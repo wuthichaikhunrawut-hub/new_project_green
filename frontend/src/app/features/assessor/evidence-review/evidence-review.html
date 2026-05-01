@@ -1,0 +1,116 @@
+<div class="container-fluid p-4 animate-in">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <button (click)="goBack()" class="btn btn-outline-secondary rounded-circle py-2 px-3">
+            <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div>
+            <h2 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-folder-open me-2"></i>ตรวจสอบเอกสารหลักฐาน</h2>
+            <p class="text-muted mb-0">องค์กร: <strong>{{ requestName }}</strong> — คำขอ #{{ requestId }}</p>
+        </div>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2 text-muted">กำลังโหลดเอกสารหลักฐาน...</p>
+    </div>
+
+    <div *ngIf="!isLoading">
+        <!-- Summary bar -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card border-0 bg-success bg-opacity-10 rounded-4 text-center py-3">
+                    <div class="fw-bold text-success fs-3">{{ passedCount }}</div>
+                    <div class="small text-success fw-semibold">ผ่านการตรวจ</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 bg-danger bg-opacity-10 rounded-4 text-center py-3">
+                    <div class="fw-bold text-danger fs-3">{{ failedCount }}</div>
+                    <div class="small text-danger fw-semibold">ไม่ผ่าน</div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 bg-warning bg-opacity-10 rounded-4 text-center py-3">
+                    <div class="fw-bold text-warning fs-3">{{ pendingCount }}</div>
+                    <div class="small text-warning fw-semibold">ยังไม่ตรวจ</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evidence Cards per Criteria -->
+        <div *ngFor="let item of evidenceItems; let idx = index" class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge bg-primary rounded-pill me-2">{{ item.criteria_code }}</span>
+                    <span class="fw-bold">{{ item.criteria_name }}</span>
+                </div>
+                <div>
+                    <span class="badge rounded-pill px-3 py-2 fs-6" [ngClass]="{
+              'bg-success': item.result === 'PASS',
+              'bg-danger': item.result === 'FAIL',
+              'bg-light text-dark border': !item.result
+            }">
+                        <i class="fa-solid me-1" [ngClass]="{
+              'fa-check': item.result === 'PASS',
+              'fa-xmark': item.result === 'FAIL',
+              'fa-circle-question': !item.result
+            }"></i>
+                        {{ item.result === 'PASS' ? 'ผ่าน' : item.result === 'FAIL' ? 'ไม่ผ่าน' : 'รอตรวจ' }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <!-- Evidence Files -->
+                <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-paperclip me-2"></i>เอกสารหลักฐานที่อัปโหลด
+                </h6>
+                <div class="row g-3 mb-4">
+                    <div *ngFor="let file of item.evidence_files" class="col-md-4">
+                        <div class="card border-0 bg-light rounded-3 p-3 d-flex flex-row gap-3 align-items-center">
+                            <i class="fa-regular fa-file-pdf text-danger fs-3"></i>
+                            <div class="flex-grow-1 overflow-hidden">
+                                <div class="fw-semibold text-truncate small">{{ file.name }}</div>
+                                <a [href]="file.url" target="_blank"
+                                    class="btn btn-sm btn-link text-primary p-0 small">เปิดเอกสาร</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngIf="!item.evidence_files || item.evidence_files.length === 0" class="col-12">
+                        <div class="text-muted small"><i class="fa-solid fa-ban me-2"></i>ไม่มีเอกสารหลักฐาน</div>
+                    </div>
+                </div>
+
+                <!-- Review Controls -->
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label small fw-bold text-muted">ความเห็นของผู้ตรวจประเมิน (Comment)</label>
+                        <textarea class="form-control" rows="3" [(ngModel)]="item.comment"
+                            placeholder="บันทึกข้อสังเกต ข้อเสนอแนะ หรือเหตุผล..."></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">ผลการตรวจ</label>
+                        <div class="d-grid gap-2">
+                            <button (click)="setResult(item, 'PASS')" class="btn rounded-3 fw-bold"
+                                [class]="item.result === 'PASS' ? 'btn-success' : 'btn-outline-success'">
+                                <i class="fa-solid fa-check me-2"></i>ผ่าน
+                            </button>
+                            <button (click)="setResult(item, 'FAIL')" class="btn rounded-3 fw-bold"
+                                [class]="item.result === 'FAIL' ? 'btn-danger' : 'btn-outline-danger'">
+                                <i class="fa-solid fa-xmark me-2"></i>ไม่ผ่าน
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="d-flex gap-3 justify-content-end mt-4 sticky-bottom bg-white py-3 px-4 border-top shadow">
+            <button class="btn btn-outline-primary px-4 rounded-pill" (click)="saveEvidence()">
+                <i class="fa-solid fa-floppy-disk me-2"></i>บันทึกผลการตรวจ
+            </button>
+            <a [routerLink]="['/assessor/decide', requestId]" class="btn btn-success px-4 rounded-pill shadow">
+                <i class="fa-solid fa-arrow-right me-2"></i>ไปหน้าสรุปผล
+            </a>
+        </div>
+    </div>
+</div>

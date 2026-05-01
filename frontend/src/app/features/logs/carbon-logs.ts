@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -14,6 +14,7 @@ import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 })
 export class CarbonLogsComponent implements OnInit {
   private carbonService = inject(CarbonService);
+  private cdr = inject(ChangeDetectorRef);
 
   logs: CarbonLog[] = [];
   isLoading = false;
@@ -88,10 +89,12 @@ export class CarbonLogsComponent implements OnInit {
         this.lastUpdatedAt = new Date();
         
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load logs', err);
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -145,8 +148,8 @@ export class CarbonLogsComponent implements OnInit {
     const e = this.electricityTrendPercent;
     const w = this.waterTrendPercent;
 
-    if (typeof e === 'number' && e >= 10) return `การใช้ไฟฟ้าเพิ่มขึ้น ${e.toFixed(0)}%`;
-    if (typeof w === 'number' && w >= 10) return `การใช้น้ำเพิ่มขึ้น ${w.toFixed(0)}%`;
+    if (typeof e === 'number' && e >= 10) return `à¸à¸²à¸£à¹ƒà¸Šà¹‰à¹„à¸Ÿà¸Ÿà¹‰à¸²à¹€à¸žà¸´à¹ˆà¸¡à¸‚à¸¶à¹‰à¸™ ${e.toFixed(0)}%`;
+    if (typeof w === 'number' && w >= 10) return `à¸à¸²à¸£à¹ƒà¸Šà¹‰à¸™à¹‰à¸³à¹€à¸žà¸´à¹ˆà¸¡à¸‚à¸¶à¹‰à¸™ ${w.toFixed(0)}%`;
     return 'AI Insight';
   }
 

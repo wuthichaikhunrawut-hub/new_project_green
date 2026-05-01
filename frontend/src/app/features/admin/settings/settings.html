@@ -1,0 +1,114 @@
+<div class="container-fluid p-4 animate-in">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1 text-primary">ตั้งค่าสถานะระบบ (System Settings)</h2>
+        <p class="text-muted mb-0">ปรับแต่งค่ากำหนดหลัก กฎการคำนวณคาร์บอน และเทมเพลตอีเมล</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- General Settings -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2"><i
+                            class="fa-solid fa-gears me-2 text-primary"></i>การตั้งค่าทั่วไป (General)</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">ปีฐานเริ่มต้น (Default Base Year)</label>
+                        <input type="number" class="form-control" [(ngModel)]="settings.defaultBaseYear">
+                        <div class="form-text">ปีที่ใช้เป็นมาตรฐานในการเปรียบเทียบการลดคาร์บอน</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">ชื่อระบบ (System Name)</label>
+                        <input type="text" class="form-control" [(ngModel)]="settings.systemName">
+                    </div>
+
+                    <div class="mb-3 form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="maintenance"
+                            [(ngModel)]="settings.maintenanceMode">
+                        <label class="form-check-label small fw-bold" for="maintenance">โหมดปิดปรับปรุง (Maintenance
+                            Mode)</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carbon Rules -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2"><i
+                            class="fa-solid fa-leaf me-2 text-success"></i>กฎการประมวลผลคาร์บอน (Carbon Rules)</h5>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">มาตรฐานอ้างอิง (Default Standard)</label>
+                        <select class="form-select" [(ngModel)]="settings.carbonStandard">
+                            <option value="GWP_AR5">IPCC GWP AR5</option>
+                            <option value="GWP_AR6">IPCC GWP AR6</option>
+                            <option value="TGO">TGO (Thailand)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Carbon Threshold (Alert)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" [(ngModel)]="settings.carbonThreshold">
+                            <span class="input-group-text">kgCO2e</span>
+                        </div>
+                        <div class="form-text">แจ้งเตือนหากองค์กรใช้เกินเกณฑ์ในเดือนนั้น</div>
+                    </div>
+
+                    <button class="btn btn-outline-success btn-sm mt-2" routerLink="/admin/emission-factors">
+                        <i class="fa-solid fa-arrow-right me-2"></i>จัดการค่าสัมประสิทธิ์ (Emission Factors)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Templates -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2"><i
+                            class="fa-solid fa-envelope me-2 text-info"></i>อีเมลเทมเพลต (Email Templates)</h5>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="py-3 px-4">ชื่อเทมเพลต</th>
+                                    <th class="py-3 px-4">หัวข้ออีเมล (Subject)</th>
+                                    <th class="py-3 px-4 text-end">จัดการ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="px-4 py-3 fw-bold">ระบบตอบรับการสมัครสมาชิก</td>
+                                    <td class="px-4 py-3 text-muted">ยินดีต้อนรับสู่ GreenSync!</td>
+                                    <td class="px-4 py-3 text-end">
+                                        <button class="btn btn-sm btn-light border"><i
+                                                class="fa-solid fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="px-4 py-3 fw-bold">อีเมลแจ้งเตือนการรีเซ็ตรหัสผ่าน</td>
+                                    <td class="px-4 py-3 text-muted">คำขอกำหนดรหัสผ่านใหม่ของคุณ</td>
+                                    <td class="px-4 py-3 text-end">
+                                        <button class="btn btn-sm btn-light border"><i
+                                                class="fa-solid fa-pen"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end mt-4">
+        <button class="btn btn-primary rounded-pill px-5 shadow" (click)="saveSettings()">
+            <i class="fa-solid fa-floppy-disk me-2"></i>บันทึกการตั้งค่าทั้งหมด
+        </button>
+    </div>
+</div>

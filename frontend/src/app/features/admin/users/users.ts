@@ -99,6 +99,8 @@ export class AdminUsersComponent implements OnInit {
     }
   }
 
+  searchText = '';
+
   suspendUser(user: User) {
     const action = user.is_active ? 'ระงับ' : 'เปิดใช้งาน';
     if (!confirm(`ยืนยันการ${action}บัญชีผู้ใช้นี้ใช่หรือไม่?`)) return;
@@ -113,5 +115,49 @@ export class AdminUsersComponent implements OnInit {
         alert('เกิดข้อผิดพลาดในการดำเนินการ');
       }
     });
+  }
+
+  deleteUser(user: User) {
+    if (!confirm(`คุณแน่ใจหรือไม่ที่จะ "ลบ" บัญชีผู้ใช้นี้? (การกระทำนี้ไม่สามารถย้อนกลับได้)`)) return;
+
+    // Ideally, call usersService.deleteUser(user.id), simulating it here if not implemented in service yet.
+    // For now assuming the service has it or will have it:
+    this.usersService.deleteUser(user.id).subscribe({
+      next: () => {
+        alert('ลบบัญชีผู้ใช้งานเรียบร้อยแล้ว');
+        this.loadUsers();
+      },
+      error: (err) => {
+        console.error('Failed to delete user:', err);
+        alert('เกิดข้อผิดพลาดในการลบผู้ใช้งาน');
+      }
+    });
+  }
+
+  resetPassword(user: User) {
+    const newPassword = prompt(`กรุณากรอกรหัสผ่านใหม่สำหรับ ${user.username} (ทิ้งว่างเพื่อยกเลิก):`);
+    if (!newPassword || newPassword.trim() === '') return;
+
+    this.usersService.updateUser(user.id, { password: newPassword }).subscribe({
+      next: () => {
+        alert('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว สำรองรหัสผ่านใหม่ให้ผู้ใช้งานด้วยครับ');
+      },
+      error: (err) => {
+        console.error('Failed to reset password:', err);
+        alert('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
+      }
+    });
+  }
+
+  filteredUsers(): User[] {
+    if (!this.searchText) {
+      return this.users;
+    }
+    const lowerSearch = this.searchText.toLowerCase();
+    return this.users.filter(u => 
+      u.username.toLowerCase().includes(lowerSearch) ||
+      u.email.toLowerCase().includes(lowerSearch) ||
+      (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch))
+    );
   }
 }

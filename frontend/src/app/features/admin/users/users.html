@@ -10,7 +10,19 @@
   </div>
 
   <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-0">
+    <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+      <div class="row">
+        <div class="col-md-4">
+          <div class="input-group shadow-sm rounded-pill overflow-hidden">
+            <span class="input-group-text bg-light border-0"><i
+                class="fa-solid fa-magnifying-glass text-muted"></i></span>
+            <input type="text" class="form-control bg-light border-0 shadow-none ps-0"
+              placeholder="ค้นหาชื่อ, อีเมล หรือองค์กร..." [(ngModel)]="searchText">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body p-0 mt-3">
       <div *ngIf="isLoading" class="text-center py-5">
         <div class="spinner-border text-primary"></div>
         <p class="mt-2 text-muted">กำลังโหลดข้อมูลผู้ใช้งาน...</p>
@@ -29,12 +41,13 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let user of users">
+            <tr *ngFor="let user of filteredUsers()">
               <td class="px-4 py-3 fw-semibold">{{ user.username }}</td>
               <td class="px-4 py-3 text-muted">{{ user.email }}</td>
               <td class="px-4 py-3">{{ user.organization?.name || '-' }}</td>
               <td class="px-4 py-3 text-center">
-                <span class="badge bg-secondary" [ngClass]="{'bg-primary': user.role === 'ADMIN', 'bg-warning text-dark': user.role === 'ASSESSOR'}">
+                <span class="badge bg-secondary"
+                  [ngClass]="{'bg-primary': user.role === 'ADMIN', 'bg-warning text-dark': user.role === 'ASSESSOR'}">
                   {{ user.role }}
                 </span>
               </td>
@@ -44,20 +57,38 @@
                 </span>
               </td>
               <td class="px-4 py-3 text-end">
-                <button class="btn btn-sm btn-outline-primary me-2 shadow-sm" (click)="openEditModal(user)">
-                  <i class="fa-solid fa-pen-to-square"></i> แก้ไข
-                </button>
-                <button class="btn btn-sm shadow-sm" 
-                  [ngClass]="user.is_active ? 'btn-outline-danger' : 'btn-outline-success'" 
-                  (click)="suspendUser(user)">
-                  <i class="fa-solid" [ngClass]="user.is_active ? 'fa-ban' : 'fa-check'"></i>
-                  {{ user.is_active ? 'ระงับ' : 'เปิดใช้' }}
-                </button>
+                <div class="dropdown d-inline-block">
+                  <button class="btn btn-sm btn-light border shadow-sm rounded-3" type="button"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fa-solid fa-ellipsis-vertical px-1"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
+                    <li><button class="dropdown-item" (click)="openEditModal(user)"><i
+                          class="fa-solid fa-pen-to-square text-primary me-2"></i> แก้ไขข้อมูล</button></li>
+                    <li><button class="dropdown-item" (click)="resetPassword(user)"><i
+                          class="fa-solid fa-key text-warning me-2"></i> รีเซ็ตรหัสผ่าน</button></li>
+                    <li>
+                      <hr class="dropdown-divider">
+                    </li>
+                    <li>
+                      <button class="dropdown-item" (click)="suspendUser(user)">
+                        <i class="fa-solid me-2"
+                          [ngClass]="user.is_active ? 'fa-ban text-danger' : 'fa-check text-success'"></i>
+                        {{ user.is_active ? 'ระงับบัญชี' : 'เปิดใช้งานบัญชี' }}
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item text-danger" (click)="deleteUser(user)">
+                        <i class="fa-solid fa-trash-can me-2"></i> ลบบัญชีผู้ใช้
+                      </button>
+                    </li>
+                  </ul>
+                </div>
               </td>
             </tr>
-            <tr *ngIf="users.length === 0">
+            <tr *ngIf="filteredUsers().length === 0">
               <td colspan="6" class="text-center py-5 text-muted">
-                ไม่พบข้อมูลผู้ใช้งาน
+                ไม่พบข้อมูลผู้ใช้งานที่ค้นหา
               </td>
             </tr>
           </tbody>
@@ -76,19 +107,22 @@
         <button type="button" class="btn-close" (click)="closeEditModal()"></button>
       </div>
       <div class="modal-body p-4">
-        
+
         <div class="mb-3">
           <label class="form-label text-muted small fw-bold">อีเมลเข้าสู่ระบบ <span class="text-danger">*</span></label>
-          <input type="email" class="form-control" [ngClass]="{'bg-light': selectedUser.id}" [(ngModel)]="selectedUser.email" [readonly]="!!selectedUser.id" [disabled]="!!selectedUser.id">
+          <input type="email" class="form-control" [ngClass]="{'bg-light': selectedUser.id}"
+            [(ngModel)]="selectedUser.email" [readonly]="!!selectedUser.id" [disabled]="!!selectedUser.id">
         </div>
 
         <div class="mb-3">
-          <label class="form-label text-muted small fw-bold">ชื่อผู้ใช้งานแสดงผล <span class="text-danger">*</span></label>
+          <label class="form-label text-muted small fw-bold">ชื่อผู้ใช้งานแสดงผล <span
+              class="text-danger">*</span></label>
           <input type="text" class="form-control" [(ngModel)]="selectedUser.username">
         </div>
 
         <div class="mb-3" *ngIf="!selectedUser.id">
-          <label class="form-label text-muted small fw-bold">รหัสผ่าน (กำหนดเริ่มต้นให้พนักงาน) <span class="text-danger">*</span></label>
+          <label class="form-label text-muted small fw-bold">รหัสผ่าน (กำหนดเริ่มต้นให้พนักงาน) <span
+              class="text-danger">*</span></label>
           <input type="password" class="form-control" [(ngModel)]="selectedUser.password">
         </div>
 
@@ -100,7 +134,8 @@
         </div>
 
         <div class="d-grid gap-2">
-          <button class="btn btn-primary shadow-sm fw-bold py-2" (click)="saveUser()" [disabled]="isSaving || !selectedUser.email || !selectedUser.username || (!selectedUser.id && !selectedUser.password)">
+          <button class="btn btn-primary shadow-sm fw-bold py-2" (click)="saveUser()"
+            [disabled]="isSaving || !selectedUser.email || !selectedUser.username || (!selectedUser.id && !selectedUser.password)">
             <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกข้อมูล
           </button>
           <button class="btn btn-light" (click)="closeEditModal()" [disabled]="isSaving">ยกเลิก</button>

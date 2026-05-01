@@ -30,7 +30,7 @@ export class UsersService {
   async findOne(id: string): Promise<User | null> {
     return this.usersRepository.findOne({ 
       where: { id }, 
-      relations: ['organization'],
+      relations: ['organization', 'assessor_profile'],
       select: ['id', 'username', 'email', 'role', 'is_active', 'assessor_verified', 'bio', 'bank_name', 'bank_account_name', 'bank_account_number', 'created_at'] 
     });
   }
@@ -70,8 +70,25 @@ export class UsersService {
     return saved;
   }
 
-  async update(id: string, updateData: Partial<User>): Promise<User | null> {
-    await this.usersRepository.update(id, updateData);
+  async update(id: string, updateData: any): Promise<User | null> {
+    const { assessor_profile, ...userData } = updateData;
+
+    // Update main user data
+    if (Object.keys(userData).length > 0) {
+      await this.usersRepository.update(id, userData);
+    }
+
+    // Update assessor profile if exists
+    if (assessor_profile) {
+      let profile: AssessorProfile | null = await this.assessorProfileRepository.findOne({ where: { user: { id } } });
+      if (!profile) {
+          profile = this.assessorProfileRepository.create({ ...assessor_profile, user: { id } } as any) as unknown as AssessorProfile;
+      } else {
+          Object.assign(profile, assessor_profile);
+      }
+      await this.assessorProfileRepository.save(profile!);
+    }
+
     const updated = await this.findOne(id);
     await this.auditLogsService.logAction(undefined, 'UPDATE_USER', `Updated user account: ${updated?.email || id}`);
     return updated;

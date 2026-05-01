@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SubscriptionsAdminService, SubscriptionPlan } from '../../../core/services/subscriptions-admin.service';
+import { SubscriptionsAdminService, SubscriptionPlan, Invoice } from '../../../core/services/subscriptions-admin.service';
 
 @Component({
   selector: 'app-admin-subscriptions',
@@ -15,17 +15,39 @@ export class AdminSubscriptionsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   plans: SubscriptionPlan[] = [];
+  invoices: Invoice[] = [];
   isLoading = true;
   isSaving = false;
   selectedPlan: Partial<SubscriptionPlan> | null = null;
+  activeTab: 'plans' | 'invoices' = 'plans';
 
-  ngOnInit() { this.loadPlans(); }
+  ngOnInit() { this.loadData(); }
 
-  loadPlans() {
+  loadData() {
     this.isLoading = true;
-    this.svc.getPlans().subscribe({
-      next: (data) => { this.plans = data; this.isLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+    if (this.activeTab === 'plans') {
+      this.svc.getPlans().subscribe({
+        next: (data) => { this.plans = data; this.isLoading = false; this.cdr.detectChanges(); },
+        error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      });
+    } else {
+      this.svc.getInvoices().subscribe({
+        next: (data) => { this.invoices = data; this.isLoading = false; this.cdr.detectChanges(); },
+        error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      });
+    }
+  }
+
+  switchTab(tab: 'plans' | 'invoices') {
+    this.activeTab = tab;
+    this.loadData();
+  }
+
+  updateInvoiceStatus(invoice: Invoice, newStatus: string) {
+    if (!confirm(`ยืนยันการเปลี่ยนสถานะใบแจ้งหนี้เป็น ${newStatus}?`)) return;
+    this.svc.updateInvoiceStatus(invoice.id, newStatus).subscribe({
+      next: () => this.loadData(),
+      error: () => alert('เกิดข้อผิดพลาดในการอัปเดตสถานะ')
     });
   }
 
@@ -46,13 +68,13 @@ export class AdminSubscriptionsComponent implements OnInit {
       : this.svc.createPlan(this.selectedPlan);
 
     obs.subscribe({
-      next: () => { this.closeModal(); this.loadPlans(); this.isSaving = false; },
+      next: () => { this.closeModal(); this.loadData(); this.isSaving = false; },
       error: () => { alert('เกิดข้อผิดพลาด'); this.isSaving = false; }
     });
   }
 
   delete(id: string) {
     if (!confirm('ยืนยันการลบแพ็กเกจนี้?')) return;
-    this.svc.deletePlan(id).subscribe({ next: () => this.loadPlans() });
+    this.svc.deletePlan(id).subscribe({ next: () => this.loadData() });
   }
 }

@@ -9,64 +9,80 @@
 
   <!-- Statistics Row -->
   <div class="row g-4 mb-4">
-    <!-- Stat 1 -->
-    <div class="col-md-4 col-sm-6">
-      <div class="card stat-card h-100">
+    <!-- Stat 1: องค์กรทั้งหมด -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card stat-card h-100 border-0 shadow-sm">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <div class="stat-label">ผู้ใช้งานทั้งหมด</div>
-              <div class="stat-value">12</div>
+              <div class="stat-label text-muted fs-6 mb-1">องค์กรทั้งหมด/ที่ใช้งานอยู่</div>
+              <div class="stat-value fw-bold text-dark" style="font-size: 1.5rem;">{{ stats.totalOrganizations }} / {{
+                stats.activeOrganizations }}</div>
             </div>
-            <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
-              <i class="fa-solid fa-users"></i>
+            <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary p-3 rounded-circle"
+              style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-building fs-5"></i>
             </div>
-          </div>
-          <div class="stat-trend text-success">
-            <i class="fa-solid fa-arrow-trend-up me-1"></i>
-            <span>+2 สัปดาห์นี้</span>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Stat 2 -->
-    <div class="col-md-4 col-sm-6">
-      <div class="card stat-card h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div>
-              <div class="stat-label">องค์กรที่ลงทะเบียน</div>
-              <div class="stat-value">5</div>
-            </div>
-            <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
-              <i class="fa-solid fa-building"></i>
-            </div>
-          </div>
-          <div class="stat-trend text-muted">
-            <i class="fa-solid fa-minus me-1"></i>
-            <span>คงที่จากสัปดาห์ก่อน</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Stat 3 (Placeholder for active requests) -->
-    <div class="col-md-4 col-sm-12">
-      <div class="card stat-card h-100">
+    <!-- Stat 2: Success Rate -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card stat-card h-100 border-0 shadow-sm">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <div class="stat-label">คำขอรอตรวจสอบ</div>
-              <div class="stat-value text-warning">8</div>
+              <div class="stat-label text-muted fs-6 mb-1">ความสำเร็จการประเมิน</div>
+              <div class="stat-value fw-bold text-success" style="font-size: 1.5rem;">{{ stats.successRate }}%</div>
             </div>
-            <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
-              <i class="fa-solid fa-clipboard-list"></i>
+            <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success p-3 rounded-circle"
+              style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-check-double fs-5"></i>
             </div>
           </div>
-          <div class="stat-trend text-warning">
-            <i class="fa-solid fa-clock me-1"></i>
-            <span>รอการประเมินจากผู้ตรวจ</span>
+          <div class="progress" style="height: 5px;">
+            <div class="progress-bar bg-success" [style.width.%]="stats.successRate"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 3: Carbon Reduction -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card stat-card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <div class="stat-label text-muted fs-6 mb-1">Carbon Reduction รวม</div>
+              <div class="stat-value fw-bold text-dark" style="font-size: 1.5rem;">{{ stats.carbonReduction | number }}
+              </div>
+              <span class="small text-muted">kgCO2e</span>
+            </div>
+            <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info p-3 rounded-circle"
+              style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-leaf fs-5"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat 4: Subscription Revenue -->
+    <div class="col-md-3 col-sm-6">
+      <div class="card stat-card h-100 border-0 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+              <div class="stat-label text-muted fs-6 mb-1">รายได้ Subscription</div>
+              <div class="stat-value fw-bold text-dark" style="font-size: 1.5rem;">฿{{ stats.subscriptionRevenue |
+                number }}</div>
+            </div>
+            <div class="stat-icon-wrapper bg-danger bg-opacity-10 text-danger p-3 rounded-circle"
+              style="width: 54px; height: 54px; display: flex; align-items: center; justify-content: center;">
+              <i class="fa-solid fa-coins fs-5"></i>
+            </div>
           </div>
         </div>
       </div>
@@ -82,14 +98,15 @@
         </div>
         <h5 class="action-title">การจัดการผู้ใช้งานระบบ</h5>
         <p class="action-desc">
-          เพิ่ม ลด แก้ไขข้อมูล หรือจัดการสิทธิ์การเข้าถึงของบัญชีต่างๆ ในระบบ GREEN SYNC ทั้ง แอดมิน ผู้ตรวจ และผู้ติดต่อองค์กร
+          เพิ่ม ลด แก้ไขข้อมูล หรือจัดการสิทธิ์การเข้าถึงของบัญชีต่างๆ ในระบบ GREEN SYNC ทั้ง แอดมิน ผู้ตรวจ
+          และผู้ติดต่อองค์กร
         </p>
         <button routerLink="/admin/users" class="btn btn-primary px-4 rounded-pill">
           <i class="fa-solid fa-users-gear me-2"></i> ไปยังหน้าจัดการผู้ใช้งาน
         </button>
       </div>
     </div>
-    
+
     <div class="col-md-6">
       <div class="card action-card">
         <div class="action-icon-circle text-success">

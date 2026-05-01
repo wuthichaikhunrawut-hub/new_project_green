@@ -25,4 +25,8 @@ export class AssessorsAdminService {
   verifyAssessor(id: string, verified: boolean): Observable<AssessorUser> {
     return this.http.put<AssessorUser>(`${this.apiUrl}/${id}`, { assessor_verified: verified }, { headers: this.headers() });
   }
+
+  suspendAssessor(id: string, isActive: boolean): Observable<AssessorUser> {
+    return this.http.put<AssessorUser>(`${this.apiUrl}/${id}`, { is_active: isActive }, { headers: this.headers() });
+  }
 }

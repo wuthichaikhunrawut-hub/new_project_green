@@ -14,7 +14,15 @@ export class OrgService {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
+  getAll(): Observable<any[]> {
+    return this.http.get<any[]>(this.apiUrl);
+  }
+
   updateOrganization(id: number, data: any): Observable<any> {
     return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
+  }
+
+  create(data: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, data);
   }
 }

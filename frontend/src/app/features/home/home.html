@@ -1,19 +1,19 @@
 <!-- --- NAVIGATION --- -->
 <nav class="main-nav">
-  <div class="nav-wrapper">
-    <a routerLink="/" class="logo">
-      <img src="assets/image/Logo.png" alt="GreenSync" style="height: 50px; width: auto; transform: scale(1.6); transform-origin: left center;">
+  <div class="nav-wrapper max-w-7xl mx-auto px-6 lg:px-12">
+    <a routerLink="/" class="logo flex-shrink-0">
+      <img src="assets/image/Logo.png" alt="GreenSync" class="h-12 lg:h-14 w-auto transform scale-160 origin-left">
     </a>
-    <ul class="nav-links">
-      <li><a routerLink="/" fragment="Green Office">สำนักงานสีเขียว</a></li>
-      <li><a routerLink="/" fragment="Carbon Footprint">คาร์บอนฟุตพริ้นท์</a></li>
+    <ul class="nav-links hidden lg:flex items-center space-x-6 xl:space-x-8">
+      <li><a routerLink="/" fragment="Green Office" class="whitespace-nowrap">สำนักงานสีเขียว</a></li>
+      <li><a routerLink="/" fragment="Carbon Footprint" class="whitespace-nowrap">คาร์บอนฟุตพริ้นท์</a></li>
       <li><a routerLink="/" fragment="features">ฟีเจอร์หลัก</a></li>
       <li><a routerLink="/" fragment="solutions">โซลูชัน</a></li>
       <li><a routerLink="/" fragment="impact">ผลลัพธ์</a></li>
     </ul>
-    <div class="nav-actions">
-      <a routerLink="/login" class="btn-nav-light">เข้าสู่ระบบ</a>
-      <a routerLink="/register" class="btn-nav-primary">เริ่มต้นใช้งาน</a>
+    <div class="nav-actions flex items-center gap-3 lg:gap-4 flex-shrink-0">
+      <a routerLink="/login" class="btn-nav-light whitespace-nowrap">เข้าสู่ระบบ</a>
+      <a routerLink="/register" class="btn-nav-primary whitespace-nowrap">เริ่มต้นใช้งาน</a>
     </div>
   </div>
 </nav>
@@ -26,56 +26,54 @@
 </div>
 
 <!-- --- HERO SECTION --- -->
-<section class="hero">
-  <div class="bg-mesh"></div>
-  <div class="hero-content animate-fade-up">
-    <div class="badge-premium">
+<section class="hero min-h-[70vh] lg:min-h-[80vh] flex items-center justify-center py-16 lg:py-24 px-6 lg:px-12">
+  <div class="bg-mesh bg-cover bg-center"></div>
+  <div class="hero-content max-w-5xl xl:max-w-4xl mx-auto text-center animate-fade-up">
+    <div class="badge-premium mb-4 lg:mb-6">
       <span class="badge-dot"></span> AI-Powered Enterprise Platform
     </div>
-    <h1 class="hero-title">
+    <h1 class="hero-title text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight mb-4 lg:mb-6">
       {{ hero.titleTh }}<br>
-      <span class="text-slate-100 fw-medium d-block mt-2" style="font-size: 1.75rem; letter-spacing: -0.5px;">{{ hero.titleEn }}</span>
+      <span class="text-slate-100 font-medium block mt-2 text-xl md:text-2xl lg:text-3xl tracking-tight">{{ hero.titleEn }}</span>
     </h1>
-    <p class="hero-subtitle">{{ hero.subtitleTh }}</p>
-    <div class="hero-actions">
-      <a routerLink="/register" class="btn-premium-solid">
-        {{ hero.primaryCta }} <!--<i class="fa-solid fa-arrow-right ms-2"></i>-->
+    <p class="hero-subtitle text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-6 lg:mb-8">{{ hero.subtitleTh }}</p>
+    <div class="hero-actions flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-6">
+      <a routerLink="/register" class="btn-premium-solid w-full sm:w-auto">
+        {{ hero.primaryCta }}
       </a>
-      <a routerLink="/org/profile" class="btn-premium-glass">
+      <a routerLink="/org/profile" class="btn-premium-glass w-full sm:w-auto">
         ข้อมูลองค์กร
       </a>
     </div>
   </div>
 </section>
-<br>
-<br>
 
 <!-- --- TRUSTED BY --- -->
-<section class="partners-section pt-5">
-  <div class="container container-sm">
-    <p class="partners-title">ขับเคลื่อนความยั่งยืนให้กับองค์กรชั้นนำมากกว่า 500 แห่ง</p>
-    <div class="partners-flex">
-      <div class="partner-text-logo fs-4 text-emerald-600">GISTDA</div>
-      <div class="partner-text-logo fs-4 text-blue-600">TEI</div>
-      <div class="partner-text-logo fs-4 text-slate-800">AWS</div>
-      <div class="partner-text-logo fs-4 text-blue-500">UN Global Compact</div>
-      <div class="partner-text-logo fs-4 text-emerald-500">SET ESG</div>
+<section class="partners-section pt-8 lg:pt-12 pb-12 lg:pb-16 px-6 lg:px-12">
+  <div class="max-w-6xl mx-auto">
+    <p class="partners-title text-sm md:text-base lg:text-lg mb-8 lg:mb-10">ขับเคลื่อนความยั่งยืนให้กับองค์กรชั้นนำมากกว่า 500 แห่ง</p>
+    <div class="partners-flex flex-wrap justify-center gap-6 lg:gap-10">
+      <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-emerald-600">GISTDA</div>
+      <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-blue-600">TEI</div>
+      <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-slate-800">AWS</div>
+      <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-blue-500">UN Global Compact</div>
+      <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-emerald-500">SET ESG</div>
     </div>
   </div>
 </section>
 
 <!-- --- BENTO GRID CORE SOLUTIONS --- -->
-<section id="CoreSolutions" class="section-bento">
-  <div class="container">
-    <div class="section-header text-center animate-fade-up">
-      <div class="badge-premium mx-auto mb-3">
+<section id="CoreSolutions" class="section-bento py-16 lg:py-24 px-6 lg:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div class="section-header text-center animate-fade-up mb-10 lg:mb-14">
+      <div class="badge-premium mx-auto mb-4 lg:mb-5">
         <span class="badge-dot"></span> Core Modules
       </div>
-      <h2 class="display-3 fw-black mb-4">เชื่อมต่อทุกมิติความยั่งยืนไว้ในที่เดียว</h2>
-      <p class="lead text-slate-500 max-w-700 mx-auto">สถาปัตยกรรมระบบที่ออกแบบมาให้ทำงานประสานกันอย่างไร้รอยต่อ ตั้งแต่การจัดเก็บข้อมูลไปจนถึงการออกรายงานมาตรฐาน</p>
+      <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-4 lg:mb-6 max-w-4xl mx-auto leading-tight">เชื่อมต่อทุกมิติความยั่งยืนไว้ในที่เดียว</h2>
+      <p class="text-base md:text-lg lg:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed">สถาปัตยกรรมระบบที่ออกแบบมาให้ทำงานประสานกันอย่างไร้รอยต่อ ตั้งแต่การจัดเก็บข้อมูลไปจนถึงการออกรายงานมาตรฐาน</p>
     </div>
 
-    <div class="bento-grid mt-5 pt-4">
+    <div class="bento-grid mt-8 lg:mt-12">
       
       <!-- BENTO 1: Green Office (Large Left) -->
       <div id="Green Office" class="bento-item bento-feature-large animate-fade-up delay-100">
@@ -121,16 +119,19 @@
 </section>
 
 <!-- --- OVERLAPPING FEATURES (The Challenge & Solution) --- -->
-<section id="features" class="section-fluid-cards">
-  <div class="container position-relative">
+<section id="features" class="section-fluid-cards py-16 lg:py-24 px-6 lg:px-12">
+  <div class="max-w-7xl mx-auto relative">
     <div class="fluid-background-shape"></div>
     
-    <div class="row align-items-center mb-5 pb-4">
-      <div class="col-lg-5 animate-fade-up">
-        <h2 class="display-4 fw-black text-slate-900 leading-tight">บอกลากระบวนการเดิมๆ<br><span class="text-gradient">เปลี่ยนผ่านสู่ดิจิทัล</span>เต็มรูปแบบ</h2>
+    <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 mb-12 lg:mb-16">
+      <div class="w-full lg:w-5/12 animate-fade-up">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-900 leading-tight mb-4 lg:mb-6">
+          บอกลากระบวนการเดิมๆ<br>
+          <span class="text-gradient">เปลี่ยนผ่านสู่ดิจิทัล</span>เต็มรูปแบบ
+        </h2>
       </div>
-      <div class="col-lg-6 offset-lg-1 animate-fade-up delay-100">
-        <p class="lead text-slate-600 m-0">หมดยุคทำงานซ้ำซ้อนบน Spreadsheet ค้นหาเอกสารไม่เจอ หรือปวดหัวกับเกณฑ์ประเมินที่เปลี่ยนใหม่ทุกปี ระบบของเราออกแบบมารองรับ Ecosystem การทำงานจริง</p>
+      <div class="w-full lg:w-6/12 animate-fade-up delay-100">
+        <p class="text-base md:text-lg lg:text-xl text-slate-600 leading-relaxed">หมดยุคทำงานซ้ำซ้อนบน Spreadsheet ค้นหาเอกสารไม่เจอ หรือปวดหัวกับเกณฑ์ประเมินที่เปลี่ยนใหม่ทุกปี ระบบของเราออกแบบมารองรับ Ecosystem การทำงานจริง</p>
       </div>
     </div>
 
@@ -147,16 +148,20 @@
 
 
 <!-- --- DYNAMIC SCROLL: HOW IT WORKS --- -->
-<section class="section-dynamic-scroll bg-slate-900 text-white">
-  <div class="container">
-    <div class="row gx-5">
-      <div class="col-lg-5 sticky-column">
-        <div class="sticky-content">
-          <div class="badge-premium badge-premium-dark mb-4">
+<section class="section-dynamic-scroll bg-slate-900 text-white py-16 lg:py-24 px-6 lg:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+      <div class="w-full lg:w-5/12">
+        <div class="lg:sticky lg:top-24">
+          <div class="badge-premium badge-premium-dark mb-4 lg:mb-6">
             <span class="badge-dot bg-emerald-400"></span> Workflow
           </div>
-          <h2 class="display-3 fw-black text-white mb-4">ทำงานง่ายขึ้น<br>ใน 3 ขั้นตอน</h2>
-          <p class="text-slate-400 fs-5 mb-5">เราออกแบบประสบการณ์ผู้ใช้ (UX) ให้เรียบง่าย ผู้ดูแลระบบสามารถเริ่มต้นใช้งานได้ทันทีโดยไม่ต้องเรียนรู้ระบบนาน</p>
+          <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white mb-4 lg:mb-6 leading-tight">
+            ทำงานง่ายขึ้น<br>ใน 3 ขั้นตอน
+          </h2>
+          <p class="text-slate-400 text-base md:text-lg lg:text-xl mb-8 lg:mb-10 leading-relaxed">
+            เราออกแบบประสบการณ์ผู้ใช้ (UX) ให้เรียบง่าย ผู้ดูแลระบบสามารถเริ่มต้นใช้งานได้ทันทีโดยไม่ต้องเรียนรู้ระบบนาน
+          </p>
           
           <div class="step-nav">
              <div class="step-nav-item active">
@@ -195,51 +200,54 @@
 </section>
 
 <!-- --- IMPACT METRICS --- -->
-<section id="impact" class="section-impact-minimal">
-  <div class="container text-center">
+<section id="impact" class="section-impact-minimal py-16 lg:py-24 px-6 lg:px-12">
+  <div class="max-w-6xl mx-auto text-center">
     <div class="impact-minimal-grid animate-fade-up">
       <div class="impact-item" *ngFor="let s of stats">
-        <div class="impact-number">{{ s.number }}</div>
-        <div class="impact-label">{{ s.label }}</div>
+        <div class="impact-number text-3xl md:text-4xl lg:text-5xl font-black">{{ s.number }}</div>
+        <div class="impact-label text-sm md:text-base lg:text-lg text-slate-600">{{ s.label }}</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- --- ASSESSOR REGISTRATION SECTION --- -->
-<section class="section-assessor-register py-5 bg-white">
-  <div class="container text-center">
-    <div class="badge-premium mx-auto mb-3">
+<section class="section-assessor-register py-16 lg:py-24 px-6 lg:px-12 bg-white">
+  <div class="max-w-4xl mx-auto text-center">
+    <div class="badge-premium mx-auto mb-4 lg:mb-5">
       <span class="badge-dot"></span> Assessor Program
     </div>
-    <h2 class="display-5 fw-black mb-4">เข้าร่วมเป็นผู้ตรวจประเมิน Green Office</h2>
-    <p class="lead text-slate-500 max-w-700 mx-auto mb-5">
+    <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-4 lg:mb-6 leading-tight">
+      เข้าร่วมเป็นผู้ตรวจประเมิน Green Office
+    </h2>
+    <p class="text-base md:text-lg lg:text-xl text-slate-500 max-w-3xl mx-auto mb-8 lg:mb-10 leading-relaxed">
       ร่วมเป็นส่วนหนึ่งของเครือข่ายผู้เชี่ยวชาญด้านสำนักงานสีเขียวและ ESG ที่ได้รับการรับรองจาก TEI พร้อมรับค่าตอบแทนจากการตรวจประเมินองค์กรต่างๆ
     </p>
-    <div class="d-flex justify-content-center gap-3 flex-wrap">
-      <a routerLink="/register/assessor" class="btn-premium-solid">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-6">
+      <a routerLink="/register/assessor" class="btn-premium-solid w-full sm:w-auto">
         ลงทะเบียนเป็น Assessor
       </a>
-      <!-- <a href="#" class="btn-premium-glass">
-        ดูเกณฑ์และสิทธิประโยชน์
-      </a> -->
     </div>
   </div>
 </section>
 
 <!-- --- CTA FULL WIDTH MESH --- -->
-<section class="cta-mesh-section">
-  <div class="container">
-    <div class="cta-floating-box animate-fade-up">
-      <div class="cta-content">
-        <h2>เข้าร่วมกับองค์กรชั้นนำที่เลือกใช้ <span class="text-emerald-400">GreenSync</span></h2>
-        <p>เริ่มต้นบนแพลตฟอร์มคลาวด์ที่ปลอดภัย ได้มาตรฐานสากล พร้อมเครื่องมือครบครันสำหรับบริหารจัดการความยั่งยืนในองค์กรของคุณ</p>
-        <div class="cta-buttons">
-          <a routerLink="/register" class="btn-white-solid">
+<section class="cta-mesh-section py-16 lg:py-24 px-6 lg:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div class="cta-floating-box animate-fade-up max-w-5xl mx-auto">
+      <div class="cta-content text-center lg:text-left">
+        <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-4 lg:mb-6 leading-tight">
+          เข้าร่วมกับองค์กรชั้นนำที่เลือกใช้ <span class="text-emerald-400">GreenSync</span>
+        </h2>
+        <p class="text-base md:text-lg lg:text-xl text-slate-300 mb-8 lg:mb-10 max-w-2xl leading-relaxed">
+          เริ่มต้นบนแพลตฟอร์มคลาวด์ที่ปลอดภัย ได้มาตรฐานสากล พร้อมเครื่องมือครบครันสำหรับบริหารจัดการความยั่งยืนในองค์กรของคุณ
+        </p>
+        <div class="cta-buttons flex flex-col sm:flex-row items-center gap-4 lg:gap-6">
+          <a routerLink="/register" class="btn-white-solid w-full sm:w-auto">
             เริ่มต้นใช้งานฟรี
           </a>
-          <a href="#" class="btn-link-white">
-            ติดต่อนัดหมายสาธิตระบบ  <!--<i class="fa-solid fa-arrow-right fs-sm ms-1"></i>-->
+          <a href="#" class="btn-link-white w-full sm:w-auto">
+            ติดต่อนัดหมายสาธิตระบบ
           </a>
         </div>
       </div>
@@ -252,50 +260,50 @@
 </section>
 
 <!-- --- FOOTER --- -->
-<footer class="footer-modern">
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand-col">
-        <a routerLink="/" class="logo text-white fs-3 mb-3 d-inline-block">Green<span class="text-emerald-400">Sync</span></a>
-        <p class="text-slate-400 mb-4 pe-4">แพลตฟอร์ม AI ชั้นนำสำหรับการลดคาร์บอน และการปฏิบัติตามมาตรฐาน ESG ระดับองค์กร</p>
-        <div class="social-links">
-          <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
-          <a href="#"><i class="fa-brands fa-line"></i></a>
+<footer class="footer-modern py-12 lg:py-16 px-6 lg:px-12">
+  <div class="max-w-7xl mx-auto">
+    <div class="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-10 lg:mb-12">
+      <div class="footer-brand-col lg:col-span-1">
+        <a routerLink="/" class="logo text-white text-2xl lg:text-3xl mb-4 inline-block">Green<span class="text-emerald-400">Sync</span></a>
+        <p class="text-slate-400 mb-6 pr-4 text-sm lg:text-base leading-relaxed">แพลตฟอร์ม AI ชั้นนำสำหรับการลดคาร์บอน และการปฏิบัติตามมาตรฐาน ESG ระดับองค์กร</p>
+        <div class="social-links flex gap-4">
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i class="fa-brands fa-facebook-f text-white"></i></a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i class="fa-brands fa-linkedin-in text-white"></i></a>
+          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i class="fa-brands fa-line text-white"></i></a>
         </div>
       </div>
       <div class="footer-links-col">
-        <h4>โซลูชัน</h4>
-        <ul>
-          <li><a href="#">Carbon Footprint (CFO)</a></li>
-          <li><a href="#">Green Office Standard</a></li>
-          <li><a href="#">AI Document OCR</a></li>
-          <li><a href="#">ESG Reporting</a></li>
+        <h4 class="text-white font-semibold mb-4 lg:mb-5 text-base lg:text-lg">โซลูชัน</h4>
+        <ul class="space-y-2 lg:space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">Carbon Footprint (CFO)</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">Green Office Standard</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">AI Document OCR</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ESG Reporting</a></li>
         </ul>
       </div>
       <div class="footer-links-col">
-        <h4>แหล่งข้อมูล</h4>
-        <ul>
-          <li><a href="#">กรณีศึกษาฐานลูกค้า</a></li>
-          <li><a href="#">ศูนย์ความรู้ (Blog)</a></li>
-          <li><a href="#">คู่มือการใช้งาน</a></li>
-          <li><a href="#">งานสัมมนา / กิจกรรม</a></li>
+        <h4 class="text-white font-semibold mb-4 lg:mb-5 text-base lg:text-lg">แหล่งข้อมูล</h4>
+        <ul class="space-y-2 lg:space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">กรณีศึกษาฐานลูกค้า</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ศูนย์ความรู้ (Blog)</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">คู่มือการใช้งาน</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">งานสัมมนา / กิจกรรม</a></li>
         </ul>
       </div>
       <div class="footer-links-col">
-        <h4>บริษัท</h4>
-        <ul>
-          <li><a href="#">เกี่ยวกับเรา</a></li>
-          <li><a href="#">ความปลอดภัย (Security)</a></li>
-          <li><a href="#">นโยบายความเป็นส่วนตัว</a></li>
-          <li><a href="#">ติดต่อเรา</a></li>
+        <h4 class="text-white font-semibold mb-4 lg:mb-5 text-base lg:text-lg">บริษัท</h4>
+        <ul class="space-y-2 lg:space-y-3">
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">เกี่ยวกับเรา</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ความปลอดภัย (Security)</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">นโยบายความเป็นส่วนตัว</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ติดต่อเรา</a></li>
         </ul>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 GreenSync Technology. All rights reserved.</p>
+    <div class="footer-bottom pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-slate-500 text-sm lg:text-base">&copy; 2026 GreenSync Technology. All rights reserved.</p>
       <div class="footer-badges">
-        <span class="cert-badge"><i class="fa-solid fa-shield-halved text-emerald-500"></i> ISO 27001 Certified</span>
+        <span class="cert-badge flex items-center gap-2 text-slate-400 text-sm lg:text-base"><i class="fa-solid fa-shield-halved text-emerald-500"></i> ISO 27001 Certified</span>
       </div>
     </div>
   </div>

@@ -9,9 +9,27 @@
     </button>
   </div>
 
-  <div *ngIf="isLoading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  <ul class="nav nav-pills mb-4 bg-white p-2 rounded-pill shadow-sm d-inline-flex">
+    <li class="nav-item">
+      <button class="nav-link rounded-pill px-4" [class.active]="activeTab === 'plans'" (click)="switchTab('plans')">
+        <i class="fa-solid fa-tags me-2"></i>แพ็กเกจการใช้งาน
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link rounded-pill px-4" [class.active]="activeTab === 'invoices'"
+        (click)="switchTab('invoices')">
+        <i class="fa-solid fa-file-invoice-dollar me-2"></i>ประวัติการชำระเงิน & ใบแจ้งหนี้
+      </button>
+    </li>
+  </ul>
 
-  <div class="row g-4" *ngIf="!isLoading">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2 text-muted">กำลังโหลดข้อมูล...</p>
+  </div>
+
+  <!-- Plans Tab -->
+  <div class="row g-4" *ngIf="!isLoading && activeTab === 'plans'">
     <div class="col-lg-4" *ngFor="let plan of plans">
       <div class="card border-0 shadow-sm rounded-4 h-100" [ngClass]="{'opacity-50': !plan.is_active}">
         <div class="card-body p-4">
@@ -22,22 +40,30 @@
             </span>
           </div>
           <p class="text-muted small">{{ plan.description }}</p>
-          <h3 class="fw-bold text-primary my-3">฿{{ plan.price_per_month | number }}<small class="text-muted fs-6 fw-normal">/เดือน</small></h3>
+          <h3 class="fw-bold text-primary my-3">฿{{ plan.price_per_month | number }}<small
+              class="text-muted fs-6 fw-normal">/เดือน</small></h3>
           <ul class="list-unstyled small text-muted">
-            <li class="mb-1"><i class="fa-solid fa-users text-primary me-2"></i>สูงสุด {{ plan.max_users }} ผู้ใช้งาน</li>
-            <li class="mb-1"><i class="fa-solid fa-location-dot text-primary me-2"></i>สูงสุด {{ plan.max_locations }} สาขา</li>
-            <li class="mb-1" [ngClass]="{'text-success fw-semibold': plan.has_ai_scan, 'text-muted': !plan.has_ai_scan}">
-              <i class="fa-solid me-2" [ngClass]="plan.has_ai_scan ? 'fa-check text-success' : 'fa-xmark text-danger'"></i>AI สแกนบิล
+            <li class="mb-1"><i class="fa-solid fa-users text-primary me-2"></i>สูงสุด {{ plan.max_users }} ผู้ใช้งาน
             </li>
-            <li class="mb-1" [ngClass]="{'text-success fw-semibold': plan.has_green_office, 'text-muted': !plan.has_green_office}">
-              <i class="fa-solid me-2" [ngClass]="plan.has_green_office ? 'fa-check text-success' : 'fa-xmark text-danger'"></i>Green Office Evaluation
+            <li class="mb-1"><i class="fa-solid fa-location-dot text-primary me-2"></i>สูงสุด {{ plan.max_locations }}
+              สาขา</li>
+            <li class="mb-1"
+              [ngClass]="{'text-success fw-semibold': plan.has_ai_scan, 'text-muted': !plan.has_ai_scan}">
+              <i class="fa-solid me-2"
+                [ngClass]="plan.has_ai_scan ? 'fa-check text-success' : 'fa-xmark text-danger'"></i>AI สแกนบิล
+            </li>
+            <li class="mb-1"
+              [ngClass]="{'text-success fw-semibold': plan.has_green_office, 'text-muted': !plan.has_green_office}">
+              <i class="fa-solid me-2"
+                [ngClass]="plan.has_green_office ? 'fa-check text-success' : 'fa-xmark text-danger'"></i>Green Office
+              Evaluation
             </li>
           </ul>
           <div class="d-flex gap-2 mt-4">
-            <button class="btn btn-sm btn-outline-primary flex-fill" (click)="openModal(plan)">
+            <button class="btn btn-sm btn-outline-primary flex-fill shadow-sm" (click)="openModal(plan)">
               <i class="fa-solid fa-pen"></i> แก้ไข
             </button>
-            <button class="btn btn-sm btn-outline-danger flex-fill" (click)="delete(plan.id)">
+            <button class="btn btn-sm btn-outline-danger flex-fill shadow-sm" (click)="delete(plan.id)">
               <i class="fa-solid fa-trash"></i> ลบ
             </button>
           </div>
@@ -45,6 +71,60 @@
       </div>
     </div>
     <div *ngIf="plans.length === 0" class="col-12 text-center py-5 text-muted">ยังไม่มีแพ็กเกจการใช้งาน</div>
+  </div>
+
+  <!-- Invoices Tab -->
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden" *ngIf="!isLoading && activeTab === 'invoices'">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th class="py-3 px-4">เลขที่อ้างอิง</th>
+            <th class="py-3 px-4">องค์กร</th>
+            <th class="py-3 px-4">แพ็กเกจ</th>
+            <th class="py-3 px-4 text-end">จำนวนเงิน</th>
+            <th class="py-3 px-4 text-center">สถานะ</th>
+            <th class="py-3 px-4 text-center">วันที่</th>
+            <th class="py-3 px-4 text-end">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inv of invoices">
+            <td class="px-4 py-3 fw-bold">{{ inv.reference_number || 'INV-'+inv.id.substring(0,8) }}</td>
+            <td class="px-4 py-3">{{ inv.organization?.name || '-' }}</td>
+            <td class="px-4 py-3 text-muted small">{{ inv.plan?.name || '-' }}</td>
+            <td class="px-4 py-3 text-end fw-bold">฿{{ inv.amount | number }}</td>
+            <td class="px-4 py-3 text-center">
+              <span class="badge rounded-pill" [ngClass]="{
+                  'bg-success': inv.status === 'PAID',
+                  'bg-warning text-dark': inv.status === 'PENDING',
+                  'bg-danger': inv.status === 'CANCELLED' || inv.status === 'OVERDUE'
+                }">
+                {{ inv.status }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-center text-muted small">{{ inv.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="px-4 py-3 text-end">
+              <div class="dropdown">
+                <button class="btn btn-sm btn-light border dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                  สถานะ
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                  <li><button class="dropdown-item" (click)="updateInvoiceStatus(inv, 'PAID')">ชำระเงินแล้ว</button>
+                  </li>
+                  <li><button class="dropdown-item" (click)="updateInvoiceStatus(inv, 'PENDING')">รอชำระเงิน</button>
+                  </li>
+                  <li><button class="dropdown-item" (click)="updateInvoiceStatus(inv, 'CANCELLED')">ยกเลิก</button></li>
+                </ul>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="invoices.length === 0">
+            <td colspan="7" class="text-center py-5 text-muted">ไม่พบข้อมูลประวัติการชำระเงิน</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -59,7 +139,8 @@
       <div class="modal-body p-4">
         <div class="mb-3">
           <label class="form-label small fw-bold text-muted">ชื่อแพ็กเกจ</label>
-          <input type="text" class="form-control" [(ngModel)]="selectedPlan.name" placeholder="เช่น Basic, Pro, Enterprise">
+          <input type="text" class="form-control" [(ngModel)]="selectedPlan.name"
+            placeholder="เช่น Basic, Pro, Enterprise">
         </div>
         <div class="mb-3">
           <label class="form-label small fw-bold text-muted">คำอธิบาย</label>

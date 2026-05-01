@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -17,6 +17,7 @@ import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 export class RequestsComponent implements OnInit {
   private requestsService = inject(RequestsService);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   requests: CertificationRequest[] = [];
   isLoading = true;
@@ -37,11 +38,13 @@ export class RequestsComponent implements OnInit {
       next: (data) => {
         this.requests = Array.isArray(data) ? data : [];
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Failed to load requests', err);
         this.requests = [];
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

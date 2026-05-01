@@ -233,44 +233,198 @@
   color: #EF4444;
 }
 
-@media (min-width: 992px) {
-  .sidebar.collapsed {
-    margin-left: 0;
-    width: 80px;
-    min-width: 80px;
+/* ══════════════════════════════════════
+   MOBILE RESPONSIVE STYLES
+══════════════════════════════════════ */
+
+/* Mobile overlay backdrop */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+  display: block;
+  opacity: 1;
+}
+
+/* Mobile hamburger toggle button */
+.mobile-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1060;
+  width: 44px;
+  height: 44px;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  color: #0F172A;
+  font-size: 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.mobile-toggle:hover {
+  background: #F8FAFC;
+  border-color: #CBD5E1;
+}
+
+/* Tablet & Mobile breakpoints */
+@media (max-width: 991px) {
+  .mobile-toggle {
+    display: flex;
   }
   
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    width: 280px;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+  }
+  
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .sidebar.collapsed {
+    margin-left: 0;
+    transform: translateX(-100%);
+    width: 280px;
+    min-width: 280px;
+  }
+  
+  .sidebar.collapsed.mobile-open {
+    transform: translateX(0);
+  }
+  
+  /* Ensure all content visible in mobile view */
   .sidebar.collapsed .brand-name,
   .sidebar.collapsed .nav-label,
   .sidebar.collapsed .nav-item span,
   .sidebar.collapsed .user-detail,
-  .sidebar.collapsed .sidebar-footer .btn-icon {
-    display: none;
+  .sidebar.collapsed .sidebar-footer .btn-icon,
+  .sidebar.collapsed .nav-group-header span,
+  .sidebar.collapsed .nav-sub-items,
+  .sidebar.collapsed .nav-category-group {
+    display: block !important;
   }
   
   .sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 12px 0;
+    justify-content: flex-start;
+    padding: 10px 14px;
     border-radius: 8px;
-    border-left: none;
-  }
-  
-  .sidebar.collapsed .nav-item.active {
-    border-radius: 8px;
-    border-left: 3px solid #0F766E;
   }
   
   .sidebar.collapsed .nav-item i {
-    margin-right: 0;
-    font-size: 1.25rem;
+    margin-right: 12px;
   }
   
   .sidebar.collapsed .user-card {
-    padding: 8px;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    box-shadow: none;
+    padding: 10px;
+    justify-content: flex-start;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+  }
+}
+
+/* Small mobile adjustments */
+@media (max-width: 480px) {
+  .sidebar {
+    width: 260px;
+    min-width: 260px;
+  }
+  
+  .nav-container {
+    padding: 16px 12px;
+  }
+  
+  .nav-item {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .nav-group-header {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .nav-sub-item {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+  
+  .nav-category-item {
+    padding: 5px 10px;
+    font-size: 0.75rem;
+  }
+  
+  .cat-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 0.6rem;
+  }
+  
+  .sidebar-footer {
+    padding: 16px 12px;
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Ensure icons always visible */
+.nav-item i,
+.nav-group-left i,
+.nav-sub-item i,
+.btn-icon i {
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Fix for FontAwesome icons */
+.fa-solid,
+.fa-regular,
+.fa-brands {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Main content shift on desktop when sidebar visible */
+@media (min-width: 992px) {
+  .main-content {
+    margin-left: 280px;
+    transition: margin-left 0.3s ease;
+  }
+  
+  .main-content.sidebar-collapsed {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 991px) {
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: 60px;
   }
 }
 

@@ -17,6 +17,12 @@ export class Organization {
   @Column({ type: 'varchar', length: 100, nullable: true })
   industry_type: string;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  business_type: string;
+
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
+
   @Column({ type: 'int', default: 0 })
   number_of_employees: number;
 

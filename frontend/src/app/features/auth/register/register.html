@@ -1,8 +1,8 @@
 <div class="register-container">
   <div class="register-card shadow-lg animate-in">
     <div class="text-center mb-5">
-      <div class="brand-logo mb-3" style="height: 50px; width: auto; align-items: center;">
-        <img src="assets/image/Logo.png" alt="GreenSync" style="height: 50px; width: auto;">
+      <div class="logo-wrapper">
+        <img src="assets/image/Logo.png" alt="GreenSync" class="brand-logo">
       </div>
       <h2 class="fw-bold text-dark mb-1">ลงทะเบียนองค์กร</h2>
       <p class="text-muted small">GreenSync Enterprise - แพลตฟอร์มจัดการคาร์บอนฟุตพริ้นท์</p>
@@ -27,7 +27,8 @@
         <div class="row g-4">
           <div class="col-12">
             <label class="form-label">ชื่อองค์กร / หน่วยงาน</label>
-            <input type="text" class="form-control" [(ngModel)]="orgData.name" name="orgName" placeholder="ระบุชื่อเต็มขององค์กร" required>
+            <input type="text" class="form-control" [(ngModel)]="orgData.name" name="orgName"
+              placeholder="ระบุชื่อเต็มขององค์กร" required>
           </div>
 
           <div class="col-md-6">
@@ -107,11 +108,13 @@
         <div class="row g-4 mb-4">
           <div class="col-12">
             <label class="form-label">ชื่อผู้ใช้งาน (Username)</label>
-            <input type="text" class="form-control" [(ngModel)]="userData.username" name="username" placeholder="สำหรับเข้าสู่ระบบ" required>
+            <input type="text" class="form-control" [(ngModel)]="userData.username" name="username"
+              placeholder="สำหรับเข้าสู่ระบบ" required>
           </div>
           <div class="col-12">
             <label class="form-label">อีเมลติดต่อ (Business Email)</label>
-            <input type="email" class="form-control" [(ngModel)]="userData.email" name="email" placeholder="example@company.com" required>
+            <input type="email" class="form-control" [(ngModel)]="userData.email" name="email"
+              placeholder="example@company.com" required>
           </div>
           <div class="col-md-6">
             <label class="form-label">รหัสผ่าน</label>
@@ -119,7 +122,8 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">ยืนยันรหัสผ่าน</label>
-            <input type="password" class="form-control" [(ngModel)]="userData.confirmPassword" name="confirmPass" required>
+            <input type="password" class="form-control" [(ngModel)]="userData.confirmPassword" name="confirmPass"
+              required>
           </div>
         </div>
 

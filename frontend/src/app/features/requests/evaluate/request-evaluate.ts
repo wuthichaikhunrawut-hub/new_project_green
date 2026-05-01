@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -17,11 +17,16 @@ export class RequestEvaluateComponent implements OnInit {
   private router = inject(Router);
   private location = inject(Location);
   private requestsService = inject(RequestsService);
+  private cdr = inject(ChangeDetectorRef);
 
   request: CertificationRequest | null = null;
   isLoading = true;
   isSaving = false;
   overallComment = '';
+  
+  get canEdit(): boolean {
+    return this.request?.status !== 'APPROVED' && this.request?.status !== 'REJECTED';
+  }
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -59,6 +64,7 @@ export class RequestEvaluateComponent implements OnInit {
 
         this.overallComment = this.request.notes || '';
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         console.error('Failed to load request:', err);

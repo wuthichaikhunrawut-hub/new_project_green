@@ -19,6 +19,10 @@ export class OrganizationsService {
     return this.orgRepository.findOne({ where: { id } });
   }
 
+  async findAll(): Promise<Organization[]> {
+    return this.orgRepository.find();
+  }
+
   async update(id: number, updateData: Partial<Organization>): Promise<Organization | null> {
     await this.orgRepository.update(id, updateData);
     return this.findOne(id);

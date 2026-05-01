@@ -1,101 +1,205 @@
 <div class="container-fluid p-4 animate-in">
+  <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="h3 mb-1 text-primary fw-bold">
-        <i class="fa-solid fa-user-shield me-2"></i> ข้อมูลโปรไฟล์ผู้ตรวจประเมิน
-      </h2>
-      <p class="text-muted mb-0">จัดการข้อมูลประจำตัวและช่องทางการรับเงินค่าตอบแทน</p>
+      <h2 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-user-shield me-2"></i>โปรไฟล์ผู้ตรวจประเมิน</h2>
+      <p class="text-muted mb-0">จัดการข้อมูลส่วนตัว วุฒิการศึกษา และข้อมูลการรับเงินค่าตอบแทน</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary px-4 rounded-pill" (click)="loadProfile()" [disabled]="isLoading">
+        <i class="fa-solid fa-rotate me-2"></i>รีเฟรช
+      </button>
+      <button class="btn btn-primary px-4 rounded-pill shadow" (click)="saveProfile()"
+        [disabled]="isSaving || isLoading">
+        <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+        <i *ngIf="!isSaving" class="fa-solid fa-floppy-disk me-2"></i>บันทึกข้อมูล
+      </button>
     </div>
   </div>
 
-  <!-- Loading State -->
   <div *ngIf="isLoading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
-    <p class="mt-3 text-muted fw-medium">กำลังโหลดข้อมูลโปรไฟล์...</p>
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-2 text-muted">กำลังโหลดข้อมูลโปรไฟล์...</p>
   </div>
 
-  <!-- Error Alert -->
-  <div *ngIf="errorMessage && !isLoading" class="alert alert-danger bg-white border-danger border-start border-4 shadow-sm mb-4">
-    <i class="fa-solid fa-triangle-exclamation text-danger me-2"></i> {{ errorMessage }}
-  </div>
+  <div *ngIf="!isLoading && user" class="row g-4">
+    <!-- Sidebar: Basic Info Card -->
+    <div class="col-lg-4">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+        <div class="card-body p-4 text-center">
+          <div class="position-relative d-inline-block mb-3">
+            <div class="avatar-circle mx-auto bg-primary bg-opacity-10 text-primary display-4 fw-bold shadow-sm">
+              {{ user.username?.charAt(0) | uppercase }}
+            </div>
+            <div class="position-absolute bottom-0 end-0 bg-success border border-white border-3 rounded-circle"
+              style="width: 20px; height: 20px;" *ngIf="user.assessor_profile?.verification_status === 'Verified'"
+              title="ผ่านการยืนยันตัวตน"></div>
+          </div>
+          <h4 class="fw-bold mb-1">{{ user.username }}</h4>
+          <p class="text-muted small mb-3"><i class="fa-solid fa-envelope me-1"></i>{{ user.email }}</p>
 
-  <div *ngIf="!isLoading" class="row">
-    <div class="col-lg-8 mx-auto">
-      
-      <!-- Profile Information Card -->
-      <div class="card shadow-sm mb-4 border-0 p-0 overflow-hidden">
-        <div class="profile-header-bg"></div>
-        <div class="card-body px-4 pb-4 px-md-5 position-relative text-center text-md-start" style="margin-top: -40px;">
-          
-          <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end mb-4 gap-4">
-            <div class="profile-avatar-placeholder shadow-sm">
-              {{ user?.username ? (user?.username?.charAt(0) | uppercase) : 'A' }}
-            </div>
-            <div class="flex-grow-1 pb-2">
-              <h4 class="fw-bold mb-1">{{ user?.username || 'ผู้ตรวจประเมิน' }}</h4>
-              <p class="text-muted mb-0"><i class="fa-solid fa-envelope me-2"></i>{{ user?.email || 'ไม่มีข้อมูลอีเมล' }}</p>
-            </div>
-            <div class="pb-2">
-              <span class="badge rounded-pill px-3 py-2 fs-6 shadow-sm border" [ngClass]="user?.assessor_verified ? 'bg-success text-white' : 'bg-light text-warning border-warning'">
-                <i class="fa-solid me-1" [ngClass]="user?.assessor_verified ? 'fa-circle-check' : 'fa-clock'"></i>
-                {{ user?.assessor_verified ? 'ยืนยันตัวตนแล้ว' : 'รอตรวจสอบหน่วยงานต้นสังกัด' }}
-              </span>
-            </div>
+          <div class="badge rounded-pill px-3 py-2 mb-3" [ngClass]="{
+                            'bg-success bg-opacity-10 text-success border border-success': user.assessor_profile?.verification_status === 'Verified',
+                            'bg-warning bg-opacity-10 text-warning border border-warning': user.assessor_profile?.verification_status === 'Pending',
+                            'bg-danger bg-opacity-10 text-danger border border-danger': user.assessor_profile?.verification_status === 'Rejected'
+                         }">
+            <i class="fa-solid" [ngClass]="{
+                            'fa-circle-check': user.assessor_profile?.verification_status === 'Verified',
+                            'fa-clock': user.assessor_profile?.verification_status === 'Pending',
+                            'fa-circle-xmark': user.assessor_profile?.verification_status === 'Rejected'
+                        }"></i>
+            {{ user.assessor_profile?.verification_status || 'Pending' }}
           </div>
 
-          <hr class="text-muted opacity-25 mb-4">
-          
-          <h6 class="text-uppercase text-muted fw-bold mb-3"><i class="fa-solid fa-pen-nib me-2 text-primary"></i> ประวัติย่อและความเชี่ยวชาญ</h6>
-          <div class="form-group">
-            <textarea class="form-control bg-light" rows="4" [(ngModel)]="formData.bio" placeholder="เช่น ผู้เชี่ยวชาญด้านการจัดการพลังงานและสิ่งแวดล้อม ประสบการณ์ตรวจประเมินกว่า 50 องค์กร..."></textarea>
-            <small class="text-muted mt-2 d-block">ข้อมูลนี้อาจถูกนำไปแสดงให้องค์กรผู้ขอประเมินทราบเพื่อความน่าเชื่อถือ</small>
+          <div class="border-top pt-3 text-start">
+            <label class="form-label small fw-bold text-muted mb-2">แนะนำตัวสั้นๆ (Bio)</label>
+            <textarea class="form-control form-control-sm" rows="3" [(ngModel)]="formData.bio"
+              placeholder="บอกความเป็นคุณ..."></textarea>
           </div>
         </div>
       </div>
 
-      <!-- Bank Account Information Card -->
-      <div class="card shadow-sm mb-5 border-0 rounded-4">
-        <div class="card-header bg-white border-bottom p-4">
-          <h5 class="mb-0 text-dark fw-bold"><i class="fa-solid fa-building-columns me-2 text-primary"></i> ข้อมูลบัญชีรับเงินค่าตอบแทน</h5>
+      <!-- Verification Info (If Verified) -->
+      <div class="card border-0 shadow-sm rounded-4 p-4 mb-4"
+        *ngIf="user.assessor_profile?.verification_status === 'Verified'">
+        <h6 class="fw-bold mb-3"><i class="fa-solid fa-shield-check text-success me-2"></i>ข้อมูลการตรวจสอบ</h6>
+        <div class="small mb-2">
+          <span class="text-muted">ตรวจสอบเมื่อ:</span>
+          <div class="fw-bold">{{ user.assessor_profile?.verified_at | date:'dd/MM/yyyy HH:mm' }}</div>
         </div>
-        <div class="card-body p-4 p-md-5">
-          <div class="alert bg-light border-info border-start border-4 text-dark mb-4 shadow-sm">
-            <div class="d-flex">
-              <i class="fa-solid fa-circle-info fs-5 text-info mt-1 me-3"></i>
-              <div>
-                <strong class="d-block mb-1">ข้อมูลสำคัญสำหรับการจ่ายเงิน</strong>
-                <span class="small text-muted">ข้อมูลส่วนนี้จะถูกใช้เพื่อทำเรื่องเบิกจ่ายค่าตอบแทนจากการตรวจประเมินแต่ละครั้ง กรุณาตรวจสอบชื่อบัญชีให้ตรงกับบัตรประชาชน</span>
+        <!-- verified_by could be linked if needed -->
+      </div>
+    </div>
+
+    <!-- Main Content: Detailed Forms -->
+    <div class="col-lg-8">
+      <!-- 1. Professional Credentials -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+          <h6 class="fw-bold mb-0 text-dark"><i
+              class="fa-solid fa-id-card text-primary me-2"></i>ข้อมูลวิชาชีพและคุณวุฒิ</h6>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">เลขที่ใบอนุญาตผู้ตรวจประเมิน</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.assessor_profile.license_number"
+                placeholder="เช่น GO-2024-XXX">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">ประสบการณ์การทำงาน (ปี)</label>
+              <input type="number" class="form-control" [(ngModel)]="formData.assessor_profile.years_experience">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-muted">ความเชี่ยวชาญ (คั่นด้วยเครื่องหมายจุลภาค ,)</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.assessor_profile.expertise_tags"
+                placeholder="เช่น การจัดการของเสีย, พลังงานแสงอาทิตย์, ISO 14001">
+              <div class="mt-2 d-flex flex-wrap gap-1">
+                <span *ngFor="let tag of formData.assessor_profile.expertise_tags.split(',')"
+                  class="badge bg-light text-primary border" [hidden]="!tag.trim()">
+                  {{ tag.trim() }}
+                </span>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold text-muted">ประวัติการศึกษา</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="formData.assessor_profile.education_background"
+                placeholder="ระบุวุฒิการศึกษาและสถาบัน..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Qualification Documents -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-white border-bottom py-3 px-4">
+          <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-file-pdf text-danger me-2"></i>เอกสารรับรองคุณสมบัติ
+          </h6>
+        </div>
+        <div class="card-body p-4 text-center border-2 border-dashed rounded-4 m-4">
+          <div *ngIf="!user.assessor_profile?.qualification_file_url" class="py-3">
+            <i class="fa-solid fa-cloud-arrow-up fs-1 text-muted mb-3"></i>
+            <p class="mb-2">ลากไฟล์มาวางหรือคลิกเพื่ออัปโหลดใบรับรอง</p>
+            <small class="text-muted d-block mb-3">PDF, JPG หรือ PNG (สูงสุด 5MB)</small>
+            <button class="btn btn-sm btn-outline-primary px-4">เลือกไฟล์</button>
+          </div>
+          <div *ngIf="user.assessor_profile?.qualification_file_url"
+            class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-danger bg-opacity-10 p-3 rounded-3 text-danger">
+                <i class="fa-solid fa-file-pdf fs-4"></i>
+              </div>
+              <div class="text-start">
+                <div class="fw-bold fw-sm text-truncate" style="max-width: 200px;">ใบรับรองคุณสมบัติ.pdf</div>
+                <small class="text-muted">อัปโหลดเมื่อ {{ user.assessor_profile.updated_at | date:'dd/MM/yyyy'
+                  }}</small>
+              </div>
+            </div>
+            <div class="d-flex gap-2">
+              <a [href]="user.assessor_profile.qualification_file_url" target="_blank"
+                class="btn btn-sm btn-light border"><i class="fa-solid fa-eye me-1"></i>ดูไฟล์</a>
+              <button class="btn btn-sm btn-outline-danger border"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Payment Information -->
+      <div class="card border-0 shadow-sm rounded-4 mb-4 bg-light bg-opacity-50">
+        <div class="card-header bg-white bg-opacity-50 border-bottom py-3 px-4">
+          <h6 class="fw-bold mb-0 text-dark"><i
+              class="fa-solid fa-credit-card text-success me-2"></i>ข้อมูลช่องทางการรับเงิน</h6>
+        </div>
+        <div class="card-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">ธนาคาร</label>
+              <select class="form-select" [(ngModel)]="formData.assessor_profile.bank_name">
+                <option value="">เลือกธนาคาร...</option>
+                <option value="SCB">ธนาคารไทยพาณิชย์ (SCB)</option>
+                <option value="KBANK">ธนาคารกสิกรไทย (KBANK)</option>
+                <option value="BBL">ธนาคารกรุงเทพ (BBL)</option>
+                <option value="KTB">ธนาคารกรุงไทย (KTB)</option>
+                <option value="TTB">ธนาคารทหารไทยธนชาต (TTB)</option>
+                <option value="GSB">ธนาคารออมสิน (GSB)</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">เลขที่บัญชี</label>
+              <input type="text" class="form-control" [(ngModel)]="formData.assessor_profile.bank_account_no"
+                placeholder="ระบุเฉพาะตัวเลข">
+            </div>
+            <div class="col-12 mt-3">
+              <div class="alert alert-info border-0 rounded-3 mb-0">
+                <i class="fa-solid fa-circle-info me-2"></i>
+                ข้อมูลนี้จะถูกเก็บเป็นความลับเพื่อใช้ในการโอนค่าตอบแทนการตรวจประเมินเท่านั้น
               </div>
             </div>
           </div>
-
-          <div class="row g-4 mb-4">
-            <div class="col-md-6">
-              <label class="form-label fw-bold">ธนาคาร <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" [(ngModel)]="formData.bank_name" placeholder="ระบุชื่อธนาคาร เช่น กสิกรไทย">
-            </div>
-            <div class="col-md-6">
-              <label class="form-label fw-bold">ชื่อบัญชี <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" [(ngModel)]="formData.bank_account_name" placeholder="วิสูตร เขียวขจี">
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label fw-bold">เลขที่บัญชี <span class="text-danger">*</span></label>
-            <input type="text" class="form-control fs-5 letter-spacing-1" [(ngModel)]="formData.bank_account_number" placeholder="XXX-X-XXXXX-X">
-          </div>
-        </div>
-        
-        <div class="card-footer bg-light border-top-0 p-4 text-end rounded-bottom-4">
-          <button class="btn btn-primary px-4 px-md-5 py-2 fw-bold shadow-sm" (click)="saveProfile()" [disabled]="isSaving">
-            <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-            <i *ngIf="!isSaving" class="fa-solid fa-floppy-disk me-2"></i> บันทึกการเปลี่ยนแปลง
-          </button>
         </div>
       </div>
-      
     </div>
   </div>
 </div>
+
+<style>
+  .avatar-circle {
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    border-radius: 50%;
+    font-size: 40px;
+  }
+
+  .card {
+    transition: all 0.3s ease;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+  }
+
+  .border-dashed {
+    border-style: dashed !important;
+  }
+</style>

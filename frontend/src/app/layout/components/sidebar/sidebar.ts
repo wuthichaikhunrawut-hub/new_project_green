@@ -1,4 +1,4 @@
-import { Component, inject, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule, UpperCasePipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,6 +16,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
   router = inject(Router);
 
   @Input() isCollapsed = false;
+  
+  // Mobile menu state
+  mobileMenuOpen = false;
 
   user: any = null;
   private subscription: Subscription = new Subscription();
@@ -36,7 +39,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     const url = this.router.url;
     if (url.includes('/carbon')) this.carbonOpen = true;
     if (url.includes('/ai-scan')) this.aiOpen = true;
-    if (url.includes('/green-office')) this.assessmentOpen = true;
+    if (url.includes('/green-office') || url.includes('/assessment')) this.assessmentOpen = true;
     if (url.includes('/org') || url.includes('/assessor/profile') || url.includes('/subscription')) this.orgOpen = true;
   }
 
@@ -46,6 +49,38 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   hasRole(roles: string[]): boolean {
     return this.user?.role ? roles.includes(this.user.role) : false;
+  }
+
+  // Mobile menu toggle
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+  }
+
+  // Close menu on route change
+  onNavItemClick() {
+    if (window.innerWidth <= 991) {
+      this.mobileMenuOpen = false;
+    }
+  }
+
+  // Close on escape key
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapePress(event: any) {
+    if (this.mobileMenuOpen) {
+      this.mobileMenuOpen = false;
+    }
+  }
+
+  // Close on resize to desktop
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    if (window.innerWidth > 991 && this.mobileMenuOpen) {
+      this.mobileMenuOpen = false;
+    }
   }
 
   toggle(section: 'carbon' | 'ai' | 'assessment' | 'org') {

@@ -61,6 +61,8 @@ export class RequestsService {
       }
     }
     let headers = new HttpHeaders();
+    const token = isPlatformBrowser(this.platformId) ? localStorage.getItem('access_token') : '';
+    if (token) headers = headers.set('Authorization', `Bearer ${token}`);
     if (orgId) headers = headers.set('x-org-id', orgId);
     if (role) headers = headers.set('x-user-role', role);
     if (userId) headers = headers.set('x-user-id', userId);

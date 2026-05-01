@@ -1,9 +1,18 @@
-<aside class="sidebar shadow" [class.collapsed]="isCollapsed">
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" [class.active]="mobileMenuOpen" (click)="closeMobileMenu()"></div>
+
+<!-- Mobile Toggle Button -->
+<button class="mobile-toggle" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+  <i class="fa-solid" [class.fa-bars]="!mobileMenuOpen" [class.fa-xmark]="mobileMenuOpen"></i>
+</button>
+
+<aside class="sidebar shadow" [class.collapsed]="isCollapsed" [class.mobile-open]="mobileMenuOpen">
 
   <!-- ── Logo ── -->
   <div class="sidebar-header">
     <a routerLink="/" class="sidebar-logo">
-      <img src="assets/image/Logo.png" alt="GreenSync" class="logo-img">
+      <img src="assets/image/Logo.png" alt="GreenSync" class="logo-img"
+        style="height: 44px; width: auto; transition: all 0.3s ease;">
       <span class="brand-name" *ngIf="!isCollapsed">Green Sync <small>v1.0</small></span>
     </a>
   </div>
@@ -12,41 +21,49 @@
 
     <!-- ═══════════════ ADMIN SECTION ═══════════════ -->
     <ng-container *ngIf="hasRole(['ADMIN'])">
-      <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
         <span>ศูนย์ควบคุมหลัก</span>
       </a>
 
       <div class="nav-label">การจัดการระบบ</div>
-      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-users-gear"></i>
         <span>จัดการผู้ใช้งาน</span>
       </a>
-      <a routerLink="/admin/assessors" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/organizations" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-building"></i>
+        <span>จัดการองค์กร</span>
+      </a>
+      <a routerLink="/admin/assessors" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-user-check"></i>
         <span>ยืนยันผู้ตรวจประเมิน</span>
       </a>
-      <a routerLink="/admin/criteria" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/criteria" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-list-check"></i>
         <span>เกณฑ์ประเมิน Green Office</span>
       </a>
-      <a routerLink="/admin/emission-factors" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/emission-factors" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-leaf"></i>
         <span>ค่าสัมประสิทธิ์คาร์บอน</span>
       </a>
 
       <div class="nav-label">แพ็กเกจและการเงิน</div>
-      <a routerLink="/admin/subscriptions" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/subscriptions" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-tags"></i>
         <span>จัดการแพ็กเกจ & โควต้า</span>
       </a>
-      <a routerLink="/admin/invoices" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/invoices" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-file-invoice-dollar"></i>
         <span>ประวัติการชำระเงิน</span>
       </a>
-      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item">
+      <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-clock-rotate-left"></i>
-        <span>Audit Logs</span>
+        <span>ประวัติการใช้งานระบบ</span>
+      </a>
+      <a routerLink="/admin/settings" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+        <span>ตั้งค่าระบบ</span>
       </a>
     </ng-container>
 
@@ -54,7 +71,7 @@
     <ng-container *ngIf="hasRole(['USER', 'EXECUTIVE'])">
 
       <!-- 1. Dashboard -->
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-chart-pie"></i>
         <span>แดชบอร์ด</span>
       </a>
@@ -62,13 +79,13 @@
       <!-- 2. Carbon Tracking (collapsible) -->
       <button class="nav-group-header" (click)="toggle('carbon')" [class.open]="carbonOpen">
         <span class="nav-group-left">
-          <i class="fa-solid fa-cloud-bolt"></i>
-          <span>Carbon Tracking</span>
+          <i class="fa-solid fa-bolt"></i>
+          <span>ติดตามคาร์บอน</span>
         </span>
         <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!carbonOpen" [class.fa-chevron-up]="carbonOpen"></i>
       </button>
       <div class="nav-sub-items" [class.expanded]="carbonOpen">
-        <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-sub-item">
+        <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
           <i class="fa-solid fa-pen-to-square"></i>
           <span>บันทึกกิจกรรม</span>
         </a>
@@ -78,12 +95,12 @@
       <button class="nav-group-header" (click)="toggle('ai')" [class.open]="aiOpen">
         <span class="nav-group-left">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
-          <span>AI Tools</span>
+          <span>เครื่องมือ AI</span>
         </span>
         <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!aiOpen" [class.fa-chevron-up]="aiOpen"></i>
       </button>
       <div class="nav-sub-items" [class.expanded]="aiOpen">
-        <a routerLink="/ai-scan" routerLinkActive="active" class="nav-sub-item ai-feature">
+        <a routerLink="/ai-scan" routerLinkActive="active" class="nav-sub-item ai-feature" (click)="onNavItemClick()">
           <i class="fa-solid fa-bolt"></i>
           <span>AI สแกนบิลอัตโนมัติ</span>
         </a>
@@ -98,38 +115,45 @@
       <button class="nav-group-header" (click)="toggle('assessment')" [class.open]="assessmentOpen">
         <span class="nav-group-left">
           <i class="fa-solid fa-leaf"></i>
-          <span>Green Office Assessment</span>
+          <span>ประเมิน Green Office</span>
         </span>
-        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!assessmentOpen" [class.fa-chevron-up]="assessmentOpen"></i>
+        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!assessmentOpen"
+          [class.fa-chevron-up]="assessmentOpen"></i>
       </button>
       <div class="nav-sub-items" [class.expanded]="assessmentOpen">
-        <a routerLink="/green-office/form" routerLinkActive="active" class="nav-sub-item">
+        <a routerLink="/assessment" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
           <i class="fa-solid fa-clipboard-list"></i>
           <span>แบบประเมินตนเอง</span>
         </a>
         <div class="nav-category-group">
           <p class="nav-category-label">หมวดการประเมิน</p>
-          <a routerLink="/green-office/form" routerLinkActive="active" class="nav-category-item">
+          <a routerLink="/assessment/category/1" routerLinkActive="active" class="nav-category-item"
+            (click)="onNavItemClick()">
             <span class="cat-badge">1</span>
             <span>นโยบายและการวางแผน</span>
           </a>
-          <a routerLink="/green-office/form" routerLinkActive="active" class="nav-category-item">
+          <a routerLink="/assessment/category/2" routerLinkActive="active" class="nav-category-item"
+            (click)="onNavItemClick()">
             <span class="cat-badge">2</span>
             <span>การสื่อสารและสร้างจิตสำนึก</span>
           </a>
-          <a routerLink="/green-office/form" routerLinkActive="active" class="nav-category-item">
+          <a routerLink="/assessment/category/3" routerLinkActive="active" class="nav-category-item"
+            (click)="onNavItemClick()">
             <span class="cat-badge">3</span>
             <span>การใช้ทรัพยากรและพลังงาน</span>
           </a>
-          <a routerLink="/green-office/form" routerLinkActive="active" class="nav-category-item">
+          <a routerLink="/assessment/category/4" routerLinkActive="active" class="nav-category-item"
+            (click)="onNavItemClick()">
             <span class="cat-badge">4</span>
             <span>การจัดการของเสีย</span>
           </a>
-          <a routerLink="/green-office/form" routerLinkActive="active" class="nav-category-item">
+          <a routerLink="/assessment/category/5" routerLinkActive="active" class="nav-category-item"
+            (click)="onNavItemClick()">
             <span class="cat-badge">5</span>
             <span>สภาพแวดล้อมและความปลอดภัย</span>
           </a>
-          <a routerLink="/green-office/form" routerLinkActive="active" class="nav-category-item">
+          <a routerLink="/assessment/category/6" routerLinkActive="active" class="nav-category-item"
+            (click)="onNavItemClick()">
             <span class="cat-badge">6</span>
             <span>การจัดซื้อที่เป็นมิตรกับสิ่งแวดล้อม</span>
           </a>
@@ -137,7 +161,7 @@
       </div>
 
       <!-- 5. Evidence Documents -->
-      <a routerLink="/green-office/evidence" routerLinkActive="active" class="nav-item">
+      <a routerLink="/green-office/evidence" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-folder-open"></i>
         <span>จัดการไฟล์หลักฐาน</span>
       </a>
@@ -146,14 +170,41 @@
 
     <!-- ═══════════════ SHARED ITEMS ═══════════════ -->
 
-    <!-- Cert requests: ADMIN, ASSESSOR, USER -->
-    <a *ngIf="hasRole(['ADMIN', 'ASSESSOR', 'USER'])" routerLink="/requests" routerLinkActive="active" class="nav-item">
+    <!-- Cert requests: USER Only (Assessor has their own section below) -->
+    <a *ngIf="hasRole(['USER'])" routerLink="/requests" routerLinkActive="active" class="nav-item"
+      (click)="onNavItemClick()">
       <i class="fa-solid fa-certificate"></i>
       <span>คำขอรับรององค์กร</span>
     </a>
 
+    <!-- ═══════════════ ASSESSOR NAV ═══════════════ -->
+    <ng-container *ngIf="hasRole(['ASSESSOR'])">
+      <div class="nav-label">ผู้ตรวจประเมิน</div>
+      <a routerLink="/assessor/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-gauge-high"></i>
+        <span>แดชบอร์ดผู้ตรวจ</span>
+      </a>
+      <a routerLink="/assessor/assignments" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-file-signature"></i>
+        <span>คำขอรับรองสำนักงานสีเขียว</span>
+      </a>
+      <a routerLink="/assessor/history" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        <span>ประวัติการประเมิน</span>
+      </a>
+      <a routerLink="/assessor/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-bell"></i>
+        <span>การแจ้งเตือน</span>
+      </a>
+      <a routerLink="/assessor/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>โปรไฟล์ผู้ตรวจ</span>
+      </a>
+    </ng-container>
+
     <!-- Assessor profile -->
-    <a *ngIf="hasRole(['ASSESSOR'])" routerLink="/assessor/profile" routerLinkActive="active" class="nav-item">
+    <a *ngIf="hasRole(['ASSESSOR'])" routerLink="/assessor/profile" routerLinkActive="active" class="nav-item"
+      (click)="onNavItemClick()" style="display:none">
       <i class="fa-solid fa-user-tie"></i>
       <span>โปรไฟล์ผู้ตรวจประเมิน</span>
     </a>
@@ -168,11 +219,12 @@
         <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!orgOpen" [class.fa-chevron-up]="orgOpen"></i>
       </button>
       <div class="nav-sub-items" [class.expanded]="orgOpen">
-        <a routerLink="/org/profile" routerLinkActive="active" class="nav-sub-item">
+        <a routerLink="/org/profile" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
           <i class="fa-solid fa-id-card"></i>
           <span>โปรไฟล์องค์กร</span>
         </a>
-        <a *ngIf="hasRole(['USER'])" routerLink="/subscription" routerLinkActive="active" class="nav-sub-item">
+        <a *ngIf="hasRole(['USER'])" routerLink="/subscription" routerLinkActive="active" class="nav-sub-item"
+          (click)="onNavItemClick()">
           <i class="fa-solid fa-box-archive"></i>
           <span>แพ็กเกจการใช้งาน</span>
         </a>

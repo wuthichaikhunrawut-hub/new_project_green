@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -13,7 +13,9 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class AssessorProfileComponent implements OnInit {
   private http = inject(HttpClient);
+  private cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
+
 
   user: any = null;
   isLoading = true;
@@ -22,9 +24,14 @@ export class AssessorProfileComponent implements OnInit {
 
   formData = {
     bio: '',
-    bank_name: '',
-    bank_account_name: '',
-    bank_account_number: ''
+    assessor_profile: {
+      license_number: '',
+      expertise_tags: '',
+      years_experience: 0,
+      education_background: '',
+      bank_name: '',
+      bank_account_no: ''
+    }
   };
 
   ngOnInit() {
@@ -38,6 +45,7 @@ export class AssessorProfileComponent implements OnInit {
     if (!currentUser || !currentUser.id) {
       this.errorMessage = 'ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่';
       this.isLoading = false;
+        this.cdr.detectChanges();
       return;
     }
 
@@ -55,11 +63,19 @@ export class AssessorProfileComponent implements OnInit {
         };
         if (data) {
           this.formData.bio = data.bio || '';
-          this.formData.bank_name = data.bank_name || '';
-          this.formData.bank_account_name = data.bank_account_name || '';
-          this.formData.bank_account_number = data.bank_account_number || '';
+          if (data.assessor_profile) {
+            this.formData.assessor_profile = {
+              license_number: data.assessor_profile.license_number || '',
+              expertise_tags: data.assessor_profile.expertise_tags || '',
+              years_experience: data.assessor_profile.years_experience || 0,
+              education_background: data.assessor_profile.education_background || '',
+              bank_name: data.assessor_profile.bank_name || '',
+              bank_account_no: data.assessor_profile.bank_account_no || ''
+            };
+          }
         }
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Failed to load profile', err);
@@ -70,6 +86,7 @@ export class AssessorProfileComponent implements OnInit {
           assessor_verified: currentUser.assessor_verified || false
         };
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

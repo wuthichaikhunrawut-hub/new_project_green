@@ -174,7 +174,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         stroke: { 
           curve: 'smooth', 
           width: this.mainChartType === 'area' ? 2 : 0,
-          colors: ['transparent'] // prevents undefined stroke color error on bars
+          colors: this.mainChartType === 'area' ? ['#0ea5e9', '#10b981'] : ['transparent']
         },
         fill: {
           type: this.mainChartType === 'area' ? 'gradient' : 'solid',
@@ -297,7 +297,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       plotOptions: { bar: { columnWidth: '45%', borderRadius: 2 } },
       dataLabels: { enabled: false },
       xaxis: { categories: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'], axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { colors: '#6b7280', fontSize: '11px', fontWeight: 500 } } },
-      yaxis: { min: -200, max: 1000, tickAmount: 4, labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 500 } } },
+      yaxis: { min: 0, labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 500 } } },
       grid: { 
         borderColor: '#f3f4f6', 
         strokeDashArray: 0,

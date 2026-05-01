@@ -8,7 +8,7 @@ import { RegisterComponent } from './features/auth/register/register';
 import { AssessorRegisterComponent } from './features/auth/assessor-register/assessor-register';
 import { HomeComponent } from './features/home/home';
 
-
+import { CategoryPageComponent } from './features/assessment/category/category';
 import { GreenOfficeFormComponent } from './features/green-office/form/form';
 import { GreenOfficeEvidenceComponent } from './features/green-office/evidence/evidence';
 import { OrgProfileComponent } from './features/org/profile/profile';
@@ -59,6 +59,13 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] }
       },
       {
+        path: 'admin/organizations',
+        loadComponent: () => import('./features/admin/organizations/organizations').then(m => m.AdminOrganizationsComponent),
+        title: 'จัดการองค์กร - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
         path: 'admin/emission-factors',
         loadComponent: () => import('./features/admin/emission-factors/emission-factors').then(m => m.AdminEmissionFactorsComponent),
         title: 'ค่าสัมประสิทธิ์คาร์บอน - Green Sync',
@@ -69,6 +76,13 @@ export const routes: Routes = [
         path: 'admin/assessors',
         loadComponent: () => import('./features/admin/assessors/assessors').then(m => m.AdminAssessorsComponent),
         title: 'ยืนยันผู้ตรวจประเมิน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN'] }
+      },
+      {
+        path: 'admin/settings',
+        loadComponent: () => import('./features/admin/settings/settings').then(m => m.AdminSettingsComponent),
+        title: 'ตั้งค่าระบบ - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN'] }
       },
@@ -94,6 +108,50 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] }
       },
 
+      // GROUP: ASSESSOR PAGES
+      {
+        path: 'assessor/dashboard',
+        loadComponent: () => import('./features/assessor/dashboard/dashboard').then(m => m.AssessorDashboardComponent),
+        title: 'แดชบอร์ดผู้ตรวจประเมิน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'ASSESSOR'] }
+      },
+      {
+        path: 'assessor/assignments',
+        loadComponent: () => import('./features/assessor/assignments/assignments').then(m => m.AssessorAssignmentsComponent),
+        title: 'คำขอรับรองสำนักงานสีเขียว - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'ASSESSOR'] }
+      },
+      {
+        path: 'assessor/evidence/:id',
+        loadComponent: () => import('./features/assessor/evidence-review/evidence-review').then(m => m.AssessorEvidenceReviewComponent),
+        title: 'ตรวจหลักฐาน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'ASSESSOR'] }
+      },
+      {
+        path: 'assessor/decide/:id',
+        loadComponent: () => import('./features/assessor/certification-decision/certification-decision').then(m => m.AssessorCertificationDecisionComponent),
+        title: 'สรุปผลการประเมิน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'ASSESSOR'] }
+      },
+      {
+        path: 'assessor/history',
+        loadComponent: () => import('./features/assessor/history/history').then(m => m.AssessorHistoryComponent),
+        title: 'ประวัติการประเมิน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'ASSESSOR'] }
+      },
+      {
+        path: 'assessor/notifications',
+        loadComponent: () => import('./features/assessor/notifications/notifications').then(m => m.AssessorNotificationsComponent),
+        title: 'การแจ้งเตือน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'ASSESSOR'] }
+      },
+
       // GROUP 3: CARBON FOOTPRINT
       {
         path: 'carbon/logs',
@@ -110,10 +168,17 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'USER', 'EXECUTIVE'] }
       },
 
-      // GROUP 2: GREEN OFFICE
-      { 
-        path: 'green-office/form', 
+      // GROUP 2: GREEN OFFICE ASSESSMENTS
+      {
+        path: 'assessment',
         component: GreenOfficeFormComponent,
+        title: 'แบบประเมินตนเอง - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'USER'] }
+      },
+      { 
+        path: 'assessment/category/:id', 
+        component: CategoryPageComponent,
         title: 'แบบประเมินตนเอง - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'USER'] }

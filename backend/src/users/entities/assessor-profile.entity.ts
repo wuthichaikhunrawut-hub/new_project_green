@@ -38,7 +38,7 @@ export class AssessorProfile {
   })
   verification_status: VerificationStatus;
 
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   verified_at: Date;
 
   @ManyToOne(() => User, { nullable: true })

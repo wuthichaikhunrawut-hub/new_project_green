@@ -10,5 +10,5 @@
   </main>
 
   <!-- Global AI Chatbot -->
-  <app-ai-chat></app-ai-chat>
+  <app-ai-chat *ngIf="user?.role !== 'ADMIN'"></app-ai-chat>
 </div>
