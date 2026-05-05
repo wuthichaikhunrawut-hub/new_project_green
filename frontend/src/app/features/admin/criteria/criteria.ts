@@ -3,6 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
 
+interface GroupedCriteria {
+  category_number: number;
+  items: GreenCriteria[];
+  expanded: boolean;
+}
+
 @Component({
   selector: 'app-admin-criteria',
   standalone: true,
@@ -15,6 +21,7 @@ export class AdminCriteriaComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   criteriaList: GreenCriteria[] = [];
+  groupedCriteria: GroupedCriteria[] = [];
   isLoading = true;
   isSaving = false;
   
@@ -29,6 +36,7 @@ export class AdminCriteriaComponent implements OnInit {
     this.criteriaService.getCriteriaList().subscribe({
       next: (data) => {
         this.criteriaList = data;
+        this.groupCriteria();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
@@ -38,6 +46,32 @@ export class AdminCriteriaComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  groupCriteria() {
+    const groups = new Map<number, GreenCriteria[]>();
+    for (const item of this.criteriaList) {
+      const cat = item.category_number || 0;
+      if (!groups.has(cat)) {
+        groups.set(cat, []);
+      }
+      groups.get(cat)!.push(item);
+    }
+    
+    this.groupedCriteria = Array.from(groups.entries())
+      .map(([category_number, items]) => {
+        const existingGroup = this.groupedCriteria.find(g => g.category_number === category_number);
+        return {
+          category_number,
+          items: items.sort((a, b) => (a.criteria_code || '').localeCompare(b.criteria_code || '')),
+          expanded: existingGroup ? existingGroup.expanded : false
+        };
+      })
+      .sort((a, b) => a.category_number - b.category_number);
+  }
+
+  toggleGroup(group: GroupedCriteria) {
+    group.expanded = !group.expanded;
   }
 
   openModal(item?: GreenCriteria) {

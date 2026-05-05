@@ -29,31 +29,44 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of criteriaList">
-              <td class="px-4 py-3 text-center">
-                <span class="badge bg-secondary">หมวด {{ item.category_number }}</span>
-              </td>
-              <td class="px-4 py-3 fw-bold text-primary">{{ item.criteria_code }}</td>
-              <td class="px-4 py-3">
-                <div class="fw-semibold text-truncate" style="max-width: 300px;" [title]="item.criteria_name">
-                  {{ item.criteria_name }}
-                </div>
-                <div class="small text-muted text-truncate" style="max-width: 300px;" [title]="item.description">
-                  {{ item.description || '-' }}
-                </div>
-              </td>
-              <td class="px-4 py-3 text-center fw-bold text-success">{{ item.max_score }}</td>
-              <td class="px-4 py-3 text-center text-muted">{{ item.year_version || '-' }}</td>
-              <td class="px-4 py-3 text-end">
-                <button class="btn btn-sm btn-outline-primary me-2 shadow-sm" (click)="openModal(item)">
-                  <i class="fa-solid fa-pen"></i> แก้ไข
-                </button>
-                <button class="btn btn-sm btn-outline-danger shadow-sm" (click)="deleteCriteria(item.id)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="criteriaList.length === 0">
+            <ng-container *ngFor="let group of groupedCriteria">
+              <tr class="table-light border-top" style="cursor: pointer; background-color: #f8fafc;" (click)="toggleGroup(group)">
+                <td colspan="6" class="px-4 py-3 fw-bold text-dark">
+                  <div class="d-flex align-items-center">
+                    <i class="fa-solid me-3 text-primary transition-all" [ngClass]="group.expanded ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
+                    <span class="fs-6">หมวดที่ {{ group.category_number }}</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle ms-3 rounded-pill px-3">{{ group.items.length }} เกณฑ์</span>
+                  </div>
+                </td>
+              </tr>
+              <ng-container *ngIf="group.expanded">
+                <tr *ngFor="let item of group.items">
+                  <td class="px-4 py-3 text-center">
+                    <div style="width: 2px; height: 100%; background-color: #cbd5e1; margin: 0 auto; min-height: 40px; border-radius: 2px;"></div>
+                  </td>
+                  <td class="px-4 py-3 fw-bold text-primary">{{ item.criteria_code }}</td>
+                  <td class="px-4 py-3">
+                    <div class="fw-semibold text-truncate" style="max-width: 300px;" [title]="item.criteria_name">
+                      {{ item.criteria_name }}
+                    </div>
+                    <div class="small text-muted text-truncate" style="max-width: 300px;" [title]="item.description">
+                      {{ item.description || '-' }}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-center fw-bold text-success">{{ item.max_score }}</td>
+                  <td class="px-4 py-3 text-center text-muted">{{ item.year_version || '-' }}</td>
+                  <td class="px-4 py-3 text-end">
+                    <button class="btn btn-sm btn-outline-primary me-2 shadow-sm" (click)="openModal(item)">
+                      <i class="fa-solid fa-pen"></i> แก้ไข
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger shadow-sm" (click)="deleteCriteria(item.id)">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </td>
+                </tr>
+              </ng-container>
+            </ng-container>
+            <tr *ngIf="groupedCriteria.length === 0">
               <td colspan="6" class="text-center py-5 text-muted">ไม่มีข้อมูลเกณฑ์ประเมิน</td>
             </tr>
           </tbody>

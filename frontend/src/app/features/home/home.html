@@ -2,7 +2,8 @@
 <nav class="main-nav">
   <div class="nav-wrapper max-w-7xl mx-auto px-6 lg:px-12">
     <a routerLink="/" class="logo flex-shrink-0">
-      <img src="assets/image/Logo.png" alt="GreenSync" class="h-12 lg:h-14 w-auto transform scale-160 origin-left">
+      <img src="assets/image/Green_office_imge.png" alt="GreenSync"
+        class="h-12 lg:h-14 w-auto transform scale-160 origin-left">
     </a>
     <ul class="nav-links hidden lg:flex items-center space-x-6 xl:space-x-8">
       <li><a routerLink="/" fragment="Green Office" class="whitespace-nowrap">สำนักงานสีเขียว</a></li>
@@ -34,9 +35,11 @@
     </div>
     <h1 class="hero-title text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black leading-tight mb-4 lg:mb-6">
       {{ hero.titleTh }}<br>
-      <span class="text-slate-100 font-medium block mt-2 text-xl md:text-2xl lg:text-3xl tracking-tight">{{ hero.titleEn }}</span>
+      <span class="text-slate-100 font-medium block mt-2 text-xl md:text-2xl lg:text-3xl tracking-tight">{{ hero.titleEn
+        }}</span>
     </h1>
-    <p class="hero-subtitle text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-6 lg:mb-8">{{ hero.subtitleTh }}</p>
+    <p class="hero-subtitle text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl mx-auto mb-6 lg:mb-8">{{
+      hero.subtitleTh }}</p>
     <div class="hero-actions flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-6">
       <a routerLink="/register" class="btn-premium-solid w-full sm:w-auto">
         {{ hero.primaryCta }}
@@ -51,7 +54,8 @@
 <!-- --- TRUSTED BY --- -->
 <section class="partners-section pt-8 lg:pt-12 pb-12 lg:pb-16 px-6 lg:px-12">
   <div class="max-w-6xl mx-auto">
-    <p class="partners-title text-sm md:text-base lg:text-lg mb-8 lg:mb-10">ขับเคลื่อนความยั่งยืนให้กับองค์กรชั้นนำมากกว่า 500 แห่ง</p>
+    <p class="partners-title text-sm md:text-base lg:text-lg mb-8 lg:mb-10">
+      ขับเคลื่อนความยั่งยืนให้กับองค์กรชั้นนำมากกว่า 500 แห่ง</p>
     <div class="partners-flex flex-wrap justify-center gap-6 lg:gap-10">
       <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-emerald-600">GISTDA</div>
       <div class="partner-text-logo text-lg md:text-xl lg:text-2xl text-blue-600">TEI</div>
@@ -69,18 +73,21 @@
       <div class="badge-premium mx-auto mb-4 lg:mb-5">
         <span class="badge-dot"></span> Core Modules
       </div>
-      <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-4 lg:mb-6 max-w-4xl mx-auto leading-tight">เชื่อมต่อทุกมิติความยั่งยืนไว้ในที่เดียว</h2>
-      <p class="text-base md:text-lg lg:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed">สถาปัตยกรรมระบบที่ออกแบบมาให้ทำงานประสานกันอย่างไร้รอยต่อ ตั้งแต่การจัดเก็บข้อมูลไปจนถึงการออกรายงานมาตรฐาน</p>
+      <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-4 lg:mb-6 max-w-4xl mx-auto leading-tight">
+        เชื่อมต่อทุกมิติความยั่งยืนไว้ในที่เดียว</h2>
+      <p class="text-base md:text-lg lg:text-xl text-slate-500 max-w-3xl mx-auto leading-relaxed">
+        สถาปัตยกรรมระบบที่ออกแบบมาให้ทำงานประสานกันอย่างไร้รอยต่อ ตั้งแต่การจัดเก็บข้อมูลไปจนถึงการออกรายงานมาตรฐาน</p>
     </div>
 
     <div class="bento-grid mt-8 lg:mt-12">
-      
+
       <!-- BENTO 1: Green Office (Large Left) -->
       <div id="Green Office" class="bento-item bento-feature-large animate-fade-up delay-100">
         <div class="bento-content">
           <div class="bento-icon bg-emerald-light text-emerald-600"><i class="fa-solid fa-leaf"></i></div>
           <h3 class="bento-title">Smart Green Office</h3>
-          <p class="bento-desc">ยกระดับการจัดการสำนักงานสีเขียว ประเมินตนเองครบ 6 หมวด จัดเก็บเอกสารบน Cloud ประเมินความพร้อมด้วย AI โดยอัตโนมัติ</p>
+          <p class="bento-desc">ยกระดับการจัดการสำนักงานสีเขียว ประเมินตนเองครบ 6 หมวด จัดเก็บเอกสารบน Cloud
+            ประเมินความพร้อมด้วย AI โดยอัตโนมัติ</p>
           <a routerLink="/register" class="bento-link">ดูรายละเอียดระบบ <i class="fa-solid fa-arrow-right"></i></a>
         </div>
         <div class="bento-image-wrapper">
@@ -94,7 +101,8 @@
           <div class="flex-grow-1">
             <div class="bento-icon bg-blue-light text-blue-600"><i class="fa-solid fa-cloud"></i></div>
             <h3 class="bento-title">Carbon Footprint CFO</h3>
-            <p class="bento-desc">รองรับ Scope 1-3 ตามมาตรฐาน อบก. เปลี่ยนบิลเป็นข้อมูลคาร์บอนด้วย AI Analytics ทันที</p>
+            <p class="bento-desc">รองรับ Scope 1-3 ตามมาตรฐาน อบก. เปลี่ยนบิลเป็นข้อมูลคาร์บอนด้วย AI Analytics ทันที
+            </p>
           </div>
           <div class="bento-image-wrapper-mini">
             <img src="assets/image/Carbon footprint.png" alt="Carbon Footprint Platform" class="bento-img-mini">
@@ -106,10 +114,11 @@
       <div class="bento-item color-card-dark animate-fade-up delay-300">
         <div class="bento-content">
           <h3 class="bento-title text-white">99.9% AI Accuracy</h3>
-          <p class="bento-desc text-slate-300">ลดงานเหนื่อยล้าดึงข้อมูลบิลค่าน้ำค่าไฟ ระบบ OCR อัจฉริยะดึงข้อมูลและจำแนก Emission Factor ตรงจุด</p>
+          <p class="bento-desc text-slate-300">ลดงานเหนื่อยล้าดึงข้อมูลบิลค่าน้ำค่าไฟ ระบบ OCR อัจฉริยะดึงข้อมูลและจำแนก
+            Emission Factor ตรงจุด</p>
           <div class="ai-pulse-graphic">
-             <div class="pulse-ring"></div>
-             <i class="fa-solid fa-microchip text-emerald-400 fs-1 position-relative z-1"></i>
+            <div class="pulse-ring"></div>
+            <i class="fa-solid fa-microchip text-emerald-400 fs-1 position-relative z-1"></i>
           </div>
         </div>
       </div>
@@ -122,7 +131,7 @@
 <section id="features" class="section-fluid-cards py-16 lg:py-24 px-6 lg:px-12">
   <div class="max-w-7xl mx-auto relative">
     <div class="fluid-background-shape"></div>
-    
+
     <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 mb-12 lg:mb-16">
       <div class="w-full lg:w-5/12 animate-fade-up">
         <h2 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-slate-900 leading-tight mb-4 lg:mb-6">
@@ -131,12 +140,15 @@
         </h2>
       </div>
       <div class="w-full lg:w-6/12 animate-fade-up delay-100">
-        <p class="text-base md:text-lg lg:text-xl text-slate-600 leading-relaxed">หมดยุคทำงานซ้ำซ้อนบน Spreadsheet ค้นหาเอกสารไม่เจอ หรือปวดหัวกับเกณฑ์ประเมินที่เปลี่ยนใหม่ทุกปี ระบบของเราออกแบบมารองรับ Ecosystem การทำงานจริง</p>
+        <p class="text-base md:text-lg lg:text-xl text-slate-600 leading-relaxed">หมดยุคทำงานซ้ำซ้อนบน Spreadsheet
+          ค้นหาเอกสารไม่เจอ หรือปวดหัวกับเกณฑ์ประเมินที่เปลี่ยนใหม่ทุกปี ระบบของเราออกแบบมารองรับ Ecosystem การทำงานจริง
+        </p>
       </div>
     </div>
 
     <div class="fluid-cards-grid">
-      <div class="glass-feature-card animate-fade-up" *ngFor="let feat of features; let i = index" [class]="'delay-'+(i*100)">
+      <div class="glass-feature-card animate-fade-up" *ngFor="let feat of features; let i = index"
+        [class]="'delay-'+(i*100)">
         <div class="card-glow" [class]="'glow-'+feat.color"></div>
         <div class="icon-box" [class]="'text-'+feat.color+'-500'"><i class="fa-solid" [class]="feat.icon"></i></div>
         <h4>{{ feat.titleTh }}</h4>
@@ -162,37 +174,37 @@
           <p class="text-slate-400 text-base md:text-lg lg:text-xl mb-8 lg:mb-10 leading-relaxed">
             เราออกแบบประสบการณ์ผู้ใช้ (UX) ให้เรียบง่าย ผู้ดูแลระบบสามารถเริ่มต้นใช้งานได้ทันทีโดยไม่ต้องเรียนรู้ระบบนาน
           </p>
-          
+
           <div class="step-nav">
-             <div class="step-nav-item active">
-               <div class="step-number">01</div>
-               <div class="step-text">นำเข้าข้อมูลและเอกสารอัตโนมัติ</div>
-             </div>
-             <div class="step-nav-item">
-               <div class="step-number">02</div>
-               <div class="step-text">AI ประมวลผลและวิเคราะห์หาค่า Carbon</div>
-             </div>
-             <div class="step-nav-item">
-               <div class="step-number">03</div>
-               <div class="step-text">ออกรายงานสรุปและหน้า Dashboard ทันที</div>
-             </div>
+            <div class="step-nav-item active">
+              <div class="step-number">01</div>
+              <div class="step-text">นำเข้าข้อมูลและเอกสารอัตโนมัติ</div>
+            </div>
+            <div class="step-nav-item">
+              <div class="step-number">02</div>
+              <div class="step-text">AI ประมวลผลและวิเคราะห์หาค่า Carbon</div>
+            </div>
+            <div class="step-nav-item">
+              <div class="step-number">03</div>
+              <div class="step-text">ออกรายงานสรุปและหน้า Dashboard ทันที</div>
+            </div>
           </div>
         </div>
       </div>
       <div class="col-lg-7 image-scroll-column">
         <!-- We use one main image prominently but styled beautifully to look like an app window -->
         <div class="app-window-mockup mt-5 animate-fade-up delay-200">
-           <div class="app-window-header">
-             <span class="dot bg-danger"></span>
-             <span class="dot bg-warning"></span>
-             <span class="dot bg-success"></span>
-           </div>
-           <img src="assets/image/How it work.png" alt="Platform Workflow" class="img-fluid w-100">
-           
-           <div class="floating-stat-card bottom-right animate-fade-up delay-400">
-             <div class="stat-value text-emerald-500">Auto Generated</div>
-             <div class="stat-label">ESG Reports Ready</div>
-           </div>
+          <div class="app-window-header">
+            <span class="dot bg-danger"></span>
+            <span class="dot bg-warning"></span>
+            <span class="dot bg-success"></span>
+          </div>
+          <img src="assets/image/How it work.png" alt="Platform Workflow" class="img-fluid w-100">
+
+          <div class="floating-stat-card bottom-right animate-fade-up delay-400">
+            <div class="stat-value text-emerald-500">Auto Generated</div>
+            <div class="stat-label">ESG Reports Ready</div>
+          </div>
         </div>
       </div>
     </div>
@@ -221,7 +233,8 @@
       เข้าร่วมเป็นผู้ตรวจประเมิน Green Office
     </h2>
     <p class="text-base md:text-lg lg:text-xl text-slate-500 max-w-3xl mx-auto mb-8 lg:mb-10 leading-relaxed">
-      ร่วมเป็นส่วนหนึ่งของเครือข่ายผู้เชี่ยวชาญด้านสำนักงานสีเขียวและ ESG ที่ได้รับการรับรองจาก TEI พร้อมรับค่าตอบแทนจากการตรวจประเมินองค์กรต่างๆ
+      ร่วมเป็นส่วนหนึ่งของเครือข่ายผู้เชี่ยวชาญด้านสำนักงานสีเขียวและ ESG ที่ได้รับการรับรองจาก TEI
+      พร้อมรับค่าตอบแทนจากการตรวจประเมินองค์กรต่างๆ
     </p>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 lg:gap-6">
       <a routerLink="/register/assessor" class="btn-premium-solid w-full sm:w-auto">
@@ -240,7 +253,8 @@
           เข้าร่วมกับองค์กรชั้นนำที่เลือกใช้ <span class="text-emerald-400">GreenSync</span>
         </h2>
         <p class="text-base md:text-lg lg:text-xl text-slate-300 mb-8 lg:mb-10 max-w-2xl leading-relaxed">
-          เริ่มต้นบนแพลตฟอร์มคลาวด์ที่ปลอดภัย ได้มาตรฐานสากล พร้อมเครื่องมือครบครันสำหรับบริหารจัดการความยั่งยืนในองค์กรของคุณ
+          เริ่มต้นบนแพลตฟอร์มคลาวด์ที่ปลอดภัย ได้มาตรฐานสากล
+          พร้อมเครื่องมือครบครันสำหรับบริหารจัดการความยั่งยืนในองค์กรของคุณ
         </p>
         <div class="cta-buttons flex flex-col sm:flex-row items-center gap-4 lg:gap-6">
           <a routerLink="/register" class="btn-white-solid w-full sm:w-auto">
@@ -251,7 +265,7 @@
           </a>
         </div>
       </div>
-      
+
       <!-- Decorative rings -->
       <div class="ring r-1"></div>
       <div class="ring r-2"></div>
@@ -264,46 +278,73 @@
   <div class="max-w-7xl mx-auto">
     <div class="footer-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-10 lg:mb-12">
       <div class="footer-brand-col lg:col-span-1">
-        <a routerLink="/" class="logo text-white text-2xl lg:text-3xl mb-4 inline-block">Green<span class="text-emerald-400">Sync</span></a>
-        <p class="text-slate-400 mb-6 pr-4 text-sm lg:text-base leading-relaxed">แพลตฟอร์ม AI ชั้นนำสำหรับการลดคาร์บอน และการปฏิบัติตามมาตรฐาน ESG ระดับองค์กร</p>
+        <a routerLink="/" class="logo text-white text-2xl lg:text-3xl mb-4 inline-block">Green<span
+            class="text-emerald-400">Sync</span></a>
+        <p class="text-slate-400 mb-6 pr-4 text-sm lg:text-base leading-relaxed">แพลตฟอร์ม AI ชั้นนำสำหรับการลดคาร์บอน
+          และการปฏิบัติตามมาตรฐาน ESG ระดับองค์กร</p>
         <div class="social-links flex gap-4">
-          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i class="fa-brands fa-facebook-f text-white"></i></a>
-          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i class="fa-brands fa-linkedin-in text-white"></i></a>
-          <a href="#" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i class="fa-brands fa-line text-white"></i></a>
+          <a href="#"
+            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i
+              class="fa-brands fa-facebook-f text-white"></i></a>
+          <a href="#"
+            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i
+              class="fa-brands fa-linkedin-in text-white"></i></a>
+          <a href="#"
+            class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-emerald-600 transition-colors"><i
+              class="fa-brands fa-line text-white"></i></a>
         </div>
       </div>
       <div class="footer-links-col">
         <h4 class="text-white font-semibold mb-4 lg:mb-5 text-base lg:text-lg">โซลูชัน</h4>
         <ul class="space-y-2 lg:space-y-3">
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">Carbon Footprint (CFO)</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">Green Office Standard</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">AI Document OCR</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ESG Reporting</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">Carbon
+              Footprint (CFO)</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">Green
+              Office Standard</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">AI
+              Document OCR</a></li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ESG
+              Reporting</a></li>
         </ul>
       </div>
       <div class="footer-links-col">
         <h4 class="text-white font-semibold mb-4 lg:mb-5 text-base lg:text-lg">แหล่งข้อมูล</h4>
         <ul class="space-y-2 lg:space-y-3">
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">กรณีศึกษาฐานลูกค้า</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ศูนย์ความรู้ (Blog)</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">คู่มือการใช้งาน</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">งานสัมมนา / กิจกรรม</a></li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">กรณีศึกษาฐานลูกค้า</a>
+          </li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ศูนย์ความรู้
+              (Blog)</a></li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">คู่มือการใช้งาน</a>
+          </li>
+          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">งานสัมมนา
+              / กิจกรรม</a></li>
         </ul>
       </div>
       <div class="footer-links-col">
         <h4 class="text-white font-semibold mb-4 lg:mb-5 text-base lg:text-lg">บริษัท</h4>
         <ul class="space-y-2 lg:space-y-3">
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">เกี่ยวกับเรา</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ความปลอดภัย (Security)</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">นโยบายความเป็นส่วนตัว</a></li>
-          <li><a href="#" class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ติดต่อเรา</a></li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">เกี่ยวกับเรา</a></li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ความปลอดภัย
+              (Security)</a></li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">นโยบายความเป็นส่วนตัว</a>
+          </li>
+          <li><a href="#"
+              class="text-slate-400 hover:text-emerald-400 transition-colors text-sm lg:text-base">ติดต่อเรา</a></li>
         </ul>
       </div>
     </div>
-    <div class="footer-bottom pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div
+      class="footer-bottom pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
       <p class="text-slate-500 text-sm lg:text-base">&copy; 2026 GreenSync Technology. All rights reserved.</p>
       <div class="footer-badges">
-        <span class="cert-badge flex items-center gap-2 text-slate-400 text-sm lg:text-base"><i class="fa-solid fa-shield-halved text-emerald-500"></i> ISO 27001 Certified</span>
+        <span class="cert-badge flex items-center gap-2 text-slate-400 text-sm lg:text-base"><i
+            class="fa-solid fa-shield-halved text-emerald-500"></i> ISO 27001 Certified</span>
       </div>
     </div>
   </div>

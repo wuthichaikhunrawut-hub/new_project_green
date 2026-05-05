@@ -1,17 +1,18 @@
 <div id="dashboard-wrapper" class="p-6 md:p-8 animate-in">
-  
+
   <!-- Header Match Reference -->
   <div class="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
     <div class="dash-header-title">
-      <img src="assets/image/Logo.png" alt="Green Sync" class="h-8">
+      <img src="assets/image/Green_office_imge.png" alt="Green Sync" class="h-8">
       Green Sync <span class="dash-header-dot"></span> <span class="dash-header-subtitle">Green Office Platform</span>
     </div>
-    
+
     <div class="top-actions">
       <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
       <button class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
       <img src="https://ui-avatars.com/api/?name=Admin&background=10B981&color=fff" alt="User" class="profile-avatar">
-      <button class="icon-btn border-0 shadow-none bg-transparent hover:bg-slate-100"><i class="fa-solid fa-ellipsis"></i></button>
+      <button class="icon-btn border-0 shadow-none bg-transparent hover:bg-slate-100"><i
+          class="fa-solid fa-ellipsis"></i></button>
     </div>
   </div>
 
@@ -22,7 +23,7 @@
       <div class="kpi-title">ปริมาณคาร์บอนรวม <span class="kpi-unit">(tCO₂e)</span></div>
       <div class="kpi-value">{{ carbonTotal | number:'1.0-0' }}</div>
       <div class="kpi-subtext">
-        <span class="kpi-trend-down"><i class="fa-solid fa-arrow-down fs-xs"></i> 2.4%</span> 
+        <span class="kpi-trend-down"><i class="fa-solid fa-arrow-down fs-xs"></i> 2.4%</span>
         เมื่อเทียบกับปีที่แล้ว
       </div>
     </div>
@@ -32,7 +33,7 @@
       <div class="kpi-title">การใช้พลังงาน <span class="kpi-unit">(kWh)</span></div>
       <div class="kpi-value">{{ energyUsage | number:'1.0-0' }}</div>
       <div class="kpi-subtext">
-        <span class="kpi-trend-down"><i class="fa-solid fa-arrow-down fs-xs"></i> 1.2%</span> 
+        <span class="kpi-trend-down"><i class="fa-solid fa-arrow-down fs-xs"></i> 1.2%</span>
         เมื่อเทียบกับปีที่แล้ว
       </div>
     </div>
@@ -42,7 +43,8 @@
       <div class="kpi-title">การใช้น้ำ <span class="kpi-unit">(m³)</span></div>
       <div class="kpi-value">{{ waterUsage | number:'1.0-0' }}</div>
       <div class="kpi-subtext">
-        <span class="kpi-trend-up" style="color:#4b5563; background:#f3f4f6;"><i class="fa-solid fa-minus fs-xs"></i> 0.0%</span> 
+        <span class="kpi-trend-up" style="color:#4b5563; background:#f3f4f6;"><i class="fa-solid fa-minus fs-xs"></i>
+          0.0%</span>
         คงที่เมื่อเทียบกับปีที่แล้ว
       </div>
     </div>
@@ -52,7 +54,7 @@
       <div class="kpi-title">อัตราการรีไซเคิล <span class="kpi-unit">(%)</span></div>
       <div class="kpi-value">{{ wasteRecycled | number:'1.0-0' }}%</div>
       <div class="kpi-subtext">
-        <span class="kpi-trend-up"><i class="fa-solid fa-arrow-up fs-xs"></i> 4.5%</span> 
+        <span class="kpi-trend-up"><i class="fa-solid fa-arrow-up fs-xs"></i> 4.5%</span>
         เมื่อเทียบกับปีที่แล้ว
       </div>
     </div>
@@ -64,17 +66,20 @@
     <div class="dashboard-card">
       <div class="chart-header">
         <div>
-           <div class="chart-title">แนวโน้มการปล่อยคาร์บอน</div>
-           <div class="chart-subtitle">เปรียบเทียบ Scope 1 และ Scope 3 (tCO₂e)</div>
+          <div class="chart-title">แนวโน้มการปล่อยคาร์บอน</div>
+          <div class="chart-subtitle">เปรียบเทียบ Scope 1 และ Scope 3 (tCO₂e)</div>
         </div>
         <div class="chart-filters">
-          <button class="filter-btn" [class.active]="mainChartType === 'area'" (click)="setMainChartType('area')" title="กราฟเส้น">
+          <button class="filter-btn" [class.active]="mainChartType === 'area'" (click)="setMainChartType('area')"
+            title="กราฟเส้น">
             <i class="fa-solid fa-chart-area"></i>
           </button>
-          <button class="filter-btn" [class.active]="mainChartType === 'bar'" (click)="setMainChartType('bar')" title="กราฟแท่ง">
+          <button class="filter-btn" [class.active]="mainChartType === 'bar'" (click)="setMainChartType('bar')"
+            title="กราฟแท่ง">
             <i class="fa-solid fa-chart-column"></i>
           </button>
-          <button class="filter-btn" [class.active]="mainChartType === 'donut'" (click)="setMainChartType('donut')" title="กราฟวงกลม">
+          <button class="filter-btn" [class.active]="mainChartType === 'donut'" (click)="setMainChartType('donut')"
+            title="กราฟวงกลม">
             <i class="fa-solid fa-chart-pie"></i>
           </button>
         </div>
@@ -95,20 +100,20 @@
           </div>
         </div>
         <div class="w-full h-[200px] mt-6 flex justify-center items-center">
-           <div id="apexSustainabilityGauge"></div>
+          <div id="apexSustainabilityGauge"></div>
         </div>
       </div>
 
       <!-- Green Energy Semi Gauge -->
       <div class="dashboard-card relative">
-         <div class="chart-header absolute top-4 left-5 right-5 z-10 w-full">
-            <div class="chart-title w-full flex justify-between pr-8">
-              สัดส่วนพลังงานสีเขียว
-            </div>
-         </div>
-         <div class="w-full h-[200px] mt-8 flex justify-center items-end pb-4">
-            <div id="apexGreenEnergyGauge"></div>
-         </div>
+        <div class="chart-header absolute top-4 left-5 right-5 z-10 w-full">
+          <div class="chart-title w-full flex justify-between pr-8">
+            สัดส่วนพลังงานสีเขียว
+          </div>
+        </div>
+        <div class="w-full h-[200px] mt-8 flex justify-center items-end pb-4">
+          <div id="apexGreenEnergyGauge"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -117,41 +122,42 @@
   <div class="grid-3-cols fade-in-up" style="animation-delay: 0.2s">
     <!-- Donut Chart -->
     <div class="dashboard-card">
-       <div class="chart-title mb-1">แหล่งปล่อยคาร์บอน</div>
-       <div class="chart-subtitle mb-4">สัดส่วนการปล่อยตามขอบเขต (Scope)</div>
-       <div class="w-full h-[260px] flex items-center justify-center relative">
-         <div id="apexCarbonDonut"></div>
-       </div>
+      <div class="chart-title mb-1">แหล่งปล่อยคาร์บอน</div>
+      <div class="chart-subtitle mb-4">สัดส่วนการปล่อยตามขอบเขต (Scope)</div>
+      <div class="w-full h-[260px] flex items-center justify-center relative">
+        <div id="apexCarbonDonut"></div>
+      </div>
     </div>
 
     <!-- Bar Chart -->
     <div class="dashboard-card">
-       <div class="chart-title mb-1">การใช้พลังงานย้อนหลัง</div>
-       <div class="chart-subtitle mb-4">พลังงานหมุนเวียน vs ไฟฟ้าจากสายส่ง (kWh)</div>
-       <div class="w-full h-[260px]">
-         <div id="apexEnergyBar"></div>
-       </div>
+      <div class="chart-title mb-1">การใช้พลังงานย้อนหลัง</div>
+      <div class="chart-subtitle mb-4">พลังงานหมุนเวียน vs ไฟฟ้าจากสายส่ง (kWh)</div>
+      <div class="w-full h-[260px]">
+        <div id="apexEnergyBar"></div>
+      </div>
     </div>
 
     <!-- AI Insights Checklist -->
     <div class="dashboard-card">
-       <div class="ai-insights-header">
-         <span>ข้อเสนอแนะอัจฉริยะจาก AI</span>
-       </div>
-       <div class="flex flex-col">
-         <div class="ai-item">
-            <div class="ai-icon-check"><i class="fa-solid fa-check"></i></div>
-            <div class="ai-text">พิจารณาเปลี่ยนหลอดไฟในอาคารเป็น LED ทั้งหมดเพื่อลดการใช้พลังงานลงได้ 15%</div>
-         </div>
-         <div class="ai-item">
-            <div class="ai-icon-check"><i class="fa-solid fa-check"></i></div>
-            <div class="ai-text">ปรับปรุงระบบรดน้ำต้นไม้ให้เป็นระบบจับความชื้นอัตโนมัติ และซ่อมจุดรั่วไหลของน้ำโดยเร็ว</div>
-         </div>
-         <div class="ai-item">
-            <div class="ai-icon-check" style="background: #ef4444;"><i class="fa-solid fa-exclamation"></i></div>
-            <div class="ai-text">ตรวจพบระบบปรับอากาศ (HVAC) โซน A ทำงานเกินเวลาที่กำหนด 12% ในสัปดาห์ที่ผ่านมา</div>
-         </div>
-       </div>
+      <div class="ai-insights-header">
+        <span>ข้อเสนอแนะอัจฉริยะจาก AI</span>
+      </div>
+      <div class="flex flex-col">
+        <div class="ai-item">
+          <div class="ai-icon-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ai-text">พิจารณาเปลี่ยนหลอดไฟในอาคารเป็น LED ทั้งหมดเพื่อลดการใช้พลังงานลงได้ 15%</div>
+        </div>
+        <div class="ai-item">
+          <div class="ai-icon-check"><i class="fa-solid fa-check"></i></div>
+          <div class="ai-text">ปรับปรุงระบบรดน้ำต้นไม้ให้เป็นระบบจับความชื้นอัตโนมัติ และซ่อมจุดรั่วไหลของน้ำโดยเร็ว
+          </div>
+        </div>
+        <div class="ai-item">
+          <div class="ai-icon-check" style="background: #ef4444;"><i class="fa-solid fa-exclamation"></i></div>
+          <div class="ai-text">ตรวจพบระบบปรับอากาศ (HVAC) โซน A ทำงานเกินเวลาที่กำหนด 12% ในสัปดาห์ที่ผ่านมา</div>
+        </div>
+      </div>
     </div>
   </div>
 
