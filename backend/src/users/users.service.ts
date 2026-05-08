@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, ILike } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
 import { AssessorProfile } from './entities/assessor-profile.entity';
 import { Role } from './entities/role.entity';
@@ -135,9 +135,8 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const normalized = email.toLowerCase();
     return this.usersRepository.findOne({
-      where: { email: normalized },
+      where: { email: ILike(email) },
       relations: ['organization'],
       select: ['id', 'email', 'password_hash', 'is_active', 'created_at'],
     });
