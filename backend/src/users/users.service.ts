@@ -137,8 +137,7 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email: ILike(email) },
-      relations: ['organization'],
-      select: ['id', 'email', 'password_hash', 'is_active', 'created_at'],
+      relations: ['organization']
     });
   }
 
