@@ -1,21 +1,27 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
-@Entity('audit_logs')
+@Entity('assessment_audit_logs')
 export class AuditLog {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { name: 'audit_log_id' })
+  id: number;
 
-  @Column({ type: 'varchar', length: 100 })
-  action: string; // e.g. 'CREATE_USER', 'UPDATE_ROLE'
+  @Column({ name: 'assessment_detail_id', nullable: true })
+  assessment_detail_id: number;
 
-  @Column({ type: 'text' })
-  description: string;
+  @Column({ name: 'action_by_user_id', nullable: true })
+  action_by_user_id: number;
 
-  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
-  @JoinColumn({ name: 'user_id' })
-  user: User; // Who performed the action
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'action_by_user_id' })
+  user: User;
 
-  @CreateDateColumn()
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  action: string;
+
+  @Column({ type: 'text', nullable: true })
+  comment: string;
+
+  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }

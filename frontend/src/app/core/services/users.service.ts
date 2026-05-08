@@ -2,6 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface Role {
+  id: number;
+  role_name: string;
+}
+
 export interface User {
   id: string;
   username: string;
@@ -18,20 +23,25 @@ export interface User {
 })
 export class UsersService {
   private http = inject(HttpClient);
-  // URL to web api
   private apiUrl = 'http://localhost:3001/users';
 
   private getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('auth_token');
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
-    
-    // Auth Token would normally be added here
+    if (token) {
+      headers = headers.set('Authorization', `Bearer ${token}`);
+    }
     return headers;
   }
 
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(this.apiUrl, { headers: this.getHeaders() });
+  }
+
+  getRoles(): Observable<Role[]> {
+    return this.http.get<Role[]>(`${this.apiUrl}/roles`, { headers: this.getHeaders() });
   }
 
   getUser(id: string): Observable<User> {

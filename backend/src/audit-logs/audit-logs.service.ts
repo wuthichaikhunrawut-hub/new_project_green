@@ -10,11 +10,12 @@ export class AuditLogsService {
     private auditLogRepository: Repository<AuditLog>,
   ) {}
 
-  async logAction(userId: string | undefined, action: string, description: string): Promise<AuditLog> {
+  async logAction(userId: number | undefined, action: string, comment: string, assessmentDetailId?: number): Promise<AuditLog> {
     const log = this.auditLogRepository.create({
       action,
-      description,
-      user: userId ? { id: userId } as any : null
+      comment,
+      action_by_user_id: userId,
+      assessment_detail_id: assessmentDetailId
     });
     return this.auditLogRepository.save(log);
   }

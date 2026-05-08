@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UsersService, User } from '../../../core/services/users.service';
+import { UsersService, User, Role } from '../../../core/services/users.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -16,15 +16,29 @@ export class AdminUsersComponent implements OnInit {
 
   users: User[] = [];
   isLoading = true;
+  activeTab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'USER' = 'ALL';
 
   // For Edit Modal
   selectedUser: Partial<User> | null = null;
   isSaving = false;
 
-  roles = ['USER', 'EXECUTIVE', 'ASSESSOR', 'ADMIN'];
+  roles: Role[] = [];
 
   ngOnInit() {
     this.loadUsers();
+    this.loadRoles();
+  }
+
+  loadRoles() {
+    this.usersService.getRoles().subscribe({
+      next: (data) => {
+        this.roles = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load roles:', err);
+      }
+    });
   }
 
   loadUsers() {
@@ -50,7 +64,6 @@ export class AdminUsersComponent implements OnInit {
       // Setup empty user for creation
       this.selectedUser = {
         email: '',
-        username: '',
         password: '',
         role: 'USER',
         is_active: true
@@ -135,7 +148,7 @@ export class AdminUsersComponent implements OnInit {
   }
 
   resetPassword(user: User) {
-    const newPassword = prompt(`กรุณากรอกรหัสผ่านใหม่สำหรับ ${user.username} (ทิ้งว่างเพื่อยกเลิก):`);
+    const newPassword = prompt(`กรุณากรอกรหัสผ่านใหม่สำหรับ ${user.email} (ทิ้งว่างเพื่อยกเลิก):`);
     if (!newPassword || newPassword.trim() === '') return;
 
     this.usersService.updateUser(user.id, { password: newPassword }).subscribe({
@@ -149,14 +162,30 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
+  setTab(tab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'USER') {
+    this.activeTab = tab;
+  }
+
   filteredUsers(): User[] {
-    if (!this.searchText) {
-      return this.users;
+    // First apply tab filter
+    let filtered = this.users;
+    
+    if (this.activeTab === 'ADMIN') {
+      filtered = filtered.filter(u => ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim()));
+    } else if (this.activeTab === 'ASSESSOR') {
+      filtered = filtered.filter(u => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim()));
+    } else if (this.activeTab === 'USER') {
+      filtered = filtered.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR'].includes(String(u.role).trim()));
     }
+
+    // Then apply text filter
+    if (!this.searchText) {
+      return filtered;
+    }
+    
     const lowerSearch = this.searchText.toLowerCase();
-    return this.users.filter(u => 
-      u.username.toLowerCase().includes(lowerSearch) ||
-      u.email.toLowerCase().includes(lowerSearch) ||
+    return filtered.filter(u => 
+      (u.email && u.email.toLowerCase().includes(lowerSearch)) ||
       (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch))
     );
   }

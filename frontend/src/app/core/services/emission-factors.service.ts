@@ -4,12 +4,12 @@ import { Observable } from 'rxjs';
 
 export interface EmissionFactor {
   id: string;
-  category: string;
-  type_name: string;
+  scope: number;
+  name: string;
   unit: string;
   factor_value: number;
-  gwp_version: string;
-  is_active: boolean;
+  source: string;
+  year: number;
   created_at: string;
 }
 

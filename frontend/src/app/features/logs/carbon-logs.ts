@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -42,10 +42,12 @@ export class CarbonLogsComponent implements OnInit {
     month: new Date().getMonth() + 1,
     year: new Date().getFullYear(),
     usage_amount: 0,
-    evidence_file: null as File | null
+    evidence_file: null as File | null,
+    evidence_url: ''
   };
 
   isScanning = false;
+  isUploading = false;
 
   ngOnInit() {
     this.fetchLogs();
@@ -207,6 +209,23 @@ export class CarbonLogsComponent implements OnInit {
     }
   }
 
+  onEvidenceFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.isUploading = true;
+      this.carbonService.uploadFile(file, 'evidence').subscribe({
+        next: (res) => {
+          this.isUploading = false;
+          this.newEntry.evidence_url = res.url;
+        },
+        error: (err) => {
+          this.isUploading = false;
+          alert('ไม่สามารถอัพโหลดไฟล์หลักฐานได้');
+        }
+      });
+    }
+  }
+
   saveLog() {
     if (!this.newEntry.activity_type || !this.newEntry.usage_amount) {
       alert('กรุณากรอกข้อมูลให้ครบถ้วน');
@@ -228,7 +247,8 @@ export class CarbonLogsComponent implements OnInit {
       amount: this.newEntry.usage_amount,
       unit: unit,
       emission: calculatedEmission,
-      source: 'MANUAL'
+      source: 'MANUAL',
+      evidence_url: this.newEntry.evidence_url
     };
 
     this.carbonService.addLog(payload).subscribe({
@@ -241,7 +261,8 @@ export class CarbonLogsComponent implements OnInit {
           month: new Date().getMonth() + 1,
           year: new Date().getFullYear(),
           usage_amount: 0,
-          evidence_file: null
+          evidence_file: null,
+          evidence_url: ''
         };
         document.getElementById('closeModalBtn')?.click();
       },

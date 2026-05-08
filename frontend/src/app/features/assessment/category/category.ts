@@ -1,6 +1,9 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
+import { RequestsService, CertificationRequest, AssessmentDetail } from '../../../core/services/requests.service';
+import { forkJoin } from 'rxjs';
 
 interface CategoryData {
   id: number;
@@ -13,6 +16,7 @@ interface CategoryData {
 
 interface Question {
   id: string;
+  detailId?: number;
   text: string;
   description?: string;
   status: 'pending' | 'uploaded' | 'rejected' | 'approved';
@@ -34,96 +38,138 @@ interface UploadedFile {
 export class CategoryPageComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private criteriaService = inject(GreenCriteriaService);
+  private requestsService = inject(RequestsService);
 
   categoryId: number = 1;
   categoryData: CategoryData | null = null;
+  activeAssessment: CertificationRequest | null = null;
+  allCriteria: GreenCriteria[] = [];
+
+  // Metadata for categories 1-6
+  private categoryTitles = [
+    '',
+    'การกำหนดนโยบาย การวางแผน',
+    'การสื่อสารและสร้างจิตสำนึก',
+    'การใช้ทรัพยากรและพลังงาน',
+    'การจัดการของเสีย',
+    'สภาพแวดล้อมและความปลอดภัย',
+    'การจัดซื้อจัดจ้างที่เป็นมิตรกับสิ่งแวดล้อม'
+  ];
+  
+  private categoryDescriptions = [
+    '',
+    'ประเมินการตั้งเป้าหมายและนโยบายด้านสิ่งแวดล้อมขององค์กร',
+    'การรณรงค์และให้ความรู้พนักงานในองค์กร',
+    'มาตรการประหยัดไฟฟ้า น้ำ และกระดาษ',
+    'การคัดแยกขยะและการลดปริมาณขยะ',
+    'การจัดการพื้นที่ทำงานให้ปลอดภัยและน่าอยู่',
+    'การเลือกซื้อสินค้าที่มีฉลากรับรองสิ่งแวดล้อม'
+  ];
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
-      const idParam = params.get('id');
-      this.categoryId = idParam ? parseInt(idParam, 10) : 1;
-      this.loadCategoryData(this.categoryId);
+    // Load all required data first
+    forkJoin({
+      criteria: this.criteriaService.getCriteriaList(),
+      requests: this.requestsService.getRequests()
+    }).subscribe({
+      next: (res) => {
+        this.allCriteria = res.criteria;
+        
+        // Find an active assessment or use the first one
+        if (res.requests && res.requests.length > 0) {
+          this.activeAssessment = res.requests[0];
+          // If details are missing, fetch by ID to ensure full relation
+          if (!this.activeAssessment.details && this.activeAssessment.id) {
+            this.requestsService.getRequestById(String(this.activeAssessment.id)).subscribe(fullReq => {
+              this.activeAssessment = fullReq;
+              this.subscribeToRoute();
+            });
+            return;
+          }
+        }
+        this.subscribeToRoute();
+      },
+      error: (err) => {
+        console.error('Failed to load assessment data', err);
+        this.subscribeToRoute(); // fallback to render empty or partial
+      }
     });
   }
 
-  loadCategoryData(id: number) {
-    // Mock data generation based on category ID
-    const titles = [
-      '',
-      'การกำหนดนโยบาย การวางแผน',
-      'การสื่อสารและสร้างจิตสำนึก',
-      'การใช้ทรัพยากรและพลังงาน',
-      'การจัดการของเสีย',
-      'สภาพแวดล้อมและความปลอดภัย',
-      'การจัดซื้อจัดจ้างที่เป็นมิตรกับสิ่งแวดล้อม'
-    ];
+  private subscribeToRoute() {
+    this.route.paramMap.subscribe(params => {
+      const idParam = params.get('id');
+      this.categoryId = idParam ? parseInt(idParam, 10) : 1;
+      this.buildCategoryData(this.categoryId);
+    });
+  }
+
+  buildCategoryData(id: number) {
+    // Filter criteria for this specific category
+    const categoryCriteria = this.allCriteria.filter(c => c.category_number === id);
     
-    const descriptions = [
-      '',
-      'ประเมินการตั้งเป้าหมายและนโยบายด้านสิ่งแวดล้อมขององค์กร',
-      'การรณรงค์และให้ความรู้พนักงานในองค์กร',
-      'มาตรการประหยัดไฟฟ้า น้ำ และกระดาษ',
-      'การคัดแยกขยะและการลดปริมาณขยะ',
-      'การจัดการพื้นที่ทำงานให้ปลอดภัยและน่าอยู่',
-      'การเลือกซื้อสินค้าที่มีฉลากรับรองสิ่งแวดล้อม'
-    ];
+    // Calculate total max score for this category
+    const totalScore = categoryCriteria.reduce((sum, c) => sum + c.max_score, 0);
 
-    const scores = [0, 25, 15, 15, 15, 15, 15];
+    const questions: Question[] = categoryCriteria.map(criteria => {
+      // Find matching assessment detail
+      const detail = this.activeAssessment?.details?.find(d => d.criteria?.id === criteria.id);
+      
+      let status: 'pending' | 'uploaded' | 'rejected' | 'approved' = 'pending';
+      const files: UploadedFile[] = [];
 
-    let questions: Question[] = [];
+      if (detail) {
+        // Evaluate status based on detail data
+        if (detail.assessor_score && detail.assessor_score >= criteria.max_score * 0.5) {
+          status = 'approved';
+        } else if (detail.evidence_files && detail.evidence_files.length > 0) {
+          status = 'uploaded';
+          // Map real files if available
+          detail.evidence_files.forEach(f => {
+            files.push({ name: f.file_name || 'document.pdf', size: 'Unknown' });
+          });
+        } else if (detail.auditor_comment) {
+          status = 'rejected';
+        }
+      }
 
-    // Base mock questions depending on category
-    if (id === 1) {
-      questions = [
-        { id: '1.1', text: 'มีการกำหนดนโยบายสิ่งแวดล้อมที่ครอบคลุมการใช้ทรัพยากร พลังงาน และการจัดการของเสีย', description: 'นโยบายต้องได้รับการอนุมัติจากผู้บริหารสูงสุดและประกาศให้พนักงานทราบ', status: 'approved', files: [{ name: 'environmental_policy_2024.pdf', size: '2.4 MB' }] },
-        { id: '1.2', text: 'มีการแต่งตั้งคณะทำงาน Green Office และกำหนดบทบาทหน้าที่ชัดเจน', description: 'คำสั่งแต่งตั้งต้องเป็นปัจจุบันและครอบคลุมทุกฝ่าย', status: 'uploaded', files: [{ name: 'committee_appointment.pdf', size: '1.1 MB' }] },
-        { id: '1.3', text: 'มีการระบุและประเมินปัญหาสิ่งแวดล้อมลักษณะปัญหาสิ่งแวดล้อม (Environmental Aspect)', status: 'pending', files: [] },
-        { id: '1.4', text: 'มีการกำหนดเป้าหมาย แผนงานโครงการ และวิธีดำเนินการอย่างชัดเจน', status: 'pending', files: [] }
-      ];
-    } else {
-      // Generic mock questions for other categories
-      questions = [
-        { id: `${id}.1`, text: `ข้อกำหนดหลักหมวดที่ ${id} (ส่วนที่ 1)`, description: 'คำอธิบายเพิ่มเติมสำหรับการอัปโหลดหลักฐาน', status: 'pending', files: [] },
-        { id: `${id}.2`, text: `ข้อกำหนดหลักหมวดที่ ${id} (ส่วนที่ 2)`, status: 'pending', files: [] }
-      ];
-      // Type assertion workaround for mock data
-      questions[1].status = 'pending'; 
-    }
+      return {
+        id: criteria.criteria_code,
+        detailId: detail?.id,
+        text: criteria.criteria_name,
+        description: criteria.description,
+        status: status,
+        files: files
+      };
+    });
 
-    // Calculate mock progress (approved/uploaded = done)
+    // Calculate progress (approved/uploaded = done)
     const completed = questions.filter(q => q.status === 'approved' || q.status === 'uploaded').length;
     const progress = questions.length > 0 ? Math.round((completed / questions.length) * 100) : 0;
 
     this.categoryData = {
       id: id,
-      title: `หมวดที่ ${id} ${names[id] || titles[id]}`,
-      description: descriptions[id] || '',
-      totalScore: scores[id] || 15,
+      title: `หมวดที่ ${id} ${this.categoryTitles[id] || ''}`,
+      description: this.categoryDescriptions[id] || '',
+      totalScore: totalScore > 0 ? totalScore : 15,
       progress: progress,
       questions: questions
     };
   }
 
-  // Helper arrays for fallback naming
-  private categoryNames = ['', 'นโยบายและการวางแผน', 'การสื่อสารและจิตสำนึก', 'ทรัพยากรและพลังงาน', 'การจัดการของเสีย', 'สภาพแวดล้อม', 'การจัดซื้อสีเขียว'];
-
-  // Calculate generic progress percentage directly (for styling width)
   get progressPercentage(): number {
     return this.categoryData?.progress || 0;
   }
 
   triggerUpload(questionId: string) {
-    // Mock upload action
+    // Keep mock upload action for UX preview until actual file upload API is integrated
     const question = this.categoryData?.questions.find(q => q.id === questionId);
     if (question) {
       question.files.push({ name: `evidence_document_${Date.now().toString().slice(-4)}.pdf`, size: '1.5 MB' });
       question.status = 'uploaded';
       
-      // Recalculate overall progress
-      if (this.categoryData) {
-        const completed = this.categoryData.questions.filter(q => q.status === 'approved' || q.status === 'uploaded').length;
-        this.categoryData.progress = Math.round((completed / this.categoryData.questions.length) * 100);
-      }
+      this.recalculateProgress();
     }
   }
 
@@ -134,11 +180,14 @@ export class CategoryPageComponent implements OnInit {
       if (question.files.length === 0) {
         question.status = 'pending';
       }
-      // Recalculate 
-      if (this.categoryData) {
-        const completed = this.categoryData.questions.filter(q => q.status === 'approved' || q.status === 'uploaded').length;
-        this.categoryData.progress = Math.round((completed / this.categoryData.questions.length) * 100);
-      }
+      this.recalculateProgress();
+    }
+  }
+
+  private recalculateProgress() {
+    if (this.categoryData) {
+      const completed = this.categoryData.questions.filter(q => q.status === 'approved' || q.status === 'uploaded').length;
+      this.categoryData.progress = Math.round((completed / this.categoryData.questions.length) * 100);
     }
   }
 
@@ -156,6 +205,3 @@ export class CategoryPageComponent implements OnInit {
     }
   }
 }
-
-// Ensure the local `names` var works for the fallback
-const names = ['', 'การกำหนดนโยบาย การวางแผน', 'การสื่อสารและสร้างจิตสำนึก', 'การใช้ทรัพยากรและพลังงาน', 'การจัดการของเสีย', 'สภาพแวดล้อมและความปลอดภัย', 'การจัดซื้อจัดจ้างที่เป็นมิตรกับสิ่งแวดล้อม'];

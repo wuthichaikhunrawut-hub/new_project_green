@@ -15,45 +15,23 @@ export class AdminSubscriptionsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   plans: SubscriptionPlan[] = [];
-  invoices: Invoice[] = [];
   isLoading = true;
   isSaving = false;
   selectedPlan: Partial<SubscriptionPlan> | null = null;
-  activeTab: 'plans' | 'invoices' = 'plans';
 
   ngOnInit() { this.loadData(); }
 
   loadData() {
     this.isLoading = true;
-    if (this.activeTab === 'plans') {
-      this.svc.getPlans().subscribe({
-        next: (data) => { this.plans = data; this.isLoading = false; this.cdr.detectChanges(); },
-        error: () => { this.isLoading = false; this.cdr.detectChanges(); }
-      });
-    } else {
-      this.svc.getInvoices().subscribe({
-        next: (data) => { this.invoices = data; this.isLoading = false; this.cdr.detectChanges(); },
-        error: () => { this.isLoading = false; this.cdr.detectChanges(); }
-      });
-    }
-  }
-
-  switchTab(tab: 'plans' | 'invoices') {
-    this.activeTab = tab;
-    this.loadData();
-  }
-
-  updateInvoiceStatus(invoice: Invoice, newStatus: string) {
-    if (!confirm(`ยืนยันการเปลี่ยนสถานะใบแจ้งหนี้เป็น ${newStatus}?`)) return;
-    this.svc.updateInvoiceStatus(invoice.id, newStatus).subscribe({
-      next: () => this.loadData(),
-      error: () => alert('เกิดข้อผิดพลาดในการอัปเดตสถานะ')
+    this.svc.getPlans().subscribe({
+      next: (data) => { this.plans = data; this.isLoading = false; this.cdr.detectChanges(); },
+      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
     });
   }
 
   openModal(plan?: SubscriptionPlan) {
     this.selectedPlan = plan ? { ...plan } : {
-      name: '', description: '', price_per_month: 0,
+      plan_name: '', description: '', price_per_month: 0,
       max_users: 5, max_locations: 1, has_ai_scan: false, has_green_office: false, is_active: true
     };
   }

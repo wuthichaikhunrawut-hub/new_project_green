@@ -12,6 +12,11 @@ export class GreenCriteriaController {
     return this.greenCriteriaService.findAll();
   }
 
+  @Get('list')
+  findAllForFrontend() {
+    return this.greenCriteriaService.findAllForFrontend();
+  }
+
   @Post()
   create(@Body() data: Partial<GreenCriteriaMaster>) {
     return this.greenCriteriaService.create(data);

@@ -2,33 +2,33 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeor
 
 @Entity('subscription_plans')
 export class SubscriptionPlan {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { name: 'plan_id' })
+  id: number;
 
-  @Column({ type: 'varchar', length: 100 })
-  name: string; // e.g. 'Basic', 'Pro', 'Enterprise'
+  @Column({ name: 'plan_name', type: 'varchar', length: 100 })
+  plan_name: string;
 
   @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', nullable: true })
   price_per_month: number;
 
-  @Column({ type: 'int', default: 1 })
+  @Column({ type: 'int', nullable: true })
   max_users: number;
 
-  @Column({ type: 'int', default: 1 })
+  @Column({ type: 'int', nullable: true })
   max_locations: number;
 
   @Column({ type: 'boolean', default: false })
   has_ai_scan: boolean;
 
-  @Column({ type: 'boolean', default: false })
+  @Column({ type: 'boolean', default: true })
   has_green_office: boolean;
 
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }

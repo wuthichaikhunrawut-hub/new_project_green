@@ -16,6 +16,20 @@ export class GreenCriteriaService {
     return this.greenCriteriaRepository.find({ order: { category_number: 'ASC', criteria_code: 'ASC' } });
   }
 
+  findAllForFrontend() {
+    return this.greenCriteriaRepository.find({ 
+      order: { category_number: 'ASC', criteria_code: 'ASC' } 
+    }).then(criteria => criteria.map(item => ({
+      id: item.id,
+      category: item.category_number,
+      code: item.criteria_code,
+      name: item.criteria_name,
+      maxScore: item.max_score,
+      currentScore: 0,
+      status: 'Pending'
+    })));
+  }
+
   async create(data: Partial<GreenCriteriaMaster>) {
     const item = this.greenCriteriaRepository.create(data);
     const saved = await this.greenCriteriaRepository.save(item);

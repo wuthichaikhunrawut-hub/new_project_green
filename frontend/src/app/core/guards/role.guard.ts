@@ -28,17 +28,31 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    if (allowedRoles.includes(role)) {
+    // Normalize role name for comparison
+    const normalizedRole = String(role).toUpperCase().replace(' ', '_');
+
+    if (allowedRoles.map(r => r.toUpperCase()).includes(normalizedRole)) {
       return true;
     }
 
     // Role is not allowed. Redirect based on role.
-    if (role === 'ASSESSOR') {
-      this.router.navigate(['/requests']);
-    } else {
-      this.router.navigate(['/dashboard']);
+    switch (normalizedRole) {
+      case 'SYSTEM_ADMIN':
+      case 'ORG_ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
+      case 'ASSESSOR':
+        this.router.navigate(['/assessor/dashboard']);
+        break;
+      case 'EXECUTIVE':
+        this.router.navigate(['/dashboard']);
+        break;
+      case 'EMPLOYEE':
+        this.router.navigate(['/dashboard']);
+        break;
+      default:
+        this.router.navigate(['/login']);
     }
-    
     return false;
   }
 }

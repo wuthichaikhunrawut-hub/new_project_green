@@ -4,18 +4,19 @@ import { Assessment } from '../../assessments/entities/assessment.entity';
 import { AssessorProfile } from './assessor-profile.entity';
 
 export enum UserRole {
-  ADMIN = 'ADMIN',
-  ASSESSOR = 'ASSESSOR',
-  USER = 'USER',
+  SYSTEM_ADMIN = 'System Admin',
+  ORG_ADMIN = 'Organization Admin',
+  EXECUTIVE = 'Executive',
+  EMPLOYEE = 'Employee',
+  ASSESSOR = 'Assessor',
+  USER = 'User',
+  ADMIN = 'ADMIN', // legacy alias
 }
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ type: 'varchar', length: 255 })
-  username: string;
+  @PrimaryGeneratedColumn('increment', { name: 'user_id' })
+  id: number;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   email: string;
@@ -26,28 +27,16 @@ export class User {
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
-  @Column({ type: 'boolean', default: false })
-  assessor_verified: boolean;
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  email_verified_at: Date;
 
-  @Column({ type: 'text', nullable: true })
-  bio: string;
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  last_login_at: Date;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  bank_name: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  bank_account_name: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  bank_account_number: string;
-
-  @Column({ type: 'varchar', default: UserRole.USER })
-  role: UserRole;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
   @ManyToOne(() => Organization, (org) => org.users, { onDelete: 'CASCADE' })

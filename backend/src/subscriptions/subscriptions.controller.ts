@@ -19,12 +19,12 @@ export class SubscriptionsController {
 
   @Put('plans/:id')
   updatePlan(@Param('id') id: string, @Body() data: Partial<SubscriptionPlan>) {
-    return this.subscriptionsService.updatePlan(id, data);
+    return this.subscriptionsService.updatePlan(parseInt(id, 10), data);
   }
 
   @Delete('plans/:id')
   removePlan(@Param('id') id: string) {
-    return this.subscriptionsService.removePlan(id);
+    return this.subscriptionsService.removePlan(parseInt(id, 10));
   }
 
   // Invoices
@@ -35,6 +35,6 @@ export class SubscriptionsController {
 
   @Put('invoices/:id/status')
   updateInvoiceStatus(@Param('id') id: string, @Body('status') status: string) {
-    return this.subscriptionsService.updateInvoiceStatus(id, status);
+    return this.subscriptionsService.updateInvoiceStatus(parseInt(id, 10), status);
   }
 }

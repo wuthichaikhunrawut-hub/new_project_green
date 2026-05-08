@@ -5,11 +5,11 @@ import { Observable } from 'rxjs';
 export interface AuditLog {
   id: string;
   action: string;
-  description: string;
+  comment: string;
   created_at: string;
   user: {
     id: string;
-    username: string;
+    username?: string;
     email: string;
   } | null;
 }

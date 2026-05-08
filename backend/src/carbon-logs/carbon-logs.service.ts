@@ -21,13 +21,13 @@ export class CarbonLogsService {
 
   async findAll(orgId: number): Promise<CarbonLog[]> {
     return this.logRepository.find({
-      where: { organization: { id: orgId } },
-      order: { date: 'DESC', created_at: 'DESC' },
+      where: { org_id: orgId },
+      order: { year: 'DESC', month: 'DESC', created_at: 'DESC' },
     });
   }
 
-  async remove(id: string, orgId: number): Promise<void> {
-    const log = await this.logRepository.findOne({ where: { id, organization: { id: orgId } } });
+  async remove(id: number, orgId: number): Promise<void> {
+    const log = await this.logRepository.findOne({ where: { id, org_id: orgId } });
     if (!log) {
       throw new NotFoundException('ไม่พบข้อมูลรายการนี้');
     }

@@ -16,6 +16,7 @@ export class AdminOrganizationsComponent implements OnInit {
   organizations: any[] = [];
   isLoading = true;
   searchText = '';
+  activeTab: 'ALL' | 'EDUCATION' | 'SYSTEM' | 'OTHERS' = 'ALL';
 
   selectedOrg: any | null = null;
   isSaving = false;
@@ -40,14 +41,34 @@ export class AdminOrganizationsComponent implements OnInit {
     });
   }
 
+  setTab(tab: 'ALL' | 'EDUCATION' | 'SYSTEM' | 'OTHERS') {
+    this.activeTab = tab;
+  }
+
   filteredOrganizations(): any[] {
+    let filtered = this.organizations;
+
+    // Filter by Tab
+    if (this.activeTab === 'EDUCATION') {
+      filtered = filtered.filter(o => String(o.industry_type).toLowerCase() === 'education');
+    } else if (this.activeTab === 'SYSTEM') {
+      filtered = filtered.filter(o => String(o.industry_type).toLowerCase() === 'system');
+    } else if (this.activeTab === 'OTHERS') {
+      filtered = filtered.filter(o => {
+        const type = String(o.industry_type).toLowerCase();
+        return type !== 'education' && type !== 'system';
+      });
+    }
+
+    // Filter by Search Text
     if (!this.searchText) {
-      return this.organizations;
+      return filtered;
     }
     const lowerSearch = this.searchText.toLowerCase();
-    return this.organizations.filter((o: any) => 
+    return filtered.filter((o: any) => 
       o.name.toLowerCase().includes(lowerSearch) ||
-      (o.business_type && o.business_type.toLowerCase().includes(lowerSearch))
+      (o.industry_type && o.industry_type.toLowerCase().includes(lowerSearch)) ||
+      (o.tax_id && o.tax_id.toLowerCase().includes(lowerSearch))
     );
   }
 
@@ -57,7 +78,10 @@ export class AdminOrganizationsComponent implements OnInit {
     } else {
       this.selectedOrg = {
         name: '',
-        business_type: '',
+        tax_id: '',
+        industry_type: '',
+        number_of_employees: 0,
+        target_reduction_percent: 0,
         is_active: true
       };
     }

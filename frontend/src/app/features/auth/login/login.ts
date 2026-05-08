@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router ,RouterLink} from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService, AuthResponse } from '../../../core/services/auth.service';
+import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ import { AuthService, AuthResponse } from '../../../core/services/auth.service';
 export class LoginComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   // Using username as email field for simplicity in UI right now
   username = '';
@@ -24,32 +26,61 @@ export class LoginComponent {
   onLogin() {
     this.isLoading = true;
     this.errorMessage = '';
+    this.cdr.detectChanges();
 
     const credentials = {
       email: this.username,
       password: this.password
     };
 
-    this.authService.login(credentials).subscribe({
+    this.authService.login(credentials).pipe(timeout(15000)).subscribe({
       next: (response: AuthResponse) => {
         this.isLoading = false;
-        if (response && response.access_token) {
-          if (response.user.role === 'ASSESSOR') {
-            this.router.navigate(['/requests']);
-          } else if (response.user.role === 'ADMIN') {
-            this.router.navigate(['/admin/dashboard']);
+        this.cdr.detectChanges();
+        try {
+          if (response && response.access_token) {
+            const role = response.user.role || '';
+
+            // Normalize role check
+            const roleUpper = role.toUpperCase();
+            const isAdmin = roleUpper === 'ADMIN'
+              || roleUpper === 'SYSTEM_ADMIN'
+              || roleUpper === 'SYSTEM ADMIN'
+              || roleUpper === 'ORGANIZATION ADMIN'
+              || roleUpper === 'ORG_ADMIN';
+
+            const isAssessor = roleUpper === 'ASSESSOR';
+
+            if (isAssessor) {
+              this.router.navigate(['/assessor/dashboard']);
+            } else if (isAdmin) {
+              this.router.navigate(['/admin/dashboard']);
+            } else {
+              this.router.navigate(['/dashboard']);
+            }
           } else {
-            this.router.navigate(['/dashboard']);
+            this.errorMessage = 'การตอบรับจากเซิร์ฟเวอร์ไม่สมบูรณ์';
+            this.cdr.detectChanges();
           }
+        } catch (e) {
+          console.error('Login processing error:', e);
+          this.errorMessage = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล';
+          this.cdr.detectChanges();
         }
       },
       error: (err: any) => {
         this.isLoading = false;
-        if (err.status === 401) {
+        console.error('Login error:', err);
+        if (err.name === 'TimeoutError') {
+          this.errorMessage = 'เซิร์ฟเวอร์ตอบสนองช้าเกินไป กรุณาลองใหม่อีกครั้ง';
+        } else if (err.status === 401) {
           this.errorMessage = 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง';
+        } else if (err.status === 0) {
+          this.errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อ';
         } else {
-          this.errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้';
+          this.errorMessage = 'เกิดข้อผิดพลาดทางเทคนิค กรุณาลองใหม่ภายหลัง';
         }
+        this.cdr.detectChanges();
       }
     });
   }

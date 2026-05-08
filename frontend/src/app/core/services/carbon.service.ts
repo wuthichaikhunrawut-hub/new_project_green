@@ -12,6 +12,7 @@ export interface CarbonLog {
   unit: string;
   emission: number;
   source: string;
+  evidence_url?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -50,5 +51,13 @@ export class CarbonService {
     const formData = new FormData();
     formData.append('file', image);
     return this.http.post<Partial<CarbonLog>>(this.geminiUrl, formData, { headers: this.getHeaders() });
+  }
+
+  // อัพโหลดไฟล์ไปที่ Supabase ผ่าน Backend
+  uploadFile(file: File, folder: string = 'evidence'): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const uploadUrl = 'http://localhost:3001/uploads';
+    return this.http.post<{ url: string }>(`${uploadUrl}?folder=${folder}`, formData, { headers: this.getHeaders() });
   }
 }

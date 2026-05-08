@@ -19,11 +19,11 @@ export class EmissionFactorsController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() data: Partial<EmissionFactor>) {
-    return this.emissionFactorsService.update(id, data);
+    return this.emissionFactorsService.update(parseInt(id, 10), data);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.emissionFactorsService.remove(id);
+    return this.emissionFactorsService.remove(parseInt(id, 10));
   }
 }

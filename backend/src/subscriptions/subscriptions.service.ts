@@ -24,21 +24,21 @@ export class SubscriptionsService {
   async createPlan(data: Partial<SubscriptionPlan>) {
     const plan = this.plansRepository.create(data);
     const saved = await this.plansRepository.save(plan);
-    await this.auditLogsService.logAction(undefined, 'CREATE_PLAN', `Created subscription plan: ${saved.name}`);
+    await this.auditLogsService.logAction(undefined, 'CREATE_PLAN', `Created subscription plan: ${saved.plan_name}`);
     return saved;
   }
 
-  async updatePlan(id: string, data: Partial<SubscriptionPlan>) {
+  async updatePlan(id: number, data: Partial<SubscriptionPlan>) {
     await this.plansRepository.update(id, data);
     const updated = await this.plansRepository.findOne({ where: { id } });
-    await this.auditLogsService.logAction(undefined, 'UPDATE_PLAN', `Updated plan: ${updated?.name}`);
+    await this.auditLogsService.logAction(undefined, 'UPDATE_PLAN', `Updated plan: ${updated?.plan_name}`);
     return updated;
   }
 
-  async removePlan(id: string) {
+  async removePlan(id: number) {
     const plan = await this.plansRepository.findOne({ where: { id } });
     await this.plansRepository.delete(id);
-    if (plan) await this.auditLogsService.logAction(undefined, 'DELETE_PLAN', `Deleted plan: ${plan.name}`);
+    if (plan) await this.auditLogsService.logAction(undefined, 'DELETE_PLAN', `Deleted plan: ${plan.plan_name}`);
   }
 
   // ---- Invoices ----
@@ -50,7 +50,7 @@ export class SubscriptionsService {
     });
   }
 
-  async updateInvoiceStatus(id: string, status: string) {
+  async updateInvoiceStatus(id: number, status: string) {
     await this.invoicesRepository.update(id, { status });
     return this.invoicesRepository.findOne({ where: { id }, relations: ['organization', 'plan'] });
   }

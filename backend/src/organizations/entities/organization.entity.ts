@@ -17,34 +17,31 @@ export class Organization {
   @Column({ type: 'varchar', length: 100, nullable: true })
   industry_type: string;
 
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  business_type: string;
-
-  @Column({ type: 'boolean', default: true })
-  is_active: boolean;
-
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', nullable: true })
   number_of_employees: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', nullable: true })
   total_floor_area: number;
 
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', nullable: true })
   working_hours_per_year: number;
 
   @Column({ type: 'int', nullable: true })
   base_year: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', nullable: true })
   target_reduction_percent: number;
 
   @Column({ type: 'varchar', length: 50, nullable: true })
   current_green_status: string;
 
-  @CreateDateColumn()
+  @Column({ type: 'boolean', default: true })
+  is_active: boolean;
+
+  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
   @OneToMany(() => User, (user) => user.organization)

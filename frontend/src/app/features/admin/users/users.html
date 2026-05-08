@@ -9,7 +9,7 @@
     </button>
   </div>
 
-  <div class="card border-0 shadow-sm rounded-4">
+  <div class="card border-0 shadow-sm rounded-4 d-flex flex-column" style="min-height: calc(100vh - 160px);">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
       <div class="row">
         <div class="col-md-4">
@@ -22,18 +22,43 @@
         </div>
       </div>
     </div>
-    <div class="card-body p-0 mt-3">
+    
+    <!-- Role Tabs -->
+    <ul class="nav nav-tabs px-4 border-bottom-0 mt-3">
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer;">
+          <i class="fa-solid fa-users me-2"></i>ทั้งหมด
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" style="cursor: pointer;">
+          <i class="fa-solid fa-user-shield me-2"></i>แอดมินระบบ
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" style="cursor: pointer;">
+          <i class="fa-solid fa-user-check me-2"></i>ผู้ตรวจประเมิน
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'USER'" (click)="setTab('USER')" style="cursor: pointer;">
+          <i class="fa-solid fa-building-user me-2"></i>ผู้ใช้งานองค์กร
+        </a>
+      </li>
+    </ul>
+
+    <div class="card-body p-0 d-flex flex-column border-top">
       <div *ngIf="isLoading" class="text-center py-5">
         <div class="spinner-border text-primary"></div>
         <p class="mt-2 text-muted">กำลังโหลดข้อมูลผู้ใช้งาน...</p>
       </div>
 
-      <div class="table-responsive" *ngIf="!isLoading">
+      <div class="table-responsive flex-grow-1" *ngIf="!isLoading">
         <table class="table table-hover align-middle mb-0">
           <thead class="bg-light">
             <tr>
-              <th scope="col" class="py-3 px-4">ชื่อผู้ใช้งาน</th>
-              <th scope="col" class="py-3 px-4">อีเมล</th>
+              <th scope="col" class="py-3 px-4">อีเมล (Email)</th>
+              <th scope="col" class="py-3 px-4">วันที่ลงทะเบียน</th>
               <th scope="col" class="py-3 px-4">องค์กรสังกัด</th>
               <th scope="col" class="py-3 px-4 text-center">สิทธิ์ (Role)</th>
               <th scope="col" class="py-3 px-4 text-center">สถานะ</th>
@@ -42,8 +67,8 @@
           </thead>
           <tbody>
             <tr *ngFor="let user of filteredUsers()">
-              <td class="px-4 py-3 fw-semibold">{{ user.username }}</td>
-              <td class="px-4 py-3 text-muted">{{ user.email }}</td>
+              <td class="px-4 py-3 fw-semibold">{{ user.email }}</td>
+              <td class="px-4 py-3 text-muted">{{ user.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
               <td class="px-4 py-3">{{ user.organization?.name || '-' }}</td>
               <td class="px-4 py-3 text-center">
                 <span class="badge bg-secondary"
@@ -114,12 +139,6 @@
             [(ngModel)]="selectedUser.email" [readonly]="!!selectedUser.id" [disabled]="!!selectedUser.id">
         </div>
 
-        <div class="mb-3">
-          <label class="form-label text-muted small fw-bold">ชื่อผู้ใช้งานแสดงผล <span
-              class="text-danger">*</span></label>
-          <input type="text" class="form-control" [(ngModel)]="selectedUser.username">
-        </div>
-
         <div class="mb-3" *ngIf="!selectedUser.id">
           <label class="form-label text-muted small fw-bold">รหัสผ่าน (กำหนดเริ่มต้นให้พนักงาน) <span
               class="text-danger">*</span></label>
@@ -129,13 +148,13 @@
         <div class="mb-4">
           <label class="form-label text-muted small fw-bold">สิทธิ์การใช้งาน (Role)</label>
           <select class="form-select" [(ngModel)]="selectedUser.role">
-            <option *ngFor="let role of roles" [value]="role">{{ role }}</option>
+            <option *ngFor="let role of roles" [value]="role.role_name">{{ role.role_name }}</option>
           </select>
         </div>
 
         <div class="d-grid gap-2">
           <button class="btn btn-primary shadow-sm fw-bold py-2" (click)="saveUser()"
-            [disabled]="isSaving || !selectedUser.email || !selectedUser.username || (!selectedUser.id && !selectedUser.password)">
+            [disabled]="isSaving || !selectedUser.email || (!selectedUser.id && !selectedUser.password)">
             <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกข้อมูล
           </button>
           <button class="btn btn-light" (click)="closeEditModal()" [disabled]="isSaving">ยกเลิก</button>

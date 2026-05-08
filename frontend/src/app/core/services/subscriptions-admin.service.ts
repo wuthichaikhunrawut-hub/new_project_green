@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 
 export interface SubscriptionPlan {
   id: string;
-  name: string;
+  plan_name: string;
   description: string;
   price_per_month: number;
   max_users: number;

@@ -9,20 +9,20 @@ export enum VerificationStatus {
 
 @Entity('assessor_profiles')
 export class AssessorProfile {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ name: 'assessor_profile_id' })
   id: number;
 
-  @OneToOne(() => User, (user) => user.assessor_profile, { onDelete: 'CASCADE' })
+  @Column({ name: 'user_id', nullable: true })
+  user_id: number;
+
+  @OneToOne(() => User, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 100, nullable: true })
   license_number: string;
 
-  @Column({ type: 'text', nullable: true })
-  expertise_tags: string; // Stored as comma-separated or JSON string
-
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'integer', nullable: true })
   years_experience: number;
 
   @Column({ type: 'text', nullable: true })
@@ -31,29 +31,22 @@ export class AssessorProfile {
   @Column({ type: 'varchar', length: 255, nullable: true })
   qualification_file_url: string;
 
-  @Column({
-    type: 'varchar',
-    length: 50,
-    default: VerificationStatus.PENDING,
-  })
-  verification_status: VerificationStatus;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  verification_status: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'timestamp without time zone', nullable: true })
   verified_at: Date;
+
+  @Column({ name: 'verified_by', nullable: true })
+  verified_by_id: number;
 
   @ManyToOne(() => User, { nullable: true })
   @JoinColumn({ name: 'verified_by' })
   verified_by: User;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  bank_account_no: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  bank_name: string;
-
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 }

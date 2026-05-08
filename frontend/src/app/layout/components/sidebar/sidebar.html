@@ -19,8 +19,8 @@
 
   <nav class="nav-container">
 
-    <!-- ═══════════════ ADMIN SECTION ═══════════════ -->
-    <ng-container *ngIf="hasRole(['ADMIN'])">
+    <!-- ═══════════════ SYSTEM ADMIN ═══════════════ -->
+    <ng-container *ngIf="isSystemAdmin">
       <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
         <span>ศูนย์ควบคุมหลัก</span>
@@ -67,8 +67,64 @@
       </a>
     </ng-container>
 
-    <!-- ═══════════════ USER / EXECUTIVE SECTION ═══════════════ -->
-    <ng-container *ngIf="hasRole(['USER', 'EXECUTIVE'])">
+    <!-- ═══════════════ ORGANIZATION ADMIN ═══════════════ -->
+    <ng-container *ngIf="isOrgAdmin">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>แดชบอร์ดองค์กร</span>
+      </a>
+
+      <div class="nav-label">จัดการองค์กร</div>
+      <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-id-card"></i>
+        <span>โปรไฟล์องค์กร</span>
+      </a>
+      <a routerLink="/admin/users" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-users-gear"></i>
+        <span>จัดการสมาชิก</span>
+      </a>
+
+      <div class="nav-label">ระบบงาน</div>
+      <button class="nav-group-header" (click)="toggle('carbon')" [class.open]="carbonOpen">
+        <span class="nav-group-left">
+          <i class="fa-solid fa-bolt"></i>
+          <span>ติดตามคาร์บอน</span>
+        </span>
+        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!carbonOpen" [class.fa-chevron-up]="carbonOpen"></i>
+      </button>
+      <div class="nav-sub-items" [class.expanded]="carbonOpen">
+        <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>บันทึกกิจกรรม</span>
+        </a>
+      </div>
+
+      <button class="nav-group-header" (click)="toggle('assessment')" [class.open]="assessmentOpen">
+        <span class="nav-group-left">
+          <i class="fa-solid fa-leaf"></i>
+          <span>ประเมิน Green Office</span>
+        </span>
+        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!assessmentOpen" [class.fa-chevron-up]="assessmentOpen"></i>
+      </button>
+      <div class="nav-sub-items" [class.expanded]="assessmentOpen">
+        <a routerLink="/assessment" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-clipboard-list"></i>
+          <span>แบบประเมินตนเอง</span>
+        </a>
+      </div>
+
+      <a routerLink="/requests" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-certificate"></i>
+        <span>คำขอรับรองสำนักงาน</span>
+      </a>
+      <a routerLink="/subscription" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-box-archive"></i>
+        <span>แพ็กเกจการใช้งาน</span>
+      </a>
+    </ng-container>
+
+    <!-- ═══════════════ USER / EMPLOYEE ═══════════════ -->
+    <ng-container *ngIf="isOrgMember && !isOrgAdmin">
 
       <!-- 1. Dashboard -->
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
@@ -106,79 +162,86 @@
         </a>
       </div>
 
-    </ng-container>
-
-    <!-- ═══════════════ USER ONLY: Green Office + Evidence ═══════════════ -->
-    <ng-container *ngIf="hasRole(['USER'])">
-
-      <!-- 4. Green Office Assessment (collapsible) -->
-      <button class="nav-group-header" (click)="toggle('assessment')" [class.open]="assessmentOpen">
-        <span class="nav-group-left">
-          <i class="fa-solid fa-leaf"></i>
-          <span>ประเมิน Green Office</span>
-        </span>
-        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!assessmentOpen"
-          [class.fa-chevron-up]="assessmentOpen"></i>
-      </button>
-      <div class="nav-sub-items" [class.expanded]="assessmentOpen">
-        <a routerLink="/assessment" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
-          <i class="fa-solid fa-clipboard-list"></i>
-          <span>แบบประเมินตนเอง</span>
-        </a>
-        <div class="nav-category-group">
-          <p class="nav-category-label">หมวดการประเมิน</p>
-          <a routerLink="/assessment/category/1" routerLinkActive="active" class="nav-category-item"
-            (click)="onNavItemClick()">
-            <span class="cat-badge">1</span>
-            <span>นโยบายและการวางแผน</span>
+      <!-- 4. Green Office Assessment (USER / EMPLOYEE only, not EXECUTIVE) -->
+      <ng-container *ngIf="!isExecutive">
+        <button class="nav-group-header" (click)="toggle('assessment')" [class.open]="assessmentOpen">
+          <span class="nav-group-left">
+            <i class="fa-solid fa-leaf"></i>
+            <span>ประเมิน Green Office</span>
+          </span>
+          <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!assessmentOpen"
+            [class.fa-chevron-up]="assessmentOpen"></i>
+        </button>
+        <div class="nav-sub-items" [class.expanded]="assessmentOpen">
+          <a routerLink="/assessment" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
+            <i class="fa-solid fa-clipboard-list"></i>
+            <span>แบบประเมินตนเอง</span>
           </a>
-          <a routerLink="/assessment/category/2" routerLinkActive="active" class="nav-category-item"
-            (click)="onNavItemClick()">
-            <span class="cat-badge">2</span>
-            <span>การสื่อสารและสร้างจิตสำนึก</span>
-          </a>
-          <a routerLink="/assessment/category/3" routerLinkActive="active" class="nav-category-item"
-            (click)="onNavItemClick()">
-            <span class="cat-badge">3</span>
-            <span>การใช้ทรัพยากรและพลังงาน</span>
-          </a>
-          <a routerLink="/assessment/category/4" routerLinkActive="active" class="nav-category-item"
-            (click)="onNavItemClick()">
-            <span class="cat-badge">4</span>
-            <span>การจัดการของเสีย</span>
-          </a>
-          <a routerLink="/assessment/category/5" routerLinkActive="active" class="nav-category-item"
-            (click)="onNavItemClick()">
-            <span class="cat-badge">5</span>
-            <span>สภาพแวดล้อมและความปลอดภัย</span>
-          </a>
-          <a routerLink="/assessment/category/6" routerLinkActive="active" class="nav-category-item"
-            (click)="onNavItemClick()">
-            <span class="cat-badge">6</span>
-            <span>การจัดซื้อที่เป็นมิตรกับสิ่งแวดล้อม</span>
-          </a>
+          <div class="nav-category-group">
+            <p class="nav-category-label">หมวดการประเมิน</p>
+            <a routerLink="/assessment/category/1" routerLinkActive="active" class="nav-category-item" (click)="onNavItemClick()">
+              <span class="cat-badge">1</span>
+              <span>นโยบายและการวางแผน</span>
+            </a>
+            <a routerLink="/assessment/category/2" routerLinkActive="active" class="nav-category-item" (click)="onNavItemClick()">
+              <span class="cat-badge">2</span>
+              <span>การสื่อสารและสร้างจิตสำนึก</span>
+            </a>
+            <a routerLink="/assessment/category/3" routerLinkActive="active" class="nav-category-item" (click)="onNavItemClick()">
+              <span class="cat-badge">3</span>
+              <span>การใช้ทรัพยากรและพลังงาน</span>
+            </a>
+            <a routerLink="/assessment/category/4" routerLinkActive="active" class="nav-category-item" (click)="onNavItemClick()">
+              <span class="cat-badge">4</span>
+              <span>การจัดการของเสีย</span>
+            </a>
+            <a routerLink="/assessment/category/5" routerLinkActive="active" class="nav-category-item" (click)="onNavItemClick()">
+              <span class="cat-badge">5</span>
+              <span>สภาพแวดล้อมและความปลอดภัย</span>
+            </a>
+            <a routerLink="/assessment/category/6" routerLinkActive="active" class="nav-category-item" (click)="onNavItemClick()">
+              <span class="cat-badge">6</span>
+              <span>การจัดซื้อที่เป็นมิตรกับสิ่งแวดล้อม</span>
+            </a>
+          </div>
         </div>
+
+        <!-- 5. Evidence Documents -->
+        <a routerLink="/green-office/evidence" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>จัดการไฟล์หลักฐาน</span>
+        </a>
+
+        <!-- Cert requests -->
+        <a routerLink="/requests" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-certificate"></i>
+          <span>คำขอรับรองสำนักงาน</span>
+        </a>
+      </ng-container>
+
+      <!-- 6. Organization -->
+      <button class="nav-group-header" (click)="toggle('org')" [class.open]="orgOpen">
+        <span class="nav-group-left">
+          <i class="fa-solid fa-building"></i>
+          <span>องค์กร</span>
+        </span>
+        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!orgOpen" [class.fa-chevron-up]="orgOpen"></i>
+      </button>
+      <div class="nav-sub-items" [class.expanded]="orgOpen">
+        <a routerLink="/org/profile" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-id-card"></i>
+          <span>โปรไฟล์องค์กร</span>
+        </a>
+        <a *ngIf="!isExecutive" routerLink="/subscription" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-box-archive"></i>
+          <span>แพ็กเกจการใช้งาน</span>
+        </a>
       </div>
 
-      <!-- 5. Evidence Documents -->
-      <a routerLink="/green-office/evidence" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-        <i class="fa-solid fa-folder-open"></i>
-        <span>จัดการไฟล์หลักฐาน</span>
-      </a>
-
     </ng-container>
 
-    <!-- ═══════════════ SHARED ITEMS ═══════════════ -->
-
-    <!-- Cert requests: USER Only (Assessor has their own section below) -->
-    <a *ngIf="hasRole(['USER'])" routerLink="/requests" routerLinkActive="active" class="nav-item"
-      (click)="onNavItemClick()">
-      <i class="fa-solid fa-certificate"></i>
-      <span>คำขอรับรององค์กร</span>
-    </a>
-
-    <!-- ═══════════════ ASSESSOR NAV ═══════════════ -->
-    <ng-container *ngIf="hasRole(['ASSESSOR'])">
+    <!-- ═══════════════ ASSESSOR ═══════════════ -->
+    <ng-container *ngIf="isAssessor">
       <div class="nav-label">ผู้ตรวจประเมิน</div>
       <a routerLink="/assessor/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
@@ -202,46 +265,17 @@
       </a>
     </ng-container>
 
-    <!-- Assessor profile -->
-    <a *ngIf="hasRole(['ASSESSOR'])" routerLink="/assessor/profile" routerLinkActive="active" class="nav-item"
-      (click)="onNavItemClick()" style="display:none">
-      <i class="fa-solid fa-user-tie"></i>
-      <span>โปรไฟล์ผู้ตรวจประเมิน</span>
-    </a>
-
-    <!-- 6. Organization (collapsible) — USER & EXECUTIVE -->
-    <ng-container *ngIf="hasRole(['USER', 'EXECUTIVE'])">
-      <button class="nav-group-header" (click)="toggle('org')" [class.open]="orgOpen">
-        <span class="nav-group-left">
-          <i class="fa-solid fa-building"></i>
-          <span>องค์กร</span>
-        </span>
-        <i class="nav-chevron fa-solid" [class.fa-chevron-down]="!orgOpen" [class.fa-chevron-up]="orgOpen"></i>
-      </button>
-      <div class="nav-sub-items" [class.expanded]="orgOpen">
-        <a routerLink="/org/profile" routerLinkActive="active" class="nav-sub-item" (click)="onNavItemClick()">
-          <i class="fa-solid fa-id-card"></i>
-          <span>โปรไฟล์องค์กร</span>
-        </a>
-        <a *ngIf="hasRole(['USER'])" routerLink="/subscription" routerLinkActive="active" class="nav-sub-item"
-          (click)="onNavItemClick()">
-          <i class="fa-solid fa-box-archive"></i>
-          <span>แพ็กเกจการใช้งาน</span>
-        </a>
-      </div>
-    </ng-container>
-
   </nav>
 
   <!-- ── Footer user card ── -->
   <div class="sidebar-footer">
     <div class="user-card">
       <div class="user-avatar">
-        {{ user?.username ? (user?.username?.charAt(0) | uppercase) : 'G' }}
+        {{ user?.username ? (user?.username?.charAt(0) | uppercase) : (user?.email?.charAt(0) | uppercase) || 'G' }}
       </div>
       <div class="user-detail" *ngIf="!isCollapsed">
-        <p class="u-name">{{ user?.username || 'Guest' }}</p>
-        <p class="u-org">{{ user?.organizationName || 'Visitor / Admin' }}</p>
+        <p class="u-name">{{ user?.username || user?.email || 'Guest' }}</p>
+        <p class="u-org">{{ user?.organizationName || user?.role || 'GreenSync' }}</p>
       </div>
       <button class="btn-icon" (click)="authService.logout()" title="ออกจากระบบ">
         <i class="fa-solid fa-power-off"></i>

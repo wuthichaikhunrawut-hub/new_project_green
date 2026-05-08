@@ -1,13 +1,13 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { of, Observable, catchError } from 'rxjs';
+import { of, Observable, catchError, map } from 'rxjs';
 import { GreenCriteria } from '../models/green-office.model';
 import { MOCK_CRITERIA } from '../mock-data/mock-green-office';
 
 @Injectable({ providedIn: 'root' })
 export class GreenOfficeService {
-  private apiUrl = 'http://localhost:3001/green-office';
+  private apiUrl = 'http://localhost:3001/admin/green-criteria';
   private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient) {}
@@ -23,8 +23,18 @@ export class GreenOfficeService {
 
   // ดึงเกณฑ์ทั้งหมด
   getCriteriaList(): Observable<GreenCriteria[]> {
-    return this.http.get<GreenCriteria[]>(this.apiUrl, { headers: this.getHeaders() })
+    return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() })
       .pipe(
+        // Transform backend data to frontend format
+        map((criteria: any[]) => criteria.map((item: any) => ({
+          id: item.id,
+          category: item.category_number,
+          code: item.criteria_code,
+          name: item.criteria_name,
+          maxScore: item.max_score,
+          currentScore: 0,
+          status: 'Pending' as const
+        }))),
         // Fallback to MOCK data if backend is not ready yet to prevent crash
         catchError(() => of(MOCK_CRITERIA))
       );

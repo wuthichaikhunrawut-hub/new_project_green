@@ -37,11 +37,11 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   greenScore = 0;
   carbonTotal = 0;
   energyUsage = 0;
-  waterUsage = 16540; // Reference data
-  wasteRecycled = 82; // Reference data
-  renewablePercentage = 63; // Reference data
-  renewableEnergy = 1850; 
-  gridEnergy = 2550; 
+  waterUsage = 0;
+  wasteRecycled = 0;
+  renewablePercentage = 0;
+  renewableEnergy = 0; 
+  gridEnergy = 0; 
 
   orgData: any = null;
   orgTarget = 0;
@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.greenService.getCriteriaList().subscribe(criteria => {
       const totalMax = criteria.reduce((sum, c) => sum + c.maxScore, 0);
       const totalGot = criteria.reduce((sum, c) => sum + (c.currentScore || 0), 0);
-      this.greenScore = totalMax > 0 ? Math.round((totalGot / totalMax) * 100) : 86; // mock 86 if 0 for reference
+      this.greenScore = totalMax > 0 ? Math.round((totalGot / totalMax) * 100) : 0; 
 
       if (this.chartsRendered) {
         this.renderSustainabilityGauge();
@@ -73,12 +73,24 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     this.carbonService.getLogs().subscribe({
       next: (logs) => {
-        if (!logs || logs.length === 0) {
-          this.carbonTotal = 7342;
-          this.energyUsage = 1682450;
+        this.carbonLogs = logs || [];
+        if (this.carbonLogs.length === 0) {
+          this.carbonTotal = 0;
+          this.energyUsage = 0;
+          this.waterUsage = 0;
+          this.renewablePercentage = 0;
         } else {
-          this.carbonTotal = logs.reduce((sum, log) => sum + log.emission, 0);
-          this.energyUsage = logs.filter(l => l.type === 'Electricity').reduce((sum, l) => sum + l.amount, 0);
+          this.carbonTotal = this.carbonLogs.reduce((sum, log) => sum + (log.emission || 0), 0);
+          this.energyUsage = this.carbonLogs
+            .filter(l => l.type === 'Electricity')
+            .reduce((sum, l) => sum + (l.amount || 0), 0);
+          this.waterUsage = this.carbonLogs
+            .filter(l => l.type === 'Water')
+            .reduce((sum, l) => sum + (l.amount || 0), 0);
+          
+          const totalEnergy = this.energyUsage;
+          const renewable = 0; // In the future, logs might have a 'is_renewable' flag or similar
+          this.renewablePercentage = totalEnergy > 0 ? Math.round((renewable / totalEnergy) * 100) : 0;
         }
         
         if (this.chartsRendered) {
@@ -122,9 +134,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (this.mainChart) this.mainChart.destroy();
     
     // Core data
-    const scope1Data = [50, 180, 210, 260, 210, 190, 290, 250, 280, 290, 310, 380, 420, 520, 550, 580, 720, 700, 740];
-    const scope3Data = [20, 40, 80, 90, 110, 95, 120, 180, 140, 180, 200, 280, 290, 340, 380, 420, 520, 520, 540];
-    const categories = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.'];
+    const scope1Data = this.getMonthlyData(this.carbonLogs, 'Scope1');
+    const scope2Data = this.getMonthlyData(this.carbonLogs, 'Scope2');
+    const scope3Data = this.getMonthlyData(this.carbonLogs, 'Scope3');
+    
+    // In the main trend chart, let's show Scope 1 and Scope 2 (most significant)
+    // or aggregate Scope 2+3 if the subtitle says Scope 3.
+    // Let's stick to the labels: Scope 1 and Scope 3 (as placeholders for Indirect)
+    const combinedIndirect = scope2Data.map((val, idx) => val + scope3Data[idx]);
+
+    const categories = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 
     let options: any;
 
@@ -167,7 +186,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         },
         series: [
           { name: 'ทางตรง (Scope 1)', data: scope1Data },
-          { name: 'ทางอ้อมอื่นๆ (Scope 3)', data: scope3Data }
+          { name: 'ทางอ้อม (Scope 2 & 3)', data: combinedIndirect }
         ],
         colors: ['#0ea5e9', '#10b981'],
         dataLabels: { enabled: false },
@@ -209,10 +228,51 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     this.mainChart.render();
   }
 
+  private getMonthlyData(logs: CarbonLog[], scopeType: 'Scope1' | 'Scope2' | 'Scope3'): number[] {
+    const monthlyValues = new Array(12).fill(0);
+    const currentYear = new Date().getFullYear();
+
+    logs.forEach(log => {
+      const logDate = new Date(log.date);
+      if (logDate.getFullYear() === currentYear) {
+        const month = logDate.getMonth();
+        const type = (log.type || '').toLowerCase();
+        
+        let belongsTo = '';
+        if (type.includes('gasoline') || type.includes('diesel')) belongsTo = 'Scope1';
+        else if (type.includes('electric')) belongsTo = 'Scope2';
+        else belongsTo = 'Scope3';
+
+        if (belongsTo === scopeType) {
+          monthlyValues[month] += log.emission || 0;
+        }
+      }
+    });
+
+    return monthlyValues;
+  }
+
+  private getEnergyUsageByMonth(logs: CarbonLog[]): { renewable: number[], grid: number[] } {
+    const renewable = new Array(12).fill(0);
+    const grid = new Array(12).fill(0);
+    const currentYear = new Date().getFullYear();
+
+    logs.forEach(log => {
+      const logDate = new Date(log.date);
+      if (logDate.getFullYear() === currentYear && (log.type || '').toLowerCase().includes('electric')) {
+        const month = logDate.getMonth();
+        // For now, let's assume all electricity is grid unless we have a flag
+        grid[month] += log.amount || 0;
+      }
+    });
+
+    return { renewable, grid };
+  }
+
   private renderSustainabilityGauge(ApexCharts?: any) {
     if (!ApexCharts) return;
     if (this.sustainabilityGauge) this.sustainabilityGauge.destroy();
-    const score = this.greenScore || 86;
+    const score = this.greenScore || 0;
     const options = {
       chart: { type: 'radialBar', height: 260, fontFamily: 'Inter, sans-serif' },
       series: [score],
@@ -237,7 +297,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (this.greenEnergyGauge) this.greenEnergyGauge.destroy();
     const options = {
       chart: { type: 'radialBar', height: 260, offsetY: -20, sparkline: { enabled: true } },
-      series: [63],
+      series: [0],
       colors: ['#0ea5e9'], // Stripe Blue
       plotOptions: {
         radialBar: {
@@ -259,9 +319,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   private renderCarbonDonut(ApexCharts: any) {
     if (this.carbonDonut) this.carbonDonut.destroy();
+    const scope1 = this.carbonLogs.filter(l => (l.type || '').toLowerCase().includes('gasoline')).reduce((s, l) => s + l.emission, 0);
+    const scope2 = this.carbonLogs.filter(l => (l.type || '').toLowerCase().includes('electric')).reduce((s, l) => s + l.emission, 0);
+    const scope3 = this.carbonLogs.filter(l => !((l.type || '').toLowerCase().includes('electric') || (l.type || '').toLowerCase().includes('gasoline'))).reduce((s, l) => s + l.emission, 0);
+
     const options = {
       chart: { type: 'donut', height: 250, fontFamily: 'Inter, sans-serif' },
-      series: [45, 25, 20, 10],
+      series: [scope1, scope2, scope3, 0],
       labels: ['Scope 1 (ตรง)', 'Scope 2 (พลังงาน)', 'Scope 3 (อื่นๆ)', 'ชดเชยแล้ว'],
       colors: ['#0f766e', '#0d9488', '#14b8a6', '#5eead4'], // Teal spectrum
       plotOptions: {
@@ -271,8 +335,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             labels: {
               show: true,
               name: { show: false },
-              value: { show: true, fontSize: '24px', fontWeight: 600, color: '#111827', formatter: (val: any) => val + '%' },
-              total: { show: true, showAlways: true, label: '', formatter: () => '45%' }
+              value: { show: true, fontSize: '24px', fontWeight: 600, color: '#111827', formatter: (val: any) => val.toFixed(1) + ' t' },
+              total: { show: true, showAlways: true, label: '', formatter: () => this.carbonTotal.toFixed(1) + ' t' }
             }
           }
         }
@@ -287,11 +351,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   private renderEnergyBar(ApexCharts: any) {
     if (this.energyBar) this.energyBar.destroy();
+    const { renewable, grid } = this.getEnergyUsageByMonth(this.carbonLogs);
     const options = {
       chart: { type: 'bar', height: 260, toolbar: { show: false }, fontFamily: 'Inter, sans-serif', stacked: true },
       series: [
-        { name: 'พลังงานหมุนเวียน (Renewable)', data: [400, 600, 450, 700, 500, 1990] },
-        { name: 'ไฟฟ้าจากสายส่ง (Grid)', data: [350, 400, 300, 450, 380, 1680] }
+        { name: 'พลังงานหมุนเวียน (Renewable)', data: renewable },
+        { name: 'ไฟฟ้าจากสายส่ง (Grid)', data: grid }
       ],
       colors: ['#0ea5e9', '#93c5fd'], // Blue palette
       plotOptions: { bar: { columnWidth: '45%', borderRadius: 2 } },

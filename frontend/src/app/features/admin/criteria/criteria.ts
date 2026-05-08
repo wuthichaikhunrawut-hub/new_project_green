@@ -74,6 +74,10 @@ export class AdminCriteriaComponent implements OnInit {
     group.expanded = !group.expanded;
   }
 
+  isAnyGroupExpanded(): boolean {
+    return this.groupedCriteria.some(g => g.expanded);
+  }
+
   openModal(item?: GreenCriteria) {
     if (item) {
       this.selectedCriteria = { ...item };

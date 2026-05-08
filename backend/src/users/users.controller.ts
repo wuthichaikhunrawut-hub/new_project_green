@@ -11,18 +11,23 @@ export class UsersController {
     return this.usersService.findAll(role);
   }
 
+  @Get('roles')
+  getAllRoles() {
+    return this.usersService.getAllRoles();
+  }
+
   // Profile endpoints
   @Get('profile/me')
   getProfile(@Headers('x-user-id') userId: string) {
-    return this.usersService.findOne(userId);
+    return this.usersService.findOne(+userId);
   }
 
   @Patch('profile/me')
   updateProfile(
     @Headers('x-user-id') userId: string,
-    @Body() updateData: any // In real app, use a mapped DTO
+    @Body() updateData: any
   ) {
-    return this.usersService.update(userId, updateData);
+    return this.usersService.update(+userId, updateData);
   }
 
   @Post()
@@ -32,16 +37,16 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+    return this.usersService.findOne(+id);
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(+id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.usersService.remove(id);
+    return this.usersService.remove(+id);
   }
 }

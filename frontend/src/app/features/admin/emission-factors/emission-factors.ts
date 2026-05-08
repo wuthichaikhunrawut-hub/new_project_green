@@ -19,15 +19,10 @@ export class AdminEmissionFactorsComponent implements OnInit {
   isSaving = false;
   
   selectedFactor: Partial<EmissionFactor> | null = null;
+  searchText = '';
+  activeTab: 'ALL' | 1 | 2 | 3 = 'ALL';
 
-  categories = [
-    'ไฟฟ้า (Electricity)',
-    'เชื้อเพลิง (Fuel)',
-    'น้ำประปา (Water)',
-    'ขยะ (Waste)',
-    'กระดาษ (Paper)',
-    'การเดินทาง (Travel)'
-  ];
+  scopes = [1, 2, 3];
 
   ngOnInit() {
     this.loadFactors();
@@ -49,17 +44,40 @@ export class AdminEmissionFactorsComponent implements OnInit {
     });
   }
 
+  setTab(tab: 'ALL' | 1 | 2 | 3) {
+    this.activeTab = tab;
+  }
+
+  filteredFactors(): EmissionFactor[] {
+    let filtered = this.factors;
+
+    // Filter by Tab
+    if (this.activeTab !== 'ALL') {
+      filtered = filtered.filter(f => f.scope === Number(this.activeTab));
+    }
+
+    // Filter by Search Text
+    if (!this.searchText) {
+      return filtered;
+    }
+    const lowerSearch = this.searchText.toLowerCase();
+    return filtered.filter(f => 
+      f.name.toLowerCase().includes(lowerSearch) ||
+      (f.source && f.source.toLowerCase().includes(lowerSearch))
+    );
+  }
+
   openModal(item?: EmissionFactor) {
     if (item) {
       this.selectedFactor = { ...item };
     } else {
       this.selectedFactor = {
-        category: 'ไฟฟ้า (Electricity)',
-        type_name: '',
+        scope: 1,
+        name: '',
         unit: 'kWh',
         factor_value: 0.0,
-        gwp_version: 'IPCC AR6',
-        is_active: true
+        source: 'TGO',
+        year: 2569
       };
     }
   }

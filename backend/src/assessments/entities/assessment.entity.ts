@@ -8,9 +8,15 @@ export class Assessment {
   @PrimaryGeneratedColumn('increment', { name: 'assessment_id' })
   id: number;
 
+  @Column({ name: 'org_id' })
+  org_id: number;
+
   @ManyToOne(() => Organization, (organization) => organization.assessments)
   @JoinColumn({ name: 'org_id' })
   organization: Organization;
+
+  @Column({ name: 'assessor_user_id', nullable: true })
+  assessor_user_id: number;
 
   @ManyToOne(() => User, (user) => user.assessments)
   @JoinColumn({ name: 'assessor_user_id' })
@@ -22,7 +28,7 @@ export class Assessment {
   @Column({ type: 'varchar', length: 50, default: 'PENDING' })
   status: string;
 
-  @Column({ name: 'total_score', type: 'float', default: 0 })
+  @Column({ name: 'total_score', type: 'double precision', default: 0 })
   total_score: number;
 
   @Column({ type: 'text', nullable: true })
@@ -31,10 +37,13 @@ export class Assessment {
   @Column({ name: 'certified_level', type: 'varchar', length: 50, nullable: true })
   certified_level: string;
 
-  @CreateDateColumn({ name: 'submitted_at' })
+  @Column({ name: 'submitted_at', type: 'timestamp without time zone', nullable: true })
   submitted_at: Date;
 
-  @UpdateDateColumn({ name: 'updated_at' })
+  @CreateDateColumn({ name: 'created_at', type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  created_at: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   updated_at: Date;
 
   @OneToMany(() => AssessmentDetail, (detail) => detail.assessment, { cascade: true })

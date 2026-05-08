@@ -31,21 +31,25 @@ export class AuthService {
     const user = await this.usersService.create({
       ...registerDto.userData,
       password_hash: hashedPassword,
-      role: registerDto.userData.role || UserRole.USER,
       organization: org,
     });
 
+    // Bootstrap: first registered user becomes ADMIN if no admins exist
+    const hasAdmin = await this.usersService.hasAnyAdmin();
+    const primaryRole = hasAdmin ? UserRole.USER : UserRole.ADMIN;
+    await this.usersService.assignRoleToUser(user.id, primaryRole);
+
     // 4. Generate JWT
-    const payload = { sub: user.id, email: user.email, orgId: org.id, role: user.role };
+    const payload = { sub: user.id, email: user.email, orgId: org.id, role: primaryRole };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: { id: user.id, email: user.email, username: user.username, role: user.role },
+      user: { id: user.id, email: user.email, role: payload.role },
       organization: org,
     };
   }
 
   async login(loginDto: any) {
-    const user = await this.usersService.findByEmailOrUsername(loginDto.email);
+    const user = await this.usersService.findByEmail(loginDto.email);
     if (!user) {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
@@ -55,11 +59,16 @@ export class AuthService {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
 
-    const payload = { sub: user.id, email: user.email, orgId: user.organization?.id, role: user.role };
+    const role = await this.usersService.getPrimaryRoleForUser(user.id);
+    const payload = { sub: user.id, email: user.email, orgId: user.organization?.id, role };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: { id: user.id, email: user.email, username: user.username, role: user.role },
-      organization: user.organization,
+      user: { id: user.id, email: user.email, role: payload.role },
+      organization: user.organization ? { 
+        id: user.organization.id, 
+        name: user.organization.name,
+        industry_type: user.organization.industry_type 
+      } : null,
     };
   }
 
@@ -76,17 +85,18 @@ export class AuthService {
     const user = await this.usersService.create({
       ...registerDto.userData,
       password_hash: hashedPassword,
-      role: UserRole.ASSESSOR,
     });
+
+    await this.usersService.assignRoleToUser(user.id, UserRole.ASSESSOR);
 
     // 3. Create Assessor Profile
     const profile = await this.usersService.createAssessorProfile(user.id, registerDto.profileData);
 
     // 4. Generate JWT
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { sub: user.id, email: user.email, role: UserRole.ASSESSOR };
     return {
       access_token: await this.jwtService.signAsync(payload),
-      user: { id: user.id, email: user.email, username: user.username, role: user.role },
+      user: { id: user.id, email: user.email, role: UserRole.ASSESSOR },
       profile,
     };
   }

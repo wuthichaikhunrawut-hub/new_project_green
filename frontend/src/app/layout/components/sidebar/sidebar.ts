@@ -47,8 +47,31 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  /** Normalise the role string from backend into a clean category */
+  get roleKey(): string {
+    const r = String(this.user?.role || '').trim();
+    if (['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(r)) return 'SYSTEM_ADMIN';
+    if (['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(r)) return 'ORG_ADMIN';
+    if (['Assessor', 'ASSESSOR'].includes(r)) return 'ASSESSOR';
+    if (['Executive', 'EXECUTIVE'].includes(r)) return 'EXECUTIVE';
+    if (['Employee', 'EMPLOYEE'].includes(r)) return 'EMPLOYEE';
+    if (['User', 'USER'].includes(r)) return 'USER';
+    return '';
+  }
+
+  get isSystemAdmin(): boolean { return this.roleKey === 'SYSTEM_ADMIN'; }
+  get isOrgAdmin(): boolean { return this.roleKey === 'ORG_ADMIN'; }
+  get isAnyAdmin(): boolean { return this.isSystemAdmin || this.isOrgAdmin; }
+  get isAssessor(): boolean { return this.roleKey === 'ASSESSOR'; }
+  get isExecutive(): boolean { return this.roleKey === 'EXECUTIVE'; }
+  get isEmployee(): boolean { return this.roleKey === 'EMPLOYEE'; }
+  /** User or Employee or Executive — regular org members */
+  get isOrgMember(): boolean {
+    return ['USER', 'EMPLOYEE', 'EXECUTIVE', 'ORG_ADMIN'].includes(this.roleKey);
+  }
+
   hasRole(roles: string[]): boolean {
-    return this.user?.role ? roles.includes(this.user.role) : false;
+    return roles.includes(this.roleKey);
   }
 
   // Mobile menu toggle

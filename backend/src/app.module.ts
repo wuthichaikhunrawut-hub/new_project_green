@@ -11,6 +11,8 @@ import { CarbonLogsModule } from './carbon-logs/carbon-logs.module';
 import { AssessmentsModule } from './assessments/assessments.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { UploadsModule } from './uploads/uploads.module';
+import { GreenOfficeModule } from './green-office/green-office.module';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'project_green'),
         autoLoadEntities: true,
-        synchronize: true, // Set to false in production
+        synchronize: false, // Set to false in production
         logging: false,
       }),
     }),
@@ -40,6 +42,8 @@ import { SubscriptionsModule } from './subscriptions/subscriptions.module';
     AssessmentsModule,
     AuditLogsModule,
     SubscriptionsModule,
+    UploadsModule,
+    GreenOfficeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
