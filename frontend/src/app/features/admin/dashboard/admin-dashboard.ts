@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { AdminAnalyticsService, AdminStats } from '../../../core/services/admin-analytics.service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -9,18 +10,51 @@ import { RouterModule } from '@angular/router';
   templateUrl: './admin-dashboard.html',
   styleUrls: ['./admin-dashboard.css']
 })
-export class AdminDashboardComponent {
-  stats = {
-    totalOrganizations: 5,
-    activeOrganizations: 4,
-    totalUsers: 12,
-    assessmentRequests: 8,
-    carbonReduction: 14500,
-    assessorCount: 3,
-    subscriptionRevenue: 24000,
-    successRate: 85 // Percentage
+export class AdminDashboardComponent implements OnInit {
+  // Version 2.0 - Forced Recompile
+  private analyticsService = inject(AdminAnalyticsService);
+
+  stats: AdminStats = {
+    totalOrganizations: 0,
+    activeOrganizations: 0,
+    totalUsers: 0,
+    assessmentRequests: 0,
+    carbonReduction: 0,
+    assessorCount: 0,
+    verifiedAssessors: 0,
+    pendingAssessors: 0,
+    subscriptionRevenue: 0,
+    revenueMonth: 0,
+    planDistribution: [],
+    assessmentStats: {
+      total: 0,
+      approved: 0,
+      pending: 0,
+      rejected: 0
+    },
+    storageUsageGb: 0,
+    totalFiles: 0,
+    successRate: 0
   };
 
-  // Here we would ideally fetch data from a service
-  // constructor(private analyticsService: AnalyticsService) {}
+  isLoading = true;
+
+  ngOnInit() {
+    this.loadStats();
+  }
+
+  loadStats() {
+    this.isLoading = true;
+    this.analyticsService.getAdminDashboardStats().subscribe({
+      next: (data: any) => {
+        console.log('Admin Stats Data Version:', data.version);
+        this.stats = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        console.error('Failed to load admin stats:', err);
+        this.isLoading = false;
+      }
+    });
+  }
 }

@@ -1,0 +1,65 @@
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { SystemSetting } from './entities/setting.entity';
+
+@Injectable()
+export class SettingsService implements OnModuleInit {
+  constructor(
+    @InjectRepository(SystemSetting)
+    private readonly settingRepo: Repository<SystemSetting>,
+  ) {}
+
+  async onModuleInit() {
+    // Seed default settings if they don't exist
+    try {
+      await this.seedDefaults();
+    } catch (err) {
+      console.warn('Could not seed default settings - table might not exist yet:', err.message);
+    }
+  }
+
+  private async seedDefaults() {
+    const defaults = {
+      defaultBaseYear: '2024',
+      systemName: 'GREEN SYNC',
+      maintenanceMode: 'false',
+      carbonStandard: 'TGO',
+      carbonThreshold: '50000',
+    };
+
+    for (const [key, value] of Object.entries(defaults)) {
+      const existing = await this.settingRepo.findOne({ where: { key } });
+      if (!existing) {
+        await this.settingRepo.save(this.settingRepo.create({ key, value, description: `Default setting for ${key}` }));
+      }
+    }
+  }
+
+  async getAllSettings(): Promise<Record<string, any>> {
+    const settings = await this.settingRepo.find();
+    const result: Record<string, any> = {};
+    for (const s of settings) {
+      // Parse boolean or number if applicable
+      if (s.value === 'true') result[s.key] = true;
+      else if (s.value === 'false') result[s.key] = false;
+      else if (!isNaN(Number(s.value))) result[s.key] = Number(s.value);
+      else result[s.key] = s.value;
+    }
+    return result;
+  }
+
+  async updateSettings(settings: Record<string, any>): Promise<Record<string, any>> {
+    for (const [key, value] of Object.entries(settings)) {
+      let valStr = String(value);
+      const existing = await this.settingRepo.findOne({ where: { key } });
+      if (existing) {
+        existing.value = valStr;
+        await this.settingRepo.save(existing);
+      } else {
+        await this.settingRepo.save(this.settingRepo.create({ key, value: valStr }));
+      }
+    }
+    return this.getAllSettings();
+  }
+}

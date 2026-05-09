@@ -189,4 +189,40 @@ export class AdminUsersComponent implements OnInit {
       (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch))
     );
   }
+
+  exportToCSV() {
+    const dataToExport = this.filteredUsers();
+    if (dataToExport.length === 0) {
+      alert('ไม่มีข้อมูลให้ส่งออก');
+      return;
+    }
+
+    const headers = ['Email', 'Created At', 'Organization', 'Role', 'Status'];
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    for (const user of dataToExport) {
+      const row = [
+        `"${user.email}"`,
+        `"${user.created_at}"`,
+        `"${user.organization?.name || '-'}"`,
+        `"${user.role}"`,
+        `"${user.is_active ? 'Active' : 'Suspended'}"`
+      ];
+      csvRows.push(row.join(','));
+    }
+
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `users_export_${new Date().getTime()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
 }

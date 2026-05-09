@@ -4,9 +4,14 @@
       <h2 class="fw-bold mb-1 text-primary">จัดการผู้ใช้งานระบบ</h2>
       <p class="text-muted mb-0">ค้นหา แก้ไขสิทธิ์ และจัดการรายชื่อผู้ใช้งานทั้งหมด</p>
     </div>
-    <button class="btn btn-primary shadow-sm rounded-pill px-4" (click)="openEditModal()">
-      <i class="fa-solid fa-user-plus me-2"></i> เพิ่มผู้ใช้งานใหม่
-    </button>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" (click)="exportToCSV()">
+        <i class="fa-solid fa-file-export me-2"></i> ส่งออก CSV
+      </button>
+      <button class="btn btn-primary shadow-sm rounded-pill px-4" (click)="openEditModal()">
+        <i class="fa-solid fa-user-plus me-2"></i> เพิ่มผู้ใช้งานใหม่
+      </button>
+    </div>
   </div>
 
   <div class="card border-0 shadow-sm rounded-4 d-flex flex-column" style="min-height: calc(100vh - 160px);">

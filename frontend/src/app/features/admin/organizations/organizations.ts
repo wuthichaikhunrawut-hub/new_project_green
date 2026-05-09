@@ -141,4 +141,41 @@ export class AdminOrganizationsComponent implements OnInit {
       }
     });
   }
+
+  exportToCSV() {
+    const dataToExport = this.filteredOrganizations();
+    if (dataToExport.length === 0) {
+      alert('ไม่มีข้อมูลให้ส่งออก');
+      return;
+    }
+
+    const headers = ['Name', 'Tax ID', 'Industry', 'Employees', 'Reduction Target (%)', 'Status'];
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    for (const org of dataToExport) {
+      const row = [
+        `"${org.name}"`,
+        `"${org.tax_id || '-'}"`,
+        `"${org.industry_type || '-'}"`,
+        `"${org.number_of_employees}"`,
+        `"${org.target_reduction_percent || 0}"`,
+        `"${org.is_active ? 'Active' : 'Suspended'}"`
+      ];
+      csvRows.push(row.join(','));
+    }
+
+    const csvString = csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `orgs_export_${new Date().getTime()}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
 }

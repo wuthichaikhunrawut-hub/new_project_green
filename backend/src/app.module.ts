@@ -13,6 +13,8 @@ import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { GreenOfficeModule } from './green-office/green-office.module';
+import { SettingsModule } from './settings/settings.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -28,9 +30,9 @@ import { GreenOfficeModule } from './green-office/green-office.module';
         port: configService.get<number>('DB_PORT', 5432),
         username: configService.get<string>('DB_USERNAME', 'postgres'),
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
-        database: configService.get<string>('DB_NAME', 'project_green'),
+        database: configService.get<string>('DB_NAME', 'greenoffice'),
         autoLoadEntities: true,
-        synchronize: false, // Set to false in production
+        synchronize: false, // Set to false to protect existing schema
         logging: false,
       }),
     }),
@@ -44,6 +46,8 @@ import { GreenOfficeModule } from './green-office/green-office.module';
     SubscriptionsModule,
     UploadsModule,
     GreenOfficeModule,
+    SettingsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
