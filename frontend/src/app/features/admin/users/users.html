@@ -31,23 +31,27 @@
     <!-- Role Tabs -->
     <ul class="nav nav-tabs px-4 border-bottom-0 mt-3">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ALL'" [class.fw-bold]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer;">
           <i class="fa-solid fa-users me-2"></i>ทั้งหมด
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.all }}</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ADMIN'" [class.fw-bold]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" style="cursor: pointer;">
           <i class="fa-solid fa-user-shield me-2"></i>แอดมินระบบ
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.admin }}</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" [class.fw-bold]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" style="cursor: pointer;">
           <i class="fa-solid fa-user-check me-2"></i>ผู้ตรวจประเมิน
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.assessor }}</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'USER'" (click)="setTab('USER')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'USER'" [class.fw-bold]="activeTab === 'USER'" (click)="setTab('USER')" style="cursor: pointer;">
           <i class="fa-solid fa-building-user me-2"></i>ผู้ใช้งานองค์กร
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.user }}</span>
         </a>
       </li>
     </ul>

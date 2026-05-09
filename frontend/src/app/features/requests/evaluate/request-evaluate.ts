@@ -130,7 +130,7 @@ export class RequestEvaluateComponent implements OnInit {
         assessment_detail_id: d.id,
         assessor_score: d.assessor_score,
         auditor_comment: d.auditor_comment
-      }))
+      })) as any[]
     };
 
     this.requestsService.updateRequest(this.request.id.toString(), updatePayload).subscribe({

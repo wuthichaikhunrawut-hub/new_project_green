@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -52,7 +52,7 @@ export class AssessorProfileComponent implements OnInit {
     const userId = currentUser.id;
 
     this.http.get<any>('http://localhost:3001/users/profile/me', {
-      headers: { 'x-user-id': userId }
+      headers: { 'x-user-id': userId.toString() }
     }).subscribe({
       next: (data) => {
         this.user = data || {
@@ -96,8 +96,8 @@ export class AssessorProfileComponent implements OnInit {
     const currentUser = this.authService.currentUserValue;
     if (!currentUser?.id) return;
 
-    this.http.patch('http://localhost:3001/users/profile/me', this.formData, {
-      headers: { 'x-user-id': currentUser.id }
+    this.http.patch<any>('http://localhost:3001/users/profile/me', this.formData, {
+      headers: { 'x-user-id': currentUser.id.toString() }
     }).subscribe({
       next: () => {
         alert('อัปเดตข้อมูลสำเร็จ');

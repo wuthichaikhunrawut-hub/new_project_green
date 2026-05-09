@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { RequestsService, CertificationRequest } from '../../../core/services/requests.service';
+import { RequestsService } from '../../../core/services/requests.service';
+import { Assessment } from '../../../core/models/assessment.model';
 
 @Component({
   selector: 'app-create-request',
@@ -18,7 +19,7 @@ export class CreateRequestComponent implements OnInit {
   currentYear = new Date().getFullYear();
   yearOptions: number[] = [];
 
-  request: Partial<CertificationRequest> = {
+  request: Partial<Assessment> = {
     status: 'PENDING',
     assessment_year: this.currentYear,
     notes: ''
@@ -37,7 +38,7 @@ export class CreateRequestComponent implements OnInit {
     this.isSubmitting = true;
 
     // Build the request object
-    const newRequest: CertificationRequest = {
+    const newRequest: Partial<Assessment> = {
       status: 'PENDING',
       assessment_year: this.request.assessment_year,
       notes: this.request.notes

@@ -84,7 +84,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
       }))
     };
 
-    this.requestsService.updateRequest(this.requestId.toString(), payload).subscribe({
+    this.requestsService.updateRequest(this.requestId.toString(), payload as any).subscribe({
       next: () => { 
         this.isSaving = false; 
         alert('บันทึกผลการประเมินสำเร็จ!'); 

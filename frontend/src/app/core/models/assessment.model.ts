@@ -16,6 +16,7 @@ export interface AssessmentCriteria {
   criteria_name: string;
   description?: string;
   max_score: number;
+  current_score?: number;
   status?: 'Pending' | 'Completed';
 }
 

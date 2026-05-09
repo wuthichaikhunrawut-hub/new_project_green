@@ -62,8 +62,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
 
     this.greenService.getCriteriaList().subscribe(criteria => {
-      const totalMax = criteria.reduce((sum, c) => sum + c.maxScore, 0);
-      const totalGot = criteria.reduce((sum, c) => sum + (c.currentScore || 0), 0);
+      const totalMax = criteria.reduce((sum, c) => sum + (c.max_score || 0), 0);
+      const totalGot = criteria.reduce((sum, c) => sum + (c.current_score || 0), 0);
       this.greenScore = totalMax > 0 ? Math.round((totalGot / totalMax) * 100) : 0; 
 
       if (this.chartsRendered) {

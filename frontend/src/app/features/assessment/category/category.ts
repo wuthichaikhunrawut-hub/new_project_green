@@ -2,7 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
-import { RequestsService, CertificationRequest, AssessmentDetail } from '../../../core/services/requests.service';
+import { RequestsService } from '../../../core/services/requests.service';
+import { Assessment, AssessmentDetail } from '../../../core/models/assessment.model';
 import { forkJoin } from 'rxjs';
 
 interface CategoryData {
@@ -43,7 +44,7 @@ export class CategoryPageComponent implements OnInit {
 
   categoryId: number = 1;
   categoryData: CategoryData | null = null;
-  activeAssessment: CertificationRequest | null = null;
+  activeAssessment: Assessment | null = null;
   allCriteria: GreenCriteria[] = [];
 
   // Metadata for categories 1-6
@@ -110,23 +111,23 @@ export class CategoryPageComponent implements OnInit {
     const categoryCriteria = this.allCriteria.filter(c => c.category_number === id);
     
     // Calculate total max score for this category
-    const totalScore = categoryCriteria.reduce((sum, c) => sum + c.max_score, 0);
+    const totalScore = categoryCriteria.reduce((sum, c) => sum + (c.max_score || 0), 0);
 
     const questions: Question[] = categoryCriteria.map(criteria => {
       // Find matching assessment detail
-      const detail = this.activeAssessment?.details?.find(d => d.criteria?.id === criteria.id);
+      const detail = this.activeAssessment?.details?.find((d: AssessmentDetail) => d.criteria?.id === criteria.id);
       
       let status: 'pending' | 'uploaded' | 'rejected' | 'approved' = 'pending';
       const files: UploadedFile[] = [];
 
       if (detail) {
         // Evaluate status based on detail data
-        if (detail.assessor_score && detail.assessor_score >= criteria.max_score * 0.5) {
+        if (detail.assessor_score && detail.assessor_score >= (criteria.max_score || 5) * 0.5) {
           status = 'approved';
         } else if (detail.evidence_files && detail.evidence_files.length > 0) {
           status = 'uploaded';
           // Map real files if available
-          detail.evidence_files.forEach(f => {
+          detail.evidence_files.forEach((f: any) => {
             files.push({ name: f.file_name || 'document.pdf', size: 'Unknown' });
           });
         } else if (detail.auditor_comment) {
@@ -135,7 +136,7 @@ export class CategoryPageComponent implements OnInit {
       }
 
       return {
-        id: criteria.criteria_code,
+        id: criteria.criteria_code || '?',
         detailId: detail?.id,
         text: criteria.criteria_name,
         description: criteria.description,

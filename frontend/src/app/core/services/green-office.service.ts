@@ -28,11 +28,11 @@ export class GreenOfficeService {
         // Transform backend data to frontend format
         map((criteria: any[]) => criteria.map((item: any) => ({
           id: item.id,
-          category: item.category_number,
-          code: item.criteria_code,
-          name: item.criteria_name,
-          maxScore: item.max_score,
-          currentScore: 0,
+          category_number: item.category_number,
+          criteria_code: item.criteria_code,
+          criteria_name: item.criteria_name,
+          max_score: item.max_score,
+          current_score: item.current_score || 0,
           status: 'Pending' as const
         }))),
         // Fallback to MOCK data if backend is not ready yet to prevent crash

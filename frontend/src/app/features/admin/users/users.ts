@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { UsersService, User, Role } from '../../../core/services/users.service';
+import { UsersService, Role } from '../../../core/services/users.service';
+import { User } from '../../../core/models/user.model';
 import { OrgService } from '../../../core/services/org.service';
 
 @Component({
@@ -19,6 +20,16 @@ export class AdminUsersComponent implements OnInit {
   users: User[] = [];
   isLoading = true;
   activeTab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'USER' = 'ALL';
+  searchText: string = '';
+
+  get countByRole() {
+    return {
+      all: this.users.length,
+      admin: this.users.filter(u => ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim())).length,
+      assessor: this.users.filter(u => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim())).length,
+      user: this.users.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR'].includes(String(u.role).trim())).length
+    };
+  }
 
   // For Edit Modal
   selectedUser: Partial<User> | null = null;
@@ -145,7 +156,6 @@ export class AdminUsersComponent implements OnInit {
     }
   }
 
-  searchText = '';
 
   suspendUser(user: User) {
     const action = user.is_active ? 'ระงับ' : 'เปิดใช้งาน';

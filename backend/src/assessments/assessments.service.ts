@@ -94,7 +94,7 @@ export class AssessmentsService {
 
     // Update details if provided (e.g., scores from Assessor)
     if (updateAssessmentDto.details && updateAssessmentDto.details.length > 0) {
-      const detailsToSave = [];
+      const detailsToSave: AssessmentDetail[] = [];
       for (const updateDetail of updateAssessmentDto.details) {
         const detailToUpdate = assessment.details.find(d => d.id === updateDetail.assessment_detail_id);
         if (detailToUpdate) {

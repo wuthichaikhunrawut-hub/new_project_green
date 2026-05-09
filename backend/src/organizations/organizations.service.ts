@@ -12,7 +12,7 @@ export class OrganizationsService {
 
   async create(orgData: any): Promise<Organization> {
     const org = this.orgRepository.create(orgData);
-    return this.orgRepository.save(org);
+    return this.orgRepository.save(org as any) as Promise<Organization>;
   }
 
   async findOne(id: number): Promise<Organization | null> {
