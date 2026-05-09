@@ -13,7 +13,7 @@ export class UploadsService {
   constructor(
     private configService: ConfigService,
     @InjectRepository(EvidenceFile)
-    private evidenceFileRepository: Repository<EvidenceFile>
+    private evidenceFileRepository: Repository<EvidenceFile>,
   ) {
     const supabaseUrl = this.configService.get<string>('SUPABASE_URL');
     const supabaseKey = this.configService.get<string>('SUPABASE_KEY');
@@ -35,17 +35,22 @@ export class UploadsService {
   }
 
   async uploadFile(
-    file: Express.Multer.File, 
+    file: Express.Multer.File,
     folder: string = 'evidence',
-    metadata?: { assessmentDetailId?: number; userId?: number; carbonLogId?: number; category?: string }
+    metadata?: {
+      assessmentDetailId?: number;
+      userId?: number;
+      carbonLogId?: number;
+      category?: string;
+    },
   ): Promise<EvidenceFile> {
     if (!this.supabase) {
       throw new BadRequestException('Supabase client not initialized');
     }
 
     const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
-    const fileExt = originalName.split('.').pop();
-    const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+    const safeName = originalName.replace(/[^a-zA-Z0-9.]/g, '_');
+    const fileName = `${folder}/${Date.now()}-${safeName}`;
 
     const { data, error } = await this.supabase.storage
       .from(this.bucket)
@@ -85,7 +90,9 @@ export class UploadsService {
       return savedFile;
     } catch (dbError) {
       console.error('❌ Database save error:', dbError);
-      throw new BadRequestException(`Failed to save evidence record: ${dbError.message}`);
+      throw new BadRequestException(
+        `Failed to save evidence record: ${dbError.message}`,
+      );
     }
   }
 
@@ -96,26 +103,30 @@ export class UploadsService {
     }
 
     // 1. Delete from Supabase Storage
-    const path = file.file_url.split('/').slice(-2).join('/'); // Get folder/filename
-    const { error } = await this.supabase.storage
-      .from(this.bucket)
-      .remove([path]);
+    // Extract path after /public/bucket-name/
+    const publicUrlPart = `/public/${this.bucket}/`;
+    const path = file.file_url.split(publicUrlPart)[1];
+    
+    if (path) {
+      const { error } = await this.supabase.storage
+        .from(this.bucket)
+        .remove([path]);
 
-    if (error) {
-      console.error('❌ Supabase delete error:', error);
-      // We continue even if storage delete fails, to keep DB in sync
+      if (error) {
+        console.error('❌ Supabase delete error:', error);
+      }
     }
 
     // 2. Delete from Database
     await this.evidenceFileRepository.delete(id);
     console.log('✅ File deleted from DB and Storage:', id);
-    
+
     return { success: true };
   }
 
   async findAll() {
     return await this.evidenceFileRepository.find({
-      order: { uploaded_at: 'DESC' }
+      order: { uploaded_at: 'DESC' },
     });
   }
 
