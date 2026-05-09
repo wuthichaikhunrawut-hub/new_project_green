@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { UploadService } from '../../../core/services/upload.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-green-office-evidence',
@@ -9,24 +11,59 @@ import { FormsModule } from '@angular/forms';
   templateUrl: './evidence.html',
   styleUrl: './evidence.css'
 })
-export class GreenOfficeEvidenceComponent {
-  files = [
-    { id: 1, name: 'รายงานการประชุม_มค_67.pdf', size: '2.4 MB', uploadDate: '15 ม.ค. 2567', category: 'หมวดที่ 1', status: 'approved' },
-    { id: 2, name: 'ภาพถ่ายกิจกรรมรณรงค์คัดแยกขยะ.jpg', size: '4.1 MB', uploadDate: '10 ก.พ. 2567', category: 'หมวดที่ 2', status: 'pending' },
-    { id: 3, name: 'ใบเสร็จค่าไฟ_ธค_66.pdf', size: '1.1 MB', uploadDate: '5 ก.พ. 2567', category: 'หมวดที่ 3', status: 'rejected' },
-    { id: 4, name: 'แผนการจัดการของเสียปี2567.docx', size: '850 KB', uploadDate: '20 ธ.ค. 2566', category: 'หมวดที่ 4', status: 'approved' }
-  ];
+export class GreenOfficeEvidenceComponent implements OnInit {
+  private uploadService = inject(UploadService);
+  private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
+
+  files: any[] = [];
 
   isDragging = false;
+  isUploading = false;
+  pendingFile: File | null = null;
+  editingFileId: number | null = null; // New: track which file is being edited
   selectedPreviewFile: any = null;
   searchTerm = '';
   selectedCategory = '';
+  filterCategory = '';
+
+  ngOnInit() {
+    this.loadFiles();
+  }
+
+  loadFiles() {
+    this.uploadService.getFiles().subscribe({
+      next: (res) => {
+        this.files = res.map(f => ({
+          id: f.evidence_file_id || f.id,
+          name: f.file_name || f.original_name || 'ไฟล์ไม่มีชื่อ',
+          size: f.file_size ? (Number(f.file_size) / 1024 / 1024).toFixed(2) + ' MB' : '0 MB',
+          uploadDate: f.uploaded_at ? new Date(f.uploaded_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : 'ไม่ระบุวันที่',
+          category: f.category || 'หมวดที่ยังไม่ระบุ',
+          status: 'pending',
+          url: f.file_url
+        }));
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('❌ Failed to load files:', err);
+      }
+    });
+  }
 
   get filteredFiles() {
-    return this.files.filter(f => 
-      f.name.toLowerCase().includes(this.searchTerm.toLowerCase()) &&
-      (this.selectedCategory ? f.category === this.selectedCategory : true)
-    );
+    if (!this.files || this.files.length === 0) return [];
+    
+    return this.files.filter(f => {
+      // If search term is empty, always match name
+      const search = this.searchTerm ? this.searchTerm.toLowerCase().trim() : '';
+      const nameMatch = !search || (f.name && f.name.toLowerCase().includes(search));
+      
+      // If category filter is empty, always match category
+      const categoryMatch = !this.filterCategory || f.category === this.filterCategory;
+      
+      return nameMatch && categoryMatch;
+    });
   }
   
   onDragOver(event: DragEvent) {
@@ -43,7 +80,7 @@ export class GreenOfficeEvidenceComponent {
     event.preventDefault();
     this.isDragging = false;
     if (event.dataTransfer?.files?.length) {
-      this.handleUpload(event.dataTransfer.files[0]);
+      this.pendingFile = event.dataTransfer.files[0];
     }
   }
   
@@ -53,34 +90,108 @@ export class GreenOfficeEvidenceComponent {
   
   onFileSelect(event: any) {
     if (event.target.files?.length) {
-      this.handleUpload(event.target.files[0]);
+      this.pendingFile = event.target.files[0];
+      // Reset input
+      event.target.value = '';
     }
   }
 
-  handleUpload(file: File) {
-    // Generate a mock entry
-    const newFile = {
-      id: Date.now(),
-      name: file.name,
-      size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-      uploadDate: new Date().toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }),
-      category: this.selectedCategory || 'หมวดที่ยังไม่ระบุ',
-      status: 'pending'
-    };
+  removePendingFile() {
+    this.pendingFile = null;
+  }
+
+  confirmUpload() {
+    if (!this.pendingFile) return;
+    this.handleUpload(this.pendingFile, this.selectedCategory);
+  }
+
+  handleUpload(file: File, category?: string) {
+    this.isUploading = true;
+    const userId = this.authService.getUser()?.id;
+
+    this.uploadService.uploadFile(file, 'evidence', { userId, category }).subscribe({
+      next: (res) => {
+        this.files.unshift({
+          id: res.id,
+          name: res.file_name,
+          size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+          uploadDate: new Date(res.uploaded_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }),
+          category: this.selectedCategory || 'หมวดที่ยังไม่ระบุ',
+          status: 'pending',
+          url: res.file_url
+        });
+        this.isUploading = false;
+        this.pendingFile = null; // Clear after success
+        this.cdr.detectChanges(); // Force UI update
+        alert('อัปโหลดไฟล์สำเร็จ!');
+      },
+      error: (err) => {
+        console.error('Upload error:', err);
+        this.isUploading = false;
+        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
+      }
+    });
+  }
+
+  deleteFile(id: number, event?: Event) {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
     
-    // Add to top of list
-    this.files.unshift(newFile);
-  }
-
-  deleteFile(id: number) {
-    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้?')) {
-      this.files = this.files.filter(f => f.id !== id);
+    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ถาวร?')) {
+      this.isUploading = true;
+      this.cdr.detectChanges();
+      
+      this.uploadService.deleteFile(id).subscribe({
+        next: () => {
+          this.files = this.files.filter(f => f.id !== id);
+          this.isUploading = false;
+          this.cdr.detectChanges(); // Force UI update
+          alert('ลบไฟล์เรียบร้อยแล้วครับ!');
+        },
+        error: (err) => {
+          console.error('Delete error:', err);
+          this.isUploading = false;
+          alert('เกิดข้อผิดพลาดในการลบไฟล์');
+        }
+      });
     }
   }
 
-  // Modal Controls
   openPreview(file: any) {
-    this.selectedPreviewFile = file;
+    if (file.url) {
+      window.open(file.url, '_blank');
+    } else {
+      alert('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
+    }
+  }
+
+  startEdit(file: any) {
+    this.editingFileId = file.id;
+  }
+
+  cancelEdit() {
+    this.editingFileId = null;
+  }
+
+  updateCategory(file: any, newCategory: string) {
+    if (!newCategory) return;
+    this.isUploading = true;
+    this.uploadService.updateFileCategory(file.id, newCategory).subscribe({
+      next: () => {
+        file.category = newCategory;
+        this.editingFileId = null;
+        this.isUploading = false;
+        this.cdr.detectChanges(); // Force UI update
+        alert('อัปเดตหมวดหมู่เรียบร้อยครับ! 😊');
+      },
+      error: (err) => {
+        console.error('Update error:', err);
+        this.isUploading = false;
+        alert('เกิดข้อผิดพลาดในการอัปเดตหมวดหมู่');
+      }
+    });
   }
 
   closePreview() {

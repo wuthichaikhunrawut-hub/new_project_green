@@ -35,7 +35,7 @@ export const routes: Routes = [
         component: DashboardComponent,
         title: 'Green Sync - ภาพรวมระบบ',
         canActivate: [RoleGuard],
-        data: { roles: ['USER', 'EXECUTIVE'] }
+        data: { roles: ['USER', 'EXECUTIVE', 'EMPLOYEE', 'SYSTEM_ADMIN', 'ORG_ADMIN'] }
       },
       {
         path: 'admin/dashboard',
@@ -231,7 +231,7 @@ export const routes: Routes = [
         component: SubscriptionComponent,
         title: 'แพ็กเกจการใช้งาน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'USER'] }
+        data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
       },
     ]
   },

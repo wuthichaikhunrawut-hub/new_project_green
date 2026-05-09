@@ -11,8 +11,8 @@ RUN npm install
 # Copy source
 COPY . .
 
-# Build NestJS
-RUN npm run build
+# Build NestJS (skip for dev mode)
+# RUN npm run build
 
 EXPOSE 3001
 

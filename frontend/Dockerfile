@@ -8,8 +8,8 @@ RUN npm install
 
 COPY . .
 
-# Build Angular (browser only, no SSR)
-RUN npm run build -- --configuration production
+# Build Angular (skip for dev mode to save time)
+# RUN npm run build -- --configuration production
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine

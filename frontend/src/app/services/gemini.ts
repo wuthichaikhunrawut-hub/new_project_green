@@ -26,6 +26,7 @@ export class GeminiService {
   uploadBill(file: File): Observable<BillScanResult> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<BillScanResult>(`${this.apiUrl}/upload-bill`, formData);
+    // Backend endpoint is /gemini/ocr
+    return this.http.post<BillScanResult>(this.apiUrl, formData);
   }
 }

@@ -1,9 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
 import { RequestsService } from '../../../core/services/requests.service';
 import { Assessment, AssessmentDetail } from '../../../core/models/assessment.model';
+import { AuthService } from '../../../core/services/auth.service';
+import { UploadService } from '../../../core/services/upload.service';
 import { forkJoin } from 'rxjs';
 
 interface CategoryData {
@@ -25,8 +27,10 @@ interface Question {
 }
 
 interface UploadedFile {
+  id?: number;
   name: string;
   size: string;
+  url?: string;
 }
 
 @Component({
@@ -163,25 +167,128 @@ export class CategoryPageComponent implements OnInit {
     return this.categoryData?.progress || 0;
   }
 
+  @ViewChild('fileInput') fileInput!: ElementRef;
+  private uploadService = inject(UploadService);
+  private authService = inject(AuthService);
+  private currentQuestionId: string | null = null;
+  isUploading = false;
+  
+  // New: Store files selected but not yet uploaded
+  pendingFiles: { [questionId: string]: File[] } = {};
+
   triggerUpload(questionId: string) {
-    // Keep mock upload action for UX preview until actual file upload API is integrated
-    const question = this.categoryData?.questions.find(q => q.id === questionId);
-    if (question) {
-      question.files.push({ name: `evidence_document_${Date.now().toString().slice(-4)}.pdf`, size: '1.5 MB' });
-      question.status = 'uploaded';
-      
-      this.recalculateProgress();
+    this.currentQuestionId = questionId;
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (file && this.currentQuestionId) {
+      if (!this.pendingFiles[this.currentQuestionId]) {
+        this.pendingFiles[this.currentQuestionId] = [];
+      }
+      this.pendingFiles[this.currentQuestionId].push(file);
+      // Reset input so same file can be selected again
+      event.target.value = '';
     }
+  }
+
+  removePendingFile(questionId: string, index: number) {
+    if (this.pendingFiles[questionId]) {
+      this.pendingFiles[questionId].splice(index, 1);
+    }
+  }
+
+  confirmUpload(questionId: string) {
+    const files = this.pendingFiles[questionId];
+    if (!files || files.length === 0) return;
+
+    this.isUploading = true;
+    const userId = this.authService.getUser()?.id;
+    const question = this.categoryData?.questions.find(q => q.id === questionId);
+    
+    if (!question) return;
+
+    // Upload each file (could use forkJoin for parallel but let's keep it simple for now)
+    const uploadObservables = files.map(file => 
+      this.uploadService.uploadFile(file, 'assessment', { 
+        assessmentDetailId: question.detailId,
+        userId 
+      })
+    );
+
+    // Using recursion or forkJoin would be better, but let's do sequential for clarity
+    this.processUploads(questionId, files, 0);
+  }
+
+  private processUploads(questionId: string, files: File[], index: number) {
+    if (index >= files.length) {
+      this.pendingFiles[questionId] = [];
+      this.isUploading = false;
+      this.recalculateProgress();
+      alert('อัปโหลดไฟล์หลักฐานสำเร็จ!');
+      return;
+    }
+
+    const file = files[index];
+    const question = this.categoryData?.questions.find(q => q.id === questionId);
+    const userId = this.authService.getUser()?.id;
+
+    this.uploadService.uploadFile(file, 'assessment', { 
+      assessmentDetailId: question?.detailId,
+      userId 
+    }).subscribe({
+      next: (res) => {
+        if (question) {
+          question.files.push({ 
+            id: res.id,
+            name: res.file_name, 
+            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+            url: res.file_url
+          });
+          question.status = 'uploaded';
+        }
+        this.processUploads(questionId, files, index + 1);
+      },
+      error: (err) => {
+        console.error('Upload error:', err);
+        alert(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
+        this.isUploading = false;
+      }
+    });
   }
 
   deleteFile(questionId: string, fileIndex: number) {
     const question = this.categoryData?.questions.find(q => q.id === questionId);
-    if (question) {
-      question.files.splice(fileIndex, 1);
-      if (question.files.length === 0) {
-        question.status = 'pending';
+    if (question && question.files[fileIndex]) {
+      const fileToDelete = question.files[fileIndex];
+      
+      if (fileToDelete.id && confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ถาวร?')) {
+        this.isUploading = true;
+        this.uploadService.deleteFile(fileToDelete.id).subscribe({
+          next: () => {
+            question.files.splice(fileIndex, 1);
+            if (question.files.length === 0) {
+              question.status = 'pending';
+            }
+            this.isUploading = false;
+            this.recalculateProgress();
+            alert('ลบไฟล์เรียบร้อยแล้วครับ!');
+          },
+          error: (err) => {
+            console.error('Delete error:', err);
+            this.isUploading = false;
+            alert('เกิดข้อผิดพลาดในการลบไฟล์');
+          }
+        });
+      } else if (!fileToDelete.id) {
+        // Fallback for mock files
+        question.files.splice(fileIndex, 1);
+        if (question.files.length === 0) {
+          question.status = 'pending';
+        }
+        this.recalculateProgress();
       }
-      this.recalculateProgress();
     }
   }
 
@@ -203,6 +310,14 @@ export class CategoryPageComponent implements OnInit {
       this.router.navigate(['/assessment/category', this.categoryId + 1]);
     } else {
       this.router.navigate(['/dashboard']);
+    }
+  }
+
+  viewFile(file: any) {
+    if (file.url) {
+      window.open(file.url, '_blank');
+    } else {
+      alert('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
     }
   }
 }

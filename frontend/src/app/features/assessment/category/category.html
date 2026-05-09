@@ -68,28 +68,51 @@
 
                 <!-- Upload Action -->
                 <div class="upload-area">
-                    <button class="btn-upload" (click)="triggerUpload(q.id)">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                        อัปโหลดไฟล์หลักฐาน
-                    </button>
-                    <span class="upload-hint">รองรับไฟล์: PDF, JPG, PNG, DOCX (สูงสุด 5MB)</span>
+                    <div class="upload-controls">
+                        <button class="btn-upload" (click)="triggerUpload(q.id)" [disabled]="isUploading">
+                            <i class="fa-solid fa-plus"></i>
+                            เลือกไฟล์
+                        </button>
+                        <button class="btn-confirm" *ngIf="pendingFiles[q.id] && pendingFiles[q.id].length > 0" 
+                                (click)="confirmUpload(q.id)" [disabled]="isUploading">
+                            <i class="fa-solid" [class.fa-cloud-arrow-up]="!isUploading" [class.fa-spinner]="isUploading" [class.fa-spin]="isUploading"></i>
+                            {{ isUploading ? 'กำลังอัปโหลด...' : 'กดยืนยันเพื่ออัปโหลด (' + pendingFiles[q.id].length + ')' }}
+                        </button>
+                    </div>
+                    <span class="upload-hint">รองรับไฟล์: PDF, JPG, PNG (สูงสุด 5MB)</span>
                 </div>
 
-                <!-- File List -->
+                <!-- Pending Files (Waiting for confirm) -->
+                <div class="pending-list" *ngIf="pendingFiles[q.id] && pendingFiles[q.id].length > 0">
+                    <div class="pending-item" *ngFor="let pFile of pendingFiles[q.id]; let pIndex = index">
+                        <div class="file-info">
+                            <i class="fa-solid fa-clock-rotate-left pending-icon"></i>
+                            <div class="file-details">
+                                <span class="file-name text-amber-600">{{ pFile.name }}</span>
+                                <span class="file-status text-amber-500">รอยืนยันการอัปโหลด</span>
+                            </div>
+                        </div>
+                        <button class="btn-remove-pending" (click)="removePendingFile(q.id, pIndex)" [disabled]="isUploading">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- File List (Already uploaded) -->
                 <div class="file-list" *ngIf="q.files.length > 0">
                     <div class="file-item" *ngFor="let file of q.files; let fIndex = index">
                         <div class="file-info">
-                            <i class="fa-solid fa-file-pdf file-icon" *ngIf="file.name.includes('.pdf')"></i>
+                            <i class="fa-solid fa-file-pdf file-icon" *ngIf="file.name.toLowerCase().includes('.pdf')"></i>
                             <i class="fa-solid fa-image file-icon-img"
-                                *ngIf="file.name.includes('.jpg') || file.name.includes('.png')"></i>
-                            <i class="fa-solid fa-file-word file-icon-doc" *ngIf="file.name.includes('.doc')"></i>
+                                *ngIf="file.name.toLowerCase().includes('.jpg') || file.name.toLowerCase().includes('.png') || file.name.toLowerCase().includes('.jpeg')"></i>
+                            <i class="fa-solid fa-file-word file-icon-doc" *ngIf="file.name.toLowerCase().includes('.doc')"></i>
                             <div class="file-details">
                                 <span class="file-name">{{ file.name }}</span>
-                                <span class="file-size">{{ file.size }}</span>
+                                <span class="file-size text-slate-400">{{ file.size }}</span>
                             </div>
                         </div>
                         <div class="file-actions">
-                            <button class="btn-icon-soft" title="ดูไฟล์"><i class="fa-regular fa-eye"></i></button>
+                            <button class="btn-icon-soft" title="ดูไฟล์" (click)="viewFile(file)"><i class="fa-regular fa-eye"></i></button>
                             <button class="btn-icon-danger" title="ลบไฟล์" (click)="deleteFile(q.id, fIndex)"><i
                                     class="fa-regular fa-trash-can"></i></button>
                         </div>
@@ -112,5 +135,8 @@
                 [class.fa-arrow-right]="categoryId < 6" [class.fa-house]="categoryId === 6"></i>
         </button>
     </div>
+
+    <!-- Hidden file input for uploads -->
+    <input type="file" #fileInput style="display: none" (change)="onFileSelected($event)">
 
 </div>

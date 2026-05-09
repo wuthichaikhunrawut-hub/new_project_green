@@ -246,9 +246,82 @@
 /* ── Upload Area ── */
 .upload-area {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.upload-controls {
+  display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 0;
+  gap: 12px;
+}
+
+.btn-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #0F766E 0%, #0D9488 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);
+}
+
+.btn-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.3);
+}
+
+.btn-confirm:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* ── Pending List (Waiting for Confirm) ── */
+.pending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background-color: #FFFBEB;
+  border: 1px dashed #F59E0B;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.pending-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.pending-icon {
+  font-size: 1.2rem;
+  color: #F59E0B;
+}
+
+.btn-remove-pending {
+  background: transparent;
+  border: none;
+  color: #94A3B8;
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.btn-remove-pending:hover {
+  color: #EF4444;
 }
 
 .file-list + .upload-area {

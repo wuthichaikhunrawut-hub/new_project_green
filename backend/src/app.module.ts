@@ -32,7 +32,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'greenoffice'),
         autoLoadEntities: true,
-        synchronize: false, // Set to false to protect existing schema
+        synchronize: true, // Enabled for development to sync new columns
         logging: false,
       }),
     }),

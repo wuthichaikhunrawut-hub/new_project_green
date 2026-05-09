@@ -33,6 +33,12 @@ export class EvidenceFile {
   @Column({ name: 'file_type', type: 'varchar', length: 50, nullable: true })
   file_type: string;
 
+  @Column({ name: 'file_size', type: 'bigint', nullable: true })
+  file_size: number;
+
+  @Column({ name: 'category', type: 'varchar', length: 100, nullable: true })
+  category: string;
+
   @CreateDateColumn({ name: 'uploaded_at', type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   uploaded_at: Date;
 }
