@@ -2,8 +2,9 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { RequestsService, CertificationRequest } from '../../core/services/requests.service';
+import { RequestsService } from '../../core/services/requests.service';
 import { AuthService } from '../../core/services/auth.service';
+import { Assessment, AssessmentStatus } from '../../core/models/assessment.model';
 import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 
 
@@ -19,7 +20,7 @@ export class RequestsComponent implements OnInit {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
-  requests: CertificationRequest[] = [];
+  requests: Assessment[] = [];
   isLoading = true;
   isSubmitting = false;
   user = this.authService.getUser();
@@ -49,7 +50,7 @@ export class RequestsComponent implements OnInit {
     });
   }
 
-  get filteredRequests(): CertificationRequest[] {
+  get filteredRequests(): Assessment[] {
     return this.requests.filter(req => {
       const matchStatus = this.statusFilter ? req.status === this.statusFilter : true;
       const orgName = req['organization']?.name || '';
@@ -61,12 +62,14 @@ export class RequestsComponent implements OnInit {
 
 
   getStatusBadgeClass(status: string): string {
+    const base = 'status-badge ';
     switch (status) {
-      case 'APPROVED': return 'bg-success';
-      case 'PENDING': return 'bg-warning text-dark';
-      case 'REVISION_REQUESTED': return 'bg-info text-dark';
-      case 'REJECTED': return 'bg-danger';
-      default: return 'bg-secondary';
+      case 'APPROVED': return base + 'status-approved';
+      case 'PENDING': return base + 'status-pending';
+      case 'SUBMITTED': return base + 'status-submitted';
+      case 'REVISION_REQUESTED': return base + 'status-revision';
+      case 'REJECTED': return base + 'status-rejected';
+      default: return base + 'status-draft';
     }
   }
 

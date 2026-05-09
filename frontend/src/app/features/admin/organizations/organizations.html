@@ -28,26 +28,41 @@
       </div>
     </div>
     
-    <!-- Industry Tabs -->
-    <ul class="nav nav-tabs px-4 border-bottom-0 mt-3">
+    <!-- Green Office Tabs -->
+    <ul class="nav nav-tabs px-4 border-bottom-0 mt-3 overflow-auto flex-nowrap" style="scrollbar-width: none;">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer;">
-          <i class="fa-solid fa-list me-2"></i>ทั้งหมด
+        <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-layer-group me-2"></i>ทั้งหมด
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'EDUCATION'" (click)="setTab('EDUCATION')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'GOVERNMENT'" (click)="setTab('GOVERNMENT')" style="cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-building-columns me-2"></i>ภาครัฐ
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'STATE_ENTERPRISE'" (click)="setTab('STATE_ENTERPRISE')" style="cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-landmark me-2"></i>รัฐวิสาหกิจ
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'PRIVATE'" (click)="setTab('PRIVATE')" style="cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-building me-2"></i>เอกชน
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'EDUCATION'" (click)="setTab('EDUCATION')" style="cursor: pointer; white-space: nowrap;">
           <i class="fa-solid fa-graduation-cap me-2"></i>การศึกษา
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'SYSTEM'" (click)="setTab('SYSTEM')" style="cursor: pointer;">
-          <i class="fa-solid fa-server me-2"></i>ระบบส่วนกลาง
+        <a class="nav-link" [class.active]="activeTab === 'INDUSTRIAL_OFFICE'" (click)="setTab('INDUSTRIAL_OFFICE')" style="cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-industry me-2"></i>สำนักงานในโรงงาน
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'OTHERS'" (click)="setTab('OTHERS')" style="cursor: pointer;">
-          <i class="fa-solid fa-building me-2"></i>อุตสาหกรรมอื่นๆ
+        <a class="nav-link" [class.active]="activeTab === 'LOCAL_ADMIN'" (click)="setTab('LOCAL_ADMIN')" style="cursor: pointer; white-space: nowrap;">
+          <i class="fa-solid fa-map-location-dot me-2"></i>ท้องถิ่น
         </a>
       </li>
     </ul>
@@ -62,25 +77,61 @@
         <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th scope="col" class="py-3 px-4">ชื่อองค์กร</th>
-                            <th scope="col" class="py-3 px-4">ประเภทอุตสาหกรรม (Industry)</th>
-                            <th scope="col" class="py-3 px-4 text-center">พนักงาน (คน)</th>
-                            <th scope="col" class="py-3 px-4 text-center">เป้าหมายลดคาร์บอน (%)</th>
+                            <th scope="col" class="py-3 px-4">ชื่อองค์กร / เลขประจำตัว</th>
+                            <th scope="col" class="py-3 px-4">ประเภทองค์กร</th>
+                            <th scope="col" class="py-3 px-4 text-center">ระดับการรับรอง</th>
+                            <th scope="col" class="py-3 px-4 text-center">ผู้ใช้งาน (คน)</th>
+                            <th scope="col" class="py-3 px-4 text-center">พนักงาน / พื้นที่</th>
+                            <th scope="col" class="py-3 px-4 text-center">เป้าหมายลด (%)</th>
+                            <th scope="col" class="py-3 px-4 text-center">สถานะ</th>
                             <th scope="col" class="py-3 px-4 text-end">จัดการ</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr *ngFor="let org of filteredOrganizations()">
-                            <td class="px-4 py-3 fw-semibold">
-                                {{ org.name }}
-                                <div class="small text-muted" *ngIf="org.tax_id">Tax ID: {{ org.tax_id }}</div>
+                            <td class="px-4 py-3">
+                                <div class="fw-bold text-dark">{{ org.name }}</div>
+                                <div class="small text-muted" *ngIf="org.tax_id"><i class="fa-solid fa-id-card me-1"></i>{{ org.tax_id }}</div>
                             </td>
-                            <td class="px-4 py-3 text-muted">{{ org.industry_type || '-' }}</td>
-                            <td class="px-4 py-3 text-center">{{ org.number_of_employees | number }}</td>
-                            <td class="px-4 py-3 text-center text-primary fw-bold">
-                                {{ org.target_reduction_percent ? org.target_reduction_percent + '%' : '-' }}
+                            <td class="px-4 py-3">
+                                <span class="badge bg-light text-dark border rounded-pill px-3">
+                                    {{ getIndustryLabel(org.industry_type) }}
+                                </span>
                             </td>
                             <td class="px-4 py-3 text-center">
+                                <div [ngSwitch]="org.current_green_status">
+                                    <span *ngSwitchCase="'GOLD'" class="badge rounded-pill bg-warning text-dark border border-warning shadow-sm px-3">
+                                        <i class="fa-solid fa-medal me-1"></i>G-Gold (ดีเยี่ยม)
+                                    </span>
+                                    <span *ngSwitchCase="'SILVER'" class="badge rounded-pill bg-light text-secondary border border-secondary shadow-sm px-3">
+                                        <i class="fa-solid fa-medal me-1"></i>G-Silver (ดีมาก)
+                                    </span>
+                                    <span *ngSwitchCase="'BRONZE'" class="badge rounded-pill bg-orange text-white border border-danger shadow-sm px-3" style="background-color: #cd7f32;">
+                                        <i class="fa-solid fa-medal me-1"></i>G-Bronze (ดี)
+                                    </span>
+                                    <span *ngSwitchDefault class="text-muted small italic">ยังไม่ได้รับรอง</span>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="fw-bold text-primary">{{ org.userCount || 0 }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <div class="fw-bold">{{ org.number_of_employees | number }} คน</div>
+                                <div class="small text-muted">{{ org.total_floor_area || 0 | number }} ตร.ม.</div>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-success fw-bold h6 mb-0">
+                                    {{ org.target_reduction_percent ? org.target_reduction_percent + '%' : '-' }}
+                                </span>
+                                <div class="small text-muted" *ngIf="org.base_year">ปีฐาน: {{ org.base_year }}</div>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <span [ngClass]="getStatusBadgeClass(org.is_active)">
+                                    <i class="fa-solid fa-circle me-1 small"></i>
+                                    {{ getStatusLabel(org.is_active) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 text-end">
                                 <div class="dropdown d-inline-block">
                                     <button class="btn btn-sm btn-light border shadow-sm rounded-3" type="button"
                                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -88,11 +139,14 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-3">
                                         <li><button class="dropdown-item" (click)="openEditModal(org)"><i
-                                                    class="fa-solid fa-pen-to-square text-primary me-2"></i>
-                                                แก้ไขข้อมูลองค์กร</button></li>
+                                                     class="fa-solid fa-pen-to-square text-primary me-2"></i>
+                                                 แก้ไขข้อมูลองค์กร</button></li>
                                         <li><button class="dropdown-item"><i
-                                                    class="fa-solid fa-history text-info me-2"></i>
-                                                ดูประวัติการประเมิน</button></li>
+                                                     class="fa-solid fa-chart-line text-info me-2"></i>
+                                                 ดูรายงาน Carbon</button></li>
+                                        <li><button class="dropdown-item"><i
+                                                     class="fa-solid fa-history text-muted me-2"></i>
+                                                 ประวัติการประเมิน</button></li>
                                         <li>
                                             <hr class="dropdown-divider">
                                         </li>
@@ -108,8 +162,9 @@
                             </td>
                         </tr>
                         <tr *ngIf="filteredOrganizations().length === 0">
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                ไม่พบข้อมูลองค์กร
+                            <td colspan="7" class="text-center py-5 text-muted bg-light bg-opacity-50">
+                                <i class="fa-solid fa-folder-open fa-3x mb-3 text-light"></i>
+                                <p>ไม่พบข้อมูลองค์กรในหมวดหมู่นี้</p>
                             </td>
                         </tr>
                     </tbody>
@@ -120,52 +175,85 @@
 </div>
 
 <!-- Edit Org Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedOrg" style="background-color: rgba(0,0,0,0.5);">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 border-0 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold">{{ selectedOrg.id ? 'แก้ไขข้อมูลองค์กร' : 'เพิ่มองค์กรใหม่' }}</h5>
+<div class="modal d-block" tabindex="-1" *ngIf="selectedOrg" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom p-4">
+                <div>
+                    <h5 class="modal-title fw-bold mb-0 text-primary">
+                        <i class="fa-solid me-2" [ngClass]="selectedOrg.id ? 'fa-pen-to-square' : 'fa-plus-circle'"></i>
+                        {{ selectedOrg.id ? 'แก้ไขข้อมูลองค์กร' : 'เพิ่มองค์กรใหม่' }}
+                    </h5>
+                    <p class="text-muted small mb-0">ระบุข้อมูลพื้นฐานตามเกณฑ์สำนักงานสีเขียว</p>
+                </div>
                 <button type="button" class="btn-close" (click)="closeEditModal()"></button>
             </div>
             <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label text-dark small fw-bold">ชื่อองค์กร <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-lg shadow-sm" [(ngModel)]="selectedOrg.name" placeholder="ระบุชื่อองค์กรเต็ม">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-dark small fw-bold">ประเภทองค์กร</label>
+                        <select class="form-select form-control-lg shadow-sm" [(ngModel)]="selectedOrg.industry_type">
+                            <option *ngFor="let type of industryTypes" [value]="type.value">{{ type.label }}</option>
+                        </select>
+                    </div>
 
-                <div class="mb-3">
-                    <label class="form-label text-muted small fw-bold">ชื่อองค์กร <span
-                            class="text-danger">*</span></label>
-                    <input type="text" class="form-control" [(ngModel)]="selectedOrg.name">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label text-muted small fw-bold">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
-                    <input type="text" class="form-control" [(ngModel)]="selectedOrg.tax_id">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label text-muted small fw-bold">ประเภทอุตสาหกรรม (Industry Type)</label>
-                    <input type="text" class="form-control" [(ngModel)]="selectedOrg.industry_type"
-                        placeholder="เช่น education, system">
-                </div>
-
-                <div class="row mb-4">
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">จำนวนพนักงาน (คน)</label>
-                        <input type="number" class="form-control" [(ngModel)]="selectedOrg.number_of_employees">
+                        <label class="form-label text-dark small fw-bold">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
+                        <input type="text" class="form-control shadow-sm" [(ngModel)]="selectedOrg.tax_id" placeholder="เลข 13 หลัก">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label text-muted small fw-bold">เป้าหมายลดคาร์บอน (%)</label>
-                        <input type="number" class="form-control" [(ngModel)]="selectedOrg.target_reduction_percent" min="0" max="100">
+                        <label class="form-label text-dark small fw-bold">ระดับการรับรอง (Green Status)</label>
+                        <select class="form-select shadow-sm" [(ngModel)]="selectedOrg.current_green_status">
+                            <option value="NONE">ยังไม่ได้รับการรับรอง</option>
+                            <option value="GOLD">G-Gold (ดีเยี่ยม)</option>
+                            <option value="SILVER">G-Silver (ดีมาก)</option>
+                            <option value="BRONZE">G-Bronze (ดี)</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12"><hr class="my-2"></div>
+
+                    <div class="col-md-4">
+                        <label class="form-label text-dark small fw-bold">ปีฐาน (Base Year)</label>
+                        <input type="number" class="form-control shadow-sm" [(ngModel)]="selectedOrg.base_year" placeholder="เช่น 2023">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-dark small fw-bold">พื้นที่สำนักงาน (ตร.ม.)</label>
+                        <input type="number" class="form-control shadow-sm" [(ngModel)]="selectedOrg.total_floor_area">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label text-dark small fw-bold">จำนวนพนักงาน (คน)</label>
+                        <input type="number" class="form-control shadow-sm" [(ngModel)]="selectedOrg.number_of_employees">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label text-dark small fw-bold">เป้าหมายลดคาร์บอน (%)</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control shadow-sm" [(ngModel)]="selectedOrg.target_reduction_percent" min="0" max="100">
+                            <span class="input-group-text">%</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <div class="form-check form-switch mb-2 ms-2">
+                            <input class="form-check-input" type="checkbox" role="switch" id="activeSwitch" [(ngModel)]="selectedOrg.is_active">
+                            <label class="form-check-label fw-bold small ms-2" for="activeSwitch">สถานะการใช้งานระบบ</label>
+                        </div>
                     </div>
                 </div>
 
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary shadow-sm fw-bold py-2" (click)="saveOrganization()"
+                <div class="mt-5 d-flex gap-2">
+                    <button class="btn btn-primary shadow-sm fw-bold px-5 py-2 flex-grow-1" (click)="saveOrganization()"
                         [disabled]="isSaving || !selectedOrg.name">
                         <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกข้อมูล
                     </button>
-                    <button class="btn btn-light" (click)="closeEditModal()" [disabled]="isSaving">ยกเลิก</button>
+                    <button class="btn btn-light px-4 border" (click)="closeEditModal()" [disabled]="isSaving">ยกเลิก</button>
                 </div>
 
             </div>
         </div>
     </div>
-</div>
+</div>

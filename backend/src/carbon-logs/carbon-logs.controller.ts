@@ -8,8 +8,10 @@ import {
   Headers,
   UnauthorizedException,
   Logger,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CarbonLogsService } from './carbon-logs.service';
+import { CreateCarbonLogDto } from './dto/create-carbon-log.dto';
 
 @Controller('carbon-logs')
 export class CarbonLogsController {
@@ -40,7 +42,7 @@ export class CarbonLogsController {
   }
 
   @Post()
-  create(@Body() createDto: any, @Headers() headers: any) {
+  create(@Body() createDto: CreateCarbonLogDto, @Headers() headers: any) {
     return this.carbonLogsService.create(createDto, this.getOrgId(headers));
   }
 

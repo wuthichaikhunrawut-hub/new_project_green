@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CarbonLog } from './entities/carbon-log.entity';
 import { Organization } from '../organizations/entities/organization.entity';
+import { CreateCarbonLogDto } from './dto/create-carbon-log.dto';
 
 @Injectable()
 export class CarbonLogsService {
@@ -11,7 +12,7 @@ export class CarbonLogsService {
     private logRepository: Repository<CarbonLog>,
   ) {}
 
-  async create(createDto: any, orgId: number) {
+  async create(createDto: CreateCarbonLogDto, orgId: number) {
     const log = this.logRepository.create({
       ...createDto,
       organization: { id: orgId } as Organization,

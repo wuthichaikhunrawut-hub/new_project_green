@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrgService } from '../../../core/services/org.service';
+import { Organization, OrgType } from '../../../core/models/organization.model';
 
 @Component({
   selector: 'app-admin-organizations',
@@ -13,12 +14,22 @@ export class AdminOrganizationsComponent implements OnInit {
   private orgService = inject(OrgService);
   private cdr = inject(ChangeDetectorRef);
 
-  organizations: any[] = [];
+  organizations: Organization[] = [];
   isLoading = true;
   searchText = '';
-  activeTab: 'ALL' | 'EDUCATION' | 'SYSTEM' | 'OTHERS' = 'ALL';
+  activeTab: 'ALL' | OrgType | 'OTHERS' = 'ALL';
 
-  selectedOrg: any | null = null;
+  industryTypes = [
+    { value: 'GOVERNMENT', label: 'หน่วยงานภาครัฐ (Government)' },
+    { value: 'STATE_ENTERPRISE', label: 'รัฐวิสาหกิจ (State Enterprise)' },
+    { value: 'PRIVATE', label: 'ภาคเอกชน (Private Sector)' },
+    { value: 'EDUCATION', label: 'สถาบันการศึกษา (Education)' },
+    { value: 'INDUSTRIAL_OFFICE', label: 'สำนักงานในโรงงาน (Industrial Office)' },
+    { value: 'LOCAL_ADMIN', label: 'องค์กรปกครองส่วนท้องถิ่น (Local Admin)' },
+    { value: 'OTHERS', label: 'อื่นๆ (Others)' }
+  ];
+
+  selectedOrg: Partial<Organization> | null = null;
   isSaving = false;
 
   ngOnInit() {
@@ -28,12 +39,12 @@ export class AdminOrganizationsComponent implements OnInit {
   loadOrganizations() {
     this.isLoading = true;
     this.orgService.getAll().subscribe({
-      next: (data: any) => {
+      next: (data: Organization[]) => {
         this.organizations = data;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err: any) => {
+      error: (err) => {
         console.error('Failed to load orgs:', err);
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -41,7 +52,7 @@ export class AdminOrganizationsComponent implements OnInit {
     });
   }
 
-  setTab(tab: 'ALL' | 'EDUCATION' | 'SYSTEM' | 'OTHERS') {
+  setTab(tab: any) {
     this.activeTab = tab;
   }
 
@@ -49,14 +60,13 @@ export class AdminOrganizationsComponent implements OnInit {
     let filtered = this.organizations;
 
     // Filter by Tab
-    if (this.activeTab === 'EDUCATION') {
-      filtered = filtered.filter(o => String(o.industry_type).toLowerCase() === 'education');
-    } else if (this.activeTab === 'SYSTEM') {
-      filtered = filtered.filter(o => String(o.industry_type).toLowerCase() === 'system');
-    } else if (this.activeTab === 'OTHERS') {
+    if (this.activeTab !== 'ALL') {
       filtered = filtered.filter(o => {
-        const type = String(o.industry_type).toLowerCase();
-        return type !== 'education' && type !== 'system';
+        const type = String(o.industry_type || '').toUpperCase();
+        if (this.activeTab === 'OTHERS') {
+          return !this.industryTypes.some(it => it.value === type && it.value !== 'OTHERS');
+        }
+        return type === this.activeTab;
       });
     }
 
@@ -72,16 +82,19 @@ export class AdminOrganizationsComponent implements OnInit {
     );
   }
 
-  openEditModal(org?: any) {
+  openEditModal(org?: Organization) {
     if (org) {
       this.selectedOrg = { ...org };
     } else {
       this.selectedOrg = {
         name: '',
         tax_id: '',
-        industry_type: '',
+        industry_type: 'PRIVATE',
         number_of_employees: 0,
+        total_floor_area: 0,
+        base_year: new Date().getFullYear(),
         target_reduction_percent: 0,
+        current_green_status: 'NONE',
         is_active: true
       };
     }
@@ -142,6 +155,11 @@ export class AdminOrganizationsComponent implements OnInit {
     });
   }
 
+  getIndustryLabel(value: string): string {
+    const type = this.industryTypes.find(t => t.value === String(value).toUpperCase());
+    return type ? type.label.split(' (')[0] : (value || 'ไม่ระบุ');
+  }
+
   exportToCSV() {
     const dataToExport = this.filteredOrganizations();
     if (dataToExport.length === 0) {
@@ -177,5 +195,13 @@ export class AdminOrganizationsComponent implements OnInit {
       link.click();
       document.body.removeChild(link);
     }
+  }
+
+  getStatusBadgeClass(active: boolean): string {
+    return 'status-badge ' + (active ? 'status-approved' : 'status-rejected');
+  }
+
+  getStatusLabel(active: boolean): string {
+    return active ? 'เปิดใช้งาน' : 'ระงับการใช้งาน';
   }
 }

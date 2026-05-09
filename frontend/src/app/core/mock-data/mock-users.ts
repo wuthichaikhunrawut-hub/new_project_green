@@ -1,4 +1,4 @@
-import { User } from '../models/auth.model';
+import { User } from '../models/user.model';
 
 export const MOCK_USER: User = {
   id: '101',

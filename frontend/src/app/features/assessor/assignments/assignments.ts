@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { RequestsService } from '../../../core/services/requests.service';
+import { Assessment } from '../../../core/models/assessment.model';
 
 @Component({
   selector: 'app-assessor-assignments',
@@ -17,7 +18,7 @@ export class AssessorAssignmentsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private requestsService = inject(RequestsService);
 
-  requests: any[] = [];
+  requests: Assessment[] = [];
   isLoading = true;
   searchTerm = '';
   statusFilter = '';

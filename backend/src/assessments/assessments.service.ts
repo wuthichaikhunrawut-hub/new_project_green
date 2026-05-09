@@ -94,13 +94,18 @@ export class AssessmentsService {
 
     // Update details if provided (e.g., scores from Assessor)
     if (updateAssessmentDto.details && updateAssessmentDto.details.length > 0) {
+      const detailsToSave = [];
       for (const updateDetail of updateAssessmentDto.details) {
         const detailToUpdate = assessment.details.find(d => d.id === updateDetail.assessment_detail_id);
         if (detailToUpdate) {
           detailToUpdate.assessor_score = updateDetail.assessor_score !== undefined ? updateDetail.assessor_score : detailToUpdate.assessor_score;
           detailToUpdate.auditor_comment = updateDetail.auditor_comment !== undefined ? updateDetail.auditor_comment : detailToUpdate.auditor_comment;
-          await this.assessmentDetailRepository.save(detailToUpdate);
+          detailsToSave.push(detailToUpdate);
         }
+      }
+      
+      if (detailsToSave.length > 0) {
+        await this.assessmentDetailRepository.save(detailsToSave);
       }
     }
 

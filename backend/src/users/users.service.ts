@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, ILike } from 'typeorm';
 import { User, UserRole } from './entities/user.entity';
+import { UserProfile } from './entities/user-profile.entity';
 import { AssessorProfile } from './entities/assessor-profile.entity';
 import { Role } from './entities/role.entity';
 import { UserRole as UserRoleLink } from './entities/user-role.entity';
@@ -13,6 +14,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(UserProfile)
+    private userProfileRepository: Repository<UserProfile>,
     @InjectRepository(AssessorProfile)
     private assessorProfileRepository: Repository<AssessorProfile>,
     @InjectRepository(Role)
@@ -104,38 +107,40 @@ export class UsersService {
     return count > 0;
   }
 
-  async findAll(role?: string): Promise<User[]> {
-    const users = await this.usersRepository.find({
-      relations: ['organization'],
-      select: ['id', 'email', 'is_active', 'created_at'],
-      order: { created_at: 'DESC' }
-    });
-    
-    for (const user of users) {
-      (user as any).role = await this.getPrimaryRoleForUser(user.id);
-      (user as any).username = user.email ? user.email.split('@')[0] : 'User';
+  async findAll(roleName?: string): Promise<User[]> {
+    const query = this.usersRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.roles', 'roles')
+      .leftJoinAndSelect('user.user_profile', 'profile')
+      .leftJoinAndSelect('user.organization', 'organization')
+      .orderBy('user.created_at', 'DESC');
+
+    if (roleName) {
+      query.andWhere('roles.role_name = :roleName', { roleName });
     }
-    
-    if (role) {
-      return users.filter(user => (user as any).role === role);
-    }
-    
-    return users;
+
+    const users = await query.getMany();
+
+    // Map for backward compatibility
+    return users.map(user => ({
+      ...user,
+      role: user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
+      username: user.user_profile?.first_name || user.email.split('@')[0]
+    })) as any;
   }
 
   async findOne(id: number): Promise<User | null> {
     const user = await this.usersRepository.findOne({ 
       where: { id }, 
-      relations: ['organization'],
-      select: ['id', 'email', 'is_active', 'created_at'] 
+      relations: ['organization', 'user_profile', 'assessor_profile', 'roles']
     });
     
-    if (user) {
-      (user as any).role = await this.getPrimaryRoleForUser(user.id);
-      (user as any).username = user.email ? user.email.split('@')[0] : 'User';
-    }
-    
-    return user;
+    if (!user) return null;
+
+    return {
+      ...user,
+      role: user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
+      username: user.user_profile?.first_name || user.email.split('@')[0]
+    } as any;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -169,7 +174,19 @@ export class UsersService {
   }
 
   async update(id: number, updateData: any): Promise<User | null> {
-    const { assessor_profile, role, username, organizationName, organization, password, ...userData } = updateData;
+    const { 
+      user_profile, 
+      assessor_profile, 
+      role, 
+      username, 
+      organizationName, 
+      organization, 
+      password,
+      id: userId,
+      created_at,
+      updated_at,
+      ...userData 
+    } = updateData;
 
     if (password) {
       userData.password_hash = await bcrypt.hash(password, 10);
@@ -191,6 +208,18 @@ export class UsersService {
           Object.assign(profile, assessor_profile);
       }
       await this.assessorProfileRepository.save(profile!);
+    }
+
+    if (user_profile) {
+      let profile: UserProfile | null = await this.userProfileRepository.findOne({ where: { user: { id } } });
+      if (!profile) {
+        profile = new UserProfile();
+        Object.assign(profile, user_profile);
+        (profile as any).user = { id };
+      } else {
+        Object.assign(profile, user_profile);
+      }
+      await this.userProfileRepository.save(profile);
     }
 
     const updated = await this.findOne(id);

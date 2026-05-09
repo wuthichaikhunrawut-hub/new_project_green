@@ -1,8 +1,9 @@
-﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { RequestsService, CertificationRequest } from '../../../core/services/requests.service';
+import { RequestsService } from '../../../core/services/requests.service';
+import { Assessment } from '../../../core/models/assessment.model';
 import { ThaiDatePipe } from '../../../shared/pipes/thai-date-pipe';
 
 @Component({
@@ -19,7 +20,7 @@ export class RequestEvaluateComponent implements OnInit {
   private requestsService = inject(RequestsService);
   private cdr = inject(ChangeDetectorRef);
 
-  request: CertificationRequest | null = null;
+  request: Assessment | null = null;
   isLoading = true;
   isSaving = false;
   overallComment = '';
@@ -40,7 +41,7 @@ export class RequestEvaluateComponent implements OnInit {
   loadRequest(id: string) {
     this.isLoading = true;
     this.requestsService.getRequestById(id).subscribe({
-      next: (data: CertificationRequest) => {
+      next: (data: Assessment) => {
         this.request = data;
         
         // Ensure details is an array if we expect it to be
@@ -120,7 +121,7 @@ export class RequestEvaluateComponent implements OnInit {
     const finalLevel = finalStatus === 'APPROVED' ? this.getCertificationLevel().level : undefined;
     const finalScore = this.calculateTotalAssessorScore();
 
-    const updatePayload: Partial<CertificationRequest> = {
+    const updatePayload: Partial<Assessment> = {
       status: finalStatus,
       notes: this.overallComment,
       total_score: finalScore,

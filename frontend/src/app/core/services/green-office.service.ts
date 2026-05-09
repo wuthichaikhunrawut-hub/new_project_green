@@ -2,7 +2,7 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { of, Observable, catchError, map } from 'rxjs';
-import { GreenCriteria } from '../models/green-office.model';
+import { AssessmentCriteria as GreenCriteria } from '../models/assessment.model';
 import { MOCK_CRITERIA } from '../mock-data/mock-green-office';
 
 @Injectable({ providedIn: 'root' })

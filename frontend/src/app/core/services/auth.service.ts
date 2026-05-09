@@ -2,7 +2,7 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
-import { User } from '../models/auth.model';
+import { User } from '../models/user.model';
 
 export interface AuthResponse {
   access_token: string;

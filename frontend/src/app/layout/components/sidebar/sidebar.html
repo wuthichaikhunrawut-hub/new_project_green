@@ -270,15 +270,18 @@
   <!-- ── Footer user card ── -->
   <div class="sidebar-footer">
     <div class="user-card">
-      <div class="user-avatar">
-        {{ user?.username ? (user?.username?.charAt(0) | uppercase) : (user?.email?.charAt(0) | uppercase) || 'G' }}
+      <div class="user-avatar-wrapper">
+        <div class="user-avatar">
+          {{ initials }}
+        </div>
+        <div class="status-indicator online"></div>
       </div>
       <div class="user-detail" *ngIf="!isCollapsed">
-        <p class="u-name">{{ user?.username || user?.email || 'Guest' }}</p>
-        <p class="u-org">{{ user?.organizationName || user?.role || 'GreenSync' }}</p>
+        <p class="u-name text-truncate">{{ displayName }}</p>
+        <p class="u-org text-truncate">{{ user?.organizationName || user?.role || 'GreenSync' }}</p>
       </div>
-      <button class="btn-icon" (click)="authService.logout()" title="ออกจากระบบ">
-        <i class="fa-solid fa-power-off"></i>
+      <button class="btn-logout" (click)="authService.logout()" title="ออกจากระบบ">
+        <i class="fa-solid fa-right-from-bracket"></i>
       </button>
     </div>
   </div>

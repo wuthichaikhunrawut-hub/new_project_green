@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Organization } from '../models/organization.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,19 +11,19 @@ export class OrgService {
 
   constructor(private http: HttpClient) {}
 
-  getOrganization(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  getOrganization(id: number): Observable<Organization> {
+    return this.http.get<Organization>(`${this.apiUrl}/${id}`);
   }
 
-  getAll(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+  getAll(): Observable<Organization[]> {
+    return this.http.get<Organization[]>(this.apiUrl);
   }
 
-  updateOrganization(id: number, data: any): Observable<any> {
-    return this.http.patch<any>(`${this.apiUrl}/${id}`, data);
+  updateOrganization(id: number, data: Partial<Organization>): Observable<Organization> {
+    return this.http.patch<Organization>(`${this.apiUrl}/${id}`, data);
   }
 
-  create(data: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, data);
+  create(data: Partial<Organization>): Observable<Organization> {
+    return this.http.post<Organization>(this.apiUrl, data);
   }
 }

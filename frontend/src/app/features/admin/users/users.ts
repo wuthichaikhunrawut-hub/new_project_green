@@ -2,6 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService, User, Role } from '../../../core/services/users.service';
+import { OrgService } from '../../../core/services/org.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -12,6 +13,7 @@ import { UsersService, User, Role } from '../../../core/services/users.service';
 })
 export class AdminUsersComponent implements OnInit {
   private usersService = inject(UsersService);
+  private orgService = inject(OrgService);
   private cdr = inject(ChangeDetectorRef);
 
   users: User[] = [];
@@ -23,10 +25,23 @@ export class AdminUsersComponent implements OnInit {
   isSaving = false;
 
   roles: Role[] = [];
+  organizations: any[] = [];
+  selectedOrgId: number | null = null;
 
   ngOnInit() {
     this.loadUsers();
     this.loadRoles();
+    this.loadOrganizations();
+  }
+
+  loadOrganizations() {
+    this.orgService.getAll().subscribe({
+      next: (data) => {
+        this.organizations = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.error('Failed to load organizations:', err)
+    });
   }
 
   loadRoles() {
@@ -60,13 +75,24 @@ export class AdminUsersComponent implements OnInit {
   openEditModal(user?: User) {
     if (user) {
       this.selectedUser = { ...user };
+      if (!this.selectedUser.user_profile) {
+        this.selectedUser.user_profile = { first_name: '', last_name: '', phone: '' };
+      }
+      // Set org id for dropdown
+      if (this.selectedUser.organization) {
+        this.selectedOrgId = this.selectedUser.organization.id;
+      } else {
+        this.selectedOrgId = null;
+      }
     } else {
       // Setup empty user for creation
+      this.selectedOrgId = null;
       this.selectedUser = {
         email: '',
         password: '',
         role: 'USER',
-        is_active: true
+        is_active: true,
+        user_profile: { first_name: '', last_name: '', phone: '' }
       };
     }
   }
@@ -79,6 +105,13 @@ export class AdminUsersComponent implements OnInit {
     if (!this.selectedUser) return;
     this.isSaving = true;
 
+    // Map org_id back to organization object or handled by backend
+    if (this.selectedOrgId) {
+      this.selectedUser.organization = { id: this.selectedOrgId };
+    } else {
+      this.selectedUser.organization = null;
+    }
+
     if (this.selectedUser.id) {
       // Update existing
       this.usersService.updateUser(this.selectedUser.id, this.selectedUser).subscribe({
@@ -90,7 +123,7 @@ export class AdminUsersComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to update user:', err);
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (err.error?.message || err.message));
           this.isSaving = false;
         }
       });
@@ -105,7 +138,7 @@ export class AdminUsersComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to create user:', err);
-          alert('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน');
+          alert('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน: ' + (err.error?.message || err.message));
           this.isSaving = false;
         }
       });
@@ -186,7 +219,9 @@ export class AdminUsersComponent implements OnInit {
     const lowerSearch = this.searchText.toLowerCase();
     return filtered.filter(u => 
       (u.email && u.email.toLowerCase().includes(lowerSearch)) ||
-      (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch))
+      (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch)) ||
+      (u.user_profile?.first_name && u.user_profile.first_name.toLowerCase().includes(lowerSearch)) ||
+      (u.user_profile?.last_name && u.user_profile.last_name.toLowerCase().includes(lowerSearch))
     );
   }
 
@@ -224,5 +259,13 @@ export class AdminUsersComponent implements OnInit {
       link.click();
       document.body.removeChild(link);
     }
+  }
+
+  getStatusBadgeClass(active: boolean): string {
+    return 'status-badge ' + (active ? 'status-approved' : 'status-rejected');
+  }
+
+  getStatusLabel(active: boolean): string {
+    return active ? 'เปิดใช้งาน' : 'ระงับการใช้งาน';
   }
 }

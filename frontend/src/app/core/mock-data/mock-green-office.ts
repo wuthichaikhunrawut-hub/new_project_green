@@ -1,4 +1,4 @@
-import { GreenCriteria } from '../models/green-office.model';
+import { AssessmentCriteria as GreenCriteria } from '../models/assessment.model';
 
 export const MOCK_CRITERIA: GreenCriteria[] = [
   { id: 1, category: 1, code: '1.1', name: 'การกำหนดนโยบายสิ่งแวดล้อม', maxScore: 5, currentScore: 0, status: 'Pending' },

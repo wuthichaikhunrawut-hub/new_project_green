@@ -7,9 +7,10 @@
       <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item active" aria-current="page">
           <span class="text-muted fw-medium">
-            <ng-container *ngIf="role === 'ADMIN'">Admin Portal</ng-container>
-            <ng-container *ngIf="role === 'ASSESSOR'">Assessor Portal</ng-container>
-            <ng-container *ngIf="role !== 'ADMIN' && role !== 'ASSESSOR'">Applicant Portal</ng-container>
+            <ng-container *ngIf="role === 'SYSTEM_ADMIN' || role === 'ADMIN' || role === 'System Admin'">System Admin Portal</ng-container>
+            <ng-container *ngIf="role === 'ASSESSOR' || role === 'Assessor'">Assessor Portal</ng-container>
+            <ng-container *ngIf="role === 'ORG_ADMIN' || role === 'Organization Admin'">Organization Admin Portal</ng-container>
+            <ng-container *ngIf="!['SYSTEM_ADMIN', 'ADMIN', 'System Admin', 'ASSESSOR', 'Assessor', 'ORG_ADMIN', 'Organization Admin'].includes(role)">Applicant Portal</ng-container>
           </span>
         </li>
       </ol>

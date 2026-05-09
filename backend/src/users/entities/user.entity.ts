@@ -1,7 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany, OneToOne, ManyToMany, JoinTable } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Assessment } from '../../assessments/entities/assessment.entity';
 import { AssessorProfile } from './assessor-profile.entity';
+import { UserProfile } from './user-profile.entity';
+import { Role } from './role.entity';
 
 export enum UserRole {
   SYSTEM_ADMIN = 'System Admin',
@@ -50,4 +52,15 @@ export class User {
 
   @OneToOne(() => AssessorProfile, profile => profile.user)
   assessor_profile: AssessorProfile;
+
+  @OneToOne(() => UserProfile, profile => profile.user)
+  user_profile: UserProfile;
+
+  @ManyToMany(() => Role)
+  @JoinTable({
+    name: 'user_roles',
+    joinColumn: { name: 'user_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' }
+  })
+  roles: Role[];
 }

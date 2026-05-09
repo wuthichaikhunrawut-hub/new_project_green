@@ -45,18 +45,29 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     ports:
       - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    command: npm run start:dev
     depends_on:
       postgres:
         condition: service_healthy
 
   frontend:
+    image: green-office-frontend-dev
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: builder
     container_name: green_frontend
     restart: always
     ports:
-      - "4000:80"
+      - "4000:4200"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.angular
+    command: npm start -- --host 0.0.0.0 --poll 2000
     depends_on:
       - backend
 

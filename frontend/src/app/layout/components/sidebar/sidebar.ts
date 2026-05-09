@@ -59,6 +59,22 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return '';
   }
 
+  get initials(): string {
+    if (this.user?.user_profile?.first_name) {
+      return this.user.user_profile.first_name.charAt(0).toUpperCase();
+    }
+    return (this.user?.username || this.user?.email || 'G').charAt(0).toUpperCase();
+  }
+
+  get displayName(): string {
+    if (this.user?.user_profile?.first_name) {
+      const first = this.user.user_profile.first_name;
+      const last = this.user.user_profile.last_name || '';
+      return `${first} ${last}`.trim();
+    }
+    return this.user?.username || this.user?.email?.split('@')[0] || 'User';
+  }
+
   get isSystemAdmin(): boolean { return this.roleKey === 'SYSTEM_ADMIN'; }
   get isOrgAdmin(): boolean { return this.roleKey === 'ORG_ADMIN'; }
   get isAnyAdmin(): boolean { return this.isSystemAdmin || this.isOrgAdmin; }
