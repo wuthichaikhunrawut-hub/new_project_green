@@ -40,7 +40,7 @@ export class AdminAssessorsComponent implements OnInit {
   }
 
   verify(user: AssessorUser) {
-    const action = user.assessor_verified ? 'เพิกถอนการยืนยัน' : 'อนุมัติ';
+    const action = user.assessor_verified ? 'เพิกถอนการอนุมัติ' : 'อนุมัติ';
     if (!confirm(`ต้องการ${action}สถานะผู้ตรวจประเมิน ${user.username} หรือไม่?`)) return;
     this.svc.verifyAssessor(user.id, !user.assessor_verified).subscribe({ next: () => this.loadAssessors() });
   }

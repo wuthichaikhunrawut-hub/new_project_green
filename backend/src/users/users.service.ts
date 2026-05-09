@@ -116,6 +116,10 @@ export class UsersService {
       (user as any).username = user.email ? user.email.split('@')[0] : 'User';
     }
     
+    if (role) {
+      return users.filter(user => (user as any).role === role);
+    }
+    
     return users;
   }
 
@@ -137,8 +141,7 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.usersRepository.findOne({
       where: { email: ILike(email) },
-      relations: ['organization'],
-      select: ['id', 'email', 'password_hash', 'is_active', 'created_at'],
+      relations: ['organization']
     });
   }
 
@@ -166,7 +169,11 @@ export class UsersService {
   }
 
   async update(id: number, updateData: any): Promise<User | null> {
-    const { assessor_profile, role, username, organizationName, organization, ...userData } = updateData;
+    const { assessor_profile, role, username, organizationName, organization, password, ...userData } = updateData;
+
+    if (password) {
+      userData.password_hash = await bcrypt.hash(password, 10);
+    }
 
     if (Object.keys(userData).length > 0) {
       await this.usersRepository.update(id, userData);
