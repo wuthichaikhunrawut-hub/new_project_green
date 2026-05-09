@@ -16,7 +16,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
   pgadmin:
     image: dpage/pgadmin4
     container_name: green_pgadmin
@@ -63,4 +62,4 @@ services:
 
 volumes:
   postgres_data:
-  pgadmin_data:
+  pgadmin_data:
