@@ -67,7 +67,14 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/.angular
-    command: npm start -- --host 0.0.0.0 --poll 2000
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - CHOKIDAR_INTERVAL=250
+      - NG_CLI_ANALYTICS=ci
+      - WATCH=true
+      - NODE_ENV=development
+      - NG_BUILD_OPTIMIZER=false
+    command: npm start -- --host 0.0.0.0 --poll 250 --watch --live-reload
     depends_on:
       - backend
 
