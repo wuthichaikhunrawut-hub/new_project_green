@@ -95,13 +95,14 @@ export class UploadsService {
         file_size: file.size,
         assessment_detail_id: metadata?.assessmentDetailId,
         uploaded_by_user_id: metadata?.userId,
-        carbon_log_id: metadata?.carbon_log_id,
+        carbon_log_id: metadata?.carbonLogId,
         category: metadata?.category,
-      } as any);
+      });
 
       const savedFile = await this.evidenceFileRepository.save(evidenceFile);
-      console.log('✅ Database record saved:', savedFile.id);
-      return savedFile;
+      const result = Array.isArray(savedFile) ? savedFile[0] : savedFile;
+      console.log('✅ Database record saved:', result.id);
+      return result;
     } catch (dbError) {
       console.error('❌ Database save error during upload:', dbError);
       throw new BadRequestException(

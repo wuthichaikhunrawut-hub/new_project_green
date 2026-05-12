@@ -4,6 +4,7 @@ import { Assessment } from '../../assessments/entities/assessment.entity';
 import { AssessorProfile } from './assessor-profile.entity';
 import { UserProfile } from './user-profile.entity';
 import { Role } from './role.entity';
+import { BankAccount } from './bank-account.entity';
 
 export enum UserRole {
   SYSTEM_ADMIN = 'System Admin',
@@ -63,4 +64,7 @@ export class User {
     inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' }
   })
   roles: Role[];
+
+  @OneToMany(() => BankAccount, (bankAccount) => bankAccount.user)
+  bank_accounts: BankAccount[];
 }

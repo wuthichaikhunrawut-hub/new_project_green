@@ -239,11 +239,14 @@ export class UsersService {
     if (bank_account) {
       let account = await this.bankAccountRepository.findOne({ where: { user: { id } } });
       if (!account) {
-        account = this.bankAccountRepository.create({ ...bank_account, user: { id }, is_primary: true });
+        const newAccount = this.bankAccountRepository.create({ ...bank_account, user: { id }, is_primary: true } as any);
+        account = Array.isArray(newAccount) ? newAccount[0] : newAccount;
       } else {
         Object.assign(account, bank_account);
       }
-      await this.bankAccountRepository.save(account);
+      if (account) {
+        await this.bankAccountRepository.save(account);
+      }
     }
 
     const updated = await this.findOne(id);
