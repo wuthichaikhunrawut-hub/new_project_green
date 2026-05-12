@@ -44,13 +44,27 @@ export class UploadsService {
       category?: string;
     },
   ): Promise<EvidenceFile> {
-    if (!this.supabase) {
-      throw new BadRequestException('Supabase client not initialized');
+    if (!file) {
+      throw new BadRequestException('File is missing');
     }
 
-    const originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    if (!this.supabase || !this.bucket) {
+      console.error('❌ Supabase not initialized. Bucket:', this.bucket);
+      throw new BadRequestException('Upload system is not ready (Supabase missing)');
+    }
+
+    // Handle filename encoding safety
+    let originalName = 'unknown_file';
+    try {
+      originalName = Buffer.from(file.originalname, 'latin1').toString('utf8');
+    } catch (e) {
+      originalName = file.originalname || 'file';
+    }
+
     const safeName = originalName.replace(/[^a-zA-Z0-9.]/g, '_');
     const fileName = `${folder}/${Date.now()}-${safeName}`;
+
+    console.log(`📤 Uploading to Supabase: ${fileName} (${file.size} bytes)`);
 
     const { data, error } = await this.supabase.storage
       .from(this.bucket)
@@ -61,9 +75,7 @@ export class UploadsService {
 
     if (error) {
       console.error('❌ Supabase upload error:', error);
-      console.error('Bucket:', this.bucket);
-      console.error('FileName:', fileName);
-      throw new BadRequestException(`Upload failed: ${error.message}`);
+      throw new BadRequestException(`Supabase upload failed: ${error.message}`);
     }
 
     // Get Public URL
@@ -72,6 +84,7 @@ export class UploadsService {
       .getPublicUrl(fileName);
 
     const publicUrl = urlData.publicUrl;
+    console.log('✅ File uploaded to Supabase, URL:', publicUrl);
 
     // Save to Database
     try {
@@ -82,16 +95,17 @@ export class UploadsService {
         file_size: file.size,
         assessment_detail_id: metadata?.assessmentDetailId,
         uploaded_by_user_id: metadata?.userId,
-        carbon_log_id: metadata?.carbonLogId,
+        carbon_log_id: metadata?.carbon_log_id,
         category: metadata?.category,
-      });
+      } as any);
 
       const savedFile = await this.evidenceFileRepository.save(evidenceFile);
+      console.log('✅ Database record saved:', savedFile.id);
       return savedFile;
     } catch (dbError) {
-      console.error('❌ Database save error:', dbError);
+      console.error('❌ Database save error during upload:', dbError);
       throw new BadRequestException(
-        `Failed to save evidence record: ${dbError.message}`,
+        `Failed to save evidence record in DB: ${dbError.message}`,
       );
     }
   }

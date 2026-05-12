@@ -11,7 +11,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Accept, Authorization, x-org-id, x-user-role, x-user-id',
   });
 
-  await app.listen(3001);
+  await app.listen(3001, '0.0.0.0');
   console.log('🚀 Backend running at http://localhost:3001');
 }
 bootstrap();

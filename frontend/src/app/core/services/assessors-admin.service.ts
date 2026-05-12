@@ -10,6 +10,19 @@ export interface AssessorUser {
   assessor_verified: boolean;
   is_active: boolean;
   created_at: string;
+  user_profile?: {
+    first_name: string;
+    last_name: string;
+    phone: string;
+  };
+  assessor_profile?: {
+    license_number: string;
+    years_experience: number;
+    education_background: string;
+    verification_status: string;
+    qualification_file_url?: string;
+  };
+  bank_accounts?: any[];
 }
 
 @Injectable({ providedIn: 'root' })

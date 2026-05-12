@@ -1,8 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { UploadService } from '../../../core/services/upload.service';
 
 @Component({
   selector: 'app-assessor-register',
@@ -12,15 +13,23 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./assessor-register.css']
 })
 export class AssessorRegisterComponent {
+  private authService = inject(AuthService);
+  private uploadService = inject(UploadService);
+  private router = inject(Router);
+
   step = 1;
   isLoading = false;
+  isUploading = false;
   errorMessage = '';
+  successMessage = '';
 
   userData = {
-    username: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    firstName: '',
+    lastName: '',
+    phone: ''
   };
 
   profileData = {
@@ -28,20 +37,32 @@ export class AssessorRegisterComponent {
     years_experience: 0,
     education_background: '',
     expertise_tags: '',
+    qualification_file_url: '',
     bank_name: '',
-    bank_account_no: ''
+    bank_account_no: '',
+    bank_account_name: ''
   };
 
-  constructor(private authService: AuthService, private router: Router) {}
-
   nextStep() {
+    this.errorMessage = '';
+    
     if (this.step === 1) {
       if (!this.userData.email || !this.userData.password || this.userData.password !== this.userData.confirmPassword) {
-        this.errorMessage = 'กรุณากรอกข้อมูลให้ครบถ้วนและรหัสผ่านต้องตรงกัน';
+        this.errorMessage = 'กรุณากรอกอีเมลและรหัสผ่านให้ถูกต้อง';
+        return;
+      }
+    } else if (this.step === 2) {
+      if (!this.userData.firstName || !this.userData.lastName || !this.userData.phone) {
+        this.errorMessage = 'กรุณากรอกข้อมูลส่วนตัวให้ครบถ้วน';
+        return;
+      }
+    } else if (this.step === 3) {
+      if (!this.profileData.license_number || !this.profileData.qualification_file_url) {
+        this.errorMessage = 'กรุณาระบุเลขใบอนุญาตและอัปโหลดไฟล์หลักฐาน';
         return;
       }
     }
-    this.errorMessage = '';
+
     this.step++;
   }
 
@@ -49,21 +70,65 @@ export class AssessorRegisterComponent {
     this.step--;
   }
 
+  async onFileSelected(event: any) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    
+    const file = input.files[0];
+
+    // Basic validation
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      this.errorMessage = 'ไฟล์มีขนาดใหญ่เกินไป (จำกัด 5MB)';
+      input.value = '';
+      return;
+    }
+
+    this.isUploading = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+
+    console.log('💎 Selected file:', file.name, file.type, file.size);
+
+    this.uploadService.uploadFile(file, 'assessors').subscribe({
+      next: (res) => {
+        this.profileData.qualification_file_url = res.url;
+        this.isUploading = false;
+        this.successMessage = 'อัปโหลดไฟล์หลักฐานเรียบร้อยแล้ว';
+        console.log('✅ Upload success:', res.url);
+      },
+      error: (err) => {
+        console.error('❌ Upload failed', err);
+        this.errorMessage = 'ไม่สามารถอัปโหลดไฟล์ได้: ' + (err.error?.message || 'Network Error');
+        this.isUploading = false;
+        input.value = ''; // Reset input so user can try again
+      }
+    });
+  }
+
   async onRegister() {
+    if (!this.profileData.bank_name || !this.profileData.bank_account_no) {
+      this.errorMessage = 'กรุณากรอกข้อมูลบัญชีธนาคารให้ครบถ้วน';
+      return;
+    }
+
     this.isLoading = true;
     this.errorMessage = '';
 
     try {
       const response: any = await this.authService.registerAssessor({
         userData: {
-          username: this.userData.username || this.userData.email.split('@')[0],
+          username: `${this.userData.firstName} ${this.userData.lastName}`,
           email: this.userData.email,
           password: this.userData.password
         },
-        profileData: this.profileData
+        profileData: {
+          ...this.profileData,
+          firstName: this.userData.firstName,
+          lastName: this.userData.lastName,
+          phone: this.userData.phone
+        }
       }).toPromise();
 
-      // Store token and redirect
       if (response && response.access_token) {
         localStorage.setItem('access_token', response.access_token);
         localStorage.setItem('user', JSON.stringify(response.user));

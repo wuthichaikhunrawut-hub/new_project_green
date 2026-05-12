@@ -22,35 +22,43 @@
       <div class="step-item" [class.active]="step === 1" [class.completed]="step > 1">
         <div class="step-icon">
           <i class="fa-solid fa-check" *ngIf="step > 1"></i>
-          <i class="fa-solid fa-user" *ngIf="step <= 1"></i>
+          <i class="fa-solid fa-lock" *ngIf="step <= 1"></i>
         </div>
-        <div class="step-label">บัญชีผู้ใช้</div>
+        <div class="step-label">บัญชี</div>
       </div>
       <div class="step-line" [class.active]="step > 1"></div>
       <div class="step-item" [class.active]="step === 2" [class.completed]="step > 2">
         <div class="step-icon">
           <i class="fa-solid fa-check" *ngIf="step > 2"></i>
-          <i class="fa-solid fa-certificate" *ngIf="step <= 2"></i>
+          <i class="fa-solid fa-user" *ngIf="step <= 2"></i>
         </div>
-        <div class="step-label">ความเชี่ยวชาญ</div>
+        <div class="step-label">โปรไฟล์</div>
       </div>
       <div class="step-line" [class.active]="step > 2"></div>
       <div class="step-item" [class.active]="step === 3" [class.completed]="step > 3">
         <div class="step-icon">
           <i class="fa-solid fa-check" *ngIf="step > 3"></i>
-          <i class="fa-solid fa-credit-card" *ngIf="step <= 3"></i>
+          <i class="fa-solid fa-certificate" *ngIf="step <= 3"></i>
         </div>
-        <div class="step-label">ข้อมูลทางบัญชี</div>
+        <div class="step-label">วิชาชีพ</div>
+      </div>
+      <div class="step-line" [class.active]="step > 3"></div>
+      <div class="step-item" [class.active]="step === 4" [class.completed]="step > 4">
+        <div class="step-icon">
+          <i class="fa-solid fa-check" *ngIf="step > 4"></i>
+          <i class="fa-solid fa-credit-card" *ngIf="step <= 4"></i>
+        </div>
+        <div class="step-label">การรับเงิน</div>
       </div>
     </div>
 
     <!-- Form Content -->
     <form (ngSubmit)="onRegister()" class="register-form">
-      <!-- Step 1: Account Information -->
+      <!-- Step 1: Account Setup -->
       <div class="step-content" [class.active]="step === 1">
         <div class="step-header compact">
           <h2 class="step-title">สร้างบัญชีผู้ใช้</h2>
-          <p class="step-description">กรอกข้อมูลบัญชีเพื่อเริ่มต้น</p>
+          <p class="step-description">กรอกข้อมูลอีเมลและรหัสผ่านเพื่อเริ่มต้น</p>
         </div>
 
         <div class="form-group compact">
@@ -60,7 +68,6 @@
             <input type="email" class="form-input" [(ngModel)]="userData.email" name="email"
               placeholder="example@email.com" required autocomplete="email">
           </div>
-          <small class="form-help">ใช้สำหรับเข้าสู่ระบบ</small>
         </div>
 
         <div class="form-row compact">
@@ -83,11 +90,47 @@
         </div>
       </div>
 
-      <!-- Step 2: Expertise Information -->
+      <!-- Step 2: Personal Information -->
       <div class="step-content" [class.active]="step === 2">
         <div class="step-header compact">
+          <h2 class="step-title">ข้อมูลส่วนตัว</h2>
+          <p class="step-description">บอกให้เรารู้จักคุณมากขึ้น</p>
+        </div>
+
+        <div class="form-row compact">
+          <div class="form-group flex-1 compact">
+            <label class="form-label">ชื่อจริง</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user input-icon"></i>
+              <input type="text" class="form-input" [(ngModel)]="userData.firstName" name="firstName"
+                placeholder="ชื่อ" required>
+            </div>
+          </div>
+          <div class="form-group flex-1 compact">
+            <label class="form-label">นามสกุล</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-user input-icon"></i>
+              <input type="text" class="form-input" [(ngModel)]="userData.lastName" name="lastName"
+                placeholder="นามสกุล" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group compact">
+          <label class="form-label">เบอร์โทรศัพท์</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-phone input-icon"></i>
+            <input type="tel" class="form-input" [(ngModel)]="userData.phone" name="phone"
+              placeholder="08X-XXX-XXXX" required>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Professional Qualification -->
+      <div class="step-content" [class.active]="step === 3">
+        <div class="step-header compact">
           <h2 class="step-title">ข้อมูลความเชี่ยวชาญ</h2>
-          <p class="step-description">แสดงข้อมูลประสบการณ์ของคุณ</p>
+          <p class="step-description">กรุณาระบุเลขใบอนุญาตและอัปโหลดหลักฐาน</p>
         </div>
 
         <div class="form-row compact">
@@ -110,76 +153,104 @@
         </div>
 
         <div class="form-group compact">
-          <label class="form-label">แท็กความเชี่ยวชาญ</label>
-          <div class="input-wrapper">
-            <i class="fa-solid fa-tags input-icon"></i>
-            <input type="text" class="form-input" [(ngModel)]="profileData.expertise_tags" name="tags"
-              placeholder="Energy, Waste, Carbon, ESG">
+          <label class="form-label">อัปโหลดไฟล์หลักฐานคุณสมบัติ</label>
+          <div class="file-upload-wrapper" [class.uploaded]="profileData.qualification_file_url">
+            <input type="file" id="evidenceFile" (change)="onFileSelected($event)" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+            <label for="evidenceFile" class="file-upload-label">
+              <div class="upload-content" *ngIf="!isUploading && !profileData.qualification_file_url">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <span>เลือกไฟล์หลักฐาน (PDF, Image)</span>
+              </div>
+              <div class="upload-content" *ngIf="isUploading">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                <span>กำลังอัปโหลด...</span>
+              </div>
+              <div class="upload-content success" *ngIf="profileData.qualification_file_url && !isUploading">
+                <i class="fa-solid fa-circle-check me-2"></i>
+                <span>อัปโหลดสำเร็จแล้ว</span>
+              </div>
+            </label>
           </div>
-          <small class="form-help">คั่นด้วยคอมม่า (,)</small>
+          <small class="form-help text-primary" *ngIf="profileData.qualification_file_url">
+            <i class="fa-solid fa-link me-1"></i> เชื่อมโยงไฟล์เรียบร้อยแล้ว
+          </small>
         </div>
 
         <div class="form-group compact">
-          <label class="form-label">วุฒิการศึกษา / ประสบการณ์</label>
+          <label class="form-label">ประวัติการศึกษา / ผลงาน</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-graduation-cap input-icon"></i>
-            <textarea class="form-input textarea" [(ngModel)]="profileData.education_background" name="edu" rows="3"
-              placeholder="ข้อมูลการศึกษาและประสบการณ์..."></textarea>
+            <textarea class="form-input textarea" [(ngModel)]="profileData.education_background" name="edu" rows="2"
+              placeholder="ข้อมูลการศึกษา..."></textarea>
           </div>
         </div>
       </div>
 
-      <!-- Step 3: Payment Information -->
-      <div class="step-content" [class.active]="step === 3">
+      <!-- Step 4: Payment Information -->
+      <div class="step-content" [class.active]="step === 4">
         <div class="step-header compact">
           <h2 class="step-title">ข้อมูลการรับค่าตอบแทน</h2>
-          <p class="step-description">ข้อมูลสำหรับการโอนเงินค่าตอบแทน</p>
+          <p class="step-description">ระบุบัญชีธนาคารเพื่อรับเงินค่าตรวจประเมิน</p>
         </div>
 
         <div class="form-group compact">
           <label class="form-label">ชื่อธนาคาร</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-building-columns input-icon"></i>
-            <input type="text" class="form-input" [(ngModel)]="profileData.bank_name" name="bankName"
-              placeholder="ธนาคารกสิกรไทย" required>
+            <select class="form-input" [(ngModel)]="profileData.bank_name" name="bankName" required>
+              <option value="" disabled>เลือกธนาคาร</option>
+              <option value="ธนาคารกสิกรไทย">ธนาคารกสิกรไทย (KBank)</option>
+              <option value="ธนาคารไทยพาณิชย์">ธนาคารไทยพาณิชย์ (SCB)</option>
+              <option value="ธนาคารกรุงเทพ">ธนาคารกรุงเทพ (BBL)</option>
+              <option value="ธนาคารกรุงไทย">ธนาคารกรุงไทย (KTB)</option>
+              <option value="ธนาคารกรุงศรีอยุธยา">ธนาคารกรุงศรีอยุธยา (BAY)</option>
+              <option value="ธนาคารทหารไทยธนชาต">ธนาคารทหารไทยธนชาต (ttb)</option>
+            </select>
           </div>
         </div>
 
         <div class="form-group compact">
-          <label class="form-label">เลขที่บัญชีธนาคาร</label>
+          <label class="form-label">เลขที่บัญชี</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-credit-card input-icon"></i>
             <input type="text" class="form-input" [(ngModel)]="profileData.bank_account_no" name="bankNo"
-              placeholder="123-4-56789-0" required>
+              placeholder="XXX-X-XXXXX-X" required>
           </div>
-          <small class="form-help">กรอกเลขบัญชีให้ครบตามสมุดบัญชี</small>
+        </div>
+
+        <div class="form-group compact">
+          <label class="form-label">ชื่อบัญชี (ภาษาไทย/อังกฤษ ตามหน้าสมุด)</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-signature input-icon"></i>
+            <input type="text" class="form-input" [(ngModel)]="profileData.bank_account_name" name="bankAccName"
+              placeholder="นาย กรีน ออฟฟิศ" required>
+          </div>
         </div>
       </div>
 
-      <!-- Error Message -->
+      <!-- Messages -->
       <div *ngIf="errorMessage" class="error-message">
         <i class="fa-solid fa-exclamation-triangle"></i>
         {{ errorMessage }}
       </div>
+      <div *ngIf="successMessage" class="success-message text-success small mb-3 text-center">
+        <i class="fa-solid fa-circle-check"></i>
+        {{ successMessage }}
+      </div>
 
       <!-- Action Buttons -->
       <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="prevStep()" *ngIf="step > 1" [disabled]="isLoading">
-          <i class="fa-solid fa-arrow-left"></i>
-          กลับ
+        <button type="button" class="btn-secondary" (click)="prevStep()" *ngIf="step > 1" [disabled]="isLoading || isUploading">
+          <i class="fa-solid fa-arrow-left"></i> กลับ
         </button>
 
-        <button type="button" class="btn-primary" (click)="nextStep()" *ngIf="step < 3" [disabled]="isLoading">
-          ถัดไป
-          <i class="fa-solid fa-arrow-right"></i>
+        <button type="button" class="btn-primary" (click)="nextStep()" *ngIf="step < 4" [disabled]="isLoading || isUploading">
+          ถัดไป <i class="fa-solid fa-arrow-right"></i>
         </button>
 
-        <button type="submit" class="btn-primary" *ngIf="step === 3" [disabled]="isLoading">
-          <span *ngIf="isLoading" class="loading-spinner"></span>
-          <span *ngIf="!isLoading">
-            <i class="fa-solid fa-check"></i>
-            ยืนยันการลงทะเบียน
-          </span>
+        <button type="submit" class="btn-primary" *ngIf="step === 4" [disabled]="isLoading || isUploading">
+          <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+          <span *ngIf="!isLoading">ยืนยันการลงทะเบียน</span>
         </button>
       </div>
     </form>

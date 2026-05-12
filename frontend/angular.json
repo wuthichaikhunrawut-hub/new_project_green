@@ -72,6 +72,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "poll": 250
+          },
           "configurations": {
             "production": {
               "buildTarget": "project-green:build:production"

@@ -59,4 +59,32 @@ export class AdminAssessorsComponent implements OnInit {
       }
     });
   }
+
+  // Modal logic
+  selectedAssessor: AssessorUser | null = null;
+
+  openModal(user: AssessorUser) {
+    this.selectedAssessor = user;
+  }
+
+  closeModal() {
+    this.selectedAssessor = null;
+  }
+
+  verifyFromModal(verified: boolean) {
+    if (!this.selectedAssessor) return;
+    const action = verified ? 'อนุมัติ' : 'ปฏิเสธ';
+    if (!confirm(`ยืนยันการ${action}ผู้ตรวจประเมิน ${this.selectedAssessor.username} หรือไม่?`)) return;
+    
+    this.svc.verifyAssessor(this.selectedAssessor.id, verified).subscribe({
+      next: () => {
+        alert(`ดำเนินการ${action}เรียบร้อยแล้ว`);
+        this.loadAssessors();
+        this.closeModal();
+      },
+      error: () => {
+        alert(`เกิดข้อผิดพลาด ไม่สามารถดำเนินการได้`);
+      }
+    });
+  }
 }

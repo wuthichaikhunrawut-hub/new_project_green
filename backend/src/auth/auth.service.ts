@@ -83,14 +83,35 @@ export class AuthService {
 
     // 2. Create User as ASSESSOR
     const user = await this.usersService.create({
-      ...registerDto.userData,
-      password_hash: hashedPassword,
+      email: registerDto.userData.email,
+      password: registerDto.userData.password,
     });
 
     await this.usersService.assignRoleToUser(user.id, UserRole.ASSESSOR);
 
-    // 3. Create Assessor Profile
-    const profile = await this.usersService.createAssessorProfile(user.id, registerDto.profileData);
+    // 3. Create Profiles
+    await this.usersService.update(user.id, {
+      user_profile: {
+        first_name: registerDto.profileData.firstName,
+        last_name: registerDto.profileData.lastName,
+        phone: registerDto.profileData.phone,
+      },
+      assessor_profile: {
+        license_number: registerDto.profileData.license_number,
+        years_experience: registerDto.profileData.years_experience,
+        education_background: registerDto.profileData.education_background,
+        qualification_file_url: registerDto.profileData.qualification_file_url,
+        verification_status: 'Pending'
+      },
+      bank_account: {
+        bank_name: registerDto.profileData.bank_name,
+        account_no: registerDto.profileData.bank_account_no,
+        account_name: registerDto.profileData.bank_account_name
+      }
+    });
+
+    // Fetch the complete profile to return
+    const profile = await this.usersService.findOne(user.id);
 
     // 4. Generate JWT
     const payload = { sub: user.id, email: user.email, role: UserRole.ASSESSOR };

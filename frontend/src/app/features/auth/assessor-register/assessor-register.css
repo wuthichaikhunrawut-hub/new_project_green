@@ -655,9 +655,81 @@ body {
   }
 }
 
-@media (max-width: 576px) {
-  .register-card {
-    padding: 30px 20px;
-    border-radius: 2rem;
-  }
+/* File Upload Styles */
+.file-upload-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.file-input-hidden {
+  position: absolute;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  z-index: -1;
+}
+
+.file-upload-label {
+  display: block;
+  width: 100%;
+  padding: 1.5rem;
+  background: var(--gray-50);
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: var(--transition-base);
+  text-align: center;
+}
+
+.file-upload-wrapper.uploaded .file-upload-label {
+  border-color: var(--primary-green);
+  background: var(--green-50);
+}
+
+.file-upload-label:hover {
+  border-color: var(--primary-green);
+  background: var(--light-green);
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--gray-600);
+  font-size: 0.875rem;
+}
+
+.upload-icon {
+  font-size: 1.5rem;
+  color: var(--gray-400);
+  margin-bottom: 0.25rem;
+}
+
+.upload-content.success {
+  color: var(--primary-green);
+}
+
+.upload-content.success i {
+  color: var(--primary-green);
+  font-size: 1.25rem;
+}
+
+.success-message {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+select.form-input {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
 }

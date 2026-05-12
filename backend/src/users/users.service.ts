@@ -6,6 +6,7 @@ import { UserProfile } from './entities/user-profile.entity';
 import { AssessorProfile } from './entities/assessor-profile.entity';
 import { Role } from './entities/role.entity';
 import { UserRole as UserRoleLink } from './entities/user-role.entity';
+import { BankAccount } from './entities/bank-account.entity';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import * as bcrypt from 'bcrypt';
 
@@ -22,6 +23,8 @@ export class UsersService {
     private rolesRepository: Repository<Role>,
     @InjectRepository(UserRoleLink)
     private userRolesRepository: Repository<UserRoleLink>,
+    @InjectRepository(BankAccount)
+    private bankAccountRepository: Repository<BankAccount>,
     private auditLogsService: AuditLogsService
   ) {}
 
@@ -111,11 +114,13 @@ export class UsersService {
     const query = this.usersRepository.createQueryBuilder('user')
       .leftJoinAndSelect('user.roles', 'roles')
       .leftJoinAndSelect('user.user_profile', 'profile')
+      .leftJoinAndSelect('user.assessor_profile', 'assessor_profile')
       .leftJoinAndSelect('user.organization', 'organization')
+      .leftJoinAndSelect('user.bank_accounts', 'bank_accounts')
       .orderBy('user.created_at', 'DESC');
 
     if (roleName) {
-      query.andWhere('roles.role_name = :roleName', { roleName });
+      query.andWhere('UPPER(roles.role_name) = UPPER(:roleName)', { roleName });
     }
 
     const users = await query.getMany();
@@ -124,7 +129,9 @@ export class UsersService {
     return users.map(user => ({
       ...user,
       role: user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
-      username: user.user_profile?.first_name || user.email.split('@')[0]
+      username: user.user_profile?.first_name || user.email.split('@')[0],
+      bio: user.assessor_profile?.education_background || '-',
+      assessor_verified: user.assessor_profile?.verification_status === 'Verified' || user.assessor_profile?.verification_status === 'VERIFIED'
     })) as any;
   }
 
@@ -185,6 +192,8 @@ export class UsersService {
       id: userId,
       created_at,
       updated_at,
+      assessor_verified,
+      bank_account,
       ...userData 
     } = updateData;
 
@@ -200,13 +209,18 @@ export class UsersService {
       await this.setRoleForUser(id, role);
     }
 
-    if (assessor_profile) {
+    if (assessor_profile || assessor_verified !== undefined) {
       let profile: AssessorProfile | null = await this.assessorProfileRepository.findOne({ where: { user: { id } } });
       if (!profile) {
           profile = this.assessorProfileRepository.create({ ...assessor_profile, user: { id } } as any) as unknown as AssessorProfile;
-      } else {
+      } else if (assessor_profile) {
           Object.assign(profile, assessor_profile);
       }
+      
+      if (assessor_verified !== undefined) {
+          profile.verification_status = assessor_verified ? 'Verified' : 'Pending';
+      }
+
       await this.assessorProfileRepository.save(profile!);
     }
 
@@ -220,6 +234,16 @@ export class UsersService {
         Object.assign(profile, user_profile);
       }
       await this.userProfileRepository.save(profile);
+    }
+
+    if (bank_account) {
+      let account = await this.bankAccountRepository.findOne({ where: { user: { id } } });
+      if (!account) {
+        account = this.bankAccountRepository.create({ ...bank_account, user: { id }, is_primary: true });
+      } else {
+        Object.assign(account, bank_account);
+      }
+      await this.bankAccountRepository.save(account);
     }
 
     const updated = await this.findOne(id);
