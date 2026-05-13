@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Feature } from './feature.entity';
 
 @Entity('subscription_plans')
 export class SubscriptionPlan {
@@ -20,14 +21,16 @@ export class SubscriptionPlan {
   @Column({ type: 'int', nullable: true })
   max_locations: number;
 
-  @Column({ type: 'boolean', default: false })
-  has_ai_scan: boolean;
-
-  @Column({ type: 'boolean', default: true })
-  has_green_office: boolean;
-
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
+
+  @ManyToMany(() => Feature)
+  @JoinTable({
+    name: 'plan_features',
+    joinColumn: { name: 'plan_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'feature_id', referencedColumnName: 'id' }
+  })
+  features: Feature[];
 
   @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;

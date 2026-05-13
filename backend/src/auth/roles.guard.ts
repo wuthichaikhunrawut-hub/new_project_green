@@ -18,8 +18,15 @@ export class RolesGuard implements CanActivate {
       return false;
     }
     
-    // Normalize role comparison
-    const userRole = String(user.role).trim().toUpperCase();
-    return requiredRoles.some((role) => role.trim().toUpperCase() === userRole);
+    // Normalize role comparison (remove spaces and underscores)
+    const normalize = (r: string) => String(r || '').trim().toUpperCase().replace(/[\s_]/g, '');
+    const userRole = normalize(user.role);
+    const hasRole = requiredRoles.some((role) => normalize(role) === userRole);
+    
+    console.log(`[RolesGuard] User Role: "${user.role}" -> "${userRole}"`);
+    console.log(`[RolesGuard] Required Roles: ${JSON.stringify(requiredRoles)}`);
+    console.log(`[RolesGuard] Access: ${hasRole ? 'ALLOWED' : 'DENIED'}`);
+    
+    return hasRole;
   }
 }

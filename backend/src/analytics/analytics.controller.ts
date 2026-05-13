@@ -10,7 +10,7 @@ export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
   @Get('admin-dashboard')
-  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
+  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
   async getAdminStats() {
     return this.analyticsService.getAdminStats();
   }

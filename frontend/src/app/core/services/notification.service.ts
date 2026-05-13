@@ -8,6 +8,8 @@ export enum NotificationType {
   ASSESSMENT = 'ASSESSMENT',
   ACCOUNT = 'ACCOUNT',
   DEADLINE = 'DEADLINE',
+  REQUEST = 'REQUEST',
+  URGENT = 'URGENT',
 }
 
 export interface Notification {

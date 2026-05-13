@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationService, NotificationType } from '../../../core/services/notification.service';
@@ -18,6 +18,7 @@ export class NotificationsAdminComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private orgService = inject(OrgService);
   private usersService = inject(UsersService);
+  private cdr = inject(ChangeDetectorRef);
 
   organizations: any[] = [];
   allUsers: any[] = [];
@@ -38,8 +39,8 @@ export class NotificationsAdminComponent implements OnInit {
     { value: NotificationType.SYSTEM, label: 'ประกาศทั่วไป' },
     { value: NotificationType.ASSESSMENT, label: 'การประเมิน' },
     { value: NotificationType.DEADLINE, label: 'แจ้งเตือนกำหนดส่ง' },
-    { value: 'REQUEST', label: 'คำร้อง/คำขอ' },
-    { value: 'URGENT', label: 'แจ้งเตือนสำคัญ' }
+    { value: NotificationType.REQUEST, label: 'คำร้อง/คำขอ' },
+    { value: NotificationType.URGENT, label: 'แจ้งเตือนสำคัญ' }
   ];
 
   isSending = false;
@@ -93,14 +94,16 @@ export class NotificationsAdminComponent implements OnInit {
         link: this.notification.link || undefined
     }).subscribe({
       next: () => {
-        this.isSending = false;
         this.successMessage = `ส่งการแจ้งเตือนสำเร็จแล้ว (${recipientIds.length} ผู้รับ)`;
         this.resetForm();
+        this.isSending = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.isSending = false;
         this.errorMessage = 'เกิดข้อผิดพลาดในการส่งการแจ้งเตือน';
         console.error(err);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -134,19 +137,20 @@ export class NotificationsAdminComponent implements OnInit {
       case NotificationType.DEADLINE: return 'fa-clock';
       case NotificationType.ASSESSMENT: return 'fa-file-circle-check';
       case NotificationType.ACCOUNT: return 'fa-user-shield';
-      case 'URGENT' as any: return 'fa-triangle-exclamation';
+      case NotificationType.REQUEST: return 'fa-file-invoice';
+      case NotificationType.URGENT: return 'fa-triangle-exclamation';
       default: return 'fa-circle-info';
     }
   }
 
   getPreviewIconClass(): string {
-    const type = this.notification.type as any;
-    if (type === 'URGENT') return 'bg-danger bg-opacity-10 text-danger';
     switch (this.notification.type) {
       case NotificationType.DEADLINE: return 'bg-warning bg-opacity-10 text-warning';
       case NotificationType.ASSESSMENT: return 'bg-primary bg-opacity-10 text-primary';
       case NotificationType.ACCOUNT: return 'bg-success bg-opacity-10 text-success';
-      default: return 'bg-info bg-opacity-10 text-info';
+      case NotificationType.REQUEST: return 'bg-info bg-opacity-10 text-info';
+      case NotificationType.URGENT: return 'bg-danger bg-opacity-10 text-danger';
+      default: return 'bg-secondary bg-opacity-10 text-secondary';
     }
   }
 

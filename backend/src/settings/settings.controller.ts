@@ -15,7 +15,7 @@ export class SettingsController {
   }
 
   @Put()
-  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
+  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
   async updateSettings(@Body() body: Record<string, any>) {
     return this.settingsService.updateSettings(body);
   }

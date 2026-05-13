@@ -38,12 +38,13 @@ export class AdminInvoicesComponent implements OnInit {
     });
   }
 
-  markAsPaid(id: string) {
+  // Update status to PAID
+  markAsPaid(id: number) {
     if (!confirm('ยืนยันการตั้งค่าสถานะเป็น "ชำระแล้ว"?')) return;
     this.svc.updateInvoiceStatus(id, 'PAID').subscribe({ next: () => this.loadInvoices() });
   }
 
-  cancel(id: string) {
+  cancel(id: number) {
     if (!confirm('ยืนยันการยกเลิกรายการนี้?')) return;
     this.svc.updateInvoiceStatus(id, 'CANCELLED').subscribe({ next: () => this.loadInvoices() });
   }

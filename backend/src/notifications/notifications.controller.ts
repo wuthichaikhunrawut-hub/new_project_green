@@ -12,16 +12,16 @@ export class NotificationsController {
 
   @Get()
   findAll(@Request() req) {
-    return this.notificationsService.findAllForUser(req.user.userId);
+    return this.notificationsService.findAllForUser(req.user.sub);
   }
 
   @Get('unread-count')
   getUnreadCount(@Request() req) {
-    return this.notificationsService.getUnreadCount(req.user.userId);
+    return this.notificationsService.getUnreadCount(req.user.sub);
   }
 
   @Post()
-  @Roles('ADMIN', 'SYSTEM_ADMIN')
+  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
   create(@Body() body: {
     title: string;
     message: string;
@@ -31,12 +31,12 @@ export class NotificationsController {
   }, @Request() req) {
     return this.notificationsService.create({
       ...body,
-      sender_id: req.user.userId,
+      sender_id: req.user.sub,
     });
   }
 
   @Post('bulk')
-  @Roles('ADMIN', 'SYSTEM_ADMIN')
+  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
   createBulk(@Body() body: {
     title: string;
     message: string;
@@ -46,17 +46,17 @@ export class NotificationsController {
   }, @Request() req) {
     return this.notificationsService.createBulk({
       ...body,
-      sender_id: req.user.userId,
+      sender_id: req.user.sub,
     });
   }
 
   @Patch(':id/read')
   markAsRead(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    return this.notificationsService.markAsRead(id, req.user.userId);
+    return this.notificationsService.markAsRead(id, req.user.sub);
   }
 
   @Patch('read-all')
   markAllAsRead(@Request() req) {
-    return this.notificationsService.markAllAsRead(req.user.userId);
+    return this.notificationsService.markAllAsRead(req.user.sub);
   }
 }
