@@ -1,0 +1,42 @@
+.animate-in {
+    animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.notification-card {
+    position: relative;
+    border-left: 4px solid transparent !important;
+    transition: all 0.2s ease;
+}
+
+.notification-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+}
+
+.unread-bg {
+    background-color: rgba(var(--bs-primary-rgb), 0.03);
+    border-left-color: var(--bs-primary) !important;
+}
+
+.unread-dot {
+    width: 10px;
+    height: 10px;
+    background-color: var(--bs-danger);
+    border-radius: 50%;
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}

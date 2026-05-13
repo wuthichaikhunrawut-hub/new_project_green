@@ -107,6 +107,13 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
       },
+      {
+        path: 'admin/notifications',
+        loadComponent: () => import('./features/admin/notifications/notifications-admin.component').then(m => m.NotificationsAdminComponent),
+        title: 'ส่งการแจ้งเตือน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+      },
 
       // GROUP: ASSESSOR PAGES
       {
@@ -232,6 +239,11 @@ export const routes: Routes = [
         title: 'แพ็กเกจการใช้งาน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),
+        title: 'การแจ้งเตือน - Green Sync'
       },
     ]
   },

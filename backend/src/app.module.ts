@@ -15,6 +15,7 @@ import { UploadsModule } from './uploads/uploads.module';
 import { GreenOfficeModule } from './green-office/green-office.module';
 import { SettingsModule } from './settings/settings.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     GreenOfficeModule,
     SettingsModule,
     AnalyticsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,191 @@
+<div class="container-fluid p-4 p-lg-5 animate-in">
+    <!-- Header -->
+    <div class="mb-5">
+        <h1 class="page-title fw-bold mb-2">ส่งการแจ้งเตือน</h1>
+        <p class="text-muted fs-6">ระบบกระจายข้อมูลข่าวสารระดับองค์กรแบบ Real-time</p>
+    </div>
+
+    <div class="row g-4 g-xl-5">
+        <!-- Main Form Area -->
+        <div class="col-lg-8">
+            <form (ngSubmit)="send()" #notifyForm="ngForm">
+                
+                <!-- Section 1: Recipient Selection -->
+                <div class="premium-card mb-4">
+                    <h5 class="fw-bold mb-4 d-flex align-items-center">
+                        <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
+                            <i class="fa-solid fa-users fs-5"></i>
+                        </span>
+                        ผู้รับการแจ้งเตือน
+                    </h5>
+
+                    <div class="target-selector d-flex flex-wrap gap-2 mb-4">
+                        <input type="radio" class="btn-check" name="targetType" id="targetAll" value="ALL_SYSTEM" [(ngModel)]="targetType">
+                        <label class="btn btn-outline-primary rounded-pill px-4" for="targetAll">ทุกคนในระบบ</label>
+
+                        <input type="radio" class="btn-check" name="targetType" id="targetOrg" value="ALL_ORG" [(ngModel)]="targetType">
+                        <label class="btn btn-outline-primary rounded-pill px-4" for="targetOrg">ทั้งองค์กร</label>
+
+                        <input type="radio" class="btn-check" name="targetType" id="targetUser" value="SPECIFIC_USER" [(ngModel)]="targetType">
+                        <label class="btn btn-outline-primary rounded-pill px-4" for="targetUser">เลือกรายคน</label>
+                    </div>
+
+                    <!-- Dynamic Fields based on Target -->
+                    <div class="row animate-in" *ngIf="targetType === 'ALL_SYSTEM'">
+                        <div class="col-12">
+                            <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center mb-0">
+                                <i class="fa-solid fa-triangle-exclamation fs-4 me-3"></i>
+                                <div>
+                                    <div class="fw-bold">ประกาศถึงทุกคนในระบบ</div>
+                                    <div class="small text-muted">ข้อความนี้จะถูกส่งไปยังผู้ใช้งานทั้งหมด {{ allUsers.length }} คน</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 animate-in" *ngIf="targetType === 'ALL_ORG' || targetType === 'SPECIFIC_USER'">
+                        <div class="col-md-6">
+                            <label class="form-label">เลือกองค์กรเป้าหมาย</label>
+                            <select class="form-select shadow-none" name="org" [(ngModel)]="selectedOrgId" (change)="onOrgChange($any($event.target).value)" required>
+                                <option [value]="null">ระบุองค์กร...</option>
+                                <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 animate-in" *ngIf="targetType === 'SPECIFIC_USER'">
+                            <label class="form-label">เลือกผู้ใช้งาน</label>
+                            <select class="form-select shadow-none" name="recipient" [(ngModel)]="selectedUserId" [disabled]="!selectedOrgId" required>
+                                <option [value]="null">{{ selectedOrgId ? 'ค้นหาผู้ใช้งาน...' : 'กรุณาเลือกองค์กรก่อน' }}</option>
+                                <option *ngFor="let user of filteredUsers" [value]="user.id">{{ user.username }} ({{ user.email }})</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top" *ngIf="getRecipientCount() > 0">
+                        <span class="badge bg-light text-primary border px-3 py-2 rounded-pill">
+                            <i class="fa-solid fa-user-check me-1"></i>
+                            เตรียมส่งถึงผู้รับ {{ getRecipientCount() }} คน
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Section 2: Message Content -->
+                <div class="premium-card">
+                    <h5 class="fw-bold mb-4 d-flex align-items-center">
+                        <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
+                            <i class="fa-solid fa-message fs-5"></i>
+                        </span>
+                        เนื้อหาการแจ้งเตือน
+                    </h5>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">ประเภทการแจ้งเตือน</label>
+                            <select class="form-select shadow-none" name="type" [(ngModel)]="notification.type">
+                                <option *ngFor="let t of notificationTypes" [value]="t.value">{{ t.label }}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 form-group">
+                            <label class="form-label">ลิงก์เพิ่มเติม (Deep Link)</label>
+                            <input type="text" class="form-control shadow-none" name="link" [(ngModel)]="notification.link" placeholder="เช่น /requests/123">
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label class="form-label">หัวข้อแจ้งเตือน</label>
+                            <input type="text" class="form-control shadow-none" name="title" [(ngModel)]="notification.title" required placeholder="พิมพ์หัวข้อสั้นๆ ที่น่าสนใจ...">
+                        </div>
+
+                        <div class="col-12 form-group">
+                            <label class="form-label">ข้อความรายละเอียด</label>
+                            <textarea class="form-control shadow-none" name="message" [(ngModel)]="notification.message" rows="5" required placeholder="ระบุเนื้อหาที่คุณต้องการแจ้งให้ทราบ..."></textarea>
+                        </div>
+
+                        <!-- Status Messages -->
+                        <div class="col-12 mt-2">
+                            <div *ngIf="successMessage" class="alert alert-success border-0 rounded-4 shadow-sm py-3 mb-4 d-flex align-items-center">
+                                <i class="fa-solid fa-circle-check fs-4 me-3"></i>
+                                <div>
+                                    <div class="fw-bold">ส่งเรียบร้อย!</div>
+                                    <div class="small">{{ successMessage }}</div>
+                                </div>
+                            </div>
+                            <div *ngIf="errorMessage" class="alert alert-danger border-0 rounded-4 shadow-sm py-3 mb-4 d-flex align-items-center">
+                                <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
+                                <div>
+                                    <div class="fw-bold">เกิดข้อผิดพลาด</div>
+                                    <div class="small">{{ errorMessage }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 d-flex align-items-center gap-3 mt-4">
+                            <button type="submit" class="btn btn-premium-primary d-flex align-items-center" [disabled]="!notifyForm.form.valid || isSending || getRecipientCount() === 0">
+                                <span *ngIf="isSending" class="spinner-border spinner-border-sm me-2"></span>
+                                <i class="fa-solid fa-paper-plane me-2" *ngIf="!isSending"></i>
+                                ส่งการแจ้งเตือนทันที
+                            </button>
+                            <button type="button" class="btn btn-premium-secondary" (click)="resetForm()">
+                                ล้างข้อมูล
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Right Sidebar: Preview & Insights -->
+        <div class="col-lg-4">
+            <div class="sticky-top" style="top: 2rem;">
+                <div class="preview-title">Live Production Preview</div>
+                <div class="notification-preview mb-4">
+                    <div class="preview-icon-wrapper" [ngClass]="getPreviewIconClass()">
+                        <i class="fa-solid fs-5" [ngClass]="getPreviewIcon()"></i>
+                    </div>
+                    <div class="preview-content">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="preview-badge" [ngClass]="getPreviewBadgeClass()">{{ getCategoryLabel() }}</span>
+                            <span class="text-muted" style="font-size: 0.6rem;">เมื่อสักครู่</span>
+                        </div>
+                        <div class="fw-bold text-dark mb-1">{{ notification.title || 'หัวข้อแจ้งเตือนจะแสดงที่นี่' }}</div>
+                        <div class="text-muted small mb-2">{{ notification.message || 'เนื้อหาข้อความจะแสดงตัวอย่างให้คุณตรวจสอบความถูกต้องก่อนกดส่ง...' }}</div>
+                        
+                        <div class="border-top pt-2 mt-2 d-flex align-items-center justify-content-between">
+                            <span class="text-muted" style="font-size: 0.7rem;">
+                                <i class="fa-solid fa-user-tag me-1"></i>ถึง: {{ getRecipientLabel() }}
+                            </span>
+                            <i *ngIf="notification.link" class="fa-solid fa-chevron-right text-primary fs-7"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="soft-blue-card mb-4">
+                    <h5 class="fs-6 d-flex align-items-center">
+                        <i class="fa-solid fa-rocket me-2 text-blue-600"></i>
+                        คำแนะนำสำหรับ Admin
+                    </h5>
+                    <ul class="list-unstyled mb-0 small">
+                        <li class="mb-3">
+                            <i class="fa-solid fa-circle-1 text-blue-500 me-2"></i>
+                            เลือก <b>"กลุ่มผู้รับ"</b> ด้านซ้ายก่อนเป็นอันดับแรก
+                        </li>
+                        <li class="mb-3">
+                            <i class="fa-solid fa-circle-2 text-blue-500 me-2"></i>
+                            ตรวจสอบ <b>"Live Preview"</b> เพื่อเช็คความสวยงาม
+                        </li>
+                        <li class="mb-0">
+                            <i class="fa-solid fa-circle-3 text-blue-500 me-2"></i>
+                            กดส่ง และรอระบบประมวลผลเพื่อกระจายข้อความ
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="premium-card bg-light border-0 py-3 text-center">
+                    <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span style="font-size: 0.75rem;">Enterprise Secure Delivery</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

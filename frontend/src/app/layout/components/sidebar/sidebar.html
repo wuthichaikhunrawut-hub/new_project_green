@@ -61,6 +61,10 @@
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>ประวัติการใช้งานระบบ</span>
       </a>
+      <a routerLink="/admin/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-paper-plane"></i>
+        <span>ส่งการแจ้งเตือน</span>
+      </a>
       <a routerLink="/admin/settings" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-screwdriver-wrench"></i>
         <span>ตั้งค่าระบบ</span>
@@ -120,6 +124,10 @@
       <a routerLink="/subscription" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-box-archive"></i>
         <span>แพ็กเกจการใช้งาน</span>
+      </a>
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-bell"></i>
+        <span>การแจ้งเตือน</span>
       </a>
     </ng-container>
 
@@ -217,6 +225,10 @@
           <i class="fa-solid fa-certificate"></i>
           <span>คำขอรับรองสำนักงาน</span>
         </a>
+        <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+          <i class="fa-solid fa-bell"></i>
+          <span>การแจ้งเตือน</span>
+        </a>
       </ng-container>
 
       <!-- 6. Organization -->
@@ -255,7 +267,7 @@
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>ประวัติการประเมิน</span>
       </a>
-      <a routerLink="/assessor/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+      <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bell"></i>
         <span>การแจ้งเตือน</span>
       </a>
