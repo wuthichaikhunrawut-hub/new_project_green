@@ -39,7 +39,7 @@ h2 {
   font-weight: 800;
   color: #475569; /* Much clearer slate color */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 9999px;
+  border-radius: 9999px !important;
   position: relative;
   cursor: pointer;
   letter-spacing: 0.5px;

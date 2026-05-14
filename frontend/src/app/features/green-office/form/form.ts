@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { AssessmentCardComponent } from '../../../shared/components/assessment/assessment-card/assessment-card';
+import { timeout } from 'rxjs';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
 
 interface Category {
@@ -61,6 +62,8 @@ export class GreenOfficeFormComponent implements OnInit {
   activeSubCategory: string = '';
   subCategories: string[] = [];
 
+  private cdr = inject(ChangeDetectorRef);
+
   constructor(private criteriaService: GreenCriteriaService) {}
 
   ngOnInit(): void {
@@ -70,21 +73,35 @@ export class GreenOfficeFormComponent implements OnInit {
   loadCriteria(): void {
     this.isLoading = true;
     this.errorMsg = '';
-    this.criteriaService.getCriteriaList().subscribe({
+    this.criteriaService.getCriteriaList().pipe(
+      timeout(8000)
+    ).subscribe({
       next: (data: GreenCriteria[]) => {
         try {
+          if (!data || data.length === 0) {
+            this.errorMsg = 'ไม่พบข้อมูลเกณฑ์การประเมินในระบบ (Data is empty)';
+            this.isLoading = false;
+            return;
+          }
           this.buildFromApiData(data);
+          this.cdr.detectChanges();
         } catch (e: any) {
           console.error('Error parsing criteria data:', e);
           this.errorMsg = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูลเกณฑ์: ' + e.message;
         } finally {
           this.isLoading = false;
+          this.cdr.detectChanges();
         }
       },
       error: (err) => {
         console.error('Failed to load criteria', err);
-        this.errorMsg = 'ไม่สามารถโหลดข้อมูลเกณฑ์การประเมินได้ กรุณาลองใหม่อีกครั้ง (' + (err.message || err.statusText) + ')';
+        if (err.name === 'TimeoutError') {
+          this.errorMsg = 'การเชื่อมต่อล่าช้าเกินไป (Connection Timeout) กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อผู้ดูแลระบบ';
+        } else {
+          this.errorMsg = 'ไม่สามารถโหลดข้อมูลเกณฑ์การประเมินได้ (' + (err.message || err.statusText || 'Unknown Error') + ')';
+        }
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

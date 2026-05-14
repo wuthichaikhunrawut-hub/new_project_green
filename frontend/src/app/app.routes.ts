@@ -165,14 +165,14 @@ export const routes: Routes = [
         component: CarbonLogsComponent,
         title: 'บันทึกก๊าซเรือนกระจก',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE', 'EXECUTIVE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       {
         path: 'ai-scan',
         component: AiScanComponent,
         title: 'AI Scan - วิเคราะห์ภาพถ่ายเพื่อลดคาร์บอน',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE', 'EXECUTIVE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
 
       // GROUP 2: GREEN OFFICE ASSESSMENTS
@@ -181,21 +181,21 @@ export const routes: Routes = [
         component: GreenOfficeFormComponent,
         title: 'แบบประเมินตนเอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       { 
         path: 'assessment/category/:id', 
         component: CategoryPageComponent,
         title: 'แบบประเมินตนเอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       { 
         path: 'green-office/evidence', 
         component: GreenOfficeEvidenceComponent,
         title: 'จัดการไฟล์หลักฐาน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
 
       // GROUP 1: ORGANIZATION
@@ -217,14 +217,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/requests/requests').then(m => m.RequestsComponent),
         title: 'จัดการคำขอรับรอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'EMPLOYEE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       {
         path: 'requests/create',
         loadComponent: () => import('./features/requests/create/create-request').then(m => m.CreateRequestComponent),
         title: 'สร้างคำขอรับรอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
       },
       {
         path: 'requests/evaluate/:id',
@@ -238,7 +238,7 @@ export const routes: Routes = [
         component: SubscriptionComponent,
         title: 'แพ็กเกจการใช้งาน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
+        data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       { 
         path: 'subscription/billing', 
