@@ -29,11 +29,10 @@ export class SettingsService implements OnModuleInit {
       'permission.manage_quota': 'System Admin',
       'permission.ai_scan': 'System Admin',
       'permission.green_office': 'System Admin',
-      'payment.bank_name': '-',
-      'payment.account_no': '-',
-      'payment.account_name': '-',
-      'payment.instruction': 'กรุณาโอนเงินเข้าบัญชีข้างต้นและแนบหลักฐานการชำระเงินในระบบ',
-      'payment.qr_code': ''
+      'stripe.public_key': '',
+      'stripe.secret_key': '',
+      'stripe.webhook_secret': '',
+      'stripe.currency': 'thb'
     };
 
     for (const [key, value] of Object.entries(defaults)) {
@@ -48,17 +47,24 @@ export class SettingsService implements OnModuleInit {
     const settings = await this.settingRepo.find();
     const result: Record<string, any> = {};
     for (const s of settings) {
-      // Parse boolean or number if applicable
-      if (s.value === 'true') result[s.key] = true;
-      else if (s.value === 'false') result[s.key] = false;
-      // DO NOT convert payment keys to numbers (e.g. account_no should stay string)
-      else if (!s.key.startsWith('payment.') && !isNaN(Number(s.value)) && s.value !== '') {
-        result[s.key] = Number(s.value);
-      } else {
-        result[s.key] = s.value;
-      }
+      result[s.key] = this.parseValue(s.key, s.value);
     }
     return result;
+  }
+
+  async getSetting(key: string): Promise<any> {
+    const setting = await this.settingRepo.findOne({ where: { key } });
+    if (!setting) return null;
+    return this.parseValue(key, setting.value);
+  }
+
+  private parseValue(key: string, value: string): any {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    if (!key.startsWith('payment.') && !key.startsWith('stripe.') && !isNaN(Number(value)) && value !== '') {
+      return Number(value);
+    }
+    return value;
   }
 
   async updateSettings(settings: Record<string, any>): Promise<Record<string, any>> {

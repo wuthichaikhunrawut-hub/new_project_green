@@ -12,6 +12,9 @@ export class SubscriptionPlan {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  badge: string;
+
   @Index()
   @Column({ type: 'double precision', nullable: true })
   price_per_month: number;

@@ -65,50 +65,38 @@
             </div>
         </div>
 
-        <!-- Billing & Payment Settings -->
+        <!-- Stripe Integration Settings -->
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4 border-bottom pb-2">
-                        <i class="fa-solid fa-file-invoice-dollar me-2 text-warning"></i>การตั้งค่าช่องทางชำระเงิน (Billing & Payment)
+                        <i class="fa-brands fa-stripe me-2 text-primary" style="font-size: 1.5rem;"></i>การเชื่อมต่อระบบชำระเงิน (Stripe Integration)
                     </h5>
                     
-                    <div class="row g-4">
-                        <div class="col-md-8">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted">ชื่อธนาคาร</label>
-                                    <input type="text" class="form-control" [(ngModel)]="settings['payment.bank_name']" placeholder="เช่น กสิกรไทย, ไทยพาณิชย์">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-muted">ชื่อบัญชี</label>
-                                    <input type="text" class="form-control" [(ngModel)]="settings['payment.account_name']" placeholder="ชื่อบริษัท หรือ ชื่อบัญชีโอน">
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label small fw-bold text-muted">เลขที่บัญชี</label>
-                                    <input type="text" class="form-control" [(ngModel)]="settings['payment.account_no']" placeholder="xxx-x-xxxxx-x">
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label small fw-bold text-muted">คำแนะนำการชำระเงิน (Instruction)</label>
-                                    <textarea class="form-control" rows="2" [(ngModel)]="settings['payment.instruction']" placeholder="คำชี้แจงเพิ่มเติม..."></textarea>
-                                </div>
-                            </div>
+                    <div class="alert alert-info border-0 rounded-3 small">
+                        <i class="fa-solid fa-circle-info me-2"></i>
+                        ใช้สำหรับระบบตัดบัตรเครดิตอัตโนมัติ คุณสามารถดู API Keys ได้จากหน้า Dashboard ของ <a href="https://dashboard.stripe.com/apikeys" target="_blank" class="fw-bold text-decoration-none">Stripe</a>
+                    </div>
+
+                    <div class="row g-4 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Stripe Public Key</label>
+                            <input type="text" class="form-control" [(ngModel)]="settings['stripe.public_key']" placeholder="pk_test_..." autocomplete="off" name="stripe_pk">
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-muted d-block">QR Code ชำระเงิน (PromptPay)</label>
-                            <div class="qr-preview mb-3">
-                                <img *ngIf="settings['payment.qr_code']" [src]="settings['payment.qr_code']" alt="QR Code Preview">
-                                <i *ngIf="!settings['payment.qr_code']" class="fa-solid fa-qrcode fs-1 text-light"></i>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <input type="file" #qrInput hidden (change)="onFileSelected($event)" accept="image/*">
-                                <button class="btn btn-sm btn-outline-primary" (click)="qrInput.click()">
-                                    <i class="fa-solid fa-upload me-1"></i> เลือกรูปภาพ
-                                </button>
-                                <button *ngIf="settings['payment.qr_code']" class="btn btn-sm btn-outline-danger" (click)="removeQr()">
-                                    <i class="fa-solid fa-trash-can"></i>
-                                </button>
-                            </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Stripe Secret Key</label>
+                            <input type="password" class="form-control" [(ngModel)]="settings['stripe.secret_key']" placeholder="sk_test_..." autocomplete="new-password" name="stripe_sk">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Stripe Webhook Secret</label>
+                            <input type="password" class="form-control" [(ngModel)]="settings['stripe.webhook_secret']" placeholder="whsec_..." autocomplete="new-password" name="stripe_wh">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">สกุลเงินเริ่มต้น (Currency)</label>
+                            <select class="form-select" [(ngModel)]="settings['stripe.currency']">
+                                <option value="thb">THB (Thai Baht)</option>
+                                <option value="usd">USD (US Dollar)</option>
+                            </select>
                         </div>
                     </div>
                 </div>

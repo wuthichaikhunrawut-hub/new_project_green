@@ -240,6 +240,13 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
       },
+      { 
+        path: 'subscription/billing', 
+        loadComponent: () => import('./features/subscription/billing/billing').then(m => m.BillingComponent),
+        title: 'จัดการการชำระเงิน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
+      },
       {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),

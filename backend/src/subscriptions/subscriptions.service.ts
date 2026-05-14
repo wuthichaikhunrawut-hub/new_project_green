@@ -7,6 +7,9 @@ import { Feature } from './entities/feature.entity';
 import { OrganizationSubscription } from './entities/organization-subscription.entity';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
+import { Organization } from '../organizations/entities/organization.entity';
+import { User } from '../users/entities/user.entity';
+
 @Injectable()
 export class SubscriptionsService {
   constructor(
@@ -18,8 +21,29 @@ export class SubscriptionsService {
     private featuresRepository: Repository<Feature>,
     @InjectRepository(OrganizationSubscription)
     private orgSubRepository: Repository<OrganizationSubscription>,
+    @InjectRepository(Organization)
+    private orgRepository: Repository<Organization>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private auditLogsService: AuditLogsService,
   ) {}
+
+  // ... (previous methods)
+
+  async getOrganizationByUserId(userId: number): Promise<Organization> {
+    const user = await this.userRepository.findOne({ 
+      where: { id: userId },
+      relations: ['organization']
+    });
+    if (!user || !user.organization) {
+      throw new Error('Organization not found for user');
+    }
+    return user.organization;
+  }
+
+  async updateOrganizationStripeId(orgId: number, stripeId: string) {
+    await this.orgRepository.update(orgId, { stripe_customer_id: stripeId });
+  }
 
   // ---- Subscription Plans ----
 

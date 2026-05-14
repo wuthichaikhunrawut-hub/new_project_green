@@ -1,94 +1,119 @@
-<div class="container-fluid p-4 animate-in">
-  <div class="text-center mb-5">
-    <h2 class="fw-bold mb-3 text-dark">แพ็กเกจและการใช้งาน (Subscription & Usage)</h2>
-    <p class="text-muted fs-5">เลือกแพ็กเกจที่เหมาะสมกับขนาดและเป้าหมายขององค์กรคุณ เพื่อการจัดการคาร์บอนอย่างยั่งยืน</p>
-    
-    <!-- Billing Toggle -->
-    <div class="d-inline-flex bg-light-subtle rounded-pill p-1 mt-4 border shadow-sm">
-      <button class="btn btn-sm rounded-pill px-4 py-2 fw-medium transition-all" 
-              [class.btn-dark]="billingCycle === 'monthly'"
-              [class.text-white]="billingCycle === 'monthly'"
-              [class.btn-light]="billingCycle !== 'monthly'"
-              [class.text-muted]="billingCycle !== 'monthly'"
-              (click)="billingCycle = 'monthly'">
-        รายเดือน
-      </button>
-      <button class="btn btn-sm rounded-pill px-4 py-2 fw-medium transition-all" 
-              [class.btn-dark]="billingCycle === 'yearly'"
-              [class.text-white]="billingCycle === 'yearly'"
-              [class.btn-light]="billingCycle !== 'yearly'"
-              [class.text-muted]="billingCycle !== 'yearly'"
-              (click)="billingCycle = 'yearly'">
-        รายปี <span class="badge bg-primary ms-2 py-1 px-2 rounded-pill shadow-sm" style="font-size: 0.65rem;">ประหยัด 20%</span>
-      </button>
-    </div>
+<div class="container-fluid p-4 p-lg-5 animate-in">
+  <div class="text-center mb-4 max-w-2xl mx-auto">
+    <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill fw-bold mb-2 border border-primary border-opacity-10" style="font-size: 0.75rem;">
+      SUBSCRIPTION
+    </span>
+    <h2 class="fw-bold mb-2">ยกระดับการจัดการคาร์บอนสู่มาตรฐานสากล</h2>
+    <p class="text-muted small">เลือกแพ็กเกจที่เหมาะสมกับขนาดองค์กร เพื่อประสิทธิภาพสูงสุดในการก้าวสู่ Net Zero</p>
   </div>
 
-  <div class="row g-4 justify-content-center">
+  <div *ngIf="!isLoading" class="row justify-content-center">
     
+    <!-- Billing Cycle Toggle -->
+    <div class="d-flex justify-content-center mb-5 animate-in" style="animation-delay: 0.1s;">
+      <div class="billing-toggle-container shadow-sm">
+        <button 
+          class="btn rounded-pill px-4 py-2 toggle-btn fw-bold transition-all"
+          [class.active]="billingCycle === 'monthly'"
+          (click)="billingCycle = 'monthly'">
+          รายเดือน
+        </button>
+        <button 
+          class="btn rounded-pill px-4 py-2 toggle-btn fw-bold transition-all d-flex align-items-center"
+          [class.active]="billingCycle === 'yearly'"
+          (click)="billingCycle = 'yearly'">
+          รายปี <span class="badge bg-white text-primary ms-2 shadow-sm rounded-pill px-2 py-1" style="font-size: 0.65rem;">-20%</span>
+        </button>
+      </div>
+    </div>
+
+  <div class="row g-3 justify-content-center">
+    
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="text-center py-5 w-100">
+      <div class="spinner-border text-primary" role="status"></div>
+    </div>
+
     <!-- Pricing Cards -->
-    <div class="col-lg-4 col-md-6" *ngFor="let plan of plans">
-      <div class="card h-100 border-0 rounded-4 pricing-card transition-all"
-           [class.shadow-sm]="currentPlan !== plan.id && !plan.popular"
-           [class.shadow-lg]="currentPlan === plan.id || plan.popular"
-           [class.border-primary]="currentPlan === plan.id"
-           [class.popular-card]="plan.popular">
+    <div class="col-lg-4 col-md-6 mt-4 mt-lg-0" *ngFor="let plan of plans">
+      <div class="card h-100 pricing-card shadow position-relative transition-all"
+           [ngClass]="(currentPlan?.id === plan.id || plan.badge) ? 'border border-primary border-2' : 'border'"
+           [style.transform]="plan.badge ? 'translateY(-10px)' : ''"
+           [style.box-shadow]="plan.badge ? '0 20px 40px -10px rgba(16,185,129,0.25) !important' : ''">
         
-        <!-- Popular Badge -->
-        <div *ngIf="plan.popular" class="position-absolute top-0 start-50 translate-middle badge bg-amber text-dark px-3 py-2 rounded-pill fw-bold shadow-sm z-2">
-          <i class="fa-solid fa-star me-1"></i> ยอดนิยม
+        <!-- Premium Badge Ribbon -->
+        <div *ngIf="plan.badge" class="position-absolute top-0 start-50 translate-middle-x bg-primary text-white px-4 py-1 rounded-bottom fw-bold shadow"
+             style="font-size: 0.75rem; letter-spacing: 0.5px; z-index: 10; text-transform: uppercase;">
+          <i class="fa-solid fa-star me-1 text-warning" *ngIf="plan.badge === 'popular'"></i>
+          <i class="fa-solid fa-fire me-1 text-warning" *ngIf="plan.badge === 'recommended'"></i>
+          <i class="fa-solid fa-building me-1" *ngIf="plan.badge === 'enterprise'"></i>
+          {{ plan.badge === 'recommended' ? 'แนะนำ' : plan.badge === 'popular' ? 'ยอดนิยม' : 'สำหรับองค์กร' }}
         </div>
         
-        <div class="card-body p-5 d-flex flex-column">
-          <!-- Active Badge -->
-          <div *ngIf="currentPlan === plan.id" class="mb-3">
-            <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-1 rounded-pill fw-bold border border-primary">
-              แพ็กเกจปัจจุบันของคุณ
+        <div class="card-body p-4 d-flex flex-column" [class.pt-5]="plan.badge">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="fw-bold m-0" [class.text-primary]="plan.badge">{{ plan.plan_name }}</h4>
+            <span *ngIf="currentPlan?.id === plan.id" class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-bold border border-primary border-opacity-10" style="font-size: 0.7rem;">
+              <i class="fa-solid fa-check me-1"></i> ปัจจุบัน
             </span>
           </div>
 
-          <h3 class="fw-bold text-dark">{{ plan.name }}</h3>
-          <p class="text-muted small mb-4" style="min-height: 40px;">{{ plan.description }}</p>
+          <p class="text-muted small mb-3">{{ plan.description }}</p>
           
           <div class="price-box mb-4">
-            <span class="display-4 fw-bold text-dark">
-              <ng-container *ngIf="plan.monthlyPrice === 0">ฟรี</ng-container>
-              <ng-container *ngIf="plan.monthlyPrice > 0">
-                ฿{{ (billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice / 12) | number:'1.0-0' }}
-              </ng-container>
-            </span>
-            <span class="text-muted" *ngIf="plan.monthlyPrice > 0">/ เดือน</span>
-            <div class="small text-primary fw-medium mt-1" *ngIf="billingCycle === 'yearly' && plan.monthlyPrice > 0">
-              (เรียกเก็บเงิน ฿{{ plan.yearlyPrice | number }} ต่อปี)
+            <div class="d-flex align-items-baseline">
+              <span class="price-value fw-bold text-dark">
+                <ng-container *ngIf="plan.price_per_month === 0">ฟรี</ng-container>
+                <ng-container *ngIf="plan.price_per_month > 0">
+                  <span class="currency">฿</span>{{ (billingCycle === 'monthly' ? plan.price_per_month : plan.price_per_month * 12 * 0.8 / 12) | number:'1.0-0' }}
+                </ng-container>
+              </span>
+              <span class="text-muted ms-1 small" *ngIf="plan.price_per_month > 0">/ เดือน</span>
+            </div>
+            
+            <div class="small text-primary fw-bold mt-1" *ngIf="billingCycle === 'yearly' && plan.price_per_month > 0" style="font-size: 0.75rem;">
+              <i class="fa-solid fa-bolt me-1"></i> ประหยัด ฿{{ plan.price_per_month * 12 * 0.2 | number }} ต่อปี
             </div>
           </div>
           
-          <button class="btn w-100 py-3 rounded-3 fw-bold mb-4"
-                  [class.btn-primary]="currentPlan !== plan.id && plan.popular"
-                  [class.btn-outline-dark-navy]="currentPlan !== plan.id && !plan.popular"
-                  [class.btn-light]="currentPlan === plan.id"
-                  [disabled]="currentPlan === plan.id"
-                  (click)="selectPlan(plan)">
-            <span *ngIf="currentPlan === plan.id">คุณกำลังใช้งานแพ็กเกจนี้</span>
-            <span *ngIf="currentPlan !== plan.id">อัปเกรดเป็น {{ plan.name }}</span>
+          <button class="btn btn-upgrade w-100 fw-bold mb-4 transition-all shadow-sm"
+                   [class.btn-primary]="currentPlan?.id !== plan.id"
+                   [class.btn-light]="currentPlan?.id === plan.id"
+                   [disabled]="currentPlan?.id === plan.id"
+                   (click)="selectPlan(plan)">
+            <span *ngIf="currentPlan?.id === plan.id">ใช้งานอยู่</span>
+            <span *ngIf="currentPlan?.id !== plan.id">
+              {{ plan.price_per_month === 0 ? 'เริ่มใช้งานฟรี' : 'อัปเกรดทันที' }}
+            </span>
           </button>
           
-          <hr class="text-muted opacity-25 mb-4">
+          <div class="mb-2 text-dark fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">สิ่งที่รวมอยู่ในแพ็กเกจ:</div>
           
-          <ul class="list-unstyled mb-0 flex-grow-1">
-            <li class="mb-3 d-flex align-items-start" *ngFor="let feature of plan.features">
-              <i class="fa-solid fa-check text-primary mt-1 me-3" *ngIf="feature.included"></i>
-              <i class="fa-solid fa-xmark text-muted mt-1 me-3 opacity-50" *ngIf="!feature.included"></i>
-              <span class="small fw-medium" [class.text-dark]="feature.included" [class.text-muted]="!feature.included" [class.text-decoration-line-through]="!feature.included">
-                {{ feature.text }}
+          <ul class="list-unstyled mb-0">
+            <li class="feature-item" *ngIf="plan.max_users">
+              <div class="feature-icon-wrapper text-primary bg-primary bg-opacity-10">
+                <i class="fa-solid fa-user"></i>
+              </div>
+              <span class="feature-text fw-medium">สูงสุด <strong>{{ plan.max_users }}</strong> ผู้ใช้งาน</span>
+            </li>
+            <li class="feature-item" *ngIf="plan.max_locations">
+              <div class="feature-icon-wrapper text-primary bg-primary bg-opacity-10">
+                <i class="fa-solid fa-map-location-dot"></i>
+              </div>
+              <span class="feature-text fw-medium">สูงสุด <strong>{{ plan.max_locations }}</strong> สาขา</span>
+            </li>
+            <li class="feature-item" *ngFor="let feature of plan.features">
+              <div class="feature-icon-wrapper text-success bg-success bg-opacity-10">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span class="feature-text fw-medium">
+                {{ feature.feature_name }} 
+                <span class="text-muted extra-small ms-1" style="font-size: 0.8em;">{{ getPlanFeatureQuota(plan.id, feature.feature_code) }}</span>
               </span>
             </li>
           </ul>
-          
         </div>
       </div>
     </div>
-    
   </div>
 </div>
-

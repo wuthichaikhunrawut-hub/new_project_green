@@ -1,56 +1,145 @@
-/* Typography & Colors */
-.text-dark { color: #0f172a; }
-.text-primary { color: #10b981; }
-.bg-primary { background-color: #10b981 !important; }
-.bg-primary bg-opacity-10 { background-color: #ecfdf5 !important; }
-.border-primary { border: 2px solid #10b981 !important; }
-.text-amber { color: #f59e0b; }
-.bg-amber { background-color: #fcd34d !important; }
-.bg-light-subtle { background-color: #f8fafc !important; }
-
-/* Buttons */
-.btn-primary { background-color: #10b981; color: white; border: none; }
-.btn-primary:hover { background-color: #059669; color: white; transform: translateY(-1px); }
-.btn-outline-dark-navy { border: 1px solid #0f172a; color: #0f172a; background: transparent; }
-.btn-outline-dark-navy:hover { background-color: #0f172a; color: white; }
-.btn-dark { background-color: #0f172a; color: white; border: none; }
-
-/* Animations */
-.transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-
-.animate-in {
-  animation: fadeInUp 0.5s ease-out forwards;
+:root {
+  --primary: #10b981;
+  --primary-dark: #059669;
+  --primary-light: #ecfdf5;
+  --dark-navy: #0f172a;
+  --slate-600: #475569;
+  --slate-400: #94a3b8;
+  --slate-100: #f1f5f9;
+  --amber-400: #fbbf24;
 }
 
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+.container-fluid {
+  background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.04), transparent 400px);
+  min-height: 100vh;
 }
 
-/* Pricing Cards */
-.pricing-card {
+/* Typography */
+h2 {
+  letter-spacing: -0.02em;
+  color: var(--dark-navy);
+}
+
+/* Billing Toggle - FIXED & PREMIUM */
+.billing-toggle-container {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  display: inline-flex;
+  padding: 6px;
+  border-radius: 9999px;
   position: relative;
-  background-color: white;
+  z-index: 10;
+}
+
+.toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 10px 28px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #475569; /* Much clearer slate color */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.toggle-btn:hover {
+  color: var(--primary);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.35) !important;
+}
+
+.toggle-btn .badge {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  vertical-align: middle;
+}
+
+/* Pricing Cards - COMPACT */
+.pricing-card {
+  background: white;
+  border: 1px solid #e2e8f0 !important;
+  transition: all 0.3s ease;
+  border-radius: 1.25rem !important;
 }
 
 .pricing-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.1) !important;
+  border-color: var(--primary) !important;
 }
 
-.popular-card {
-  border: 1px solid #fcd34d;
+.pricing-card.border-primary {
+  border: 2px solid var(--primary) !important;
 }
 
-.popular-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 6px;
-  background: linear-gradient(90deg, #fcd34d, #f59e0b);
-  border-top-left-radius: 1rem;
-  border-top-right-radius: 1rem;
+/* Prices */
+.price-value {
+  font-size: 2.75rem;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
 }
 
+.currency {
+  font-size: 1.25rem;
+  margin-right: 2px;
+}
+
+/* Buttons */
+.btn-upgrade {
+  border-radius: 10px;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.btn-upgrade.btn-primary {
+  background: var(--primary);
+  border: none;
+}
+
+.btn-upgrade.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+/* Features List */
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.75rem;
+}
+
+.feature-icon-wrapper {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+.feature-text {
+  color: var(--slate-600);
+  font-size: 0.875rem;
+}
+
+/* Animations */
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

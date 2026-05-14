@@ -37,11 +37,10 @@ export class AdminSettingsComponent implements OnInit {
     maintenanceMode: false,
     carbonStandard: 'TGO',
     carbonThreshold: 50000,
-    'payment.bank_name': '-',
-    'payment.account_no': '-',
-    'payment.account_name': '-',
-    'payment.instruction': '',
-    'payment.qr_code': ''
+    'stripe.public_key': '',
+    'stripe.secret_key': '',
+    'stripe.webhook_secret': '',
+    'stripe.currency': 'thb'
   };
 
   isLoading = true;
@@ -86,18 +85,7 @@ export class AdminSettingsComponent implements OnInit {
     });
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e: any) => {
-        this.settings['payment.qr_code'] = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
   removeQr() {
-    this.settings['payment.qr_code'] = '';
+    // Deprecated for Stripe
   }
 }

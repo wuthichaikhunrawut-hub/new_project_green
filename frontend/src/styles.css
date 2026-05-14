@@ -325,3 +325,33 @@ h6 { font-size: 0.9rem; }
 .status-revision { background-color: #F1F5F9 !important; color: #475569 !important; border: 1px solid #CBD5E1 !important; }
 .status-draft { background-color: #F8FAFC !important; color: #64748B !important; border: 1px solid #E2E8F0 !important; }
 
+/* ==========================================
+   GLOBAL STRIPE ASSISTANT SUPPRESSION (NUCLEAR OPTION)
+   ========================================== */
+/* Hide dev tools appended directly to body */
+body > iframe[src*="stripe.com"],
+body > div > iframe[src*="stripe.com"][title*="dev"],
+body > div > iframe[src*="stripe.com"][title*="Dev"],
+body > div > iframe[src*="stripe.com"][title*="assistant"],
+/* Hide any fixed position stripe elements */
+div[style*="position: fixed"][style*="z-index: 2147483647"],
+/* Hide shadow DOM hosts if they have these names */
+.StripeDevTools,
+.stripe-dev-tools,
+stripe-dev-tools,
+#stripe-assistant-frame,
+[id^="stripe-assistant"],
+[id^="stripe-dev-tools"],
+iframe[name^="__privateStripeAssistant"],
+iframe[name*="stripeAssistant"],
+div[data-testid="stripe-assistant-widget"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -9999 !important;
+  position: absolute !important;
+  width: 0 !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
