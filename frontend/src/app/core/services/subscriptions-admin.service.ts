@@ -17,6 +17,7 @@ export interface SubscriptionPlan {
   max_users: number;
   max_locations: number;
   is_active: boolean;
+  badge?: 'recommended' | 'popular' | 'enterprise';
   features?: Feature[];
 }
 

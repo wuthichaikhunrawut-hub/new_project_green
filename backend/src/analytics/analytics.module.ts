@@ -10,9 +10,12 @@ import { OrganizationSubscription } from '../subscriptions/entities/organization
 import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { AssessorProfile } from '../users/entities/assessor-profile.entity';
 
+import { SettingsModule } from '../settings/settings.module';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Organization, Invoice, Assessment, OrganizationSubscription, SubscriptionPlan, AssessorProfile]),
+    SettingsModule,
   ],
   controllers: [AnalyticsController],
   providers: [AnalyticsService],

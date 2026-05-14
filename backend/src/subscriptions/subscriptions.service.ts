@@ -4,6 +4,7 @@ import { Repository, In } from 'typeorm';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
 import { Invoice } from './entities/invoice.entity';
 import { Feature } from './entities/feature.entity';
+import { OrganizationSubscription } from './entities/organization-subscription.entity';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
@@ -15,6 +16,8 @@ export class SubscriptionsService {
     private invoicesRepository: Repository<Invoice>,
     @InjectRepository(Feature)
     private featuresRepository: Repository<Feature>,
+    @InjectRepository(OrganizationSubscription)
+    private orgSubRepository: Repository<OrganizationSubscription>,
     private auditLogsService: AuditLogsService,
   ) {}
 
@@ -100,5 +103,21 @@ export class SubscriptionsService {
   async updateInvoiceStatus(id: number, status: string) {
     await this.invoicesRepository.update(id, { status });
     return this.invoicesRepository.findOne({ where: { id }, relations: ['organization', 'plan'] });
+  }
+
+  // ---- Feature Access Enforcement ----
+
+  async findOrgSubscription(orgId: number) {
+    return this.orgSubRepository.findOne({
+      where: { org_id: orgId, status: 'ACTIVE' },
+      relations: ['plan', 'plan.features']
+    });
+  }
+
+  async canAccessFeature(orgId: number, featureCode: string): Promise<boolean> {
+    const sub = await this.findOrgSubscription(orgId);
+    if (!sub || !sub.plan) return false;
+    
+    return sub.plan.features?.some(f => f.feature_code.toLowerCase() === featureCode.toLowerCase());
   }
 }

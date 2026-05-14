@@ -1,192 +1,324 @@
-<div class="container-fluid p-4 animate-in">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="fw-bold mb-1 text-primary">จัดการการใช้งาน</h2>
-      <p class="text-muted mb-0">กำหนดแพ็กเกจ และฟีเจอร์ย่อยสำหรับระดับบริการต่างๆ</p>
-    </div>
-    <div class="d-flex gap-3 align-items-center">
-      <div class="btn-group p-1 bg-light rounded-pill shadow-sm">
-        <button class="btn rounded-pill px-4" [ngClass]="activeTab === 'plans' ? 'btn-primary' : 'btn-light'" (click)="activeTab = 'plans'">
-          <i class="fa-solid fa-box me-2"></i>แพ็กเกจ
-        </button>
-        <button class="btn rounded-pill px-4" [ngClass]="activeTab === 'features' ? 'btn-primary' : 'btn-light'" (click)="activeTab = 'features'">
-          <i class="fa-solid fa-list-check me-2"></i>ฟีเจอร์ย่อย
-        </button>
+<div class="premium-page-wrapper">
+  <div class="container-fluid p-4 admin-subscription-container animate-in">
+  <div class="mb-5 px-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="fw-bold mb-1" style="color: var(--brand-green) !important;">จัดการแพ็กเกจสมาชิก</h2>
+        <p class="text-muted mb-0 small">ระบบจัดการฟีเจอร์และแพ็กเกจระดับ Enterprise (Admin Portal)</p>
       </div>
-      <button class="btn btn-primary shadow-sm rounded-pill px-4" (click)="activeTab === 'plans' ? openModal() : openFeatureModal()">
-        <i class="fa-solid fa-plus me-2"></i> {{ activeTab === 'plans' ? 'เพิ่มแพ็กเกจ' : 'เพิ่มฟีเจอร์' }}
-      </button>
-    </div>
-  </div>
-
-
-
-  <div *ngIf="isLoading" class="text-center py-5">
-    <div class="spinner-border text-primary"></div>
-    <p class="mt-2 text-muted">กำลังโหลดข้อมูล...</p>
-  </div>
-
-  <!-- Plans Tab -->
-  <div class="row g-4" *ngIf="!isLoading && activeTab === 'plans'">
-    <div class="col-lg-4" *ngFor="let plan of plans">
-      <div class="card border-0 shadow-sm rounded-4 h-100" [ngClass]="{'opacity-50': !plan.is_active}">
-        <div class="card-body p-4">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <h5 class="fw-bold mb-0">{{ plan.plan_name }}</h5>
-            <span class="badge" [ngClass]="plan.is_active ? 'bg-success' : 'bg-secondary'">
-              {{ plan.is_active ? 'เปิดใช้' : 'ปิดใช้' }}
-            </span>
-          </div>
-          <p class="text-muted small">{{ plan.description }}</p>
-          <h3 class="fw-bold text-primary my-3">฿{{ plan.price_per_month | number }}<small
-              class="text-muted fs-6 fw-normal">/เดือน</small></h3>
-          <ul class="list-unstyled small text-muted">
-            <li class="mb-1"><i class="fa-solid fa-users text-primary me-2"></i>สูงสุด {{ plan.max_users }} ผู้ใช้งาน
-            </li>
-            <li class="mb-1"><i class="fa-solid fa-location-dot text-primary me-2"></i>สูงสุด {{ plan.max_locations }}
-              สาขา</li>
-            <li class="mb-1 text-success fw-semibold" *ngFor="let feat of plan.features">
-              <i class="fa-solid fa-check me-2"></i>{{ feat.feature_name }}
-            </li>
-          </ul>
-          <div class="d-flex gap-2 mt-4">
-            <button class="btn btn-sm btn-outline-primary flex-fill shadow-sm" (click)="openModal(plan)">
-              <i class="fa-solid fa-pen"></i> แก้ไข
-            </button>
-            <button class="btn btn-sm btn-outline-danger flex-fill shadow-sm" (click)="delete(plan.id)">
-              <i class="fa-solid fa-trash"></i> ลบ
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div *ngIf="plans.length === 0" class="col-12 text-center py-5 text-muted">ยังไม่มีแพ็กเกจการใช้งาน</div>
-  </div>
-
-  <!-- Features Tab -->
-  <div class="card border-0 shadow-sm rounded-4 overflow-hidden" *ngIf="!isLoading && activeTab === 'features'">
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="bg-light">
-          <tr>
-            <th class="ps-4">Code</th>
-            <th>ชื่อฟีเจอร์</th>
-            <th>คำอธิบาย</th>
-            <th class="text-end pe-4">จัดการ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let feat of allFeatures">
-            <td class="ps-4"><span class="badge bg-light text-primary border">{{ feat.feature_code }}</span></td>
-            <td class="fw-bold">{{ feat.feature_name }}</td>
-            <td class="text-muted small">{{ feat.description }}</td>
-            <td class="text-end pe-4">
-              <button class="btn btn-sm btn-outline-primary me-2" (click)="openFeatureModal(feat)">
-                <i class="fa-solid fa-pen"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" (click)="deleteFeature(feat.id)">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </td>
-          </tr>
-          <tr *ngIf="allFeatures.length === 0">
-            <td colspan="4" class="text-center py-5 text-muted">ยังไม่มีฟีเจอร์ย่อยในระบบ</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-
-</div>
-
-<!-- Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedPlan" style="background-color: rgba(0,0,0,0.5);">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold">{{ selectedPlan.id ? 'แก้ไขแพ็กเกจ' : 'สร้างแพ็กเกจใหม่' }}</h5>
-        <button type="button" class="btn-close" (click)="closeModal()"></button>
-      </div>
-      <div class="modal-body p-4">
-        <div class="mb-3">
-          <label class="form-label small fw-bold text-muted">ชื่อแพ็กเกจ</label>
-          <input type="text" class="form-control" [(ngModel)]="selectedPlan.plan_name"
-            placeholder="เช่น Basic, Pro, Enterprise">
-        </div>
-        <div class="mb-3">
-          <label class="form-label small fw-bold text-muted">คำอธิบาย</label>
-          <textarea class="form-control" rows="2" [(ngModel)]="selectedPlan.description"></textarea>
-        </div>
-        <div class="mb-3">
-          <label class="form-label small fw-bold text-muted">ราคา (บาท/เดือน)</label>
-          <input type="number" class="form-control" [(ngModel)]="selectedPlan.price_per_month">
-        </div>
-        <div class="row">
-          <div class="col-6 mb-3">
-            <label class="form-label small fw-bold text-muted">ผู้ใช้สูงสุด</label>
-            <input type="number" class="form-control" [(ngModel)]="selectedPlan.max_users">
-          </div>
-          <div class="col-6 mb-3">
-            <label class="form-label small fw-bold text-muted">สาขาสูงสุด</label>
-            <input type="number" class="form-control" [(ngModel)]="selectedPlan.max_locations">
-          </div>
-        </div>
-        <hr class="my-1 text-muted opacity-25">
-        <label class="form-label small fw-bold text-primary mb-2">ฟีเจอร์การใช้งาน (Dynamic Features)</label>
-        <div class="mb-2 form-check" *ngFor="let feat of allFeatures">
-          <input class="form-check-input" type="checkbox" [id]="'feat_' + feat.id" 
-                 [checked]="isFeatureSelected(feat.id)" (change)="toggleFeature(feat.id)">
-          <label class="form-check-label small" [for]="'feat_' + feat.id">
-            {{ feat.feature_name }}
-          </label>
-        </div>
-        <div class="mb-4 form-check form-switch">
-          <input class="form-check-input" type="checkbox" id="isActive" [(ngModel)]="selectedPlan.is_active">
-          <label class="form-check-label small fw-bold text-muted" for="isActive">เปิดให้เลือกใช้งานได้</label>
-        </div>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button class="btn btn-light me-md-2" (click)="closeModal()">ยกเลิก</button>
-          <button class="btn btn-primary px-4" (click)="save()" [disabled]="isSaving">
-            <i class="fa-solid fa-floppy-disk me-2"></i> บันทึก
+      <div class="d-flex gap-2">
+        <div class="btn-group p-1 bg-white shadow-sm rounded-pill border-0">
+          <button class="btn rounded-pill px-4 btn-sm transition-all" [class.btn-success]="activeTab === 'features'" [class.text-muted]="activeTab !== 'features'" (click)="activeTab = 'features'" [style.background]="activeTab === 'features' ? 'var(--brand-green)' : 'transparent'" [style.color]="activeTab === 'features' ? 'white' : ''">
+            คลังฟีเจอร์
+          </button>
+          <button class="btn rounded-pill px-4 btn-sm transition-all" [class.btn-success]="activeTab === 'plans'" [class.text-muted]="activeTab !== 'plans'" (click)="activeTab = 'plans'" [style.background]="activeTab === 'plans' ? 'var(--brand-green)' : 'transparent'" [style.color]="activeTab === 'plans' ? 'white' : ''">
+            แพ็กเกจสมาชิก
+          </button>
+          <button class="btn rounded-pill px-4 btn-sm transition-all" [class.btn-success]="activeTab === 'permissions'" [class.text-muted]="activeTab !== 'permissions'" (click)="activeTab = 'permissions'" [style.background]="activeTab === 'permissions' ? 'var(--brand-green)' : 'transparent'" [style.color]="activeTab === 'permissions' ? 'white' : ''">
+            จัดการสิทธิ์
           </button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Main Content Area -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-success spinner-border-sm" role="status"></div>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <!-- 1. Feature Inventory (Refined Borders) -->
+    <div *ngIf="activeTab === 'features'" class="row g-4 px-3">
+      <div class="col-12 d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0 text-muted">รายการฟีเจอร์ทั้งหมดในคลัง</h6>
+        <button class="btn btn-premium-green btn-sm px-4" (click)="openFeatureModal()">
+          <i class="fa-solid fa-plus me-1"></i> เพิ่มฟีเจอร์ใหม่
+        </button>
+      </div>
+      <div class="col-md-4" *ngFor="let feat of allFeatures">
+        <div class="capability-card feature-inventory-card">
+          <div class="card-head">
+            <div class="capability-icon"><i class="fa-solid fa-cube"></i></div>
+            <span class="badge rounded-pill bg-light text-success border px-2 py-1 extra-small" style="font-size: 0.65rem;">{{ feat.feature_code }}</span>
+          </div>
+          <h6 class="capability-name mb-1">{{ feat.feature_name }}</h6>
+          <p class="capability-desc line-clamp-2 mb-0">{{ feat.description || 'ไม่มีคำอธิบาย' }}</p>
+          <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top border-subtle">
+            <span class="extra-small text-muted" style="font-size: 0.75rem;">ใช้ใน {{ getPlanUsageCount(feat.id) }} แพ็กเกจ</span>
+            <div class="d-flex gap-2">
+              <button class="btn btn-light btn-sm px-3 rounded-pill fw-bold text-muted transition-all" (click)="openFeatureModal(feat)" style="font-size: 0.75rem;">
+                <i class="fa-solid fa-pen-nib me-1"></i> แก้ไข
+              </button>
+              <button class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all" (click)="deleteFeature(feat.id)" style="font-size: 0.75rem; background: #fef2f2; border: 1px solid #fca5a5;">
+                <i class="fa-solid fa-trash-alt me-1"></i> ลบ
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Package Management (Professional Preview) -->
+    <div *ngIf="activeTab === 'plans'" class="row g-4 px-3">
+      <div class="col-12 d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0 text-muted">พรีวิวแพ็กเกจสมาชิก (Customer View)</h6>
+        <button class="btn btn-premium-green btn-sm px-4" (click)="openModal()">
+          <i class="fa-solid fa-plus me-1"></i> สร้างแพ็กเกจใหม่
+        </button>
+      </div>
+      
+      <!-- Professional Pricing Table -->
+      <div class="col-12">
+        <div class="d-flex flex-wrap justify-content-start w-100 mt-3" style="gap: 2rem;">
+          <div *ngFor="let plan of plans" style="flex: 0 1 340px; max-width: 340px;">
+        <div class="pricing-preview-card glass-card h-100" [class.opacity-50]="!plan.is_active" [class.active]="plan.badge === 'recommended'">
+          <!-- Badge -->
+          <ng-container *ngIf="plan.badge">
+            <div class="badge-pack"
+                 [ngClass]="{
+                   'badge-recommended': plan.badge === 'recommended',
+                   'badge-popular'   : plan.badge === 'popular',
+                   'badge-enterprise': plan.badge === 'enterprise'
+                 }">
+              {{ plan.badge === 'recommended' ? 'แนะนำ' : plan.badge === 'popular' ? 'ยอดนิยม' : 'สำหรับองค์กร' }}
+            </div>
+          </ng-container>
+
+          <!-- Inactive Status Badge -->
+          <ng-container *ngIf="!plan.is_active">
+            <div class="badge-pack" style="background: var(--slate-400); color: white;">
+              ปิดการใช้งาน
+            </div>
+          </ng-container>
+
+
+
+          <div class="pricing-header">
+            <div class="plan-name">{{ plan.plan_name }}</div>
+          </div>
+          <div class="pricing-amount">
+            <span class="currency">฿</span>
+            <span class="value">{{ plan.price_per_month | number }}</span>
+            <span class="period">/ เดือน</span>
+          </div>
+          <p class="text-muted small mb-0 px-2">{{ plan.description }}</p>
+          
+          <div class="pricing-divider"></div>
+          
+          <div class="pricing-features-list">
+            <!-- Quota Feature (Primary) -->
+            <div class="pricing-feature-item primary-feature">
+              <i class="fa-solid fa-user"></i>
+              <span>สูงสุด <strong>{{ plan.max_users }}</strong> ผู้ใช้งาน</span>
+            </div>
+            <div class="pricing-feature-item primary-feature">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span>สูงสุด <strong>{{ plan.max_locations }}</strong> สาขา</span>
+            </div>
+            
+            <!-- Other Features -->
+            <div class="pricing-feature-item" *ngFor="let f of plan.features">
+              <i class="fa-solid fa-check"></i>
+              <span>{{ f.feature_name }} <small class="text-muted">({{ getPlanFeatureQuota(plan.id, f.feature_code) }})</small></span>
+            </div>
+          </div>
+
+          <div class="mt-auto d-flex gap-2 justify-content-center border-top border-subtle pt-4 mt-3">
+            <button class="btn btn-light btn-sm w-100 rounded-pill fw-bold text-muted transition-all" (click)="openModal(plan)" style="font-size: 0.85rem;">
+              <i class="fa-solid fa-pen-nib me-1"></i> แก้ไข
+            </button>
+            <button class="btn btn-sm w-100 rounded-pill fw-bold text-danger transition-all" (click)="delete(plan.id)" style="font-size: 0.85rem; background: #fef2f2; border: 1px solid #fca5a5;">
+              <i class="fa-solid fa-trash-alt me-1"></i> ลบ
+            </button>
+          </div>
+        </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Permission Governance -->
+    <div *ngIf="activeTab === 'permissions'" class="px-3">
+      <div class="capability-card p-0 overflow-hidden border-0 shadow-sm">
+        <div class="p-4 bg-white d-flex justify-content-between align-items-center border-bottom border-subtle">
+          <div>
+            <h6 class="fw-bold mb-1">ตารางกำหนดสิทธิ์การใช้งาน (Governance Matrix)</h6>
+            <p class="text-muted extra-small mb-0">กำหนดการเข้าถึงฟีเจอร์แยกตามบทบาทของผู้ใช้งาน</p>
+          </div>
+          <button class="btn btn-premium-green btn-sm px-5" (click)="savePermissions()" [disabled]="isSaving">
+            บันทึกการตั้งค่าสิทธิ์
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem; table-layout: fixed;">
+            <thead class="bg-light">
+              <tr>
+                <th class="ps-4 py-3 text-muted fw-bold border-0" style="width: 25%;">ฟีเจอร์ระบบ</th>
+                <th *ngFor="let role of roles" class="text-center py-3 text-muted fw-bold border-0">{{ role }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let feat of allFeatures">
+                <td class="ps-4 py-3 fw-semibold text-slate-900 border-bottom border-subtle">
+                  {{ feat.feature_name }}
+                  <div class="extra-small text-muted fw-normal" style="font-size: 0.7rem;">{{ feat.feature_code }}</div>
+                </td>
+                <td *ngFor="let role of roles" class="text-center py-3 border-bottom border-subtle">
+                  <div class="form-check form-switch d-inline-block">
+                    <input class="form-check-input" type="checkbox" [checked]="hasPermission(feat.feature_code, role)" (change)="togglePermission(feat.feature_code, role)">
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Feature Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedFeature" style="background-color: rgba(0,0,0,0.5);">
+<!-- Modal: Package Configuration (Green Sync Edition) -->
+<div class="modal d-block premium-modal animate-in" *ngIf="selectedPlan" tabindex="-1" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);">
+  <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <!-- Minimal Header -->
+      <div class="modal-header-minimal d-flex justify-content-between align-items-center">
+        <div class="title-group">
+          <h4 style="color: var(--brand-green);">{{ selectedPlan.id ? 'แก้ไขแพ็กเกจสมาชิก' : 'สร้างแพ็กเกจใหม่' }}</h4>
+          <p>กำหนดค่าเชิงพาณิชย์และฟีเจอร์สำหรับองค์กร</p>
+        </div>
+        <div class="d-flex align-items-center gap-4">
+          <div class="status-indicator d-flex align-items-center">
+            <span class="small fw-bold me-2" [style.color]="selectedPlan.is_active ? 'var(--brand-green)' : '#94a3b8'">
+              {{ selectedPlan.is_active ? 'เปิดใช้งาน' : 'ปิดใช้งาน' }}
+            </span>
+            <div class="form-check form-switch p-0 m-0">
+              <input class="form-check-input m-0" type="checkbox" [(ngModel)]="selectedPlan.is_active" style="width: 2.2em; height: 1.1em;">
+            </div>
+          </div>
+          <button type="button" class="btn-close shadow-none" (click)="closeModal()" style="font-size: 0.75rem;"></button>
+        </div>
+      </div>
+
+      <div class="modal-body p-0">
+        <div class="row g-0">
+          <!-- Sidebar (40%) -->
+          <div class="col-md-4 config-sidebar p-4 border-end border-subtle">
+            <section class="mb-5">
+              <span class="section-label">ข้อมูลเชิงพาณิชย์</span>
+              <div class="mb-3">
+                <label class="input-label">ชื่อแพ็กเกจ</label>
+                <input type="text" class="premium-input" [(ngModel)]="selectedPlan.plan_name">
+              </div>
+              <div class="mb-3">
+                <label class="input-label">คำอธิบาย</label>
+                <textarea class="premium-input" rows="3" [(ngModel)]="selectedPlan.description"></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="input-label">ราคาพื้นฐาน (บาท/เดือน)</label>
+                <input type="number" class="premium-input fw-bold text-success fs-5" [(ngModel)]="selectedPlan.price_per_month">
+              </div>
+              <div class="mb-3">
+                <label class="input-label">ป้ายกำกับ (Badge)</label>
+                <select class="premium-input form-select" [(ngModel)]="selectedPlan.badge">
+                  <option [ngValue]="undefined">ไม่มีป้ายกำกับ</option>
+                  <option value="recommended">แนะนำ (Recommended)</option>
+                  <option value="popular">ยอดนิยม (Popular)</option>
+                  <option value="enterprise">สำหรับองค์กร (Enterprise)</option>
+                </select>
+              </div>
+            </section>
+            <section>
+              <span class="section-label">โควตาพื้นฐาน</span>
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="p-3 bg-white border border-subtle rounded-3 text-center">
+                    <label class="input-label">ผู้ใช้</label>
+                    <input type="number" class="w-100 border-0 text-center fw-bold" [(ngModel)]="selectedPlan.max_users">
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 bg-white border border-subtle rounded-3 text-center">
+                    <label class="input-label">สาขา</label>
+                    <input type="number" class="w-100 border-0 text-center fw-bold" [(ngModel)]="selectedPlan.max_locations">
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <!-- Feature Panel (60%) -->
+          <div class="col-md-8 p-4 bg-white">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h6 class="fw-bold mb-0">เปิดใช้งานฟีเจอร์และกำหนดโควตา</h6>
+              <span class="badge rounded-pill bg-green-soft text-success border border-success border-opacity-10 px-3 py-2">
+                {{ selectedFeatureIds.length }} ฟีเจอร์ที่เปิดใช้งาน
+              </span>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-6" *ngFor="let feat of allFeatures">
+                <div class="capability-card p-3" [class.active]="isFeatureSelected(feat.id)" (click)="toggleFeature(feat.id)">
+                  <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="capability-icon" style="width:32px; height:32px;"><i class="fa-solid fa-cube small"></i></div>
+                    <div class="form-check form-switch p-0 m-0">
+                      <input class="form-check-input m-0" type="checkbox" [checked]="isFeatureSelected(feat.id)" (click)="$event.stopPropagation()" (change)="toggleFeature(feat.id)">
+                    </div>
+                  </div>
+                  <h6 class="small fw-bold mb-1">{{ feat.feature_name }}</h6>
+                  <p class="extra-small text-muted line-clamp-1 mb-3">{{ feat.description || 'เปิดใช้งานฟีเจอร์นี้' }}</p>
+                  
+                  <div class="quota-pill mt-auto" *ngIf="isFeatureSelected(feat.id)" (click)="$event.stopPropagation()">
+                    <div class="d-flex justify-content-between align-items-center">
+                      <span class="extra-small text-muted fw-bold">โควตา</span>
+                      <div class="quota-control py-0">
+                        <input type="number" class="small" [ngModel]="getQuota(feat.feature_code)" (ngModelChange)="setQuota(feat.feature_code, $event)">
+                        <span class="extra-small text-muted">/ด.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer-clean p-4 border-top">
+        <button type="button" class="btn btn-light px-4 border-0" (click)="closeModal()">ยกเลิก</button>
+        <button type="button" class="btn btn-premium-green px-5" (click)="save()" [disabled]="isSaving">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Feature Inventory -->
+<div class="modal d-block premium-modal animate-in" *ngIf="selectedFeature" tabindex="-1" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold">{{ selectedFeature.id ? 'แก้ไขฟีเจอร์' : 'สร้างฟีเจอร์ใหม่' }}</h5>
+    <div class="modal-content">
+      <div class="modal-header-minimal border-0">
+        <h5 class="fw-bold mb-0">จัดการคลังฟีเจอร์</h5>
         <button type="button" class="btn-close" (click)="closeFeatureModal()"></button>
       </div>
-      <div class="modal-body p-4">
+      <div class="modal-body p-4 bg-slate-50">
         <div class="mb-3">
-          <label class="form-label small fw-bold text-muted">Feature Code</label>
-          <input type="text" class="form-control" [(ngModel)]="selectedFeature.feature_code" 
-                 placeholder="เช่น AI_SCAN, REPORT_GEN">
-          <div class="form-text">ใช้สำหรับอ้างอิงในระบบ (ภาษาอังกฤษพิมพ์ใหญ่)</div>
+          <label class="input-label">Feature Code</label>
+          <input type="text" class="premium-input fw-bold" [(ngModel)]="selectedFeature.feature_code" placeholder="เช่น AI_SCAN" [disabled]="!!selectedFeature.id">
         </div>
         <div class="mb-3">
-          <label class="form-label small fw-bold text-muted">ชื่อฟีเจอร์</label>
-          <input type="text" class="form-control" [(ngModel)]="selectedFeature.feature_name" 
-                 placeholder="ชื่อที่จะแสดงในหน้าแพ็กเกจ">
+          <label class="input-label">ชื่อฟีเจอร์</label>
+          <input type="text" class="premium-input" [(ngModel)]="selectedFeature.feature_name">
         </div>
-        <div class="mb-4">
-          <label class="form-label small fw-bold text-muted">คำอธิบาย</label>
-          <textarea class="form-control" rows="3" [(ngModel)]="selectedFeature.description"></textarea>
+        <div class="mb-0">
+          <label class="input-label">รายละเอียด</label>
+          <textarea class="premium-input" rows="4" [(ngModel)]="selectedFeature.description"></textarea>
         </div>
-        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button class="btn btn-light me-md-2" (click)="closeFeatureModal()">ยกเลิก</button>
-          <button class="btn btn-primary px-4" (click)="saveFeature()" [disabled]="isSaving">
-            <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกฟีเจอร์
-          </button>
-        </div>
+      </div>
+      <div class="modal-footer-clean">
+        <button type="button" class="btn btn-light" (click)="closeFeatureModal()">ยกเลิก</button>
+        <button type="button" class="btn btn-premium-green" (click)="saveFeature()">บันทึกข้อมูล</button>
       </div>
     </div>
   </div>
-</div>
+</div></div>

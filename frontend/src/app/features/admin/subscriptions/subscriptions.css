@@ -1,2 +1,397 @@
-.animate-in { animation: fadeIn 0.4s ease-out forwards; }
-@keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+/* Premium Green Design System (Minimal & Cohesive) */
+
+.admin-subscription-container {
+  background: transparent;
+  min-height: 100vh;
+  font-family: 'Inter', 'IBM Plex Sans Thai', -apple-system, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+:host {
+  --brand-green: var(--color-primary, #16A34A);
+  --brand-green-dark: var(--color-primary-hover, #15803D);
+  --brand-green-soft: var(--color-primary-light, #DCFCE7);
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-600: #475569;
+  --slate-900: #064e3b;
+  --border-subtle: #f1f3f2;
+}
+
+/* Base Card - Refined Border */
+.capability-card {
+  background: white;
+  border: 1px solid var(--slate-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+.capability-card:hover {
+  border-color: var(--brand-green);
+  box-shadow: 0 12px 24px -10px rgba(16, 185, 129, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Feature Inventory Card - Clean Accent */
+.feature-inventory-card {
+  border-top: 3px solid var(--brand-green);
+}
+
+.capability-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--brand-green-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--brand-green);
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.25rem;
+}
+
+.capability-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.capability-desc {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--slate-600);
+  margin-bottom: 1.5rem;
+}
+
+/* Professional Pricing Table Style */
+.pricing-preview-card {
+  background: var(--card-bg);
+  border: 1px solid var(--slate-200);
+  border-radius: 12px;
+  padding: 2.5rem 2rem;
+  text-align: center;
+  position: relative;
+  transition: all 0.4s;
+  box-shadow: var(--card-shadow);
+  width: 100%;
+}
+
+.pricing-preview-card.active {
+  border-color: var(--brand-green);
+  box-shadow: 0 12px 30px -5px rgba(16, 185, 129, 0.2);
+}
+
+.pricing-preview-card:hover {
+  border-color: var(--brand-green);
+  box-shadow: 0 8px 20px -5px rgba(16, 185, 129, 0.15);
+}
+
+.pricing-header .plan-name {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--brand-green);
+  margin-bottom: 1rem;
+}
+
+.pricing-amount {
+  margin-bottom: 1.5rem;
+}
+
+.pricing-amount .currency {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--slate-900);
+  vertical-align: top;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.pricing-amount .value {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--slate-900);
+  letter-spacing: -2px;
+}
+
+.pricing-amount .period {
+  font-size: 0.875rem;
+  color: var(--slate-400);
+}
+
+.pricing-divider {
+  height: 1px;
+  background: radial-gradient(circle, var(--slate-200) 0%, transparent 100%);
+  margin: 1.5rem 0;
+}
+
+.pricing-features-list {
+  text-align: left;
+  margin-bottom: 2rem;
+}
+
+.pricing-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.875rem;
+  font-size: 0.9375rem;
+  color: var(--slate-600);
+}
+
+.pricing-feature-item i {
+  color: var(--brand-green);
+  font-size: 0.875rem;
+}
+
+/* Admin Floating Actions */
+.admin-actions-floating {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  gap: 0.4rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.pricing-preview-card:hover .admin-actions-floating {
+  opacity: 1;
+}
+
+.btn-admin-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1px solid var(--slate-100);
+  color: var(--slate-400);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.2s;
+}
+
+.btn-admin-action:hover {
+  background: var(--brand-green-soft);
+  color: var(--brand-green);
+  transform: scale(1.1);
+}
+
+.btn-admin-action.delete:hover {
+  color: #dc2626;
+}
+
+/* Premium Modal Enhancements */
+.premium-modal .modal-content {
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(6, 78, 59, 0.15);
+}
+
+.config-sidebar {
+  background: #fbfcfc;
+}
+
+.btn-premium-green {
+  background: var(--brand-green);
+  color: white !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+/* เพิ่มคลาสใหม่สำหรับพื้นหลังแบบ gradient และการ์ดแก้ว */
+.premium-page-wrapper {
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
+}
+
+/* Badge Pack */
+.badge-pack {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.badge-recommended {
+  background: var(--brand-green);
+  color: white;
+}
+
+.badge-popular {
+  background: #3b82f6; /* Blue for popular */
+  color: white;
+}
+
+.badge-enterprise {
+  background: #1f2937; /* Dark slate for enterprise */
+  color: white;
+}
+
+/* Primary Feature styling */
+.pricing-feature-item.primary-feature {
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+.pricing-feature-item.primary-feature i {
+  font-size: 1.1rem;
+}
+
+/* CTA Button Enhancements */
+.cta-btn {
+  transition: all 0.3s;
+}
+
+.cta-btn:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+}
+
+/* -------------------------------------
+   Premium Modal Inputs & Labels
+------------------------------------- */
+.modal-header-minimal {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-footer-clean {
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background: var(--slate-50);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.title-group h4 {
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+  letter-spacing: -0.02em;
+}
+
+.title-group p {
+  color: var(--slate-400);
+  margin-bottom: 0;
+  font-size: 0.9rem;
+}
+
+.section-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--slate-400);
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 0.5rem;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--slate-600);
+  margin-bottom: 0.5rem;
+}
+
+.premium-input {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  background: white;
+  font-size: 0.95rem;
+  color: var(--slate-900);
+  transition: all 0.2s ease;
+}
+
+.premium-input:focus {
+  outline: none;
+  border-color: var(--brand-green);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+textarea.premium-input {
+  resize: vertical;
+}
+
+.quota-pill {
+  background: var(--slate-50);
+  border: 1px solid var(--slate-200);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+}
+
+.quota-control input {
+  width: 60px;
+  border: none;
+  border-bottom: 2px solid var(--slate-200);
+  text-align: center;
+  font-weight: 700;
+  color: var(--brand-green);
+  background: transparent;
+  padding: 0.25rem;
+  outline: none;
+  transition: border-color 0.2s;
+  -moz-appearance: textfield;
+}
+
+.quota-control input::-webkit-outer-spin-button,
+.quota-control input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.quota-control input:focus {
+  border-color: var(--brand-green);
+}
+
+.bg-slate-50 {
+  background-color: var(--slate-50);
+}
+

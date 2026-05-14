@@ -26,6 +26,14 @@ export class SettingsService implements OnModuleInit {
       maintenanceMode: 'false',
       carbonStandard: 'TGO',
       carbonThreshold: '50000',
+      'permission.manage_quota': 'System Admin',
+      'permission.ai_scan': 'System Admin',
+      'permission.green_office': 'System Admin',
+      'payment.bank_name': '-',
+      'payment.account_no': '-',
+      'payment.account_name': '-',
+      'payment.instruction': 'กรุณาโอนเงินเข้าบัญชีข้างต้นและแนบหลักฐานการชำระเงินในระบบ',
+      'payment.qr_code': ''
     };
 
     for (const [key, value] of Object.entries(defaults)) {
@@ -43,8 +51,12 @@ export class SettingsService implements OnModuleInit {
       // Parse boolean or number if applicable
       if (s.value === 'true') result[s.key] = true;
       else if (s.value === 'false') result[s.key] = false;
-      else if (!isNaN(Number(s.value))) result[s.key] = Number(s.value);
-      else result[s.key] = s.value;
+      // DO NOT convert payment keys to numbers (e.g. account_no should stay string)
+      else if (!s.key.startsWith('payment.') && !isNaN(Number(s.value)) && s.value !== '') {
+        result[s.key] = Number(s.value);
+      } else {
+        result[s.key] = s.value;
+      }
     }
     return result;
   }

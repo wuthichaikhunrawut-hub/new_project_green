@@ -1,2 +1,82 @@
+:host {
+  --brand-green: var(--color-primary, #16A34A);
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #f0fdf4 100%);
+}
+
+.premium-page-wrapper {
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  padding-bottom: 2rem;
+}
+
+.admin-invoice-container {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.table-premium {
+  font-size: 0.9rem;
+}
+
+.table-premium thead th {
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 1.25rem 1rem;
+}
+
+.table-premium tbody td {
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.table-premium tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge.bg-warning { background-color: #fef3c7 !important; color: #92400e !important; border: 1px solid #fcd34d !important; }
+.status-badge.bg-success { background-color: #ecfdf5 !important; color: #065f46 !important; border: 1px solid #a7f3d0 !important; }
+.status-badge.bg-danger { background-color: #fef2f2 !important; color: #991b1b !important; border: 1px solid #fca5a5 !important; }
+
+.btn-white {
+  background: white;
+  color: #64748b;
+  border: 1px solid #e2e8f0 !important;
+}
+
+.btn-white:hover {
+  background: #f8fafc;
+  color: var(--brand-green);
+}
+
+.invoice-ref {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  letter-spacing: 0.05em;
+}
+
 .animate-in { animation: fadeIn 0.4s ease-out forwards; }
 @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }

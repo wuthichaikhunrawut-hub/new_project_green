@@ -10,6 +10,7 @@ import { OrganizationSubscription } from './entities/organization-subscription.e
 import { PlanFeature } from './entities/plan-feature.entity';
 import { Payment } from './entities/payment.entity';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
       Payment
     ]),
     AuditLogsModule,
+    SettingsModule,
   ],
   controllers: [SubscriptionsController],
   providers: [SubscriptionsService],

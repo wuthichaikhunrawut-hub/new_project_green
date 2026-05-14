@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn, Index } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { SubscriptionPlan } from './subscription-plan.entity';
 
@@ -7,6 +7,7 @@ export class Invoice {
   @PrimaryGeneratedColumn('increment', { name: 'invoice_id' })
   id: number;
 
+  @Index()
   @Column({ name: 'org_id', nullable: true })
   org_id: number;
 
@@ -14,6 +15,7 @@ export class Invoice {
   @JoinColumn({ name: 'org_id' })
   organization: Organization;
 
+  @Index()
   @Column({ name: 'plan_id', nullable: true })
   plan_id: number;
 
@@ -33,6 +35,7 @@ export class Invoice {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
+  @Index()
   @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }

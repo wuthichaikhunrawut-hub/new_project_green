@@ -9,7 +9,24 @@ import { SettingsService } from '../../../core/services/settings.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './settings.html',
-  styles: ``
+  styles: `
+    .qr-preview {
+      width: 150px;
+      height: 150px;
+      border: 2px dashed #e2e8f0;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #f8fafc;
+    }
+    .qr-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  `
 })
 export class AdminSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);
@@ -19,7 +36,12 @@ export class AdminSettingsComponent implements OnInit {
     systemName: 'GREEN SYNC',
     maintenanceMode: false,
     carbonStandard: 'TGO',
-    carbonThreshold: 50000
+    carbonThreshold: 50000,
+    'payment.bank_name': '-',
+    'payment.account_no': '-',
+    'payment.account_name': '-',
+    'payment.instruction': '',
+    'payment.qr_code': ''
   };
 
   isLoading = true;
@@ -32,8 +54,15 @@ export class AdminSettingsComponent implements OnInit {
     this.isLoading = true;
     this.settingsService.getSettings().subscribe({
       next: (data) => {
+        console.log('Backend Settings Received:', data);
         if (data) {
+          // Force update each key to be sure
+          Object.keys(data).forEach(key => {
+            (this.settings as any)[key] = data[key];
+          });
+          // Also spread for safety
           this.settings = { ...this.settings, ...data };
+          console.log('Current Frontend Settings:', this.settings);
         }
         this.isLoading = false;
       },
@@ -55,5 +84,20 @@ export class AdminSettingsComponent implements OnInit {
         alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
       }
     });
+  }
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.settings['payment.qr_code'] = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  removeQr() {
+    this.settings['payment.qr_code'] = '';
   }
 }

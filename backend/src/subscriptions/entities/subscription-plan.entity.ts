@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, Index } from 'typeorm';
 import { Feature } from './feature.entity';
 
 @Entity('subscription_plans')
@@ -12,6 +12,7 @@ export class SubscriptionPlan {
   @Column({ type: 'text', nullable: true })
   description: string;
 
+  @Index()
   @Column({ type: 'double precision', nullable: true })
   price_per_month: number;
 
@@ -32,6 +33,7 @@ export class SubscriptionPlan {
   })
   features: Feature[];
 
+  @Index()
   @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
   created_at: Date;
 }

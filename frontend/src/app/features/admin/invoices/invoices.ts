@@ -28,13 +28,30 @@ export class AdminInvoicesComponent implements OnInit {
     'CANCELLED': 'bg-danger'
   };
 
-  ngOnInit() { this.loadInvoices(); }
+  ngOnInit() { 
+    setTimeout(() => {
+      this.loadInvoices(); 
+    }, 0);
+  }
 
   loadInvoices() {
     this.isLoading = true;
+    this.cdr.detectChanges();
     this.svc.getInvoices().subscribe({
-      next: (data) => { this.invoices = data; this.isLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      next: (data) => { 
+        this.invoices = data; 
+        this.isLoading = false; 
+        this.cdr.detectChanges(); 
+      },
+      error: (err) => { 
+        console.error('Failed to load invoices:', err);
+        this.isLoading = false; 
+        this.cdr.detectChanges(); 
+      },
+      complete: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

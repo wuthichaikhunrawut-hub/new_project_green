@@ -65,6 +65,56 @@
             </div>
         </div>
 
+        <!-- Billing & Payment Settings -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">
+                        <i class="fa-solid fa-file-invoice-dollar me-2 text-warning"></i>การตั้งค่าช่องทางชำระเงิน (Billing & Payment)
+                    </h5>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-8">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">ชื่อธนาคาร</label>
+                                    <input type="text" class="form-control" [(ngModel)]="settings['payment.bank_name']" placeholder="เช่น กสิกรไทย, ไทยพาณิชย์">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">ชื่อบัญชี</label>
+                                    <input type="text" class="form-control" [(ngModel)]="settings['payment.account_name']" placeholder="ชื่อบริษัท หรือ ชื่อบัญชีโอน">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label small fw-bold text-muted">เลขที่บัญชี</label>
+                                    <input type="text" class="form-control" [(ngModel)]="settings['payment.account_no']" placeholder="xxx-x-xxxxx-x">
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label small fw-bold text-muted">คำแนะนำการชำระเงิน (Instruction)</label>
+                                    <textarea class="form-control" rows="2" [(ngModel)]="settings['payment.instruction']" placeholder="คำชี้แจงเพิ่มเติม..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted d-block">QR Code ชำระเงิน (PromptPay)</label>
+                            <div class="qr-preview mb-3">
+                                <img *ngIf="settings['payment.qr_code']" [src]="settings['payment.qr_code']" alt="QR Code Preview">
+                                <i *ngIf="!settings['payment.qr_code']" class="fa-solid fa-qrcode fs-1 text-light"></i>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <input type="file" #qrInput hidden (change)="onFileSelected($event)" accept="image/*">
+                                <button class="btn btn-sm btn-outline-primary" (click)="qrInput.click()">
+                                    <i class="fa-solid fa-upload me-1"></i> เลือกรูปภาพ
+                                </button>
+                                <button *ngIf="settings['payment.qr_code']" class="btn btn-sm btn-outline-danger" (click)="removeQr()">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Email Templates -->
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">
