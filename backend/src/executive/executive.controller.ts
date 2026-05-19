@@ -1,4 +1,10 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -19,6 +25,10 @@ export class ExecutiveController {
 
   @Get('dashboard')
   getDashboard(@Request() req: { user: JwtUser }) {
-    return this.executiveService.getDashboard(Number(req.user.orgId ?? 0));
+    const orgId = Number(req.user.orgId ?? 0);
+    if (!orgId) {
+      throw new BadRequestException('บัญชีนี้ไม่ได้เชื่อมกับองค์กร');
+    }
+    return this.executiveService.getDashboard(orgId);
   }
 }

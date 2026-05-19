@@ -88,6 +88,19 @@
                 <span class="badge" [ngClass]="getStatusBadgeClass(req.status)">
                   {{ getStatusLabel(req.status) }}
                 </span>
+                <div
+                  *ngIf="req.status === 'REVISION_REQUESTED' && req.notes"
+                  class="small text-danger mt-2 d-block"
+                >
+                  <i class="fa-solid fa-circle-exclamation me-1"></i>{{ req.notes }}
+                </div>
+                <a
+                  *ngIf="isOrgAdmin && req.status === 'REVISION_REQUESTED'"
+                  routerLink="/org-admin/revision-center"
+                  class="small text-primary d-block mt-1"
+                >
+                  ไปที่ Revision Center
+                </a>
               </td>
               
               <!-- Score -->

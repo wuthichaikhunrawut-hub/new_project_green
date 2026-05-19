@@ -49,11 +49,18 @@ export class CarbonLogsService {
     try {
       const log = await this.logRepository.findOne({
         where: { id, org_id: orgId },
+        relations: ['emission_factor'],
       });
       if (!log) {
         throw new NotFoundException('ไม่พบข้อมูลรายการนี้');
       }
       Object.assign(log, updateDto);
+      if (updateDto.usage_amount !== undefined) {
+        const factorValue = log.emission_factor?.factor_value;
+        if (factorValue != null && factorValue > 0) {
+          log.total_emission = updateDto.usage_amount * factorValue;
+        }
+      }
       return await this.logRepository.save(log);
     } catch (error) {
       if (error instanceof NotFoundException) throw error;

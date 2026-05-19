@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -29,7 +30,11 @@ export class OrgAdminController {
   constructor(private readonly orgAdminService: OrgAdminService) {}
 
   private orgId(req: { user: JwtUser }): number {
-    return Number(req.user.orgId ?? 0);
+    const id = Number(req.user.orgId ?? 0);
+    if (!id) {
+      throw new BadRequestException('บัญชีนี้ไม่ได้เชื่อมกับองค์กร');
+    }
+    return id;
   }
 
   @Get('revision-center')

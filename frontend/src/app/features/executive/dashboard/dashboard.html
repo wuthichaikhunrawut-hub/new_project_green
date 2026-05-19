@@ -88,17 +88,29 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
-            @for (row of data.approvedAssessments; track row.id) {
-              <tr class="hover:bg-slate-50">
-                <td class="px-4 py-3 text-slate-700">{{ row.assessmentYear || '-' }}</td>
-                <td class="px-4 py-3 text-slate-700">{{ row.totalScore | number:'1.1-2' }}</td>
-                <td class="px-4 py-3 text-slate-700">{{ row.certifiedLevel || '-' }}</td>
-                <td class="px-4 py-3 text-slate-500">{{ row.approvedAt ? (row.approvedAt | date:'dd/MM/yyyy') : '-' }}</td>
+            @if (data.approvedAssessments.length === 0) {
+              <tr>
+                <td colspan="4" class="px-4 py-10 text-center text-slate-400">
+                  ยังไม่มีผลประเมินที่อนุมัติแล้ว
+                </td>
               </tr>
+            } @else {
+              @for (row of data.approvedAssessments; track row.id) {
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 text-slate-700">{{ row.assessmentYear || '-' }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.totalScore | number:'1.1-2' }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.certifiedLevel || '-' }}</td>
+                  <td class="px-4 py-3 text-slate-500">{{ row.approvedAt ? (row.approvedAt | date:'dd/MM/yyyy') : '-' }}</td>
+                </tr>
+              }
             }
           </tbody>
         </table>
       </div>
     </section>
+  } @else {
+    <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+      ไม่สามารถโหลดรายงานผู้บริหารได้ กรุณาลองรีเฟรชอีกครั้ง
+    </div>
   }
 </div>
