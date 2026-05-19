@@ -20,11 +20,22 @@ export class GeminiController {
       storage: memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
       fileFilter: (_req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+        const allowed = [
+          'image/jpeg',
+          'image/png',
+          'image/webp',
+          'image/gif',
+          'application/pdf',
+        ];
         if (allowed.includes(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(new BadRequestException('Only image files (JPG, PNG, WEBP) and PDF are allowed'), false);
+          cb(
+            new BadRequestException(
+              'Only image files (JPG, PNG, WEBP) and PDF are allowed',
+            ),
+            false,
+          );
         }
       },
     }),

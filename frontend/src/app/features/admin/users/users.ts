@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { UsersService, Role } from '../../../core/services/users.service';
 import { User } from '../../../core/models/user.model';
 import { OrgService } from '../../../core/services/org.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -15,11 +16,16 @@ import { OrgService } from '../../../core/services/org.service';
 export class AdminUsersComponent implements OnInit {
   private usersService = inject(UsersService);
   private orgService = inject(OrgService);
+  private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+
+  isSystemAdmin = false;
+  isOrgAdmin = false;
+  currentOrgId: number | null = null;
 
   users: User[] = [];
   isLoading = true;
-  activeTab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'USER' = 'ALL';
+  activeTab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'ADMIN_ORG' | 'MEMBER' = 'ALL';
   searchText: string = '';
 
   get countByRole() {
@@ -27,7 +33,8 @@ export class AdminUsersComponent implements OnInit {
       all: this.users.length,
       admin: this.users.filter(u => ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim())).length,
       assessor: this.users.filter(u => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim())).length,
-      user: this.users.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR'].includes(String(u.role).trim())).length
+      adminOrg: this.users.filter(u => ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim())).length,
+      member: this.users.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR', 'Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim())).length
     };
   }
 
@@ -40,9 +47,27 @@ export class AdminUsersComponent implements OnInit {
   selectedOrgId: number | null = null;
 
   ngOnInit() {
-    this.loadUsers();
-    this.loadRoles();
-    this.loadOrganizations();
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.checkRoles();
+        this.loadUsers();
+        this.loadRoles();
+        if (this.isSystemAdmin) {
+          this.loadOrganizations();
+        }
+      }
+    });
+  }
+
+  checkRoles() {
+    const user = this.authService.getUser();
+    const role = (user?.role || '').toUpperCase().trim().split(' ').join('_');
+    
+    // Exact match to prevent Organization Admin from being identified as System Admin
+    this.isSystemAdmin = role === 'SYSTEM_ADMIN' || role === 'ADMIN';
+    this.isOrgAdmin = role === 'ORGANIZATION_ADMIN' || role === 'ORG_ADMIN';
+    
+    this.currentOrgId = this.authService.getOrganizationId();
   }
 
   loadOrganizations() {
@@ -97,7 +122,7 @@ export class AdminUsersComponent implements OnInit {
       }
     } else {
       // Setup empty user for creation
-      this.selectedOrgId = null;
+      this.selectedOrgId = this.isOrgAdmin ? this.currentOrgId : null;
       this.selectedUser = {
         email: '',
         password: '',
@@ -205,7 +230,7 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  setTab(tab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'USER') {
+  setTab(tab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'ADMIN_ORG' | 'MEMBER') {
     this.activeTab = tab;
   }
 
@@ -217,8 +242,10 @@ export class AdminUsersComponent implements OnInit {
       filtered = filtered.filter(u => ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim()));
     } else if (this.activeTab === 'ASSESSOR') {
       filtered = filtered.filter(u => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim()));
-    } else if (this.activeTab === 'USER') {
-      filtered = filtered.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR'].includes(String(u.role).trim()));
+    } else if (this.activeTab === 'ADMIN_ORG') {
+      filtered = filtered.filter(u => ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim()));
+    } else if (this.activeTab === 'MEMBER') {
+      filtered = filtered.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR', 'Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim()));
     }
 
     // Then apply text filter

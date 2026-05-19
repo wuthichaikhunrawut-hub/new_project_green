@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { AssessmentDetail } from './assessment-detail.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -10,7 +17,9 @@ export class EvidenceFile {
   @Column({ name: 'assessment_detail_id', nullable: true })
   assessment_detail_id: number;
 
-  @ManyToOne(() => AssessmentDetail, detail => detail.evidence_files, { onDelete: 'CASCADE' })
+  @ManyToOne(() => AssessmentDetail, (detail) => detail.evidence_files, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'assessment_detail_id' })
   assessment_detail: AssessmentDetail;
 
@@ -39,6 +48,10 @@ export class EvidenceFile {
   @Column({ name: 'category', type: 'varchar', length: 100, nullable: true })
   category: string;
 
-  @CreateDateColumn({ name: 'uploaded_at', type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({
+    name: 'uploaded_at',
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   uploaded_at: Date;
 }

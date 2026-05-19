@@ -6,6 +6,7 @@ import { UsersModule } from '../users/users.module';
 import { OrganizationsModule } from '../organizations/organizations.module';
 import { SettingsModule } from '../settings/settings.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
     OrganizationsModule,
     SettingsModule,
     SubscriptionsModule,
+    AuditLogsModule,
     JwtModule.register({
       global: true,
       secret: 'GREEN_SYNC_SUPER_SECRET_KEY_FOR_LOCAL_DEV',
@@ -21,6 +23,6 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService]
+  exports: [AuthService],
 })
 export class AuthModule {}

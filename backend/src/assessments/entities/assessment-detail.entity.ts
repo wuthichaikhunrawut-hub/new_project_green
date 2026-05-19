@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Assessment } from './assessment.entity';
 import { GreenCriteriaMaster } from './green-criteria-master.entity';
 import { EvidenceFile } from './evidence-file.entity';
@@ -11,7 +18,9 @@ export class AssessmentDetail {
   @Column({ name: 'assessment_id', nullable: true })
   assessment_id: number;
 
-  @ManyToOne(() => Assessment, assessment => assessment.details, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Assessment, (assessment) => assessment.details, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'assessment_id' })
   assessment: Assessment;
 
@@ -34,12 +43,20 @@ export class AssessmentDetail {
   @Column({ name: 'auditor_comment', type: 'text', nullable: true })
   auditor_comment: string;
 
-  @Column({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 
-  @Column({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @Column({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   updated_at: Date;
 
-  @OneToMany(() => EvidenceFile, file => file.assessment_detail, { cascade: true })
+  @OneToMany(() => EvidenceFile, (file) => file.assessment_detail, {
+    cascade: true,
+  })
   evidence_files: EvidenceFile[];
 }

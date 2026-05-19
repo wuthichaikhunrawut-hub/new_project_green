@@ -11,6 +11,7 @@ import { PlanFeature } from './entities/plan-feature.entity';
 import { Payment } from './entities/payment.entity';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { SettingsModule } from '../settings/settings.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 import { Organization } from '../organizations/entities/organization.entity';
 import { User } from '../users/entities/user.entity';
@@ -21,7 +22,7 @@ import { UserSubscriptionsController } from './user-subscriptions.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      SubscriptionPlan, 
+      SubscriptionPlan,
       Invoice,
       Feature,
       FeatureUsageLog,
@@ -29,12 +30,17 @@ import { UserSubscriptionsController } from './user-subscriptions.controller';
       PlanFeature,
       Payment,
       Organization,
-      User
+      User,
     ]),
     AuditLogsModule,
     SettingsModule,
+    NotificationsModule,
   ],
-  controllers: [SubscriptionsController, PaymentController, UserSubscriptionsController],
+  controllers: [
+    SubscriptionsController,
+    PaymentController,
+    UserSubscriptionsController,
+  ],
   providers: [SubscriptionsService, StripeService],
   exports: [SubscriptionsService, StripeService],
 })

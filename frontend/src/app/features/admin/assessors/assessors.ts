@@ -15,28 +15,49 @@ export class AdminAssessorsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   assessors: AssessorUser[] = [];
+  filteredData: AssessorUser[] = [];
   isLoading = true;
   searchText = '';
+  filterStatus = 'ALL';
 
   ngOnInit() { this.loadAssessors(); }
 
   loadAssessors() {
     this.isLoading = true;
     this.svc.getAssessors().subscribe({
-      next: (data) => { this.assessors = data; this.isLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      next: (data) => { 
+        this.assessors = data; 
+        this.isLoading = false; 
+        this.applyFilters();
+      },
+      error: () => { 
+        this.isLoading = false; 
+        this.cdr.detectChanges(); 
+      }
     });
   }
 
-  filteredAssessors(): AssessorUser[] {
-    if (!this.searchText) {
-      return this.assessors;
+  applyFilters() {
+    let result = this.assessors;
+    
+    if (this.filterStatus === 'APPROVED') {
+      result = result.filter(a => a.assessor_verified);
+    } else if (this.filterStatus === 'PENDING') {
+      result = result.filter(a => !a.assessor_verified && a.is_active);
+    } else if (this.filterStatus === 'SUSPENDED') {
+      result = result.filter(a => !a.is_active);
     }
-    const lowerSearch = this.searchText.toLowerCase();
-    return this.assessors.filter(a => 
-      a.username.toLowerCase().includes(lowerSearch) ||
-      a.email.toLowerCase().includes(lowerSearch)
-    );
+
+    if (this.searchText) {
+      const lowerSearch = this.searchText.toLowerCase();
+      result = result.filter(a => 
+        (a.username && a.username.toLowerCase().includes(lowerSearch)) ||
+        (a.email && a.email.toLowerCase().includes(lowerSearch))
+      );
+    }
+    
+    this.filteredData = result;
+    this.cdr.detectChanges();
   }
 
   verify(user: AssessorUser) {

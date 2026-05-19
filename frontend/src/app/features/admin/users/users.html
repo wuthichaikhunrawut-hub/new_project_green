@@ -1,8 +1,8 @@
 <div class="container-fluid p-4 animate-in">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="fw-bold mb-1 text-primary">จัดการผู้ใช้งานระบบ</h2>
-      <p class="text-muted mb-0">ค้นหา แก้ไขสิทธิ์ และจัดการรายชื่อผู้ใช้งานทั้งหมด</p>
+      <h2 class="fw-bold mb-1 text-primary">จัดการสมาชิก{{ isOrgAdmin ? 'ในองค์กร' : '' }}</h2>
+      <p class="text-muted mb-0">{{ isOrgAdmin ? 'จัดการรายชื่อพนักงานและสิทธิ์การเข้าถึงในองค์กรของคุณ' : 'ค้นหา แก้ไขสิทธิ์ และจัดการรายชื่อผู้ใช้งานทั้งหมดในระบบ' }}</p>
     </div>
     <div class="d-flex gap-2">
       <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" (click)="exportToCSV()">
@@ -22,7 +22,7 @@
             <span class="input-group-text bg-light border-0"><i
                 class="fa-solid fa-magnifying-glass text-muted"></i></span>
             <input type="text" class="form-control bg-light border-0 shadow-none ps-0"
-              placeholder="ค้นหาชื่อ, อีเมล หรือองค์กร..." [(ngModel)]="searchText">
+              [placeholder]="isOrgAdmin ? 'ค้นหาชื่อหรืออีเมลสมาชิก...' : 'ค้นหาชื่อ, อีเมล หรือองค์กร...'" [(ngModel)]="searchText">
           </div>
         </div>
       </div>
@@ -36,22 +36,32 @@
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.all }}</span>
         </a>
       </li>
-      <li class="nav-item">
+      
+      <!-- System Admin Tabs -->
+      <li class="nav-item" *ngIf="isSystemAdmin">
         <a class="nav-link" [class.active]="activeTab === 'ADMIN'" [class.fw-bold]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" style="cursor: pointer;">
           <i class="fa-solid fa-user-shield me-2"></i>แอดมินระบบ
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.admin }}</span>
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="isSystemAdmin">
         <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" [class.fw-bold]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" style="cursor: pointer;">
           <i class="fa-solid fa-user-check me-2"></i>ผู้ตรวจประเมิน
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.assessor }}</span>
         </a>
       </li>
+
+      <!-- Shared / Org Tabs -->
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'USER'" [class.fw-bold]="activeTab === 'USER'" (click)="setTab('USER')" style="cursor: pointer;">
-          <i class="fa-solid fa-building-user me-2"></i>ผู้ใช้งานองค์กร
-          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.user }}</span>
+        <a class="nav-link" [class.active]="activeTab === 'ADMIN_ORG'" [class.fw-bold]="activeTab === 'ADMIN_ORG'" (click)="setTab('ADMIN_ORG')" style="cursor: pointer;">
+          <i class="fa-solid fa-user-gear me-2"></i>Admin Org
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.adminOrg }}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="activeTab === 'MEMBER'" [class.fw-bold]="activeTab === 'MEMBER'" (click)="setTab('MEMBER')" style="cursor: pointer;">
+          <i class="fa-solid fa-building-user me-2"></i>สมาชิกในองค์กร
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.member }}</span>
         </a>
       </li>
     </ul>
@@ -191,10 +201,21 @@
         </div>
 
         <div class="row g-3 mb-4">
-          <div class="col-md-12">
+          <div class="col-md-6">
             <label class="form-label text-muted small fw-bold">สิทธิ์การใช้งาน (Role)</label>
             <select class="form-select rounded-3" [(ngModel)]="selectedUser.role">
-              <option *ngFor="let role of roles" [value]="role.role_name">{{ role.role_name }}</option>
+              <ng-container *ngFor="let role of roles">
+                <option *ngIf="isSystemAdmin || ['User', 'Organization Admin'].includes(role.role_name)" [value]="role.role_name">
+                  {{ role.role_name }}
+                </option>
+              </ng-container>
+            </select>
+          </div>
+          <div class="col-md-6" *ngIf="isSystemAdmin">
+            <label class="form-label text-muted small fw-bold">สังกัดองค์กร</label>
+            <select class="form-select rounded-3" [(ngModel)]="selectedOrgId">
+              <option [ngValue]="null">ไม่มีสังกัด</option>
+              <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
             </select>
           </div>
         </div>

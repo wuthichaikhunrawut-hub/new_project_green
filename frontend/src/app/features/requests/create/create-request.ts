@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { RequestsService } from '../../../core/services/requests.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Assessment } from '../../../core/models/assessment.model';
 
 @Component({
@@ -12,12 +13,16 @@ import { Assessment } from '../../../core/models/assessment.model';
   templateUrl: './create-request.html'
 })
 export class CreateRequestComponent implements OnInit {
+  private authService = inject(AuthService);
   private requestsService = inject(RequestsService);
   private router = inject(Router);
 
   isSubmitting = false;
   currentYear = new Date().getFullYear();
   yearOptions: number[] = [];
+
+  user = this.authService.getUser();
+  organizationName = this.user?.organizationName || 'องค์กรของคุณ';
 
   request: Partial<Assessment> = {
     status: 'PENDING',

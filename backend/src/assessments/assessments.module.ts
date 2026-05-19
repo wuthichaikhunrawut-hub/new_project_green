@@ -16,15 +16,20 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Assessment, 
-      AssessmentDetail, 
-      GreenCriteriaMaster, 
+      Assessment,
+      AssessmentDetail,
+      GreenCriteriaMaster,
       EvidenceFile,
-      Certificate
+      Certificate,
     ]),
-    AuditLogsModule
+    AuditLogsModule,
   ],
-  controllers: [AssessmentsController, GreenCriteriaController, GreenOfficeController, GreenOfficeDataController],
+  controllers: [
+    AssessmentsController,
+    GreenCriteriaController,
+    GreenOfficeController,
+    GreenOfficeDataController,
+  ],
   providers: [AssessmentsService, GreenCriteriaService],
   exports: [AssessmentsService, GreenCriteriaService],
 })

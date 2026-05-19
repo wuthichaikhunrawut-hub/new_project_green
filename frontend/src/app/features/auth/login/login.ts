@@ -42,12 +42,10 @@ export class LoginComponent {
             const role = response.user.role || '';
 
             // Normalize role check
-            const roleUpper = role.toUpperCase();
+            const roleUpper = role.toUpperCase().trim().split(' ').join('_');
             const isAdmin = roleUpper === 'ADMIN'
               || roleUpper === 'SYSTEM_ADMIN'
-              || roleUpper === 'SYSTEM ADMIN'
-              || roleUpper === 'ORGANIZATION ADMIN'
-              || roleUpper === 'ORG_ADMIN';
+              || roleUpper === 'ORGANIZATION_ADMIN';
 
             const isAssessor = roleUpper === 'ASSESSOR';
 

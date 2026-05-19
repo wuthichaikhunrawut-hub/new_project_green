@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Put, Query, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Put,
+  Query,
+  Headers,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -7,7 +19,23 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  findAll(@Query('role') role?: string) {
+  findAll(@Query('role') role?: string, @Headers() headers?: any) {
+    const orgIdStr = headers['x-org-id'];
+    const userRole = headers['x-user-role'] || '';
+
+    // If ORG_ADMIN, force filter by their organization
+    if (
+      ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].some((r) =>
+        String(userRole).includes(r),
+      )
+    ) {
+      const orgId = parseInt(orgIdStr, 10);
+      if (!isNaN(orgId)) {
+        return this.usersService.findAll(role, orgId);
+      }
+    }
+
+    // Otherwise (System Admin), return all or filtered by role
     return this.usersService.findAll(role);
   }
 
@@ -23,10 +51,7 @@ export class UsersController {
   }
 
   @Patch('profile/me')
-  updateProfile(
-    @Headers('x-user-id') userId: string,
-    @Body() updateData: any
-  ) {
+  updateProfile(@Headers('x-user-id') userId: string, @Body() updateData: any) {
     return this.usersService.update(+userId, updateData);
   }
 

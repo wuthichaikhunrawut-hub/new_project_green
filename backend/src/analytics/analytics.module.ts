@@ -9,12 +9,22 @@ import { Assessment } from '../assessments/entities/assessment.entity';
 import { OrganizationSubscription } from '../subscriptions/entities/organization-subscription.entity';
 import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { AssessorProfile } from '../users/entities/assessor-profile.entity';
+import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 
 import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Organization, Invoice, Assessment, OrganizationSubscription, SubscriptionPlan, AssessorProfile]),
+    TypeOrmModule.forFeature([
+      User,
+      Organization,
+      Invoice,
+      Assessment,
+      OrganizationSubscription,
+      SubscriptionPlan,
+      AssessorProfile,
+      CarbonLog,
+    ]),
     SettingsModule,
   ],
   controllers: [AnalyticsController],

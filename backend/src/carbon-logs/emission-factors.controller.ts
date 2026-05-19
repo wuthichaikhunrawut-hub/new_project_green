@@ -1,11 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { EmissionFactorsService } from './emission-factors.service';
 import { EmissionFactor } from './entities/emission-factor.entity';
 
 @Controller('admin/emission-factors')
 // @UseGuards(AdminRoleGuard)
 export class EmissionFactorsController {
-  constructor(private readonly emissionFactorsService: EmissionFactorsService) {}
+  constructor(
+    private readonly emissionFactorsService: EmissionFactorsService,
+  ) {}
 
   @Get()
   findAll() {

@@ -21,6 +21,8 @@ export interface AssessorUser {
     education_background: string;
     verification_status: string;
     qualification_file_url?: string;
+    verified_at?: string;
+    verified_by_id?: number;
   };
   bank_accounts?: any[];
 }

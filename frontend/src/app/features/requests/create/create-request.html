@@ -2,8 +2,8 @@
   <!-- Header -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="fw-bold mb-1 text-primary">สร้างคำขอรับรองสำนักงานสีเขียว</h2>
-      <p class="text-muted mb-0">กรอกข้อมูลและขอบเขตการสำรวจเพื่อส่งเรื่องให้ผู้ตรวจประเมิน</p>
+      <h2 class="fw-bold mb-1 text-primary">ยื่นคำขอรับการตรวจประเมินจริง</h2>
+      <p class="text-muted mb-0">กรอกข้อมูลและขอบเขตการสำรวจเพื่อส่งเรื่องให้ผู้ตรวจประเมินเข้ามาประเมินจริง</p>
     </div>
   </div>
 
@@ -12,7 +12,26 @@
     <div class="col-lg-8">
       <div class="card p-0">
         <div class="card-body p-4">
+          <!-- Organization Badge -->
+          <div class="d-flex align-items-center mb-4 p-3 bg-primary-subtle rounded-3 border border-primary-subtle">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px;">
+              <i class="fa-solid fa-building"></i>
+            </div>
+            <div>
+              <div class="text-primary small fw-bold text-uppercase ls-1">หน่วยงานที่ยื่นขอ</div>
+              <div class="h5 mb-0 fw-bold">{{ organizationName }}</div>
+            </div>
+          </div>
+
           <form (ngSubmit)="onSubmit()" #requestForm="ngForm">
+            <!-- Requester Info -->
+            <div class="mb-4">
+              <label class="form-label text-muted small fw-bold">ผู้ส่งคำขอ</label>
+              <div class="d-flex align-items-center p-2 bg-light rounded-3">
+                <i class="fa-solid fa-user-circle fs-4 me-2 text-secondary"></i>
+                <span class="fw-semibold">{{ user?.username || user?.email }}</span>
+              </div>
+            </div>
             <!-- Year -->
             <div class="mb-4">
               <label for="year" class="form-label text-dark fw-bold">รอบปีที่รับการประเมิน <span class="text-danger">*</span></label>

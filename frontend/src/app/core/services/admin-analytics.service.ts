@@ -30,9 +30,9 @@ export interface AdminStats {
 })
 export class AdminAnalyticsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/analytics';
+  private apiUrl = 'http://localhost:3001/admin-stats';
 
   getAdminDashboardStats(): Observable<AdminStats> {
-    return this.http.get<AdminStats>(`${this.apiUrl}/admin-dashboard`);
+    return this.http.get<AdminStats>(`${this.apiUrl}/dashboard`);
   }
 }

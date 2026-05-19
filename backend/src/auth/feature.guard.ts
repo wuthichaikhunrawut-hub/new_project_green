@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { FEATURE_KEY } from './feature.decorator';
@@ -27,10 +32,15 @@ export class FeatureGuard implements CanActivate {
       throw new ForbiddenException('User organization context missing');
     }
 
-    const hasAccess = await this.subscriptionsService.canAccessFeature(user.org_id, featureCode);
-    
+    const hasAccess = await this.subscriptionsService.canAccessFeature(
+      user.org_id,
+      featureCode,
+    );
+
     if (!hasAccess) {
-      throw new ForbiddenException(`Your subscription plan does not include the ${featureCode} feature.`);
+      throw new ForbiddenException(
+        `Your subscription plan does not include the ${featureCode} feature.`,
+      );
     }
 
     return true;

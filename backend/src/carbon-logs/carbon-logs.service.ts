@@ -28,7 +28,9 @@ export class CarbonLogsService {
   }
 
   async remove(id: number, orgId: number): Promise<void> {
-    const log = await this.logRepository.findOne({ where: { id, org_id: orgId } });
+    const log = await this.logRepository.findOne({
+      where: { id, org_id: orgId },
+    });
     if (!log) {
       throw new NotFoundException('ไม่พบข้อมูลรายการนี้');
     }

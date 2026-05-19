@@ -23,6 +23,8 @@ export class NotificationsAdminComponent implements OnInit {
   organizations: any[] = [];
   allUsers: any[] = [];
   filteredUsers: any[] = [];
+  history: any[] = [];
+  isLoadingHistory = false;
   
   targetType: TargetType = 'ALL_SYSTEM';
   selectedOrgId: number | null = null;
@@ -54,6 +56,23 @@ export class NotificationsAdminComponent implements OnInit {
   loadInitialData() {
     this.orgService.getAll().subscribe(orgs => this.organizations = orgs);
     this.usersService.getUsers().subscribe(users => this.allUsers = users);
+    this.loadHistory();
+  }
+
+  loadHistory() {
+    this.isLoadingHistory = true;
+    this.notificationService.getAllSystemNotifications().subscribe({
+      next: (data) => {
+        this.history = data;
+        this.isLoadingHistory = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Failed to load notification history:', err);
+        this.isLoadingHistory = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   onOrgChange(orgId: any) {
@@ -97,6 +116,7 @@ export class NotificationsAdminComponent implements OnInit {
         this.successMessage = `ส่งการแจ้งเตือนสำเร็จแล้ว (${recipientIds.length} ผู้รับ)`;
         this.resetForm();
         this.isSending = false;
+        this.loadHistory(); // Refresh history
         this.cdr.detectChanges();
       },
       error: (err) => {

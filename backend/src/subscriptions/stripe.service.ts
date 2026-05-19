@@ -13,7 +13,8 @@ export class StripeService implements OnModuleInit {
   }
 
   private async initStripe() {
-    const secretKey = await this.settingsService.getSetting('stripe.secret_key');
+    const secretKey =
+      await this.settingsService.getSetting('stripe.secret_key');
     if (secretKey) {
       this.stripe = new Stripe(secretKey, {});
     }

@@ -1,4 +1,16 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany, OneToOne, ManyToMany, JoinTable } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Assessment } from '../../assessments/entities/assessment.entity';
 import { AssessorProfile } from './assessor-profile.entity';
@@ -36,10 +48,16 @@ export class User {
   @Column({ type: 'timestamp without time zone', nullable: true })
   last_login_at: Date;
 
-  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   updated_at: Date;
 
   @ManyToOne(() => Organization, (org) => org.users, { onDelete: 'CASCADE' })
@@ -48,20 +66,20 @@ export class User {
 
   // Added references for Assessor relationships (reverse side)
   // Assessor's assigned assessments
-  @OneToMany(() => Assessment, assessment => assessment.assessor)
+  @OneToMany(() => Assessment, (assessment) => assessment.assessor)
   assessments: Assessment[];
 
-  @OneToOne(() => AssessorProfile, profile => profile.user)
+  @OneToOne(() => AssessorProfile, (profile) => profile.user)
   assessor_profile: AssessorProfile;
 
-  @OneToOne(() => UserProfile, profile => profile.user)
+  @OneToOne(() => UserProfile, (profile) => profile.user)
   user_profile: UserProfile;
 
   @ManyToMany(() => Role)
   @JoinTable({
     name: 'user_roles',
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' }
+    inverseJoinColumn: { name: 'role_id', referencedColumnName: 'id' },
   })
   roles: Role[];
 

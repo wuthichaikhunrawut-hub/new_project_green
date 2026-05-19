@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  OneToMany,
+} from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { User } from '../../users/entities/user.entity';
 import { AssessmentDetail } from './assessment-detail.entity';
@@ -34,18 +43,37 @@ export class Assessment {
   @Column({ type: 'text', nullable: true })
   notes: string;
 
-  @Column({ name: 'certified_level', type: 'varchar', length: 50, nullable: true })
+  @Column({
+    name: 'certified_level',
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+  })
   certified_level: string;
 
-  @Column({ name: 'submitted_at', type: 'timestamp without time zone', nullable: true })
+  @Column({
+    name: 'submitted_at',
+    type: 'timestamp without time zone',
+    nullable: true,
+  })
   submitted_at: Date;
 
-  @CreateDateColumn({ name: 'created_at', type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({
+    name: 'created_at',
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 
-  @UpdateDateColumn({ name: 'updated_at', type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({
+    name: 'updated_at',
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   updated_at: Date;
 
-  @OneToMany(() => AssessmentDetail, (detail) => detail.assessment, { cascade: true })
+  @OneToMany(() => AssessmentDetail, (detail) => detail.assessment, {
+    cascade: true,
+  })
   details: AssessmentDetail[];
 }

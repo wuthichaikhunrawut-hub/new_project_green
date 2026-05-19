@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToMany, JoinTable, Index } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToMany,
+  JoinTable,
+  Index,
+} from 'typeorm';
 import { Feature } from './feature.entity';
 
 @Entity('subscription_plans')
@@ -32,11 +40,14 @@ export class SubscriptionPlan {
   @JoinTable({
     name: 'plan_features',
     joinColumn: { name: 'plan_id', referencedColumnName: 'id' },
-    inverseJoinColumn: { name: 'feature_id', referencedColumnName: 'id' }
+    inverseJoinColumn: { name: 'feature_id', referencedColumnName: 'id' },
   })
   features: Feature[];
 
   @Index()
-  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 }

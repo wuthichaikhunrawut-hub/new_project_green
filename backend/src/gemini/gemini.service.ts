@@ -36,7 +36,9 @@ export class GeminiService {
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+      });
 
       const prompt = `You are an expert at reading Thai utility bills (electricity, water, gas, fuel).
 Analyze this bill image and extract the following information. Respond ONLY with a valid JSON object, no markdown, no explanation.
@@ -64,13 +66,19 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       const text = response.text().trim();
 
       // Strip markdown code fences if present
-      const jsonText = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+      const jsonText = text
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/```\s*$/i, '')
+        .trim();
 
       const parsed: BillScanResult = JSON.parse(jsonText);
       return parsed;
     } catch (error) {
       console.error('Gemini API error:', error);
-      throw new InternalServerErrorException('AI scan failed: ' + (error as Error).message);
+      throw new InternalServerErrorException(
+        'AI scan failed: ' + (error as Error).message,
+      );
     }
   }
 
@@ -86,7 +94,9 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     }
 
     try {
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = this.genAI.getGenerativeModel({
+        model: 'gemini-1.5-flash',
+      });
 
       const systemContext = `คุณคือ GreenBot ผู้ช่วย AI ของระบบ Green Sync ที่เชี่ยวชาญด้าน:
 1. การประเมินสำนักงานสีเขียว (Green Office) ตามมาตรฐานกระทรวงทรัพยากรธรรมชาติและสิ่งแวดล้อม
@@ -105,7 +115,9 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       return { reply };
     } catch (error) {
       console.error('Gemini chat error:', error);
-      throw new InternalServerErrorException('ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง');
+      throw new InternalServerErrorException(
+        'ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง',
+      );
     }
   }
 }
