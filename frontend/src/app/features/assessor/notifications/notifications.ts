@@ -51,14 +51,14 @@ export class AssessorNotificationsComponent implements OnInit {
           requestId: null,
           read: false
         });
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
-      error: () => { this.cdr.detectChanges(); }
+      error: () => { this.cdr.markForCheck(); }
     });
   }
 
   markAllRead() {
     this.notifications.forEach(n => n.read = true);
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 }

@@ -35,7 +35,7 @@ export class SubscriptionComponent implements OnInit {
     setTimeout(() => {
       if (this.isLoading) {
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     }, 5000);
 
@@ -54,19 +54,19 @@ export class SubscriptionComponent implements OnInit {
               this.currentPlan = sub.plan;
             }
             this.isLoading = false;
-            this.cdr.detectChanges(); // Force UI update!
+            this.cdr.markForCheck(); // Force UI update!
           },
           error: (err) => {
             console.error('MySub error:', err);
             this.isLoading = false;
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           }
         });
       },
       error: (err) => {
         console.error('Data load error:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

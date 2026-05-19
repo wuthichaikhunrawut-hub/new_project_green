@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AssessorService } from '../../../core/services/assessor.service';
 import { AssessorAssignmentItem } from '../../../core/models/assessor.model';
@@ -8,8 +9,9 @@ import { ToastService } from '../../../shared/services/toast.service';
 @Component({
   selector: 'app-assessor-history',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './history.html',
+  styleUrl: './history.css',
 })
 export class AssessorHistoryComponent implements OnInit {
   private readonly assessorService = inject(AssessorService);
@@ -19,9 +21,53 @@ export class AssessorHistoryComponent implements OnInit {
   history: AssessorAssignmentItem[] = [];
   isLoading = true;
 
-  ngOnInit(): void {
-    this.load();
+  // Filters
+  searchTerm = '';
+  statusFilter = '';
+  yearFilter = '';
+  sortBy: 'date_desc' | 'date_asc' | 'score_desc' | 'score_asc' = 'date_desc';
+
+  // Stats
+  get totalApproved(): number { return this.history.filter(h => h.status === 'APPROVED').length; }
+  get totalRejected(): number { return this.history.filter(h => h.status === 'REJECTED').length; }
+  get avgScore(): number {
+    const scored = this.history.filter(h => h.totalScore > 0);
+    if (!scored.length) return 0;
+    return Math.round(scored.reduce((s, h) => s + h.totalScore, 0) / scored.length);
   }
+  get availableYears(): number[] {
+    return Array.from(new Set(this.history.map(h => h.assessmentYear))).sort((a, b) => b - a);
+  }
+
+  get filteredHistory(): AssessorAssignmentItem[] {
+    let items = this.history.filter(item => {
+      const matchSearch = !this.searchTerm ||
+        item.orgName.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchStatus = !this.statusFilter || item.status === this.statusFilter;
+      const matchYear = !this.yearFilter || String(item.assessmentYear) === this.yearFilter;
+      return matchSearch && matchStatus && matchYear;
+    });
+
+    switch (this.sortBy) {
+      case 'date_asc':
+        items = items.slice().sort((a, b) =>
+          new Date(a.submittedAt ?? 0).getTime() - new Date(b.submittedAt ?? 0).getTime());
+        break;
+      case 'date_desc':
+        items = items.slice().sort((a, b) =>
+          new Date(b.submittedAt ?? 0).getTime() - new Date(a.submittedAt ?? 0).getTime());
+        break;
+      case 'score_desc':
+        items = items.slice().sort((a, b) => b.totalScore - a.totalScore);
+        break;
+      case 'score_asc':
+        items = items.slice().sort((a, b) => a.totalScore - b.totalScore);
+        break;
+    }
+    return items;
+  }
+
+  ngOnInit(): void { this.load(); }
 
   load(): void {
     this.isLoading = true;
@@ -29,17 +75,100 @@ export class AssessorHistoryComponent implements OnInit {
       next: (data) => {
         this.history = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isLoading = false;
         this.toast.error('โหลดประวัติไม่สำเร็จ');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
     });
   }
 
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.statusFilter = '';
+    this.yearFilter = '';
+  }
+
+  printReport(item: AssessorAssignmentItem): void {
+    // Open evaluate page in new tab and trigger print
+    const url = `/requests/evaluate/${item.id}`;
+    const win = window.open(url, '_blank');
+    if (win) {
+      win.onload = () => {
+        setTimeout(() => win.print(), 800);
+      };
+    }
+  }
+
+  exportCsv(): void {
+    const rows = [
+      ['ลำดับ', 'ชื่อองค์กร', 'ปีประเมิน', 'สถานะ', 'คะแนนรวม', 'ระดับการรับรอง', 'Carbon รวม (tCO₂e)'],
+      ...this.filteredHistory.map((h, i) => [
+        String(i + 1),
+        h.orgName,
+        String(h.assessmentYear),
+        this.statusLabel(h.status),
+        String(h.totalScore),
+        this.certLevel(h.totalScore),
+        String(h.carbonSummary?.totalEmission?.toFixed(2) ?? '0'),
+      ])
+    ];
+
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `assessor-history-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   statusLabel(status: string): string {
-    return status === 'APPROVED' ? 'อนุมัติแล้ว' : 'ไม่อนุมัติ';
+    const map: Record<string, string> = {
+      APPROVED: 'อนุมัติแล้ว', REJECTED: 'ปฏิเสธ',
+      REVISION_REQUESTED: 'รอแก้ไข',
+    };
+    return map[status] ?? status;
+  }
+
+  statusClass(status: string): string {
+    const map: Record<string, string> = {
+      APPROVED: 'badge-approved', REJECTED: 'badge-rejected',
+      REVISION_REQUESTED: 'badge-revision',
+    };
+    return map[status] ?? '';
+  }
+
+  certLevel(score: number): string {
+    if (score >= 90) return 'ทอง (Gold)';
+    if (score >= 70) return 'เงิน (Silver)';
+    if (score >= 50) return 'ทองแดง (Bronze)';
+    if (score > 0) return 'ไม่ผ่านเกณฑ์';
+    return '-';
+  }
+
+  certEmoji(score: number): string {
+    if (score >= 90) return '🥇';
+    if (score >= 70) return '🥈';
+    if (score >= 50) return '🥉';
+    if (score > 0) return '❌';
+    return '—';
+  }
+
+  certClass(score: number): string {
+    if (score >= 90) return 'cert-gold';
+    if (score >= 70) return 'cert-silver';
+    if (score >= 50) return 'cert-bronze';
+    return 'cert-none';
+  }
+
+  formatDate(dateStr: string | null): string {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('th-TH', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
   }
 }

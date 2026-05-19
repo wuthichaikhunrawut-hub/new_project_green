@@ -1,53 +1,209 @@
-<div class="max-w-7xl mx-auto space-y-6">
-  <header>
-    <h1 class="text-2xl font-bold text-slate-900">คำขอรับรองที่ได้รับมอบหมาย</h1>
-    <p class="text-sm text-slate-500 mt-1">ตรวจหลักฐานและสรุปผลการประเมินตามเกณฑ์ Green Office</p>
-  </header>
+<div class="asgn-wrapper animate-in">
 
-  <div class="flex flex-col sm:flex-row gap-3">
-    <input
-      type="search"
-      [(ngModel)]="searchTerm"
-      placeholder="ค้นหาชื่อองค์กร..."
-      class="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500"
-    />
-    <select
-      [(ngModel)]="statusFilter"
-      class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-    >
-      <option value="">ทุกสถานะ</option>
-      <option value="PENDING">รอดำเนินการ</option>
-      <option value="SUBMITTED">ส่งแล้ว</option>
-      <option value="IN_REVIEW">กำลังตรวจ</option>
-      <option value="REVISION_REQUESTED">รอแก้ไข</option>
-    </select>
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i class="fa-solid fa-list-check"></i>
+        คำขอรับรองที่ได้รับมอบหมาย
+      </h1>
+      <p class="page-subtitle">ตรวจหลักฐานและสรุปผลการประเมินตามเกณฑ์ Green Office</p>
+    </div>
+    <div class="page-header-right">
+      <button class="refresh-btn" (click)="load()" [disabled]="isLoading">
+        <i class="fa-solid fa-rotate" [class.spin-anim]="isLoading"></i>
+        รีเฟรช
+      </button>
+    </div>
   </div>
 
-  @if (isLoading) {
-    <div class="flex justify-center py-16">
-      <div class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+  <!-- ══ STATUS QUICK FILTER TABS ══ -->
+  <div class="status-tabs" *ngIf="!isLoading">
+    <button class="stab" [class.stab-active]="statusFilter === ''" (click)="statusFilter = ''">
+      ทั้งหมด <span class="stab-count">{{ assignments.length }}</span>
+    </button>
+    <button class="stab stab-pending" [class.stab-active]="statusFilter === 'PENDING'" (click)="statusFilter = 'PENDING'">
+      รอตรวจ <span class="stab-count">{{ countByStatus['PENDING'] ?? 0 }}</span>
+    </button>
+    <button class="stab stab-review" [class.stab-active]="statusFilter === 'IN_REVIEW'" (click)="statusFilter = 'IN_REVIEW'">
+      กำลังตรวจ <span class="stab-count">{{ countByStatus['IN_REVIEW'] ?? 0 }}</span>
+    </button>
+    <button class="stab stab-submitted" [class.stab-active]="statusFilter === 'SUBMITTED'" (click)="statusFilter = 'SUBMITTED'">
+      ส่งแล้ว <span class="stab-count">{{ countByStatus['SUBMITTED'] ?? 0 }}</span>
+    </button>
+    <button class="stab stab-revision" [class.stab-active]="statusFilter === 'REVISION_REQUESTED'" (click)="statusFilter = 'REVISION_REQUESTED'">
+      รอแก้ไข <span class="stab-count">{{ countByStatus['REVISION_REQUESTED'] ?? 0 }}</span>
+    </button>
+  </div>
+
+  <!-- ══ SEARCH + FILTER BAR ══ -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input
+        type="search"
+        [(ngModel)]="searchTerm"
+        placeholder="ค้นหาชื่อองค์กร..."
+        class="search-input"
+      />
+      <button *ngIf="searchTerm" class="search-clear" (click)="searchTerm = ''">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
-  } @else if (filteredAssignments.length === 0) {
-    <p class="text-center text-slate-500 py-16 text-sm">ไม่พบรายการ</p>
-  } @else {
-    <div class="grid gap-4">
-      @for (item of filteredAssignments; track item.id) {
-        <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm hover:shadow-md transition-shadow">
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
-              <div class="flex flex-wrap items-center gap-2">
-                <h2 class="font-semibold text-slate-900">{{ item.orgName }}</h2>
-                <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100">{{ statusLabel(item.status) }}</span>
-              </div>
-              <p class="text-sm text-slate-500 mt-1">ปี {{ item.assessmentYear }} · คาร์บอนรวม {{ item.carbonSummary.totalEmission | number:'1.1-2' }} tCO₂e</p>
+
+    <select [(ngModel)]="yearFilter" class="filter-select">
+      <option value="">ทุกปีประเมิน</option>
+      <option *ngFor="let y of availableYears" [value]="y">ปี {{ y }}</option>
+    </select>
+
+    <button *ngIf="searchTerm || statusFilter || yearFilter" class="clear-all-btn" (click)="clearFilters()">
+      <i class="fa-solid fa-filter-circle-xmark"></i> ล้างตัวกรอง
+    </button>
+
+    <div class="view-toggle">
+      <button class="vt-btn" [class.vt-active]="viewMode === 'list'" (click)="viewMode = 'list'" title="มุมมองรายการ">
+        <i class="fa-solid fa-bars"></i>
+      </button>
+      <button class="vt-btn" [class.vt-active]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="มุมมอง Grid">
+        <i class="fa-solid fa-grip"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ RESULT COUNT ══ -->
+  <div class="result-count" *ngIf="!isLoading">
+    แสดง <strong>{{ filteredAssignments.length }}</strong> จาก {{ assignments.length }} รายการ
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner-ring"></div>
+    <p>กำลังโหลดรายการคำขอ...</p>
+  </div>
+
+  <!-- ══ EMPTY STATE ══ -->
+  <div class="empty-state" *ngIf="!isLoading && filteredAssignments.length === 0">
+    <i class="fa-regular fa-folder-open"></i>
+    <p>ไม่พบรายการ</p>
+    <span *ngIf="searchTerm || statusFilter || yearFilter">
+      ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง
+    </span>
+    <button *ngIf="searchTerm || statusFilter || yearFilter" class="clear-all-btn" (click)="clearFilters()">
+      ล้างตัวกรองทั้งหมด
+    </button>
+  </div>
+
+  <!-- ══ LIST VIEW ══ -->
+  <div class="asgn-list" *ngIf="!isLoading && filteredAssignments.length > 0 && viewMode === 'list'">
+    <div class="asgn-card" *ngFor="let item of filteredAssignments"
+      [class.asgn-card-urgent]="isNearDeadline(item)">
+
+      <!-- Urgent ribbon -->
+      <div class="urgent-ribbon" *ngIf="isNearDeadline(item)">
+        <i class="fa-solid fa-fire-flame-curved"></i> ด่วน · รอ {{ getDaysWaiting(item) }} วัน
+      </div>
+
+      <div class="asgn-card-inner">
+        <!-- LEFT: Org Info -->
+        <div class="asgn-left">
+          <div class="org-avatar-lg">{{ item.orgName.charAt(0) }}</div>
+          <div class="org-detail">
+            <div class="org-name-row">
+              <span class="org-name">{{ item.orgName }}</span>
+              <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+              <span class="badge-mock" *ngIf="item.carbonSummary?.isMock">ข้อมูลตัวอย่าง</span>
             </div>
-            <div class="flex gap-2">
-              <a [routerLink]="['/assessor/evidence', item.id]" class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700">ตรวจหลักฐาน</a>
-              <a [routerLink]="['/assessor/decide', item.id]" class="px-4 py-2 rounded-xl border border-slate-200 text-sm font-medium hover:bg-slate-50">สรุปผล</a>
+            <div class="org-meta">
+              <span><i class="fa-solid fa-calendar-alt"></i> ปีประเมิน {{ item.assessmentYear }}</span>
+              <span class="dot">·</span>
+              <span *ngIf="item.submittedAt">
+                <i class="fa-solid fa-clock"></i> ส่งมา {{ getDaysWaiting(item) }} วัน
+              </span>
+              <span class="dot" *ngIf="item.submittedAt">·</span>
+              <span *ngIf="item.totalScore > 0">
+                <i class="fa-solid fa-star"></i> {{ item.totalScore | number:'1.0-1' }} คะแนน
+                ({{ getCertLevel(getScorePercent(item)) }})
+              </span>
             </div>
           </div>
-        </article>
-      }
+        </div>
+
+        <!-- CENTER: Carbon Summary -->
+        <div class="carbon-panel">
+          <div class="carbon-panel-title">
+            <i class="fa-solid fa-leaf"></i>
+            Carbon Footprint
+          </div>
+          <div class="carbon-total-row">
+            <span class="carbon-total-num">{{ item.carbonSummary?.totalEmission | number:'1.1-1' }}</span>
+            <span class="carbon-unit">tCO₂e รวม</span>
+          </div>
+          <div class="scope-bar-list">
+            <div class="scope-row" *ngFor="let scope of item.carbonSummary?.scopes">
+              <div class="scope-label-wrap">
+                <span class="scope-dot" [style.background]="getScopeColor(scope.scope)"></span>
+                <span class="scope-name-sm">S{{ scope.scope }}</span>
+              </div>
+              <div class="scope-track">
+                <div class="scope-fill-bar"
+                  [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary?.totalEmission ?? 0)"
+                  [style.min-width]="scope.totalEmission > 0 ? '4px' : '0'"
+                  [style.background]="getScopeColor(scope.scope)">
+                </div>
+              </div>
+              <span class="scope-emit">{{ scope.totalEmission | number:'1.1-1' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Actions -->
+        <div class="asgn-actions">
+          <a [routerLink]="['/requests/evaluate', item.id]" class="act-btn act-primary">
+            <i class="fa-solid fa-clipboard-check"></i> ตรวจประเมิน
+          </a>
+        </div>
+      </div>
     </div>
-  }
+  </div>
+
+  <!-- ══ GRID VIEW ══ -->
+  <div class="asgn-grid" *ngIf="!isLoading && filteredAssignments.length > 0 && viewMode === 'grid'">
+    <div class="asgn-grid-card" *ngFor="let item of filteredAssignments"
+      [class.asgn-grid-card-urgent]="isNearDeadline(item)">
+
+      <div class="grid-card-top">
+        <div class="gc-org-avatar">{{ item.orgName.charAt(0) }}</div>
+        <div class="gc-badges">
+          <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+          <span class="urgent-chip" *ngIf="isNearDeadline(item)">
+            <i class="fa-solid fa-fire-flame-curved"></i> ด่วน
+          </span>
+        </div>
+      </div>
+
+      <div class="gc-org-name">{{ item.orgName }}</div>
+      <div class="gc-meta">ปี {{ item.assessmentYear }} · รอ {{ getDaysWaiting(item) }} วัน</div>
+
+      <div class="gc-carbon">
+        <div class="gc-carbon-label">
+          <i class="fa-solid fa-leaf"></i>
+          {{ item.carbonSummary?.totalEmission | number:'1.1-1' }} tCO₂e
+        </div>
+        <div class="gc-scopes">
+          <span *ngFor="let s of item.carbonSummary?.scopes" class="gc-scope-chip"
+            [style.background]="getScopeColor(s.scope) + '20'"
+            [style.color]="getScopeColor(s.scope)">
+            S{{ s.scope }}: {{ s.totalEmission | number:'1.0-0' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="gc-actions">
+        <a [routerLink]="['/requests/evaluate', item.id]" class="act-btn act-primary">
+          <i class="fa-solid fa-clipboard-check"></i> ตรวจประเมิน
+        </a>
+      </div>
+    </div>
+  </div>
+
 </div>

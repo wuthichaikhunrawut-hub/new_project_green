@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +9,13 @@ import { AuthService } from '../services/auth.service';
 export class RoleGuard implements CanActivate {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    if (!isPlatformBrowser(this.platformId)) {
+      return true; // Allow server-side rendering to proceed, we will handle 401s without redirecting
+    }
+
     const user = this.authService.getUser();
     
     // Not authenticated, let authGuard (if any) or login page handle it
@@ -28,19 +34,42 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    // Normalize role name for comparison (e.g., 'Organization Admin' -> 'ORGANIZATION_ADMIN')
-    const normalizedRole = String(role).toUpperCase().trim().split(' ').join('_');
+    const normalizeRole = (value: string): string => {
+      const val = String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s_]/g, '');
+      if (val === 'ORGADMIN' || val === 'ORGANIZATIONADMIN') {
+        return 'ORGANIZATIONADMIN';
+      }
+      if (val === 'SYSTEMADMIN' || val === 'ADMIN') {
+        return 'SYSTEMADMIN';
+      }
+      return val;
+    };
 
-    if (allowedRoles.map(r => r.toUpperCase()).includes(normalizedRole)) {
+    const userRole = normalizeRole(String(role));
+    const allowed = allowedRoles.map((r) => normalizeRole(r));
+
+    if (allowed.includes(userRole)) {
+      return true;
+    }
+
+    const legacyRole = String(role).toUpperCase().trim().split(' ').join('_');
+    if (allowedRoles.map((r) => r.toUpperCase()).includes(legacyRole)) {
       return true;
     }
 
     // Role is not allowed. Redirect based on role.
+    const normalizedRole = String(role).toUpperCase().trim().split(' ').join('_');
     switch (normalizedRole) {
       case 'SYSTEM_ADMIN':
+      case 'ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
       case 'ORG_ADMIN':
       case 'ORGANIZATION_ADMIN':
-        this.router.navigate(['/admin/dashboard']);
+        this.router.navigate(['/dashboard']);
         break;
       case 'ASSESSOR':
         this.router.navigate(['/assessor/dashboard']);

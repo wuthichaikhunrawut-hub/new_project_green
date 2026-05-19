@@ -38,12 +38,12 @@ export class AdminCriteriaComponent implements OnInit {
         this.criteriaList = data;
         this.groupCriteria();
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load criteria:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

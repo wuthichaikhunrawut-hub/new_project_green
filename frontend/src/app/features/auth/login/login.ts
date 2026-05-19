@@ -26,7 +26,7 @@ export class LoginComponent {
   onLogin() {
     this.isLoading = true;
     this.errorMessage = '';
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     const credentials = {
       email: this.username,
@@ -36,7 +36,7 @@ export class LoginComponent {
     this.authService.login(credentials).pipe(timeout(15000)).subscribe({
       next: (response: AuthResponse) => {
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
         try {
           if (response && response.access_token) {
             const role = response.user.role || '';
@@ -45,8 +45,7 @@ export class LoginComponent {
             const roleUpper = role.toUpperCase().trim().split(' ').join('_');
             const isExecutive = roleUpper === 'EXECUTIVE';
             const isAdmin = roleUpper === 'ADMIN'
-              || roleUpper === 'SYSTEM_ADMIN'
-              || roleUpper === 'ORGANIZATION_ADMIN';
+              || roleUpper === 'SYSTEM_ADMIN';
 
             const isAssessor = roleUpper === 'ASSESSOR';
 
@@ -54,8 +53,8 @@ export class LoginComponent {
               this.router.navigate(['/assessor/dashboard']);
             } else if (isExecutive) {
               this.router.navigate(['/executive/dashboard']);
-            } else if (roleUpper === 'ORGANIZATION_ADMIN') {
-              this.router.navigate(['/org-admin/revision-center']);
+            } else if (roleUpper === 'ORGANIZATION_ADMIN' || roleUpper === 'ORG_ADMIN') {
+              this.router.navigate(['/dashboard']);
             } else if (isAdmin) {
               this.router.navigate(['/admin/dashboard']);
             } else {
@@ -63,12 +62,12 @@ export class LoginComponent {
             }
           } else {
             this.errorMessage = 'การตอบรับจากเซิร์ฟเวอร์ไม่สมบูรณ์';
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           }
         } catch (e) {
           console.error('Login processing error:', e);
           this.errorMessage = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล';
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       },
       error: (err: any) => {
@@ -83,7 +82,7 @@ export class LoginComponent {
         } else {
           this.errorMessage = 'เกิดข้อผิดพลาดทางเทคนิค กรุณาลองใหม่ภายหลัง';
         }
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

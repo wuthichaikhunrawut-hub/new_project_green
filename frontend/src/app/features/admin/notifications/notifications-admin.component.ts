@@ -65,12 +65,12 @@ export class NotificationsAdminComponent implements OnInit {
       next: (data) => {
         this.history = data;
         this.isLoadingHistory = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load notification history:', err);
         this.isLoadingHistory = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -117,13 +117,13 @@ export class NotificationsAdminComponent implements OnInit {
         this.resetForm();
         this.isSending = false;
         this.loadHistory(); // Refresh history
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.isSending = false;
         this.errorMessage = 'เกิดข้อผิดพลาดในการส่งการแจ้งเตือน';
         console.error(err);
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

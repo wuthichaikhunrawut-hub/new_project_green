@@ -32,7 +32,7 @@ export class AdminAssessorsComponent implements OnInit {
       },
       error: () => { 
         this.isLoading = false; 
-        this.cdr.detectChanges(); 
+        this.cdr.markForCheck(); 
       }
     });
   }
@@ -57,7 +57,7 @@ export class AdminAssessorsComponent implements OnInit {
     }
     
     this.filteredData = result;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
   }
 
   verify(user: AssessorUser) {

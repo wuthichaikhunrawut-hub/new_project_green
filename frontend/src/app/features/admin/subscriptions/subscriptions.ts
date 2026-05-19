@@ -71,7 +71,7 @@ export class AdminSubscriptionsComponent implements OnInit {
 
   loadData() {
     this.isLoading = true;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     // Use forkJoin to load all required data in parallel and stop loading only when all are done
     forkJoin({
@@ -84,12 +84,12 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.allFeatures = result.features;
         this.permissionSettings = result.permissions;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load subscription data:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -160,12 +160,12 @@ export class AdminSubscriptionsComponent implements OnInit {
       next: () => {
         this.isSaving = false;
         alert('บันทึกการตั้งค่าสิทธิ์เรียบร้อยแล้ว');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isSaving = false;
         alert('เกิดข้อผิดพลาดในการบันทึกสิทธิ์');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -217,12 +217,12 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.loadData();
         this.isSaving = false;
         alert('บันทึกฟีเจอร์สำเร็จ');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         alert('ไม่สามารถบันทึกฟีเจอร์ได้');
         this.isSaving = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -281,12 +281,12 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.loadData(); 
         this.isSaving = false; 
         alert('บันทึกแพ็กเกจสำเร็จ');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => { 
         alert('ไม่สามารถบันทึกแพ็กเกจได้');
         this.isSaving = false; 
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

@@ -27,12 +27,12 @@ export class AdminAuditLogsComponent implements OnInit {
       next: (data) => {
         this.logs = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load audit logs:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

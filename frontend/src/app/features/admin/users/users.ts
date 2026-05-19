@@ -74,7 +74,7 @@ export class AdminUsersComponent implements OnInit {
     this.orgService.getAll().subscribe({
       next: (data) => {
         this.organizations = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => console.error('Failed to load organizations:', err)
     });
@@ -84,7 +84,7 @@ export class AdminUsersComponent implements OnInit {
     this.usersService.getRoles().subscribe({
       next: (data) => {
         this.roles = data;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load roles:', err);
@@ -98,12 +98,12 @@ export class AdminUsersComponent implements OnInit {
       next: (data) => {
         this.users = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load users:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
