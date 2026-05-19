@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { OrgService } from '../../../core/services/org.service';
@@ -32,7 +32,7 @@ export class OrgProfileComponent implements OnInit {
       this.loadOrgData();
     } else {
       this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       this.orgForm.disable();
     }
   }
@@ -59,13 +59,13 @@ export class OrgProfileComponent implements OnInit {
         this.orgForm.patchValue(data);
         this.orgForm.disable();
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Error loading org data:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
-        alert('ไม่สามารถดึงข้อมูลองค์กรได้');
+        this.cdr.markForCheck();
+        alert('???????????????????????????');
       }
     });
   }
@@ -90,14 +90,14 @@ export class OrgProfileComponent implements OnInit {
           this.isEditing = false;
           this.orgForm.disable();
           this.isLoading = false;
-        this.cdr.detectChanges();
-          alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+        this.cdr.markForCheck();
+          alert('?????????????????????????');
         },
         error: (err) => {
           console.error('Error updating org:', err);
           this.isLoading = false;
-        this.cdr.detectChanges();
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        this.cdr.markForCheck();
+          alert('???????????????????????????????');
         }
       });
     } else {
@@ -106,6 +106,6 @@ export class OrgProfileComponent implements OnInit {
   }
 
   onLogoUpload() {
-    alert('ระบบอัปโหลดโลโก้จะพร้อมใช้งานในเวอร์ชันถัดไป');
+    alert('????????????????????????????????????????????');
   }
 }

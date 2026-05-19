@@ -34,12 +34,12 @@ export class AdminEmissionFactorsComponent implements OnInit {
       next: (data) => {
         this.factors = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load emission factors:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

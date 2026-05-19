@@ -84,13 +84,13 @@ export class GreenOfficeFormComponent implements OnInit {
             return;
           }
           this.buildFromApiData(data);
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         } catch (e: any) {
           console.error('Error parsing criteria data:', e);
           this.errorMsg = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูลเกณฑ์: ' + e.message;
         } finally {
           this.isLoading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       },
       error: (err) => {
@@ -101,7 +101,7 @@ export class GreenOfficeFormComponent implements OnInit {
           this.errorMsg = 'ไม่สามารถโหลดข้อมูลเกณฑ์การประเมินได้ (' + (err.message || err.statusText || 'Unknown Error') + ')';
         }
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

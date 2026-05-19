@@ -1,98 +1,284 @@
-<div class="max-w-7xl mx-auto space-y-8">
-  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div>
-      <h1 class="text-2xl font-bold text-slate-900">คอนโซลผู้ตรวจประเมิน</h1>
-      <p class="text-sm text-slate-500 mt-1">ภาพรวมคำขอรับรอง Green Office และข้อมูลคาร์บอนแยก Scope</p>
+<div class="dash-wrapper animate-in">
+
+  <!-- ══ GREETING BANNER ══ -->
+  <div class="greeting-banner">
+    <div class="greeting-left">
+      <div class="avatar-ring">
+        <div class="avatar-inner">{{ currentUser?.username?.charAt(0)?.toUpperCase() ?? 'A' }}</div>
+      </div>
+      <div>
+        <p class="greeting-sub">{{ greeting }},</p>
+        <h1 class="greeting-name">{{ currentUser?.username ?? 'ผู้ตรวจประเมิน' }}</h1>
+        <p class="greeting-role">
+          <i class="fa-solid fa-shield-check"></i>
+          ผู้ตรวจประเมิน Green Office
+        </p>
+      </div>
     </div>
-    <button
-      type="button"
-      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
-      (click)="loadDashboard()"
-    >
-      รีเฟรชข้อมูล
-    </button>
-  </header>
-
-  @if (isLoading) {
-    <div class="flex justify-center py-20">
-      <div class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+    <div class="greeting-right">
+      <button class="refresh-btn" (click)="loadDashboard()" [disabled]="isLoading">
+        <i class="fa-solid fa-rotate" [class.spin]="isLoading"></i>
+        รีเฟรช
+      </button>
+      <a routerLink="/assessor/assignments" class="all-jobs-btn">
+        <i class="fa-solid fa-list-check"></i>
+        งานทั้งหมด
+      </a>
     </div>
-  } @else {
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5">
-        <p class="text-xs font-medium text-amber-800 uppercase tracking-wide">รอตรวจประเมิน</p>
-        <p class="text-3xl font-bold text-amber-900 mt-2">{{ stats.pending }}</p>
-      </div>
-      <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-        <p class="text-xs font-medium text-blue-800 uppercase tracking-wide">กำลังตรวจ</p>
-        <p class="text-3xl font-bold text-blue-900 mt-2">{{ stats.inReview }}</p>
-      </div>
-      <div class="rounded-2xl border border-violet-100 bg-violet-50 p-5">
-        <p class="text-xs font-medium text-violet-800 uppercase tracking-wide">ส่งกลับแก้ไข</p>
-        <p class="text-3xl font-bold text-violet-900 mt-2">{{ stats.revisionRequested }}</p>
-      </div>
-      <div class="rounded-2xl border border-red-100 bg-red-50 p-5">
-        <p class="text-xs font-medium text-red-800 uppercase tracking-wide">ใกล้ครบกำหนด</p>
-        <p class="text-3xl font-bold text-red-900 mt-2">{{ stats.nearDeadline }}</p>
-      </div>
-    </section>
+  </div>
 
-    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-        <h2 class="font-semibold text-slate-900">คำขอที่ต้องดำเนินการ</h2>
-        <a routerLink="/assessor/assignments" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">ดูทั้งหมด →</a>
+  <!-- ══ LOADING ══ -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner-ring"></div>
+    <p>กำลังโหลดข้อมูล...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ══ STAT CARDS ══ -->
+    <div class="stats-grid">
+      <div class="stat-card stat-amber">
+        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">รอตรวจประเมิน</p>
+          <p class="stat-number">{{ stats.pending }}</p>
+        </div>
+        <div class="stat-trend" *ngIf="stats.pending > 0">
+          <i class="fa-solid fa-arrow-up"></i> ต้องดำเนินการ
+        </div>
       </div>
 
-      @if (assignments.length === 0) {
-        <p class="text-center text-slate-500 py-12 text-sm">ไม่มีคำขอค้างในขณะนี้</p>
-      } @else {
-        <div class="divide-y divide-slate-100">
-          @for (item of assignments; track item.id) {
-            <article class="p-6 hover:bg-slate-50/80 transition-colors">
-              <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                <div class="min-w-0 flex-1">
-                  <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 class="font-semibold text-slate-900">{{ item.orgName }}</h3>
-                    <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{{ statusLabel(item.status) }}</span>
-                    @if (item.carbonSummary.isMock) {
-                      <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">ข้อมูลตัวอย่าง</span>
-                    }
+      <div class="stat-card stat-blue">
+        <div class="stat-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">กำลังตรวจสอบ</p>
+          <p class="stat-number">{{ stats.inReview }}</p>
+        </div>
+        <div class="stat-trend">
+          <i class="fa-solid fa-circle-dot"></i> In Progress
+        </div>
+      </div>
+
+      <div class="stat-card stat-violet">
+        <div class="stat-icon"><i class="fa-solid fa-rotate-left"></i></div>
+        <div class="stat-body">
+          <p class="stat-label">ส่งกลับแก้ไข</p>
+          <p class="stat-number">{{ stats.revisionRequested }}</p>
+        </div>
+        <div class="stat-trend">
+          <i class="fa-solid fa-pen"></i> รอองค์กรแก้ไข
+        </div>
+      </div>
+
+      <div class="stat-card stat-red" [class.stat-red-alert]="stats.nearDeadline > 0">
+        <div class="stat-icon">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span class="alert-pulse" *ngIf="stats.nearDeadline > 0"></span>
+        </div>
+        <div class="stat-body">
+          <p class="stat-label">ใกล้ครบกำหนด</p>
+          <p class="stat-number">{{ stats.nearDeadline }}</p>
+        </div>
+        <div class="stat-trend stat-trend-urgent" *ngIf="stats.nearDeadline > 0">
+          <i class="fa-solid fa-fire"></i> ต้องรีบดำเนินการ!
+        </div>
+        <div class="stat-trend" *ngIf="stats.nearDeadline === 0">
+          <i class="fa-solid fa-check"></i> ทุกอย่างปกติ
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NEAR DEADLINE ALERT ══ -->
+    <div class="deadline-alert" *ngIf="nearDeadlineItems.length > 0">
+      <div class="deadline-alert-header">
+        <i class="fa-solid fa-fire-flame-curved"></i>
+        <span>รายการที่รอนานเกิน 10 วัน — ต้องดำเนินการด่วน ({{ nearDeadlineItems.length }} รายการ)</span>
+      </div>
+      <div class="deadline-list">
+        <div class="deadline-item" *ngFor="let item of nearDeadlineItems">
+          <div class="deadline-item-left">
+            <div class="deadline-org">
+              <i class="fa-solid fa-building"></i>
+              {{ item.orgName }}
+            </div>
+            <div class="deadline-meta">
+              ปี {{ item.assessmentYear }}
+              <span class="dot">·</span>
+              รอมา <strong class="days-urgent">{{ getDaysWaiting(item) }} วัน</strong>
+              <span class="dot">·</span>
+              <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+            </div>
+          </div>
+          <div class="deadline-actions">
+            <a [routerLink]="['/requests/evaluate', item.id]" class="btn-urgent">
+              <i class="fa-solid fa-bolt"></i> ตรวจด่วน
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MAIN CONTENT: 2 COLUMN ══ -->
+    <div class="main-grid">
+
+      <!-- LEFT: Active Assignments -->
+      <div class="assignments-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <i class="fa-solid fa-list-check"></i>
+            คำขอที่ต้องดำเนินการ
+          </h2>
+          <a routerLink="/assessor/assignments" class="see-all-link">ดูทั้งหมด →</a>
+        </div>
+
+        <div class="empty-state" *ngIf="activeItems.length === 0">
+          <i class="fa-regular fa-circle-check"></i>
+          <p>ไม่มีคำขอค้างในขณะนี้</p>
+          <span>งานของท่านเป็นปัจจุบัน ✓</span>
+        </div>
+
+        <div class="assignment-list" *ngIf="activeItems.length > 0">
+          <div class="assignment-card" *ngFor="let item of activeItems">
+            <div class="assignment-top">
+              <div class="org-info">
+                <div class="org-avatar">{{ item.orgName.charAt(0) }}</div>
+                <div>
+                  <div class="org-name">{{ item.orgName }}</div>
+                  <div class="org-meta">
+                    ปีประเมิน {{ item.assessmentYear }}
+                    <span class="dot">·</span>
+                    <span *ngIf="item.submittedAt">
+                      ส่งมา {{ getDaysWaiting(item) }} วัน
+                    </span>
                   </div>
-                  <p class="text-sm text-slate-500">ปีประเมิน {{ item.assessmentYear }} · รวม {{ item.carbonSummary.totalEmission | number:'1.1-2' }} tCO₂e</p>
-
-                  <div class="mt-4 space-y-2">
-                    @for (scope of item.carbonSummary.scopes; track scope.scope) {
-                      <div>
-                        <div class="flex justify-between text-xs text-slate-600 mb-1">
-                          <span>{{ scope.label }}</span>
-                          <span>{{ scope.totalEmission | number:'1.1-2' }} tCO₂e</span>
-                        </div>
-                        <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
-                          <div
-                            class="h-full rounded-full bg-emerald-500 transition-all"
-                            [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)"
-                          ></div>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-
-                <div class="flex flex-wrap gap-2 shrink-0">
-                  <a
-                    [routerLink]="['/assessor/evidence', item.id]"
-                    class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
-                  >ตรวจหลักฐาน</a>
-                  <a
-                    [routerLink]="['/assessor/decide', item.id]"
-                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-white transition-colors"
-                  >สรุปผล</a>
                 </div>
               </div>
-            </article>
-          }
+              <div class="assignment-badges">
+                <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+                <span class="badge-mock" *ngIf="item.carbonSummary?.isMock">ข้อมูลตัวอย่าง</span>
+              </div>
+            </div>
+
+            <!-- Carbon Mini Summary -->
+            <div class="carbon-mini" *ngIf="item.carbonSummary">
+              <div class="carbon-mini-title">
+                <i class="fa-solid fa-leaf"></i>
+                Carbon: {{ item.carbonSummary.totalEmission | number:'1.1-1' }} tCO₂e
+              </div>
+              <div class="scope-bars">
+                <div class="scope-bar-row" *ngFor="let scope of item.carbonSummary.scopes">
+                  <span class="scope-tag">S{{ scope.scope }}</span>
+                  <div class="scope-track">
+                    <div class="scope-fill"
+                      [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)"
+                      [style.min-width]="scope.totalEmission > 0 ? '4px' : '0'"
+                      [style.background]="getScopeColor(scope.scope)">
+                    </div>
+                  </div>
+                  <span class="scope-val">{{ scope.totalEmission | number:'1.1-1' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+              <a [routerLink]="['/requests/evaluate', item.id]" class="qa-primary">
+                <i class="fa-solid fa-clipboard-check"></i> ตรวจประเมิน
+              </a>
+            </div>
+          </div>
         </div>
-      }
-    </section>
-  }
+      </div>
+
+      <!-- RIGHT: Stats Summary -->
+      <div class="summary-panel">
+
+        <!-- Score Average Card -->
+        <div class="avg-score-card">
+          <div class="avg-title">
+            <i class="fa-solid fa-chart-line"></i>
+            คะแนนเฉลี่ยที่ให้
+          </div>
+          <div class="avg-display">
+            <div class="avg-number">{{ stats.avgScorePercent | number:'1.0-1' }}</div>
+            <div class="avg-unit">%</div>
+          </div>
+          <div class="avg-cert">
+            ระดับเฉลี่ย: <strong>{{ getCertLevelFromScore(stats.avgScorePercent) }}</strong>
+          </div>
+          <div class="avg-bar">
+            <div class="avg-bar-fill"
+              [style.width.%]="stats.avgScorePercent"
+              [class.bar-gold]="stats.avgScorePercent >= 90"
+              [class.bar-silver]="stats.avgScorePercent >= 70 && stats.avgScorePercent < 90"
+              [class.bar-bronze]="stats.avgScorePercent >= 50 && stats.avgScorePercent < 70"
+              [class.bar-fail]="stats.avgScorePercent < 50">
+            </div>
+          </div>
+        </div>
+
+        <!-- Work Summary -->
+        <div class="work-summary-card">
+          <div class="ws-title">
+            <i class="fa-solid fa-chart-pie"></i>
+            ภาพรวมงาน
+          </div>
+          <div class="ws-grid">
+            <div class="ws-item">
+              <div class="ws-num ws-amber">{{ stats.pending }}</div>
+              <div class="ws-label">รอตรวจ</div>
+            </div>
+            <div class="ws-item">
+              <div class="ws-num ws-blue">{{ stats.inReview }}</div>
+              <div class="ws-label">กำลังตรวจ</div>
+            </div>
+            <div class="ws-item">
+              <div class="ws-num ws-violet">{{ stats.revisionRequested }}</div>
+              <div class="ws-label">รอแก้ไข</div>
+            </div>
+            <div class="ws-item">
+              <div class="ws-num ws-green">{{ stats.completed }}</div>
+              <div class="ws-label">เสร็จสิ้น</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Nav -->
+        <div class="quick-nav-card">
+          <div class="ws-title">
+            <i class="fa-solid fa-rocket"></i>
+            ทางลัด
+          </div>
+          <div class="quick-nav-list">
+            <a routerLink="/assessor/assignments" class="qn-item">
+              <div class="qn-icon qn-blue"><i class="fa-solid fa-list-check"></i></div>
+              <div>
+                <div class="qn-name">รายการคำขอทั้งหมด</div>
+                <div class="qn-desc">ดูและจัดการคำขอรับรองทั้งหมด</div>
+              </div>
+              <i class="fa-solid fa-chevron-right qn-arrow"></i>
+            </a>
+            <a routerLink="/assessor/history" class="qn-item">
+              <div class="qn-icon qn-green"><i class="fa-solid fa-clock-rotate-left"></i></div>
+              <div>
+                <div class="qn-name">ประวัติการประเมิน</div>
+                <div class="qn-desc">คำขอที่อนุมัติและปฏิเสธแล้ว</div>
+              </div>
+              <i class="fa-solid fa-chevron-right qn-arrow"></i>
+            </a>
+            <a routerLink="/assessor/profile" class="qn-item">
+              <div class="qn-icon qn-violet"><i class="fa-solid fa-user-shield"></i></div>
+              <div>
+                <div class="qn-name">โปรไฟล์ผู้ตรวจ</div>
+                <div class="qn-desc">ข้อมูลวิชาชีพและคุณวุฒิ</div>
+              </div>
+              <i class="fa-solid fa-chevron-right qn-arrow"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </ng-container>
 </div>

@@ -38,12 +38,12 @@ export class NotificationsComponent implements OnInit {
       next: (data) => {
         this.notifications = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load notifications:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -52,14 +52,14 @@ export class NotificationsComponent implements OnInit {
     if (n.is_read) return;
     this.notificationService.markAsRead(n.id).subscribe(() => {
       n.is_read = true;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 
   markAllRead() {
     this.notificationService.markAllAsRead().subscribe(() => {
       this.notifications.forEach(n => n.is_read = true);
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
     });
   }
 

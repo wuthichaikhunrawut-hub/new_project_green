@@ -49,9 +49,11 @@ export class AuthService {
   }
 
   logout() {
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('currentOrg');
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('currentOrg');
+    }
     this.currentUserSubject.next(null);
   }
 
@@ -68,8 +70,14 @@ export class AuthService {
 
   getOrganizationId(): number | null {
     if (isPlatformBrowser(this.platformId)) {
-      const org = JSON.parse(localStorage.getItem('currentOrg') || '{}');
-      return org.org_id || org.id || null;
+      try {
+        const orgStr = localStorage.getItem('currentOrg');
+        if (!orgStr || orgStr === 'null' || orgStr === 'undefined') return null;
+        const org = JSON.parse(orgStr);
+        return org?.org_id || org?.id || null;
+      } catch (e) {
+        return null;
+      }
     }
     return null;
   }

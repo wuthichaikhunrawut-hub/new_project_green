@@ -1,6 +1,7 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -8,8 +9,13 @@ import { AuthService } from '../services/auth.service';
 export class RoleGuard implements CanActivate {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private platformId = inject(PLATFORM_ID);
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
+    if (!isPlatformBrowser(this.platformId)) {
+      return true; // Allow server-side rendering to proceed, we will handle 401s without redirecting
+    }
+
     const user = this.authService.getUser();
     
     // Not authenticated, let authGuard (if any) or login page handle it

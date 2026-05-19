@@ -26,7 +26,7 @@ export class LoginComponent {
   onLogin() {
     this.isLoading = true;
     this.errorMessage = '';
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
 
     const credentials = {
       email: this.username,
@@ -36,7 +36,7 @@ export class LoginComponent {
     this.authService.login(credentials).pipe(timeout(15000)).subscribe({
       next: (response: AuthResponse) => {
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
         try {
           if (response && response.access_token) {
             const role = response.user.role || '';
@@ -62,12 +62,12 @@ export class LoginComponent {
             }
           } else {
             this.errorMessage = 'การตอบรับจากเซิร์ฟเวอร์ไม่สมบูรณ์';
-            this.cdr.detectChanges();
+            this.cdr.markForCheck();
           }
         } catch (e) {
           console.error('Login processing error:', e);
           this.errorMessage = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล';
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       },
       error: (err: any) => {
@@ -82,7 +82,7 @@ export class LoginComponent {
         } else {
           this.errorMessage = 'เกิดข้อผิดพลาดทางเทคนิค กรุณาลองใหม่ภายหลัง';
         }
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

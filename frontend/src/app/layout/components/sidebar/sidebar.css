@@ -673,3 +673,79 @@
   background-color: rgba(15, 118, 110, 0.12);
   color: #0F766E;
 }
+
+/* ══════════════════════════════════════
+   ASSESSOR - NAV BADGE (pending count)
+══════════════════════════════════════ */
+.nav-badge {
+  margin-left: auto;
+  font-size: 0.63rem;
+  font-weight: 800;
+  padding: 1px 7px;
+  border-radius: 20px;
+  min-width: 18px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1.6;
+}
+.nav-badge-amber {
+  background: #FEF3C7;
+  color: #D97706;
+  border: 1px solid #FDE68A;
+}
+
+/* ══════════════════════════════════════
+   ASSESSOR - SHORTCUT CARD
+══════════════════════════════════════ */
+.nav-shortcut-card {
+  margin: 4px 0 10px;
+  padding: 0.75rem 0.85rem;
+  background: rgba(15, 118, 110, 0.05);
+  border: 1px solid rgba(15, 118, 110, 0.2);
+  border-radius: 10px;
+}
+.nsc-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0F766E;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 3px;
+}
+.nsc-title i { color: #F59E0B; font-size: 0.75rem; }
+.nsc-desc {
+  font-size: 0.7rem;
+  color: #94A3B8;
+  margin: 0 0 0.5rem;
+}
+.nsc-btn {
+  display: block;
+  text-align: center;
+  padding: 4px 10px;
+  border-radius: 7px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0F766E;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  transition: all 0.2s;
+}
+.nsc-btn:hover {
+  background: #0F766E;
+  color: #FFFFFF;
+}
+
+/* nav-item-home resets to standard system style */
+.nav-item-home {
+  font-weight: 600;
+  color: #0F766E;
+}
+.nav-item-home i { color: #0F766E; }
+.nav-item-home:hover { background-color: #F8FAFC; color: #0F172A; }
+.nav-item-home.active {
+  background-color: rgba(15, 118, 110, 0.08);
+  color: #0F766E;
+  border-left: 3px solid #0F766E;
+}

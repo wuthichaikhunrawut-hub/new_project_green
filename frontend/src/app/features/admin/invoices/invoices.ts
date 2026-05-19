@@ -36,21 +36,21 @@ export class AdminInvoicesComponent implements OnInit {
 
   loadInvoices() {
     this.isLoading = true;
-    this.cdr.detectChanges();
+    this.cdr.markForCheck();
     this.svc.getInvoices().subscribe({
       next: (data) => { 
         this.invoices = data; 
         this.isLoading = false; 
-        this.cdr.detectChanges(); 
+        this.cdr.markForCheck(); 
       },
       error: (err) => { 
         console.error('Failed to load invoices:', err);
         this.isLoading = false; 
-        this.cdr.detectChanges(); 
+        this.cdr.markForCheck(); 
       },
       complete: () => {
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

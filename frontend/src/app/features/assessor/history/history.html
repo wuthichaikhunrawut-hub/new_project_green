@@ -1,24 +1,189 @@
-<div class="max-w-5xl mx-auto space-y-6">
-  <header>
-    <h1 class="text-2xl font-bold text-slate-900">ประวัติการประเมิน</h1>
-    <p class="text-sm text-slate-500 mt-1">คำขอที่ปิดงานแล้ว (อนุมัติ / ปฏิเสธ)</p>
-  </header>
+<div class="hist-wrapper animate-in">
 
-  @if (isLoading) {
-    <div class="flex justify-center py-16"><div class="h-10 w-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>
-  } @else if (history.length === 0) {
-    <p class="text-center text-slate-500 py-16 text-sm">ยังไม่มีประวัติ</p>
-  } @else {
-    <div class="rounded-2xl border border-slate-200 overflow-hidden bg-white divide-y divide-slate-100">
-      @for (item of history; track item.id) {
-        <div class="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div>
-            <h2 class="font-semibold text-slate-900">{{ item.orgName }}</h2>
-            <p class="text-sm text-slate-500">ปี {{ item.assessmentYear }} · {{ statusLabel(item.status) }}</p>
-          </div>
-          <a [routerLink]="['/assessor/decide', item.id]" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">ดูรายละเอียด →</a>
-        </div>
-      }
+  <!-- ══ PAGE HEADER ══ -->
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1 class="page-title">
+        <i class="fa-solid fa-clock-rotate-left"></i>
+        ประวัติการประเมิน
+      </h1>
+      <p class="page-subtitle">คำขอที่ดำเนินการเสร็จสิ้นแล้ว (อนุมัติ / ปฏิเสธ / ส่งกลับแก้ไข)</p>
     </div>
-  }
+    <div class="page-header-right">
+      <button class="export-btn" (click)="exportCsv()" [disabled]="filteredHistory.length === 0" title="ส่งออก CSV">
+        <i class="fa-solid fa-file-csv"></i>
+        ส่งออก CSV
+      </button>
+      <button class="refresh-btn" (click)="load()" [disabled]="isLoading">
+        <i class="fa-solid fa-rotate" [class.spin-anim]="isLoading"></i>
+        รีเฟรช
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ SUMMARY STAT CARDS ══ -->
+  <div class="summary-cards" *ngIf="!isLoading && history.length > 0">
+    <div class="sum-card sum-total">
+      <div class="sum-icon"><i class="fa-solid fa-folder-closed"></i></div>
+      <div class="sum-body">
+        <p class="sum-label">งานทั้งหมด</p>
+        <p class="sum-num">{{ history.length }}</p>
+      </div>
+    </div>
+    <div class="sum-card sum-approved">
+      <div class="sum-icon"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="sum-body">
+        <p class="sum-label">อนุมัติแล้ว</p>
+        <p class="sum-num">{{ totalApproved }}</p>
+      </div>
+      <div class="sum-rate" *ngIf="history.length > 0">
+        {{ (totalApproved / history.length * 100) | number:'1.0-0' }}%
+      </div>
+    </div>
+    <div class="sum-card sum-rejected">
+      <div class="sum-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+      <div class="sum-body">
+        <p class="sum-label">ปฏิเสธ</p>
+        <p class="sum-num">{{ totalRejected }}</p>
+      </div>
+    </div>
+    <div class="sum-card sum-score">
+      <div class="sum-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="sum-body">
+        <p class="sum-label">คะแนนเฉลี่ย</p>
+        <p class="sum-num">{{ avgScore }}<small>คะแนน</small></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FILTER + SORT BAR ══ -->
+  <div class="filter-bar" *ngIf="!isLoading && history.length > 0">
+    <div class="search-wrap">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="search" [(ngModel)]="searchTerm"
+        placeholder="ค้นหาชื่อองค์กร..."
+        class="search-input" />
+      <button *ngIf="searchTerm" class="search-clear" (click)="searchTerm = ''">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <select [(ngModel)]="statusFilter" class="filter-select">
+      <option value="">ทุกสถานะ</option>
+      <option value="APPROVED">อนุมัติแล้ว</option>
+      <option value="REJECTED">ปฏิเสธ</option>
+      <option value="REVISION_REQUESTED">รอแก้ไข</option>
+    </select>
+
+    <select [(ngModel)]="yearFilter" class="filter-select">
+      <option value="">ทุกปีประเมิน</option>
+      <option *ngFor="let y of availableYears" [value]="y">ปี {{ y }}</option>
+    </select>
+
+    <select [(ngModel)]="sortBy" class="filter-select">
+      <option value="date_desc">วันที่ล่าสุด</option>
+      <option value="date_asc">วันที่เก่าสุด</option>
+      <option value="score_desc">คะแนนสูงสุด</option>
+      <option value="score_asc">คะแนนน้อยสุด</option>
+    </select>
+
+    <button *ngIf="searchTerm || statusFilter || yearFilter" class="clear-btn" (click)="clearFilters()">
+      <i class="fa-solid fa-filter-circle-xmark"></i> ล้าง
+    </button>
+  </div>
+
+  <!-- ══ RESULT INFO ══ -->
+  <div class="result-info" *ngIf="!isLoading && history.length > 0">
+    แสดง <strong>{{ filteredHistory.length }}</strong> จาก {{ history.length }} รายการ
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner-ring"></div>
+    <p>กำลังโหลดประวัติ...</p>
+  </div>
+
+  <!-- ══ EMPTY ══ -->
+  <div class="empty-state" *ngIf="!isLoading && history.length === 0">
+    <i class="fa-regular fa-folder-open"></i>
+    <p>ยังไม่มีประวัติการประเมิน</p>
+    <span>คำขอที่อนุมัติหรือปฏิเสธแล้วจะปรากฏที่นี่</span>
+  </div>
+
+  <div class="empty-state" *ngIf="!isLoading && history.length > 0 && filteredHistory.length === 0">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <p>ไม่พบรายการที่ตรงกับตัวกรอง</p>
+    <button class="clear-btn" (click)="clearFilters()">ล้างตัวกรองทั้งหมด</button>
+  </div>
+
+  <!-- ══ HISTORY LIST ══ -->
+  <div class="hist-list" *ngIf="!isLoading && filteredHistory.length > 0">
+    <div class="hist-card" *ngFor="let item of filteredHistory; let i = index">
+
+      <!-- Cert Level Color Strip -->
+      <div class="cert-strip" [class]="certClass(item.totalScore)"></div>
+
+      <div class="hist-card-inner">
+        <!-- LEFT: Org + Meta -->
+        <div class="hist-left">
+          <div class="org-avatar" [class]="certClass(item.totalScore)">
+            {{ item.orgName.charAt(0) }}
+          </div>
+          <div class="hist-detail">
+            <div class="hist-org-row">
+              <span class="hist-org-name">{{ item.orgName }}</span>
+              <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+            </div>
+            <div class="hist-meta">
+              <span><i class="fa-solid fa-calendar-alt"></i> ปีประเมิน {{ item.assessmentYear }}</span>
+              <span class="dot">·</span>
+              <span><i class="fa-solid fa-clock"></i> {{ formatDate(item.submittedAt) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CENTER: Score + Cert -->
+        <div class="score-center">
+          <div class="cert-emoji">{{ certEmoji(item.totalScore) }}</div>
+          <div class="cert-info">
+            <div class="cert-name" [class]="certClass(item.totalScore)">{{ certLevel(item.totalScore) }}</div>
+            <div class="cert-score" *ngIf="item.totalScore > 0">{{ item.totalScore }} คะแนน</div>
+            <div class="cert-score" *ngIf="!item.totalScore">ยังไม่มีคะแนน</div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Carbon + Actions -->
+        <div class="hist-right">
+          <div class="carbon-chip" *ngIf="item.carbonSummary">
+            <i class="fa-solid fa-leaf"></i>
+            {{ item.carbonSummary.totalEmission | number:'1.1-1' }} tCO₂e
+          </div>
+          <div class="hist-actions">
+            <a [routerLink]="['/requests/evaluate', item.id]" class="act-view">
+              <i class="fa-solid fa-eye"></i> ดูรายละเอียด
+            </a>
+            <button class="act-print" (click)="printReport(item)" title="พิมพ์/PDF">
+              <i class="fa-solid fa-print"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
+<!-- ══ PRINT STYLES (hidden in browser, visible on print) ══ -->
+<style>
+@media print {
+  .hist-wrapper .page-header,
+  .hist-wrapper .filter-bar,
+  .hist-wrapper .summary-cards,
+  .hist-wrapper .result-info,
+  .hist-wrapper .hist-actions { display: none !important; }
+
+  .hist-card { break-inside: avoid; border: 1px solid #e5e7eb !important; box-shadow: none !important; }
+  .hist-wrapper { padding: 0 !important; }
+  body { font-size: 12px; }
+}
+</style>

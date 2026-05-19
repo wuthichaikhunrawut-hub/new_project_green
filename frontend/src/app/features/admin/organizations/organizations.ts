@@ -42,12 +42,12 @@ export class AdminOrganizationsComponent implements OnInit {
       next: (data: Organization[]) => {
         this.organizations = data;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load orgs:', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

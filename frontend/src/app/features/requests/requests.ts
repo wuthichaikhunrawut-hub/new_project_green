@@ -49,13 +49,13 @@ export class RequestsComponent implements OnInit {
       next: (data) => {
         this.requests = Array.isArray(data) ? data : [];
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         console.error('Failed to load requests', err);
         this.requests = [];
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

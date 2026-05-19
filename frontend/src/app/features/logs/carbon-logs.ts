@@ -91,12 +91,12 @@ export class CarbonLogsComponent implements OnInit {
         this.lastUpdatedAt = new Date();
         
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load logs', err);
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

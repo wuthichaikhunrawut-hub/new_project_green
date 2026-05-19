@@ -65,12 +65,12 @@ export class AssessorCertificationDecisionComponent implements OnInit {
           auditor_comment: d.auditor_comment ?? '',
         }));
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isLoading = false;
         this.toast.error('โหลดข้อมูลไม่สำเร็จ');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
     });
   }
@@ -142,7 +142,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
           this.isSaving = false;
           const msg = err?.error?.message ?? 'เกิดข้อผิดพลาด';
           this.toast.error('อนุมัติไม่สำเร็จ', Array.isArray(msg) ? msg.join(', ') : String(msg));
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
       });
   }
@@ -167,7 +167,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
           this.isSaving = false;
           const msg = err?.error?.message ?? 'เกิดข้อผิดพลาด';
           this.toast.error('ส่งกลับไม่สำเร็จ', Array.isArray(msg) ? msg.join(', ') : String(msg));
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
       });
   }
@@ -191,7 +191,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
         error: () => {
           this.isSaving = false;
           this.toast.error('บันทึกร่างไม่สำเร็จ');
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         },
       });
   }

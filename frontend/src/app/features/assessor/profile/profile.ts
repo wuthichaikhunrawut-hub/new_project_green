@@ -47,7 +47,7 @@ export class AssessorProfileComponent implements OnInit {
     if (!currentUser || !currentUser.id) {
       this.errorMessage = 'ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่';
       this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       return;
     }
 
@@ -77,7 +77,7 @@ export class AssessorProfileComponent implements OnInit {
           }
         }
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load profile', err);
@@ -88,7 +88,7 @@ export class AssessorProfileComponent implements OnInit {
           assessor_verified: currentUser.assessor_verified || false
         };
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }

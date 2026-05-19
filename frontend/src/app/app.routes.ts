@@ -216,8 +216,9 @@ export const routes: Routes = [
       { 
         path: 'org/profile', 
         component: OrgProfileComponent,
-        title: 'ข้อมูลหน่วยงาน - Green Sync'
-        // Every logged-in user can access profile
+        title: 'ข้อมูลหน่วยงาน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       {
         path: 'assessor/profile',
@@ -264,7 +265,9 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),
-        title: 'การแจ้งเตือน - Green Sync'
+        title: 'การแจ้งเตือน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE', 'ASSESSOR'] }
       },
     ]
   },

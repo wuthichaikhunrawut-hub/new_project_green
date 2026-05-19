@@ -206,27 +206,54 @@
 
     <!-- ═══════════════ ASSESSOR ═══════════════ -->
     <ng-container *ngIf="isAssessor">
-      <div class="nav-label">ผู้ตรวจประเมิน</div>
-      <a routerLink="/assessor/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+
+      <!-- Main Dashboard -->
+      <a routerLink="/assessor/dashboard" routerLinkActive="active"
+        class="nav-item nav-item-home" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
-        <span>แดชบอร์ดผู้ตรวจ</span>
+        <span>คอนโซลผู้ตรวจ</span>
       </a>
-      <a routerLink="/assessor/assignments" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-        <i class="fa-solid fa-file-signature"></i>
-        <span>คำขอรับรองสำนักงานสีเขียว</span>
+
+      <!-- งานตรวจประเมิน -->
+      <div class="nav-label">งานตรวจประเมิน</div>
+      <a routerLink="/assessor/assignments" routerLinkActive="active"
+        class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-list-check"></i>
+        <span>รายการคำขอ</span>
+        <span class="nav-badge nav-badge-amber" *ngIf="pendingCount > 0">{{ pendingCount }}</span>
       </a>
-      <a routerLink="/assessor/history" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+      <a routerLink="/assessor/history" routerLinkActive="active"
+        class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>ประวัติการประเมิน</span>
       </a>
-      <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+
+      <!-- ทางลัด -->
+      <div class="nav-label">ทางลัด</div>
+      <div class="nav-shortcut-card" *ngIf="!isCollapsed">
+        <div class="nsc-title">
+          <i class="fa-solid fa-bolt"></i>
+          เริ่มตรวจประเมิน
+        </div>
+        <p class="nsc-desc">เลือกคำขอจากรายการงาน</p>
+        <a routerLink="/assessor/assignments" class="nsc-btn" (click)="onNavItemClick()">
+          รายการคำขอค้าง →
+        </a>
+      </div>
+
+      <!-- บัญชีและการแจ้งเตือน -->
+      <div class="nav-label">บัญชี</div>
+      <a routerLink="/notifications" routerLinkActive="active"
+        class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bell"></i>
         <span>การแจ้งเตือน</span>
       </a>
-      <a routerLink="/assessor/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+      <a routerLink="/assessor/profile" routerLinkActive="active"
+        class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-user-shield"></i>
         <span>โปรไฟล์ผู้ตรวจ</span>
       </a>
+
     </ng-container>
 
   </nav>

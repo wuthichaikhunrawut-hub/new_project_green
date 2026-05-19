@@ -67,17 +67,17 @@ export class AssessorEvidenceReviewComponent implements OnInit {
           this.assessorService.getCarbonSummary(this.orgId).subscribe({
             next: (summary) => {
               this.carbonSummary = summary;
-              this.cdr.detectChanges();
+              this.cdr.markForCheck();
             },
           });
         }
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isLoading = false;
         this.toast.error('โหลดข้อมูลไม่สำเร็จ');
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
     });
   }
@@ -114,7 +114,7 @@ export class AssessorEvidenceReviewComponent implements OnInit {
         this.isSaving = false;
         const msg = err?.error?.message ?? 'เกิดข้อผิดพลาด';
         this.toast.error('บันทึกไม่สำเร็จ', Array.isArray(msg) ? msg.join(', ') : String(msg));
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
     });
   }

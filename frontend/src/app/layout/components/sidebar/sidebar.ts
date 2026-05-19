@@ -1,7 +1,8 @@
-import { Component, inject, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, inject, Input, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AssessorService } from '../../../core/services/assessor.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,14 +14,17 @@ import { Subscription } from 'rxjs';
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
+  private assessorService = inject(AssessorService);
   router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   @Input() isCollapsed = false;
-  
+
   // Mobile menu state
   mobileMenuOpen = false;
 
   user: any = null;
+  pendingCount = 0;
   private subscription: Subscription = new Subscription();
 
 
@@ -29,9 +33,26 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.authService.currentUser$.subscribe(user => {
         this.user = user;
+        // Load pending count for assessor badge
+        if (user && this.isAssessor) {
+          this.loadPendingCount();
+        }
+        this.cdr.markForCheck();
       })
     );
+  }
 
+  loadPendingCount(): void {
+    this.assessorService.getDashboard().subscribe({
+      next: (data) => {
+        this.pendingCount = (data.stats.pending ?? 0) + (data.stats.inReview ?? 0);
+        this.cdr.markForCheck();
+      },
+      error: () => { 
+        this.pendingCount = 0; 
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   ngOnDestroy() {

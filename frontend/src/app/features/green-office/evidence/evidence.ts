@@ -43,7 +43,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
           status: 'pending',
           url: f.file_url
         }));
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('❌ Failed to load files:', err);
@@ -122,7 +122,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         });
         this.isUploading = false;
         this.pendingFile = null; // Clear after success
-        this.cdr.detectChanges(); // Force UI update
+        this.cdr.markForCheck(); // Force UI update
         alert('อัปโหลดไฟล์สำเร็จ!');
       },
       error: (err) => {
@@ -141,13 +141,13 @@ export class GreenOfficeEvidenceComponent implements OnInit {
     
     if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ถาวร?')) {
       this.isUploading = true;
-      this.cdr.detectChanges();
+      this.cdr.markForCheck();
       
       this.uploadService.deleteFile(id).subscribe({
         next: () => {
           this.files = this.files.filter(f => f.id !== id);
           this.isUploading = false;
-          this.cdr.detectChanges(); // Force UI update
+          this.cdr.markForCheck(); // Force UI update
           alert('ลบไฟล์เรียบร้อยแล้วครับ!');
         },
         error: (err) => {
@@ -183,7 +183,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         file.category = newCategory;
         this.editingFileId = null;
         this.isUploading = false;
-        this.cdr.detectChanges(); // Force UI update
+        this.cdr.markForCheck(); // Force UI update
         alert('อัปเดตหมวดหมู่เรียบร้อยครับ! 😊');
       },
       error: (err) => {
