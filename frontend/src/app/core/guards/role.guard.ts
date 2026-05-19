@@ -28,11 +28,19 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    const normalizeRole = (value: string): string =>
-      String(value || '')
+    const normalizeRole = (value: string): string => {
+      const val = String(value || '')
         .trim()
         .toUpperCase()
         .replace(/[\s_]/g, '');
+      if (val === 'ORGADMIN' || val === 'ORGANIZATIONADMIN') {
+        return 'ORGANIZATIONADMIN';
+      }
+      if (val === 'SYSTEMADMIN' || val === 'ADMIN') {
+        return 'SYSTEMADMIN';
+      }
+      return val;
+    };
 
     const userRole = normalizeRole(String(role));
     const allowed = allowedRoles.map((r) => normalizeRole(r));
@@ -50,11 +58,12 @@ export class RoleGuard implements CanActivate {
     const normalizedRole = String(role).toUpperCase().trim().split(' ').join('_');
     switch (normalizedRole) {
       case 'SYSTEM_ADMIN':
+      case 'ADMIN':
         this.router.navigate(['/admin/dashboard']);
         break;
       case 'ORG_ADMIN':
       case 'ORGANIZATION_ADMIN':
-        this.router.navigate(['/org-admin/revision-center']);
+        this.router.navigate(['/dashboard']);
         break;
       case 'ASSESSOR':
         this.router.navigate(['/assessor/dashboard']);

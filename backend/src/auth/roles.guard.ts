@@ -22,11 +22,19 @@ export class RolesGuard implements CanActivate {
 
     // 1. Check Hardcoded Roles (from Decorator)
     if (requiredRoles) {
-      const normalize = (r: string) =>
-        String(r || '')
+      const normalize = (r: string) => {
+        const val = String(r || '')
           .trim()
           .toUpperCase()
           .replace(/[\s_]/g, '');
+        if (val === 'ORGADMIN' || val === 'ORGANIZATIONADMIN') {
+          return 'ORGANIZATIONADMIN';
+        }
+        if (val === 'SYSTEMADMIN' || val === 'ADMIN') {
+          return 'SYSTEMADMIN';
+        }
+        return val;
+      };
       const userRole = normalize(user.role);
       const hasRole = requiredRoles.some(
         (role) => normalize(role) === userRole,

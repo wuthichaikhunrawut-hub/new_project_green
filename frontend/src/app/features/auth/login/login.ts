@@ -45,8 +45,7 @@ export class LoginComponent {
             const roleUpper = role.toUpperCase().trim().split(' ').join('_');
             const isExecutive = roleUpper === 'EXECUTIVE';
             const isAdmin = roleUpper === 'ADMIN'
-              || roleUpper === 'SYSTEM_ADMIN'
-              || roleUpper === 'ORGANIZATION_ADMIN';
+              || roleUpper === 'SYSTEM_ADMIN';
 
             const isAssessor = roleUpper === 'ASSESSOR';
 
@@ -54,8 +53,8 @@ export class LoginComponent {
               this.router.navigate(['/assessor/dashboard']);
             } else if (isExecutive) {
               this.router.navigate(['/executive/dashboard']);
-            } else if (roleUpper === 'ORGANIZATION_ADMIN') {
-              this.router.navigate(['/org-admin/revision-center']);
+            } else if (roleUpper === 'ORGANIZATION_ADMIN' || roleUpper === 'ORG_ADMIN') {
+              this.router.navigate(['/dashboard']);
             } else if (isAdmin) {
               this.router.navigate(['/admin/dashboard']);
             } else {
