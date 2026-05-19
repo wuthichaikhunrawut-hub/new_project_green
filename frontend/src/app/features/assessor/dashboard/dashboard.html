@@ -1,446 +1,98 @@
-<div class="dashboard-wrapper animate-in">
-    <!-- Header Section -->
-    <header class="dashboard-header mb-5">
-        <div class="d-flex flex-column gap-1">
-            <h1 class="h3 fw-bold text-gray-900 mb-0">คอนโซลผู้ตรวจประเมิน</h1>
-            <p class="text-secondary mb-0">จัดการรายการประเมิน Green Office และติดตามสถิติการตรวจสอบของคุณ</p>
-        </div>
-        <div class="header-actions">
-            <button class="btn btn-white shadow-sm border rounded-pill px-4" (click)="loadDashboardData()">
-                <i class="fa-solid fa-arrows-rotate me-2"></i>อัปเดตข้อมูล
-            </button>
-        </div>
-    </header>
+<div class="max-w-7xl mx-auto space-y-8">
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">คอนโซลผู้ตรวจประเมิน</h1>
+      <p class="text-sm text-slate-500 mt-1">ภาพรวมคำขอรับรอง Green Office และข้อมูลคาร์บอนแยก Scope</p>
+    </div>
+    <button
+      type="button"
+      class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+      (click)="loadDashboard()"
+    >
+      รีเฟรชข้อมูล
+    </button>
+  </header>
 
-    <!-- Summary Metrics Section -->
-    <section class="metrics-grid mb-5">
-        <div class="metric-card warning shadow-subtle">
-            <div class="metric-content">
-                <span class="metric-label">รอตรวจประเมิน</span>
-                <div class="metric-value">{{ stats.pending }}</div>
-                <div class="metric-trend text-warning"><i class="fa-solid fa-clock me-1"></i>รายการค้างช้า</div>
-            </div>
-            <div class="metric-icon-box bg-warning-soft">
-                <i class="fa-solid fa-folder-open"></i>
-            </div>
-        </div>
-
-        <div class="metric-card info shadow-subtle">
-            <div class="metric-content">
-                <span class="metric-label">กำลังดำเนินการ</span>
-                <div class="metric-value">{{ stats.inProgress }}</div>
-                <div class="metric-trend text-info"><i
-                        class="fa-solid fa-spinner fa-spin-pulse me-1"></i>อัปเดตล่าสุดวันนี้</div>
-            </div>
-            <div class="metric-icon-box bg-info-soft">
-                <i class="fa-solid fa-pen-nib"></i>
-            </div>
-        </div>
-
-        <div class="metric-card success shadow-subtle">
-            <div class="metric-content">
-                <span class="metric-label">ตรวจเสร็จสมบูรณ์</span>
-                <div class="metric-value">{{ stats.completed }}</div>
-                <div class="metric-trend text-success"><i class="fa-solid fa-circle-check me-1"></i>ผลงานทั้งหมด</div>
-            </div>
-            <div class="metric-icon-box bg-success-soft">
-                <i class="fa-solid fa-check-double"></i>
-            </div>
-        </div>
-
-        <div class="metric-card danger shadow-subtle">
-            <div class="metric-content">
-                <span class="metric-label">ใกล้ครบกำหนด</span>
-                <div class="metric-value text-danger">{{ stats.nearDeadline }}</div>
-                <div class="metric-trend text-muted">ภายใน 48 ชั่วโมง</div>
-            </div>
-            <div class="metric-icon-box bg-danger-soft">
-                <i class="fa-solid fa-bolt-lightning"></i>
-            </div>
-        </div>
+  @if (isLoading) {
+    <div class="flex justify-center py-20">
+      <div class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+    </div>
+  } @else {
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="rounded-2xl border border-amber-100 bg-amber-50 p-5">
+        <p class="text-xs font-medium text-amber-800 uppercase tracking-wide">รอตรวจประเมิน</p>
+        <p class="text-3xl font-bold text-amber-900 mt-2">{{ stats.pending }}</p>
+      </div>
+      <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+        <p class="text-xs font-medium text-blue-800 uppercase tracking-wide">กำลังตรวจ</p>
+        <p class="text-3xl font-bold text-blue-900 mt-2">{{ stats.inReview }}</p>
+      </div>
+      <div class="rounded-2xl border border-violet-100 bg-violet-50 p-5">
+        <p class="text-xs font-medium text-violet-800 uppercase tracking-wide">ส่งกลับแก้ไข</p>
+        <p class="text-3xl font-bold text-violet-900 mt-2">{{ stats.revisionRequested }}</p>
+      </div>
+      <div class="rounded-2xl border border-red-100 bg-red-50 p-5">
+        <p class="text-xs font-medium text-red-800 uppercase tracking-wide">ใกล้ครบกำหนด</p>
+        <p class="text-3xl font-bold text-red-900 mt-2">{{ stats.nearDeadline }}</p>
+      </div>
     </section>
 
-    <div class="row g-4">
-        <!-- Main Work Section (Table) -->
-        <div class="col-xl-8">
-            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
-                <div
-                    class="card-header bg-white border-bottom py-4 px-4 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="fw-bold text-gray-900 mb-1">รายการคำขอรับรองล่าสุด</h5>
-                        <p class="small text-secondary mb-0">แสดงรายการที่รอดำเนินการมากที่สุด</p>
-                    </div>
-                    <a routerLink="/assessor/assignments"
-                        class="btn btn-sm btn-light border rounded-pill px-3 fw-bold">ดูทั้งหมด</a>
-                </div>
-                <div class="card-body p-0">
-                    <div *ngIf="pendingRequests.length === 0" class="empty-state py-5">
-                        <div class="empty-icon mb-3">
-                            <i class="fa-solid fa-clipboard-check text-success opacity-20 display-3"></i>
-                        </div>
-                        <h6 class="fw-bold text-gray-700">ไม่มีรายการตกค้าง</h6>
-                        <p class="text-muted small">คุณจัดการทุกคำขอเรียบร้อยแล้ว! รอลูกค้าส่งเอกสารเพิ่มเติม</p>
-                    </div>
+    <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="font-semibold text-slate-900">คำขอที่ต้องดำเนินการ</h2>
+        <a routerLink="/assessor/assignments" class="text-sm font-medium text-emerald-600 hover:text-emerald-700">ดูทั้งหมด →</a>
+      </div>
 
-                    <div class="table-responsive" *ngIf="pendingRequests.length > 0">
-                        <table class="table table-hover align-middle mb-0 custom-table">
-                            <thead>
-                                <tr>
-                                    <th class="ps-4">ชื่อหน่วยงาน / องค์กร</th>
-                                    <th class="text-center">ปีที่ประเมิน</th>
-                                    <th class="text-center">สถานะปัจจุบัน</th>
-                                    <th class="pe-4 text-end">ดำเนินการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr *ngFor="let req of pendingRequests" class="cursor-pointer"
-                                    [routerLink]="['/assessor/evidence', req.id]">
-                                    <td class="ps-4 py-3">
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="org-avatar">{{ req.organization?.name?.charAt(0) || 'O' }}</div>
-                                            <div>
-                                                <div class="fw-bold text-gray-900">{{ req.organization?.name }}</div>
-                                                <div class="small text-secondary">ID: {{ req.id }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="text-center text-secondary small">{{ req.assessment_year || '2567' }}
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="modern-badge"
-                                            [ngClass]="req.status === 'PENDING' ? 'warning' : 'info'">
-                                            <span class="dot"></span>
-                                            {{ req.status === 'PENDING' ? 'รอดำเนินการ' : 'รอการแก้ไข' }}
-                                        </span>
-                                    </td>
-                                    <td class="pe-4 text-end">
-                                        <button class="btn btn-action-icon" title="เริ่มประเมิน">
-                                            <i class="fa-solid fa-chevron-right"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+      @if (assignments.length === 0) {
+        <p class="text-center text-slate-500 py-12 text-sm">ไม่มีคำขอค้างในขณะนี้</p>
+      } @else {
+        <div class="divide-y divide-slate-100">
+          @for (item of assignments; track item.id) {
+            <article class="p-6 hover:bg-slate-50/80 transition-colors">
+              <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 class="font-semibold text-slate-900">{{ item.orgName }}</h3>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">{{ statusLabel(item.status) }}</span>
+                    @if (item.carbonSummary.isMock) {
+                      <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">ข้อมูลตัวอย่าง</span>
+                    }
+                  </div>
+                  <p class="text-sm text-slate-500">ปีประเมิน {{ item.assessmentYear }} · รวม {{ item.carbonSummary.totalEmission | number:'1.1-2' }} tCO₂e</p>
+
+                  <div class="mt-4 space-y-2">
+                    @for (scope of item.carbonSummary.scopes; track scope.scope) {
+                      <div>
+                        <div class="flex justify-between text-xs text-slate-600 mb-1">
+                          <span>{{ scope.label }}</span>
+                          <span>{{ scope.totalEmission | number:'1.1-2' }} tCO₂e</span>
+                        </div>
+                        <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div
+                            class="h-full rounded-full bg-emerald-500 transition-all"
+                            [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)"
+                          ></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
                 </div>
-            </div>
+
+                <div class="flex flex-wrap gap-2 shrink-0">
+                  <a
+                    [routerLink]="['/assessor/evidence', item.id]"
+                    class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition-colors"
+                  >ตรวจหลักฐาน</a>
+                  <a
+                    [routerLink]="['/assessor/decide', item.id]"
+                    class="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-white transition-colors"
+                  >สรุปผล</a>
+                </div>
+              </div>
+            </article>
+          }
         </div>
-
-        <!-- Sidebar Actions Section -->
-        <div class="col-xl-4">
-            <div class="d-flex flex-column gap-4">
-                <!-- Average Score Card -->
-                <div class="card border-0 shadow-sm rounded-4 bg-gradient-primary text-white overflow-hidden p-4">
-                    <div class="position-relative z-1">
-                        <h6 class="small fw-bold text-white-50 mb-3 text-uppercase letter-spacing-wide">
-                            ประสิทธิภาพการประเมิน</h6>
-                        <div class="d-flex align-items-baseline gap-2 mb-2">
-                            <span class="display-5 fw-bold">{{ stats.avgScore || '0' }}</span>
-                            <span class="h5 text-white-50">/ 5.0</span>
-                        </div>
-                        <p class="small mb-4 text-white-70">คะแนนเฉลี่ยที่หน่วยงานได้รับจากการประเมินของคุณ</p>
-                        <div class="progress bg-white bg-opacity-20 shadow-inner rounded-pill" style="height: 6px;">
-                            <div class="progress-bar bg-white" [style.width.%]="(stats.avgScore / 5 * 100)"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Quick Actions Panel -->
-                <div class="card border-0 shadow-sm rounded-4">
-                    <div class="card-header bg-white border-bottom py-3 px-4">
-                        <h6 class="fw-bold text-gray-900 mb-0">เครื่องมือจัดการด่วน</h6>
-                    </div>
-                    <div class="card-body p-3">
-                        <div class="links-stack">
-                            <a routerLink="/assessor/assignments" class="link-item">
-                                <div class="link-icon bg-primary-soft text-primary"><i
-                                        class="fa-solid fa-file-signature"></i></div>
-                                <div class="link-label">
-                                    <span class="fw-bold d-block">การขอรับรอง</span>
-                                    <span class="small text-muted">เข้าสู่หน้ารายการคำขอทั้งหมด</span>
-                                </div>
-                                <i class="fa-solid fa-arrow-right-long chevron"></i>
-                            </a>
-                            <a routerLink="/assessor/history" class="link-item">
-                                <div class="link-icon bg-success-soft text-success"><i
-                                        class="fa-solid fa-clock-rotate-left"></i></div>
-                                <div class="link-label">
-                                    <span class="fw-bold d-block">ประวัติการทำงาน</span>
-                                    <span class="small text-muted">ตรวจสอบผลการประเมินย้อนหลัง</span>
-                                </div>
-                                <i class="fa-solid fa-arrow-right-long chevron"></i>
-                            </a>
-                            <a routerLink="/assessor/notifications" class="link-item">
-                                <div class="link-icon bg-warning-soft text-warning"><i class="fa-solid fa-bell"></i>
-                                </div>
-                                <div class="link-label">
-                                    <span class="fw-bold d-block">การแจ้งเตือน</span>
-                                    <span class="small text-muted">ดูข้อมูลข่าวสารและการตอบกลับ</span>
-                                </div>
-                                <span *ngIf="stats.pending > 0" class="badge bg-danger rounded-pill">{{ stats.pending
-                                    }}</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+      }
+    </section>
+  }
 </div>
-
-<style>
-    /* Premium SaaS CSS Overrides */
-    :host {
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-900: #111827;
-        --primary-green: #10b981;
-        --sidebar-width: 280px;
-    }
-
-    .dashboard-wrapper {
-        color: var(--gray-900);
-        font-family: 'Inter', 'Prompt', sans-serif;
-    }
-
-    /* Header */
-    .dashboard-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-    }
-
-    .btn-white {
-        background: white;
-        border: 1px solid var(--gray-200);
-        color: var(--gray-900);
-        font-weight: 600;
-        transition: all 0.2s ease;
-    }
-
-    .btn-white:hover {
-        background: var(--gray-50);
-        border-color: var(--gray-300);
-    }
-
-    /* Metrics Grid */
-    .metrics-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 1.5rem;
-    }
-
-    .metric-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 1.25rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid rgba(0, 0, 0, 0.03);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .metric-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-    }
-
-    .metric-label {
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: #6b7280;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-
-    .metric-value {
-        font-size: 2.25rem;
-        font-weight: 800;
-        letter-spacing: -0.025em;
-        margin-bottom: 0.25rem;
-    }
-
-    .metric-trend {
-        font-size: 0.75rem;
-        font-weight: 500;
-    }
-
-    .metric-icon-box {
-        width: 56px;
-        height: 56px;
-        border-radius: 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-
-    /* Soft Colors */
-    .bg-warning-soft {
-        background: #fffbeb;
-        color: #d97706;
-    }
-
-    .bg-info-soft {
-        background: #eff6ff;
-        color: #2563eb;
-    }
-
-    .bg-success-soft {
-        background: #ecfdf5;
-        color: #10b981;
-    }
-
-    .bg-danger-soft {
-        background: #fef2f2;
-        color: #ef4444;
-    }
-
-    .bg-primary-soft {
-        background: #f0fdf4;
-        color: #16a34a;
-    }
-
-    /* Table Styles */
-    .custom-table thead th {
-        background: var(--gray-50);
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        font-weight: 700;
-        color: #4b5563;
-        border-top: none;
-    }
-
-    .org-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: var(--gray-100);
-        color: var(--gray-900);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        border: 1px solid var(--gray-200);
-    }
-
-    .modern-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.35rem 0.85rem;
-        border-radius: 2rem;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    .modern-badge.warning {
-        background: #fffbeb;
-        color: #92400e;
-    }
-
-    .modern-badge.info {
-        background: #eff6ff;
-        color: #1e40af;
-    }
-
-    .modern-badge .dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-    }
-
-    .modern-badge.warning .dot {
-        background: #f59e0b;
-    }
-
-    .modern-badge.info .dot {
-        background: #3b82f6;
-    }
-
-    .btn-action-icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        border: none;
-        background: transparent;
-        color: var(--gray-400);
-        transition: var(--transition-fast);
-    }
-
-    tr:hover .btn-action-icon {
-        background: var(--gray-100);
-        color: var(--gray-900);
-        transform: translateX(3px);
-    }
-
-    /* Action Panels */
-    .bg-gradient-primary {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    }
-
-    .links-stack {
-        display: flex;
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-
-    .link-item {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        padding: 1rem;
-        border-radius: 1rem;
-        text-decoration: none;
-        border: 1px solid transparent;
-        transition: all 0.2s ease;
-    }
-
-    .link-item:hover {
-        background: var(--gray-50);
-        border-color: var(--gray-200);
-        transform: translateX(4px);
-    }
-
-    .link-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        flex-shrink: 0;
-    }
-
-    .link-label {
-        flex: 1;
-    }
-
-    .link-item .chevron {
-        opacity: 0;
-        color: var(--gray-300);
-        transition: 0.2s;
-    }
-
-    .link-item:hover .chevron {
-        opacity: 1;
-        transform: translateX(5px);
-        color: var(--gray-900);
-    }
-
-    .shadow-subtle {
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-    }
-
-    .letter-spacing-wide {
-        letter-spacing: 0.1em;
-    }
-
-    .cursor-pointer {
-        cursor: pointer;
-    }
-</style>

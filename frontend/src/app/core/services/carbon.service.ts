@@ -46,6 +46,24 @@ export class CarbonService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
+  updateLog(
+    id: string,
+    payload: Partial<{
+      activity_type: string;
+      month: number;
+      year: number;
+      usage_amount: number;
+      total_emission: number;
+      emission_factor_id: number;
+      evidence_url: string;
+      data_source: string;
+    }>,
+  ): Observable<unknown> {
+    return this.http.patch(`${this.apiUrl}/${id}`, payload, {
+      headers: this.getHeaders(),
+    });
+  }
+
   // ยิงไปหา Gemini API ใน Backend
   scanBill(image: File): Observable<Partial<CarbonLog>> {
     const formData = new FormData();

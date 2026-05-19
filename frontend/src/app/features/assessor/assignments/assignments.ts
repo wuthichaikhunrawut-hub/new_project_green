@@ -2,54 +2,65 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { RequestsService } from '../../../core/services/requests.service';
-import { Assessment } from '../../../core/models/assessment.model';
+import { AssessorService } from '../../../core/services/assessor.service';
+import { AssessorAssignmentItem } from '../../../core/models/assessor.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-assessor-assignments',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './assignments.html',
-  styles: ``
 })
 export class AssessorAssignmentsComponent implements OnInit {
-  private auth = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef);
-  private requestsService = inject(RequestsService);
+  private readonly assessorService = inject(AssessorService);
+  private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  requests: Assessment[] = [];
+  assignments: AssessorAssignmentItem[] = [];
   isLoading = true;
   searchTerm = '';
   statusFilter = '';
 
-
-
-  get filteredRequests() {
-    return this.requests.filter(r => {
-      const matchSearch = !this.searchTerm || (r.organization?.name || '').toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchStatus = !this.statusFilter || r.status === this.statusFilter;
+  get filteredAssignments(): AssessorAssignmentItem[] {
+    return this.assignments.filter((item) => {
+      const matchSearch =
+        !this.searchTerm ||
+        item.orgName.toLowerCase().includes(this.searchTerm.toLowerCase());
+      const matchStatus = !this.statusFilter || item.status === this.statusFilter;
       return matchSearch && matchStatus;
     });
   }
 
-  ngOnInit() { this.loadRequests(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
-  loadRequests() {
+  load(): void {
     this.isLoading = true;
-    this.requestsService.getRequests().subscribe({
-      next: (data) => { this.requests = data; this.isLoading = false; this.cdr.detectChanges(); },
-      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+    this.assessorService.getAssignments().subscribe({
+      next: (data) => {
+        this.assignments = data;
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.toast.error('โหลดรายการไม่สำเร็จ');
+        this.cdr.detectChanges();
+      },
     });
   }
 
-  getStatusLabel(status: string): string {
+  statusLabel(status: string): string {
     const map: Record<string, string> = {
       PENDING: 'รอดำเนินการ',
+      SUBMITTED: 'ส่งแล้ว',
+      IN_REVIEW: 'กำลังตรวจ',
       REVISION_REQUESTED: 'รอแก้ไข',
       APPROVED: 'อนุมัติ',
-      REJECTED: 'ปฏิเสธ'
+      REJECTED: 'ปฏิเสธ',
     };
-    return map[status] || status;
+    return map[status] ?? status;
   }
 }

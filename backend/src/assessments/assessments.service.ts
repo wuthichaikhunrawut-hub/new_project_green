@@ -52,7 +52,12 @@ export class AssessmentsService {
     role: string = '',
     assessorId?: string,
   ): Promise<Assessment[]> {
-    if (role === 'ADMIN') {
+    const normalizedRole = String(role || '')
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+
+    if (normalizedRole === 'ADMIN' || normalizedRole === 'SYSTEM_ADMIN') {
       return this.assessmentRepository.find({
         relations: ['organization', 'assessor'],
         order: { submitted_at: 'DESC' },
@@ -61,7 +66,7 @@ export class AssessmentsService {
 
     // ASSESSOR: show all assessments so they can pick up any pending work
     // (assignment UI not yet implemented - this ensures assessors are not blocked)
-    if (role === 'ASSESSOR') {
+    if (normalizedRole === 'ASSESSOR') {
       return this.assessmentRepository.find({
         relations: ['organization', 'assessor'],
         order: { submitted_at: 'DESC' },

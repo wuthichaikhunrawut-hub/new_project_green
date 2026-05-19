@@ -24,8 +24,15 @@ export class AssessmentsController {
     return orgId;
   }
 
-  private getUserRole(headers: any): string {
-    return headers['x-user-role'] || '';
+  private normalizeRole(role: string): string {
+    return String(role || '')
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, '_');
+  }
+
+  private getUserRole(headers: Record<string, string | undefined>): string {
+    return this.normalizeRole(headers['x-user-role'] ?? '');
   }
 
   @Post()

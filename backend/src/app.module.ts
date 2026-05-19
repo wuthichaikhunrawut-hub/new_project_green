@@ -16,6 +16,9 @@ import { GreenOfficeModule } from './green-office/green-office.module';
 import { SettingsModule } from './settings/settings.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { AssessorModule } from './assessor/assessor.module';
+import { OrgAdminModule } from './org-admin/org-admin.module';
+import { ExecutiveModule } from './executive/executive.module';
 
 @Module({
   imports: [
@@ -50,6 +53,9 @@ import { NotificationsModule } from './notifications/notifications.module';
     SettingsModule,
     AnalyticsModule,
     NotificationsModule,
+    AssessorModule,
+    OrgAdminModule,
+    ExecutiveModule,
   ],
   controllers: [AppController],
   providers: [AppService],
