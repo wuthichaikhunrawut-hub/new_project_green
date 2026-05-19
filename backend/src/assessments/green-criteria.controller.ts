@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
 import { GreenCriteriaMaster } from './entities/green-criteria-master.entity';
@@ -17,13 +18,25 @@ export class GreenCriteriaController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 
   @Get()
-  findAll() {
-    return this.greenCriteriaService.findAll();
+  findAll(@Headers() headers: any) {
+    const orgIdStr = headers['x-org-id'];
+    let orgId = 0;
+    if (orgIdStr) {
+      orgId = parseInt(orgIdStr, 10);
+      if (isNaN(orgId)) orgId = 0;
+    }
+    return this.greenCriteriaService.findAll(orgId);
   }
 
   @Get('list')
-  findAllForFrontend() {
-    return this.greenCriteriaService.findAllForFrontend();
+  findAllForFrontend(@Headers() headers: any) {
+    const orgIdStr = headers['x-org-id'];
+    let orgId = 0;
+    if (orgIdStr) {
+      orgId = parseInt(orgIdStr, 10);
+      if (isNaN(orgId)) orgId = 0;
+    }
+    return this.greenCriteriaService.findAllForFrontend(orgId);
   }
 
   @Post()

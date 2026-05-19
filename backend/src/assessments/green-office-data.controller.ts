@@ -7,7 +7,12 @@ export class GreenOfficeDataController {
 
   @Get()
   async findAll(@Headers('x-org-id') orgId?: string) {
-    const criteria = await this.greenCriteriaService.findAll();
+    let numericOrgId = 0;
+    if (orgId) {
+      numericOrgId = parseInt(orgId, 10);
+      if (isNaN(numericOrgId)) numericOrgId = 0;
+    }
+    const criteria = await this.greenCriteriaService.findAll(numericOrgId);
 
     // Transform data to match frontend model
     return criteria.map((item) => ({

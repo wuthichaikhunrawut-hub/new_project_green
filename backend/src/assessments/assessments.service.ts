@@ -30,7 +30,15 @@ export class AssessmentsService {
     const savedAssessment = await this.assessmentRepository.save(assessment);
 
     // Initialize Assessment Details based on Criteria Master
-    const criteriaList = await this.criteriaRepository.find();
+    const hasPassed = await this.assessmentRepository.findOne({
+      where: { organization: { id: orgId }, status: 'APPROVED' },
+    });
+
+    let criteriaList = await this.criteriaRepository.find();
+    if (!hasPassed) {
+      criteriaList = criteriaList.filter((c) => c.category_number !== 7);
+    }
+
     const details = criteriaList.map((criteria) => {
       return this.assessmentDetailRepository.create({
         assessment: savedAssessment,

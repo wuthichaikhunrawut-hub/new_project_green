@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UploadService } from '../../../core/services/upload.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { GreenOfficeService } from '../../../core/services/green-office.service';
 
 @Component({
   selector: 'app-green-office-evidence',
@@ -14,6 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
 export class GreenOfficeEvidenceComponent implements OnInit {
   private uploadService = inject(UploadService);
   private authService = inject(AuthService);
+  private greenOfficeService = inject(GreenOfficeService);
   private cdr = inject(ChangeDetectorRef);
 
   files: any[] = [];
@@ -26,9 +28,19 @@ export class GreenOfficeEvidenceComponent implements OnInit {
   searchTerm = '';
   selectedCategory = '';
   filterCategory = '';
+  hasCategory7 = false;
 
   ngOnInit() {
     this.loadFiles();
+    this.greenOfficeService.getCriteriaList().subscribe({
+      next: (criteria) => {
+        this.hasCategory7 = criteria.some(c => c.category_number === 7);
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.hasCategory7 = false;
+      }
+    });
   }
 
   loadFiles() {

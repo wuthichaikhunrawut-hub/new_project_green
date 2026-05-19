@@ -7,7 +7,12 @@ export class GreenOfficeController {
 
   @Get()
   findAll(@Headers('x-org-id') orgId?: string) {
-    return this.greenCriteriaService.findAll();
+    let numericOrgId = 0;
+    if (orgId) {
+      numericOrgId = parseInt(orgId, 10);
+      if (isNaN(numericOrgId)) numericOrgId = 0;
+    }
+    return this.greenCriteriaService.findAll(numericOrgId);
   }
 
   @Put(':id/score')

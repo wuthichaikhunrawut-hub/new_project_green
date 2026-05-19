@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { RequestsService } from '../../../core/services/requests.service';
@@ -45,6 +45,7 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
   private authService = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
 
   request: Assessment | null = null;
   isLoading = true;
@@ -152,7 +153,10 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
 
   loadCarbonSummary(orgId: number) {
     this.carbonLoading = true;
-    const token = localStorage.getItem('access_token');
+    let token: string | null = null;
+    if (isPlatformBrowser(this.platformId)) {
+      token = localStorage.getItem('access_token');
+    }
     const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
     this.http.get<CarbonSummary>(`http://localhost:3001/assessor/organizations/${orgId}/carbon-summary`, { headers })
       .subscribe({

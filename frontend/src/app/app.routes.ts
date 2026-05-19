@@ -23,6 +23,13 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent, title: 'ลงทะเบียนองค์กร - Green Sync' },
   { path: 'register/assessor', component: AssessorRegisterComponent, title: 'ลงทะเบียนผู้ตรวจประเมิน - Green Sync' },
+  {
+    path: 'assessor/report/:id',
+    loadComponent: () => import('./features/assessor/report/report').then(m => m.AssessorReportComponent),
+    title: 'รายงานการประเมิน - Green Sync',
+    canActivate: [RoleGuard],
+    data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR'] }
+  },
 
   // 3. หน้าที่ต้องผ่านการ Login และใช้ Layout ร่วมกัน (Sidebar/Header)
   {
