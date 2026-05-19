@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-assessor-profile',
@@ -15,6 +16,7 @@ export class AssessorProfileComponent implements OnInit {
   private http = inject(HttpClient);
   private cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
+  private toast = inject(ToastService);
 
 
   user: any = null;
@@ -100,12 +102,12 @@ export class AssessorProfileComponent implements OnInit {
       headers: { 'x-user-id': currentUser.id.toString() }
     }).subscribe({
       next: () => {
-        alert('อัปเดตข้อมูลสำเร็จ');
+        this.toast.success('อัปเดตข้อมูลสำเร็จ');
         this.isSaving = false;
       },
       error: (err) => {
         console.error('Failed to update profile', err);
-        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
         this.isSaving = false;
       }
     });

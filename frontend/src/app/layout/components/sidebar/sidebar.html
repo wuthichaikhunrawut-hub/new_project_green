@@ -105,6 +105,10 @@
         <i class="fa-solid fa-certificate"></i>
         <span>ติดตามผลประเมินจริง</span>
       </a>
+      <a routerLink="/org-admin/revision-center" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>Revision Center</span>
+      </a>
       <a routerLink="/subscription" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-box-archive"></i>
         <span>แพ็กเกจการใช้งาน</span>
@@ -121,6 +125,10 @@
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-chart-pie"></i>
         <span>แดชบอร์ด</span>
+      </a>
+      <a *ngIf="isExecutive" routerLink="/executive/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Executive Dashboard</span>
       </a>
 
       <div class="nav-label">ระบบงาน</div>

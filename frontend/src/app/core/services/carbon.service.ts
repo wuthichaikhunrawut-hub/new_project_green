@@ -23,13 +23,21 @@ export class CarbonService {
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
-  private getHeaders(): { [header: string]: string } {
-    let orgId = '';
+  private getHeaders(): HttpHeaders {
+    let headers = new HttpHeaders();
     if (isPlatformBrowser(this.platformId)) {
-      const org = JSON.parse(localStorage.getItem('currentOrg') || '{}');
-      orgId = org.id ? org.id.toString() : '';
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+      const org = JSON.parse(localStorage.getItem('currentOrg') || '{}') as {
+        id?: number | string;
+      };
+      if (org.id) {
+        headers = headers.set('x-org-id', String(org.id));
+      }
     }
-    return { 'x-org-id': orgId };
+    return headers;
   }
 
   // ดึงข้อมูลทั้งหมด
@@ -44,6 +52,24 @@ export class CarbonService {
 
   deleteLog(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+  }
+
+  updateLog(
+    id: string,
+    payload: Partial<{
+      activity_type: string;
+      month: number;
+      year: number;
+      usage_amount: number;
+      total_emission: number;
+      emission_factor_id: number;
+      evidence_url: string;
+      data_source: string;
+    }>,
+  ): Observable<unknown> {
+    return this.http.patch(`${this.apiUrl}/${id}`, payload, {
+      headers: this.getHeaders(),
+    });
   }
 
   // ยิงไปหา Gemini API ใน Backend

@@ -1,57 +1,70 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { RequestsService } from '../../../core/services/requests.service';
+import { AssessorService } from '../../../core/services/assessor.service';
+import {
+  AssessorAssignmentItem,
+  AssessorDashboardStats,
+} from '../../../core/models/assessor.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-assessor-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './dashboard.html',
-  styles: ``
 })
 export class AssessorDashboardComponent implements OnInit {
-  private auth = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef);
-  private requestsService = inject(RequestsService);
+  private readonly assessorService = inject(AssessorService);
+  private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  stats = {
+  isLoading = true;
+  stats: AssessorDashboardStats = {
     pending: 0,
-    inProgress: 0,
+    inReview: 0,
+    revisionRequested: 0,
     completed: 0,
     nearDeadline: 0,
-    avgScore: 0
+    avgScorePercent: 0,
   };
-  pendingRequests: any[] = [];
+  assignments: AssessorAssignmentItem[] = [];
 
-
-
-  ngOnInit() {
-    this.loadDashboardData();
+  ngOnInit(): void {
+    this.loadDashboard();
   }
 
-  loadDashboardData() {
-    this.requestsService.getRequests().subscribe({
+  loadDashboard(): void {
+    this.isLoading = true;
+    this.assessorService.getDashboard().subscribe({
       next: (data) => {
-        this.stats.pending = data.filter(r => r.status === 'PENDING').length;
-        this.stats.inProgress = data.filter(r => r.status === 'REVISION_REQUESTED').length;
-        this.stats.completed = data.filter(r => ['APPROVED', 'REJECTED'].includes(r.status)).length;
-        this.stats.nearDeadline = 0;
-        this.stats.avgScore = this.calculateAvgScore(data);
-        this.pendingRequests = data.filter(r => r.status === 'PENDING').slice(0, 5);
+        this.stats = data.stats;
+        this.assignments = data.assignments.slice(0, 6);
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => { console.error('Failed to load dashboard data', err); this.cdr.detectChanges(); }
+      error: () => {
+        this.isLoading = false;
+        this.toast.error('โหลดแดชบอร์ดไม่สำเร็จ', 'กรุณาลองใหม่อีกครั้ง');
+        this.cdr.detectChanges();
+      },
     });
   }
 
-  calculateAvgScore(requests: any[]): number {
-    const scored = requests.filter(r => r.total_score && r.total_score > 0);
-    if (scored.length === 0) return 0;
-    const totalMax = scored.reduce((a, r) => a + (r.total_max_score || 50), 0);
-    const totalActual = scored.reduce((a, r) => a + r.total_score, 0);
-    return totalMax > 0 ? parseFloat(((totalActual / totalMax) * 5).toFixed(1)) : 0;
+  statusLabel(status: string): string {
+    const map: Record<string, string> = {
+      PENDING: 'รอตรวจ',
+      SUBMITTED: 'ส่งแล้ว',
+      IN_REVIEW: 'กำลังตรวจ',
+      REVISION_REQUESTED: 'รอแก้ไข',
+      APPROVED: 'อนุมัติ',
+      REJECTED: 'ปฏิเสธ',
+    };
+    return map[status] ?? status;
+  }
+
+  scopeBarWidth(value: number, total: number): string {
+    if (!total) return '0%';
+    return `${Math.min(100, Math.round((value / total) * 100))}%`;
   }
 }

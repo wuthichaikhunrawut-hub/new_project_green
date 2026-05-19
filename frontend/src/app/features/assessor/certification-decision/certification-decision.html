@@ -1,136 +1,73 @@
-<div class="container-fluid p-4 animate-in">
-    <div class="d-flex align-items-center gap-3 mb-4">
-        <button (click)="goBack()" class="btn btn-outline-secondary rounded-circle py-2 px-3">
-            <i class="fa-solid fa-arrow-left"></i>
-        </button>
-        <div>
-            <h2 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-gavel me-2"></i>สรุปผลและตัดสินการรับรอง</h2>
-            <p class="text-muted mb-0">คำขอ #{{ requestId }} — <strong>{{ requestName }}</strong></p>
-        </div>
-    </div>
+<div class="max-w-4xl mx-auto space-y-6">
+  <button type="button" class="text-sm text-slate-600 hover:text-emerald-600 font-medium" (click)="goBack()">← กลับตรวจหลักฐาน</button>
 
-    <div *ngIf="isLoading" class="text-center py-5">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">กำลังโหลดข้อมูล...</p>
-    </div>
+  @if (isLoading) {
+    <div class="flex justify-center py-20"><div class="h-10 w-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>
+  } @else {
+    <header class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h1 class="text-2xl font-bold text-slate-900">สรุปผลการประเมิน</h1>
+      <p class="text-slate-600 mt-1">{{ requestName }}</p>
+      <div class="mt-4 flex flex-wrap gap-4 text-sm">
+        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-medium">คะแนน {{ totalScore }}/{{ totalMaxScore }}</span>
+        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-800 font-medium">{{ scorePercent | number:'1.0-0' }}%</span>
+        <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-800 font-medium">{{ getCertificationLevel() }}</span>
+      </div>
+    </header>
 
-    <div *ngIf="!isLoading" class="row g-4">
-
-        <!-- Left: Score Summary -->
-        <div class="col-md-5">
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-white border-bottom py-3 px-4">
-                    <h6 class="fw-bold mb-0"><i class="fa-solid fa-chart-bar me-2 text-primary"></i>คะแนนรวมการประเมิน
-                    </h6>
-                </div>
-                <div class="card-body p-4 text-center">
-                    <div class="display-3 fw-bold text-primary">{{ totalScore }}</div>
-                    <div class="text-muted mb-3">/ {{ totalMaxScore }} คะแนน</div>
-                    <div class="progress mb-3" style="height: 12px;">
-                        <div class="progress-bar"
-                            [class]="scorePercent >= 70 ? 'bg-success' : scorePercent >= 50 ? 'bg-warning' : 'bg-danger'"
-                            [style.width.%]="scorePercent"></div>
-                    </div>
-                    <div class="fs-4 fw-bold"
-                        [class]="scorePercent >= 70 ? 'text-success' : scorePercent >= 50 ? 'text-warning' : 'text-danger'">
-                        {{ scorePercent | number:'1.0-0' }}%
-                    </div>
-
-                    <div class="mt-4 p-3 rounded-4 border" [ngClass]="{
-              'border-success bg-success bg-opacity-10': scorePercent >= 70,
-              'border-warning bg-warning bg-opacity-10': scorePercent >= 50 && scorePercent < 70,
-              'border-danger bg-danger bg-opacity-10': scorePercent < 50
-            }">
-                        <i class="fa-solid fa-medal fs-3 mb-2 d-block"
-                            [class]="scorePercent >= 70 ? 'text-success' : scorePercent >= 50 ? 'text-warning' : 'text-danger'"></i>
-                        <div class="fw-bold fs-5">{{ getCertificationLevel() }}</div>
-                        <small class="text-muted">ระดับการรับรองที่ได้</small>
-                    </div>
-                </div>
+    <section class="space-y-3">
+      @for (item of scoreItems; track item.assessment_detail_id) {
+        <article class="rounded-xl border border-slate-200 bg-white p-4">
+          <div class="flex justify-between gap-2 mb-2">
+            <div>
+              <span class="text-xs text-emerald-700 font-mono">{{ item.criteria_code }}</span>
+              <h3 class="font-medium text-slate-900">{{ item.criteria_name }}</h3>
             </div>
+            <span class="text-sm text-slate-500">เต็ม {{ item.max_score }}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <label class="text-xs text-slate-500">คะแนนผู้ตรวจ</label>
+            <input
+              type="number"
+              [(ngModel)]="item.assessor_score"
+              [max]="item.max_score"
+              min="0"
+              class="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm text-center"
+            />
+          </div>
+          <textarea
+            [(ngModel)]="item.auditor_comment"
+            rows="1"
+            placeholder="ความเห็น..."
+            class="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30"
+          ></textarea>
+        </article>
+      }
+    </section>
 
-            <!-- Per Criteria Scores -->
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-bottom py-3 px-4">
-                    <h6 class="fw-bold mb-0"><i class="fa-solid fa-list me-2 text-success"></i>คะแนนรายข้อ</h6>
-                </div>
-                <ul class="list-group list-group-flush">
-                    <li *ngFor="let item of scoreItems"
-                        class="list-group-item d-flex justify-content-between align-items-center px-4 py-2">
-                        <span class="small fw-semibold text-truncate" style="max-width: 65%;"
-                            [title]="item.criteria_name">
-                            <span class="badge bg-secondary rounded-pill me-2 small">{{ item.criteria_code }}</span>
-                            {{ item.criteria_name }}
-                        </span>
-                        <span class="fw-bold text-primary">{{ item.assessor_score }} / {{ item.max_score }}</span>
-                    </li>
-                    <li *ngIf="scoreItems.length === 0" class="list-group-item text-center text-muted py-4">
-                        ยังไม่มีคะแนน</li>
-                </ul>
-            </div>
-        </div>
+    <section class="rounded-2xl border border-slate-200 bg-white p-5">
+      <label class="block text-sm font-medium text-slate-700 mb-2">สรุปความเห็นโดยรวม / เหตุผลส่งกลับแก้ไข</label>
+      <textarea
+        [(ngModel)]="overallComment"
+        rows="4"
+        class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-emerald-500/30 outline-none"
+        placeholder="ระบุข้อเสนอแนะหรือเหตุผลเมื่อส่งกลับแก้ไข..."
+      ></textarea>
+    </section>
 
-        <!-- Right: Decision Panel -->
-        <div class="col-md-7">
-            <div class="card border-0 shadow-sm rounded-4 mb-4">
-                <div class="card-header bg-white border-bottom py-3 px-4">
-                    <h6 class="fw-bold mb-0"><i
-                            class="fa-solid fa-comment-dots me-2 text-info"></i>ความเห็นสรุปของผู้ตรวจประเมิน</h6>
-                </div>
-                <div class="card-body p-4">
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted">ข้อสังเกตและข้อเสนอแนะโดยรวม</label>
-                        <textarea class="form-control" rows="5" [(ngModel)]="overallComment"
-                            placeholder="บันทึกสรุปผล ข้อเสนอแนะ หรือสิ่งที่ต้องปรับปรุง..."></textarea>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label small fw-bold text-muted">ผลการตัดสินการรับรอง <span
-                                class="text-danger">*</span></label>
-                        <div class="d-flex flex-column gap-2">
-                            <label class="d-flex align-items-center gap-3 p-3 rounded-3 border cursor-pointer"
-                                [ngClass]="{'bg-success bg-opacity-10 border-success': decision === 'APPROVED'}">
-                                <input type="radio" [(ngModel)]="decision" value="APPROVED"
-                                    class="form-check-input mt-0">
-                                <div>
-                                    <div class="fw-bold text-success">✅ ผ่านการรับรอง</div>
-                                    <div class="small text-muted">องค์กรผ่านเกณฑ์ทั้งหมด</div>
-                                </div>
-                            </label>
-                            <label class="d-flex align-items-center gap-3 p-3 rounded-3 border cursor-pointer"
-                                [ngClass]="{'bg-warning bg-opacity-10 border-warning': decision === 'REVISION_REQUESTED'}">
-                                <input type="radio" [(ngModel)]="decision" value="REVISION_REQUESTED"
-                                    class="form-check-input mt-0">
-                                <div>
-                                    <div class="fw-bold text-warning">🔄 ต้องปรับปรุง</div>
-                                    <div class="small text-muted">ให้แก้ไขและส่งใหม่</div>
-                                </div>
-                            </label>
-                            <label class="d-flex align-items-center gap-3 p-3 rounded-3 border cursor-pointer"
-                                [ngClass]="{'bg-danger bg-opacity-10 border-danger': decision === 'REJECTED'}">
-                                <input type="radio" [(ngModel)]="decision" value="REJECTED"
-                                    class="form-check-input mt-0">
-                                <div>
-                                    <div class="fw-bold text-danger">❌ ไม่ผ่านการรับรอง</div>
-                                    <div class="small text-muted">ไม่เป็นไปตามเกณฑ์</div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <footer class="flex flex-col sm:flex-row gap-3 justify-end">
+      <button type="button" class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium" [disabled]="isSaving" (click)="saveDraft()">บันทึกร่าง</button>
+      <button type="button" class="px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 font-semibold hover:bg-amber-100" [disabled]="isSaving" (click)="openRevisionConfirm()">ส่งกลับไปแก้ไข</button>
+      <button type="button" class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50" [disabled]="isSaving" (click)="openApproveConfirm()">อนุมัติผ่านเกณฑ์</button>
+    </footer>
+  }
 
-            <div class="d-flex gap-3 justify-content-end">
-                <button class="btn btn-outline-secondary px-4 rounded-pill" (click)="saveDraft()" [disabled]="isSaving">
-                    <i class="fa-solid fa-floppy-disk me-2"></i>บันทึกร่าง
-                </button>
-                <button class="btn btn-primary px-5 rounded-pill shadow" (click)="submitDecision()"
-                    [disabled]="isSaving || !decision">
-                    <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
-                    <i *ngIf="!isSaving" class="fa-solid fa-paper-plane me-2"></i>
-                    ยืนยันผลการประเมิน
-                </button>
-            </div>
-        </div>
-
-    </div>
+  <app-confirm-dialog
+    [open]="confirmOpen"
+    [title]="confirmTitle"
+    [message]="confirmMessage"
+    [variant]="confirmVariant"
+    [confirmLabel]="pendingAction === 'revision' ? 'ส่งกลับแก้ไข' : 'อนุมัติ'"
+    (confirm)="onConfirmOk()"
+    (cancel)="onConfirmCancel()"
+  />
 </div>

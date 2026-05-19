@@ -39,12 +39,15 @@ export class RoleGuard implements CanActivate {
     switch (normalizedRole) {
       case 'SYSTEM_ADMIN':
       case 'ORG_ADMIN':
+      case 'ORGANIZATION_ADMIN':
         this.router.navigate(['/admin/dashboard']);
         break;
       case 'ASSESSOR':
         this.router.navigate(['/assessor/dashboard']);
         break;
       case 'EXECUTIVE':
+        this.router.navigate(['/executive/dashboard']);
+        break;
       case 'EMPLOYEE':
       case 'USER':
         this.router.navigate(['/dashboard']);

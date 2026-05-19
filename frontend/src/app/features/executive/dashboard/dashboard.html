@@ -1,0 +1,116 @@
+<div class="max-w-7xl mx-auto space-y-8">
+  <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Executive Dashboard</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        ภาพรวมผลรับรอง Green Office และความคืบหน้าการลดคาร์บอนสู่เป้าหมาย Net Zero
+      </p>
+    </div>
+    <button
+      type="button"
+      (click)="load()"
+      class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-medium hover:bg-slate-50"
+    >
+      รีเฟรชข้อมูล
+    </button>
+  </header>
+
+  @if (isLoading) {
+    <div class="flex justify-center py-16">
+      <div class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+    </div>
+  } @else if (data) {
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-500">ผลรับรอง (Approved)</p>
+        <p class="text-3xl font-bold text-slate-900 mt-2">{{ data.approvedCount }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-500">คะแนนเฉลี่ย</p>
+        <p class="text-3xl font-bold text-emerald-700 mt-2">{{ data.avgApprovedScore | number:'1.1-2' }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-500">ระดับรับรองล่าสุด</p>
+        <p class="text-lg font-semibold text-slate-900 mt-2">{{ data.latestCertifiedLevel || '-' }}</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-500">Progress to Net Zero</p>
+        <p class="text-3xl font-bold text-blue-700 mt-2">{{ data.netZeroProgressPercent | number:'1.0-2' }}%</p>
+        <p class="text-xs text-slate-500 mt-2">
+          เป้าหมายลด {{ data.targetReductionPercent | number:'1.0-2' }}%
+        </p>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-6">
+      <h2 class="font-semibold text-slate-900 mb-4">Carbon Trend by Scope (tCO₂e)</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        @for (scope of [1,2,3]; track scope) {
+          <article class="rounded-xl border border-slate-100 p-4">
+            <h3 class="text-sm font-semibold text-slate-800 mb-3">Scope {{ scope }}</h3>
+            @if (pointsByScope(scope).length === 0) {
+              <p class="text-xs text-slate-400">ยังไม่มีข้อมูล</p>
+            } @else {
+              <div class="space-y-2">
+                @for (point of pointsByScope(scope); track point.year) {
+                  <div>
+                    <div class="flex justify-between text-xs text-slate-500 mb-1">
+                      <span>{{ point.year }}</span>
+                      <span>{{ point.totalEmission | number:'1.1-2' }}</span>
+                    </div>
+                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        class="h-full bg-emerald-500 rounded-full"
+                        [style.width]="barWidth(point, maxEmission(pointsByScope(scope)))"
+                      ></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100">
+        <h2 class="font-semibold text-slate-900">ผลประเมินที่อนุมัติแล้ว</h2>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm">
+          <thead class="bg-slate-50 text-slate-600">
+            <tr>
+              <th class="text-left font-medium px-4 py-3">ปี</th>
+              <th class="text-left font-medium px-4 py-3">คะแนนรวม</th>
+              <th class="text-left font-medium px-4 py-3">ระดับรับรอง</th>
+              <th class="text-left font-medium px-4 py-3">วันที่อนุมัติ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            @if (data.approvedAssessments.length === 0) {
+              <tr>
+                <td colspan="4" class="px-4 py-10 text-center text-slate-400">
+                  ยังไม่มีผลประเมินที่อนุมัติแล้ว
+                </td>
+              </tr>
+            } @else {
+              @for (row of data.approvedAssessments; track row.id) {
+                <tr class="hover:bg-slate-50">
+                  <td class="px-4 py-3 text-slate-700">{{ row.assessmentYear || '-' }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.totalScore | number:'1.1-2' }}</td>
+                  <td class="px-4 py-3 text-slate-700">{{ row.certifiedLevel || '-' }}</td>
+                  <td class="px-4 py-3 text-slate-500">{{ row.approvedAt ? (row.approvedAt | date:'dd/MM/yyyy') : '-' }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  } @else {
+    <div class="rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
+      ไม่สามารถโหลดรายงานผู้บริหารได้ กรุณาลองรีเฟรชอีกครั้ง
+    </div>
+  }
+</div>

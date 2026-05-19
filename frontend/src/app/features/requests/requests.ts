@@ -33,6 +33,11 @@ export class RequestsComponent implements OnInit {
     return ['ORGANIZATION_ADMIN'].includes(role);
   }
 
+  get isOrgAdmin(): boolean {
+    const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
+    return ['ORGANIZATION_ADMIN', 'ORG_ADMIN'].includes(role);
+  }
+
   ngOnInit() {
     this.loadRequests();
   }

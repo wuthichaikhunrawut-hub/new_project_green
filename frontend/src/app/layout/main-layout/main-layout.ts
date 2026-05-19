@@ -5,12 +5,13 @@ import { AuthService } from '../../core/services/auth.service';
 import { SidebarComponent } from '../components/sidebar/sidebar';
 import { HeaderComponent } from '../components/header/header';
 import { AiChatComponent } from '../../shared/components/ai-chat/ai-chat';
+import { ToastContainerComponent } from '../../shared/components/ui/toast-container';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent, AiChatComponent],
+  imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent, AiChatComponent, ToastContainerComponent],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.css'
 })

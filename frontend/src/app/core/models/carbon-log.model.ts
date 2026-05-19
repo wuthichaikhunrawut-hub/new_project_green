@@ -10,6 +10,7 @@ export interface EmissionFactor {
   id: number;
   name: string;
   category: string;
+  scope?: number;
   unit: string;
   factor_value: number;
   is_active: boolean;

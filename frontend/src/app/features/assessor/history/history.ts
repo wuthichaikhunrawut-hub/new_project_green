@@ -1,56 +1,45 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { RequestsService } from '../../../core/services/requests.service';
+import { AssessorService } from '../../../core/services/assessor.service';
+import { AssessorAssignmentItem } from '../../../core/models/assessor.model';
+import { ToastService } from '../../../shared/services/toast.service';
 
 @Component({
   selector: 'app-assessor-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './history.html',
-  styles: ``
 })
 export class AssessorHistoryComponent implements OnInit {
-  private auth = inject(AuthService);
-  private cdr = inject(ChangeDetectorRef);
-  private requestsService = inject(RequestsService);
+  private readonly assessorService = inject(AssessorService);
+  private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
-  history: any[] = [];
+  history: AssessorAssignmentItem[] = [];
   isLoading = true;
-  searchTerm = '';
-  statusFilter = '';
-  yearFilter = '';
-  years: number[] = [];
 
-  get filteredHistory() {
-    return this.history.filter(r => {
-      const matchSearch = !this.searchTerm || (r.organization?.name || '').toLowerCase().includes(this.searchTerm.toLowerCase());
-      const matchStatus = !this.statusFilter || r.status === this.statusFilter;
-      const matchYear = !this.yearFilter || String(r.assessment_year) === this.yearFilter;
-      return matchSearch && matchStatus && matchYear;
-    });
+  ngOnInit(): void {
+    this.load();
   }
 
-  ngOnInit() { this.loadHistory(); }
-
-  loadHistory() {
-    this.requestsService.getRequests().subscribe({
+  load(): void {
+    this.isLoading = true;
+    this.assessorService.getHistory().subscribe({
       next: (data) => {
-        this.history = data.filter(r => ['APPROVED', 'REJECTED', 'REVISION_REQUESTED'].includes(r.status));
-        this.years = [...new Set(this.history.map(r => r.assessment_year).filter(Boolean))].sort((a, b) => b - a);
+        this.history = data;
         this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => { this.isLoading = false; this.cdr.detectChanges(); }
+      error: () => {
+        this.isLoading = false;
+        this.toast.error('โหลดประวัติไม่สำเร็จ');
+        this.cdr.detectChanges();
+      },
     });
   }
 
-  getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      APPROVED: 'อนุมัติ', REJECTED: 'ปฏิเสธ', REVISION_REQUESTED: 'ส่งกลับแก้ไข'
-    };
-    return map[status] || status;
+  statusLabel(status: string): string {
+    return status === 'APPROVED' ? 'อนุมัติแล้ว' : 'ไม่อนุมัติ';
   }
 }
