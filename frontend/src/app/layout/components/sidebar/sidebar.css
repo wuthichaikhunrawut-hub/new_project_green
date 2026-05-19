@@ -156,6 +156,31 @@
   color: #0F766E;
 }
 
+.nav-item-featured {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  color: #B45309;
+}
+
+.nav-item-featured i {
+  color: #D97706;
+}
+
+.nav-item-featured:hover {
+  background: rgba(245, 158, 11, 0.14);
+  color: #92400E;
+}
+
+.nav-item-featured.active {
+  background: rgba(245, 158, 11, 0.16);
+  color: #92400E;
+  border-left: 3px solid #D97706;
+}
+
+.nav-item-featured.active i {
+  color: #D97706;
+}
+
 .sidebar-footer {
   padding: 16px;
   border-top: 1px solid #E2E8F0;

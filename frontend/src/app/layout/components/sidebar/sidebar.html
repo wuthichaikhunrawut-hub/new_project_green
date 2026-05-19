@@ -77,6 +77,16 @@
         <i class="fa-solid fa-chart-pie"></i>
         <span>แดชบอร์ดองค์กร</span>
       </a>
+      <a
+        routerLink="/org-admin/revision-center"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item nav-item-featured"
+        (click)="onNavItemClick()"
+      >
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>ศูนย์แก้ไขข้อมูล</span>
+      </a>
 
       <div class="nav-label">จัดการองค์กร</div>
       <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
@@ -88,10 +98,14 @@
         <span>จัดการสมาชิก</span>
       </a>
 
-      <div class="nav-label">ระบบงาน</div>
+      <div class="nav-label">ระบบงานและคาร์บอน</div>
       <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bolt"></i>
         <span>ติดตามคาร์บอน</span>
+      </a>
+      <a routerLink="/ai-scan" routerLinkActive="active" class="nav-item ai-feature" (click)="onNavItemClick()">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+        <span>เครื่องมือ AI</span>
       </a>
       <a routerLink="/assessment" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-clipboard-list"></i>
@@ -101,17 +115,34 @@
         <i class="fa-solid fa-folder-open"></i>
         <span>จัดการไฟล์หลักฐาน</span>
       </a>
-      <a routerLink="/requests" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+      <div class="nav-label">การรับรอง Green Office</div>
+      <a routerLink="/requests" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-certificate"></i>
         <span>ติดตามผลประเมินจริง</span>
       </a>
-      <a routerLink="/org-admin/revision-center" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-        <i class="fa-solid fa-rotate-left"></i>
-        <span>Revision Center</span>
+      <a
+        routerLink="/requests/create"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="nav-item"
+        (click)="onNavItemClick()"
+      >
+        <i class="fa-solid fa-file-circle-plus"></i>
+        <span>สร้างคำขอประเมินจริง</span>
       </a>
-      <a routerLink="/subscription" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+      <a routerLink="/executive/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>รายงานผู้บริหาร</span>
+      </a>
+
+      <div class="nav-label">แพ็กเกจและบัญชี</div>
+      <a routerLink="/subscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-box-archive"></i>
         <span>แพ็กเกจการใช้งาน</span>
+      </a>
+      <a routerLink="/subscription/billing" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-credit-card"></i>
+        <span>จัดการการชำระเงิน</span>
       </a>
       <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bell"></i>

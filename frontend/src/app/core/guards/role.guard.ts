@@ -28,19 +28,33 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    // Normalize role name for comparison (e.g., 'Organization Admin' -> 'ORGANIZATION_ADMIN')
-    const normalizedRole = String(role).toUpperCase().trim().split(' ').join('_');
+    const normalizeRole = (value: string): string =>
+      String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s_]/g, '');
 
-    if (allowedRoles.map(r => r.toUpperCase()).includes(normalizedRole)) {
+    const userRole = normalizeRole(String(role));
+    const allowed = allowedRoles.map((r) => normalizeRole(r));
+
+    if (allowed.includes(userRole)) {
+      return true;
+    }
+
+    const legacyRole = String(role).toUpperCase().trim().split(' ').join('_');
+    if (allowedRoles.map((r) => r.toUpperCase()).includes(legacyRole)) {
       return true;
     }
 
     // Role is not allowed. Redirect based on role.
+    const normalizedRole = String(role).toUpperCase().trim().split(' ').join('_');
     switch (normalizedRole) {
       case 'SYSTEM_ADMIN':
+        this.router.navigate(['/admin/dashboard']);
+        break;
       case 'ORG_ADMIN':
       case 'ORGANIZATION_ADMIN':
-        this.router.navigate(['/admin/dashboard']);
+        this.router.navigate(['/org-admin/revision-center']);
         break;
       case 'ASSESSOR':
         this.router.navigate(['/assessor/dashboard']);

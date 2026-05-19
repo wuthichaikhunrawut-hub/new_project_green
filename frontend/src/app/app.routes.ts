@@ -238,7 +238,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/requests/create/create-request').then(m => m.CreateRequestComponent),
         title: 'สร้างคำขอรับรอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['ORGANIZATION_ADMIN'] }
+        data: { roles: ['ORGANIZATION_ADMIN', 'ORG_ADMIN'] }
       },
       {
         path: 'requests/evaluate/:id',
