@@ -187,17 +187,37 @@ export class UsersService {
   async findOne(id: number): Promise<User | null> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['organization', 'user_profile', 'assessor_profile', 'roles'],
+      relations: [
+        'organization',
+        'user_profile',
+        'assessor_profile',
+        'roles',
+        'bank_accounts',
+      ],
     });
 
     if (!user) return null;
 
-    return {
+    const primaryBank =
+      user.bank_accounts?.find((b) => b.is_primary) ||
+      user.bank_accounts?.[0];
+
+    const res = {
       ...user,
       role:
         user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
       username: user.user_profile?.first_name || user.email.split('@')[0],
-    } as any;
+    };
+
+    if (res.assessor_profile) {
+      res.assessor_profile = {
+        ...res.assessor_profile,
+        bank_name: primaryBank?.bank_name || '',
+        bank_account_no: primaryBank?.account_no || '',
+      } as any;
+    }
+
+    return res as any;
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -260,6 +280,20 @@ export class UsersService {
       ...userData
     } = updateData;
 
+    let profileBankName: string | undefined = undefined;
+    let profileBankAccountNo: string | undefined = undefined;
+
+    if (assessor_profile) {
+      if (assessor_profile.bank_name !== undefined) {
+        profileBankName = assessor_profile.bank_name;
+        delete assessor_profile.bank_name;
+      }
+      if (assessor_profile.bank_account_no !== undefined) {
+        profileBankAccountNo = assessor_profile.bank_account_no;
+        delete assessor_profile.bank_account_no;
+      }
+    }
+
     if (password) {
       userData.password_hash = await bcrypt.hash(password, 10);
     }
@@ -315,19 +349,31 @@ export class UsersService {
       await this.userProfileRepository.save(profile);
     }
 
-    if (bank_account) {
+    const mergedBankAccount = bank_account || (profileBankName !== undefined || profileBankAccountNo !== undefined
+      ? { bank_name: profileBankName, account_no: profileBankAccountNo }
+      : null);
+
+    if (mergedBankAccount) {
       let account = await this.bankAccountRepository.findOne({
         where: { user: { id } },
       });
       if (!account) {
         const newAccount = this.bankAccountRepository.create({
-          ...bank_account,
+          bank_name: mergedBankAccount.bank_name || '',
+          account_no: mergedBankAccount.account_no !== undefined ? mergedBankAccount.account_no : mergedBankAccount.bank_account_no || '',
+          account_name: user_profile?.first_name || 'Assessor Account',
           user: { id },
           is_primary: true,
         });
         account = Array.isArray(newAccount) ? newAccount[0] : newAccount;
       } else {
-        Object.assign(account, bank_account);
+        if (mergedBankAccount.bank_name !== undefined) {
+          account.bank_name = mergedBankAccount.bank_name;
+        }
+        const accNo = mergedBankAccount.account_no !== undefined ? mergedBankAccount.account_no : mergedBankAccount.bank_account_no;
+        if (accNo !== undefined) {
+          account.account_no = accNo;
+        }
       }
       if (account) {
         await this.bankAccountRepository.save(account);

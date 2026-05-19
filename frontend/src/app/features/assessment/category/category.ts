@@ -51,7 +51,7 @@ export class CategoryPageComponent implements OnInit {
   activeAssessment: Assessment | null = null;
   allCriteria: GreenCriteria[] = [];
 
-  // Metadata for categories 1-6
+  // Metadata for categories 1-7
   private categoryTitles = [
     '',
     'การกำหนดนโยบาย การวางแผน',
@@ -59,7 +59,8 @@ export class CategoryPageComponent implements OnInit {
     'การใช้ทรัพยากรและพลังงาน',
     'การจัดการของเสีย',
     'สภาพแวดล้อมและความปลอดภัย',
-    'การจัดซื้อจัดจ้างที่เป็นมิตรกับสิ่งแวดล้อม'
+    'การจัดซื้อจัดจ้างที่เป็นมิตรกับสิ่งแวดล้อม',
+    'การดำเนินงานเพื่อความต่อเนื่อง'
   ];
   
   private categoryDescriptions = [
@@ -69,7 +70,8 @@ export class CategoryPageComponent implements OnInit {
     'มาตรการประหยัดไฟฟ้า น้ำ และกระดาษ',
     'การคัดแยกขยะและการลดปริมาณขยะ',
     'การจัดการพื้นที่ทำงานให้ปลอดภัยและน่าอยู่',
-    'การเลือกซื้อสินค้าที่มีฉลากรับรองสิ่งแวดล้อม'
+    'การเลือกซื้อสินค้าที่มีฉลากรับรองสิ่งแวดล้อม',
+    'การดำเนินงานเพื่อความยั่งยืนและความต่อเนื่องขององค์กร'
   ];
 
   ngOnInit() {
@@ -306,7 +308,8 @@ export class CategoryPageComponent implements OnInit {
   }
 
   goNext() {
-    if (this.categoryId < 6) {
+    const maxCategory = this.allCriteria.some(c => c.category_number === 7) ? 7 : 6;
+    if (this.categoryId < maxCategory) {
       this.router.navigate(['/assessment/category', this.categoryId + 1]);
     } else {
       this.router.navigate(['/dashboard']);

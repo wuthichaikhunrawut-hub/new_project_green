@@ -209,7 +209,7 @@
 
       <!-- Main Dashboard -->
       <a routerLink="/assessor/dashboard" routerLinkActive="active"
-        class="nav-item nav-item-home" (click)="onNavItemClick()">
+        class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
         <span>คอนโซลผู้ตรวจ</span>
       </a>
@@ -230,16 +230,11 @@
 
       <!-- ทางลัด -->
       <div class="nav-label">ทางลัด</div>
-      <div class="nav-shortcut-card" *ngIf="!isCollapsed">
-        <div class="nsc-title">
-          <i class="fa-solid fa-bolt"></i>
-          เริ่มตรวจประเมิน
-        </div>
-        <p class="nsc-desc">เลือกคำขอจากรายการงาน</p>
-        <a routerLink="/assessor/assignments" class="nsc-btn" (click)="onNavItemClick()">
-          รายการคำขอค้าง →
-        </a>
-      </div>
+      <a routerLink="/assessor/assignments" routerLinkActive="active"
+        class="nav-item nav-item-featured" (click)="onNavItemClick()">
+        <i class="fa-solid fa-bolt"></i>
+        <span>เริ่มตรวจประเมิน (งานค้าง)</span>
+      </a>
 
       <!-- บัญชีและการแจ้งเตือน -->
       <div class="nav-label">บัญชี</div>

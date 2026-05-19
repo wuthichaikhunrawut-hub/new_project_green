@@ -1,0 +1,155 @@
+<div *ngIf="isLoading" class="d-flex justify-content-center align-items-center vh-100">
+    <div class="spinner-border" style="color: #2D6A4F;" role="status">
+        <span class="visually-hidden">กำลังโหลด...</span>
+    </div>
+</div>
+
+<div *ngIf="!isLoading && assessment" class="report-shell">
+
+    <!-- ปุ่มพิมพ์ -->
+    <div class="toolbar no-print">
+        <button class="btn-pdf btn-back" (click)="goBack()">
+            <i class="fa-solid fa-arrow-left"></i> ย้อนกลับ
+        </button>
+        <button class="btn-pdf" (click)="print()">
+            <i class="fa-solid fa-file-pdf"></i> บันทึกเป็น PDF / พิมพ์รายงาน
+        </button>
+    </div>
+
+    <!-- ═══ กระดาษ A4 ═══ -->
+    <div class="a4">
+        <div class="page-content">
+
+            <!-- ▸ หัวเอกสาร -->
+            <div class="hdr">
+                <div class="hdr-left">
+                    <img src="assets/image/Green_office_imge.png" alt="Green Sync" class="hdr-logo">
+                    <p class="hdr-brand">
+                        Green Sync Platform
+                        <small>ระบบประเมินสำนักงานสีเขียวอัจฉริยะ</small>
+                    </p>
+                </div>
+                <div class="hdr-right">
+                    <p class="hdr-doc-title">รายงานผลการตรวจประเมินสำนักงานสีเขียวอย่างเป็นทางการ</p>
+                    <span class="hdr-year">ปีงบประมาณ {{ assessment.assessment_year }}</span>
+                </div>
+            </div>
+
+            <!-- ▸ แถวบน: ข้อมูลองค์กร + คะแนน -->
+            <div class="grid-main">
+
+                <!-- บล็อก 1: ข้อมูลองค์กร -->
+                <div class="blk-org">
+                    <h3 class="blk-title">
+                        <i class="fa-solid fa-building"></i> ข้อมูลองค์กรผู้ขอรับการประเมิน
+                    </h3>
+                    <div class="org-grid">
+                        <div class="org-col">
+                            <div class="org-row"><span class="org-lbl">ชื่อองค์กร</span> <span class="org-val">{{ assessment.organization?.name || '-' }}</span></div>
+                            <div class="org-row"><span class="org-lbl">เลขผู้เสียภาษี</span> <span class="org-val">{{ assessment.organization?.tax_id || '-' }}</span></div>
+                            <div class="org-row"><span class="org-lbl">ประเภทกิจการ</span> <span class="org-val">{{ assessment.organization?.industry_type || '-' }}</span></div>
+                        </div>
+                        <div class="org-col">
+                            <div class="org-row"><span class="org-lbl">จำนวนบุคลากร</span> <span class="org-val">{{ assessment.organization?.number_of_employees ? (assessment.organization.number_of_employees + ' คน') : '-' }}</span></div>
+                            <div class="org-row"><span class="org-lbl">พื้นที่ใช้สอย</span> <span class="org-val">{{ assessment.organization?.total_floor_area ? (assessment.organization.total_floor_area | number:'1.0-0') + ' ตร.ม.' : '-' }}</span></div>
+                            <div class="org-row"><span class="org-lbl">วันที่ตรวจประเมิน</span> <span class="org-val" style="color: #2D6A4F; font-weight: 700;">{{ formatDate(assessment.updated_at) }}</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- บล็อก 2: ผลคะแนนรวม -->
+                <div class="blk-score">
+                    <span class="sc-label">ผลการประเมินรวม</span>
+                    <div class="sc-num">{{ assessment.total_score | number:'1.1-1' }}</div>
+                    <span class="sc-max">คะแนนจากเต็ม {{ maxScoreSum }}</span>
+                </div>
+            </div>
+
+            <!-- สถานะการรับรอง -->
+            <div class="cert-status">
+                ผ่านเกณฑ์การรับรองมาตรฐานสะสม: <span class="cert-level">ระดับ{{ certLevelThai }}</span>
+            </div>
+
+            <!-- ▸ แถวล่าง: ตารางคะแนน + คาร์บอน -->
+            <div class="grid-bottom">
+
+                <!-- บล็อก 3: ตารางสรุปคะแนน -->
+                <div class="blk-table">
+                    <h3 class="sec-title">
+                        <i class="fa-solid fa-chart-column"></i> สรุปคะแนนประเมินจำแนกตามหมวดหมู่
+                    </h3>
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%; text-align: center;">หมวด</th>
+                                <th style="width: 56%;">รายการประเมิน</th>
+                                <th style="width: 17%; text-align: right;">เต็ม</th>
+                                <th style="width: 17%; text-align: right;">ได้</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let cat of categories">
+                                <td class="c-num">{{ cat.categoryId }}</td>
+                                <td>{{ cat.name }}</td>
+                                <td class="c-max">{{ cat.maxScore | number:'1.0-0' }}</td>
+                                <td class="c-score">{{ cat.score | number:'1.1-1' }}</td>
+                            </tr>
+                            <tr class="row-total">
+                                <td colspan="2" style="text-align: right;">คะแนนรวมสะสมสุทธิ</td>
+                                <td class="c-max">{{ maxScoreSum }}</td>
+                                <td class="c-score">{{ assessment.total_score | number:'1.1-1' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- บล็อก 4: สรุปคาร์บอนฟุตพริ้นท์ -->
+                <div class="blk-carbon">
+                    <h3 class="sec-title">
+                        <i class="fa-solid fa-cloud"></i> สรุปปริมาณก๊าซเรือนกระจก
+                    </h3>
+                    <div class="carbon-box">
+                        <div *ngIf="carbonSummary; else noCarbonTpl">
+                            <div class="carbon-total">
+                                <div class="carbon-total-label">ปริมาณการปล่อยรวม</div>
+                                <div class="carbon-total-num">{{ carbonSummary.totalEmission | number:'1.1-1' }}</div>
+                                <div class="carbon-total-unit">ตันคาร์บอนไดออกไซด์เทียบเท่า (tCO₂e)</div>
+                            </div>
+                            <div class="scope-bars">
+                                <div class="scope-row" *ngFor="let s of carbonSummary.scopes">
+                                    <span class="scope-dot" [ngClass]="'s' + s.scope"></span>
+                                    <span class="scope-name">{{ getScopeThaiLabel(s.scope) }}</span>
+                                    <div class="scope-bar-track">
+                                        <div class="scope-bar-fill" [ngClass]="'s' + s.scope"
+                                             [style.width.%]="getScopePercent(s.totalEmission)"></div>
+                                    </div>
+                                    <span class="scope-val">{{ s.totalEmission | number:'1.1-1' }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <ng-template #noCarbonTpl>
+                            <div class="no-carbon">
+                                <i class="fa-solid fa-leaf" style="color: #95D5B2; font-size: 18px;"></i>
+                                <p style="margin: 4px 0 0;">ยังไม่มีข้อมูลการบันทึกก๊าซเรือนกระจก</p>
+                            </div>
+                        </ng-template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ▸ ส่วนลงนาม -->
+            <div class="ftr">
+                <div class="sig">
+                    <div class="sig-line"></div>
+                    <p class="sig-p">( ........................................................ )</p>
+                    <p class="sig-role">ประธานคณะกรรมการผู้ตรวจประเมิน</p>
+                    <p class="sig-date">วันที่: {{ formatDate(assessment.updated_at) }}</p>
+                </div>
+            </div>
+
+            <!-- ท้ายกระดาษ -->
+            <p class="ftr-line">เอกสารฉบับนี้ออกโดยระบบ Green Sync — สงวนลิขสิทธิ์ © พ.ศ. {{ currentYear }}</p>
+
+        </div>
+    </div>
+</div>

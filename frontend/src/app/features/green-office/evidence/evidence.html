@@ -87,6 +87,7 @@
                 <option value="หมวดที่ 4">หมวดที่ 4 — การจัดการของเสีย</option>
                 <option value="หมวดที่ 5">หมวดที่ 5 — สภาพแวดล้อมและความปลอดภัย</option>
                 <option value="หมวดที่ 6">หมวดที่ 6 — การจัดซื้อจัดจ้างที่เป็นมิตรฯ</option>
+                <option value="หมวดที่ 7" *ngIf="hasCategory7">หมวดที่ 7 — การดำเนินงานเพื่อความต่อเนื่อง</option>
               </select>
             </div>
 
@@ -170,6 +171,7 @@
                 <option value="หมวดที่ 4">หมวดที่ 4</option>
                 <option value="หมวดที่ 5">หมวดที่ 5</option>
                 <option value="หมวดที่ 6">หมวดที่ 6</option>
+                <option value="หมวดที่ 7" *ngIf="hasCategory7">หมวดที่ 7</option>
               </select>
             </div>
 
@@ -245,6 +247,7 @@
                   <option [selected]="file.category === 'หมวดที่ 4'" value="หมวดที่ 4">หมวดที่ 4</option>
                   <option [selected]="file.category === 'หมวดที่ 5'" value="หมวดที่ 5">หมวดที่ 5</option>
                   <option [selected]="file.category === 'หมวดที่ 6'" value="หมวดที่ 6">หมวดที่ 6</option>
+                  <option [selected]="file.category === 'หมวดที่ 7'" value="หมวดที่ 7" *ngIf="hasCategory7">หมวดที่ 7</option>
                 </select>
                 <button (click)="cancelEdit()" class="text-gray-400 hover:text-red-500">
                   <i class="fa-solid fa-xmark text-[10px]"></i>

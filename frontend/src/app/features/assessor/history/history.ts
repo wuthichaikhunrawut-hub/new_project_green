@@ -93,13 +93,8 @@ export class AssessorHistoryComponent implements OnInit {
 
   printReport(item: AssessorAssignmentItem): void {
     // Open evaluate page in new tab and trigger print
-    const url = `/requests/evaluate/${item.id}`;
+    const url = `/assessor/report/${item.id}`;
     const win = window.open(url, '_blank');
-    if (win) {
-      win.onload = () => {
-        setTimeout(() => win.print(), 800);
-      };
-    }
   }
 
   exportCsv(): void {
