@@ -1,4 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { EmissionFactor } from './emission-factor.entity';
 
@@ -17,7 +25,9 @@ export class CarbonLog {
   @Column({ name: 'org_id', nullable: true })
   org_id: number;
 
-  @ManyToOne(() => Organization, (org) => org.carbon_logs, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Organization, (org) => org.carbon_logs, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'org_id' })
   organization: Organization;
 
@@ -42,9 +52,15 @@ export class CarbonLog {
   @Column({ type: 'character varying', length: 100, nullable: true })
   data_source: string;
 
-  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   updated_at: Date;
 }

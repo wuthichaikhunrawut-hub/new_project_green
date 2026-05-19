@@ -77,6 +77,13 @@ export class AssessorRegisterComponent {
     const file = input.files[0];
 
     // Basic validation
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+    if (!allowedTypes.includes(file.type)) {
+      this.errorMessage = 'รองรับเฉพาะไฟล์ PDF, JPG, PNG เท่านั้น';
+      input.value = '';
+      return;
+    }
+
     if (file.size > 5 * 1024 * 1024) { // 5MB limit
       this.errorMessage = 'ไฟล์มีขนาดใหญ่เกินไป (จำกัด 5MB)';
       input.value = '';
@@ -89,16 +96,27 @@ export class AssessorRegisterComponent {
 
     console.log('💎 Selected file:', file.name, file.type, file.size);
 
+    // Add 30-second timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (this.isUploading) {
+        this.isUploading = false;
+        this.errorMessage = 'อัปโหลดหมดเวลา กรุณาลองใหม่อีกครั้ง';
+        input.value = '';
+      }
+    }, 30000);
+
     this.uploadService.uploadFile(file, 'assessors').subscribe({
       next: (res) => {
-        this.profileData.qualification_file_url = res.url;
+        clearTimeout(timeoutId);
+        this.profileData.qualification_file_url = res.url || res.file_url;
         this.isUploading = false;
         this.successMessage = 'อัปโหลดไฟล์หลักฐานเรียบร้อยแล้ว';
-        console.log('✅ Upload success:', res.url);
+        console.log('✅ Upload success:', this.profileData.qualification_file_url);
       },
       error: (err) => {
+        clearTimeout(timeoutId);
         console.error('❌ Upload failed', err);
-        this.errorMessage = 'ไม่สามารถอัปโหลดไฟล์ได้: ' + (err.error?.message || 'Network Error');
+        this.errorMessage = 'ไม่สามารถอัปโหลดไฟล์ได้: ' + (err.error?.message || err.message || 'Network Error — กรุณาตรวจสอบว่า Backend ทำงานอยู่');
         this.isUploading = false;
         input.value = ''; // Reset input so user can try again
       }

@@ -1,4 +1,11 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Assessment } from './assessment.entity';
 import { Organization } from '../../organizations/entities/organization.entity';
 
@@ -22,7 +29,10 @@ export class Certificate {
   @Column({ type: 'timestamp without time zone', nullable: true })
   expired_at: Date;
 
-  @CreateDateColumn({ type: 'timestamp without time zone', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({
+    type: 'timestamp without time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   created_at: Date;
 
   @ManyToOne(() => Assessment, { onDelete: 'CASCADE' })

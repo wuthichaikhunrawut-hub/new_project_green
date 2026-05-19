@@ -6,6 +6,8 @@ import { Invoice } from './entities/invoice.entity';
 import { Feature } from './entities/feature.entity';
 import { OrganizationSubscription } from './entities/organization-subscription.entity';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/entities/notification.entity';
 
 import { Organization } from '../organizations/entities/organization.entity';
 import { User } from '../users/entities/user.entity';
@@ -26,14 +28,15 @@ export class SubscriptionsService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private auditLogsService: AuditLogsService,
+    private notificationsService: NotificationsService,
   ) {}
 
   // ... (previous methods)
 
   async getOrganizationByUserId(userId: number): Promise<Organization> {
-    const user = await this.userRepository.findOne({ 
+    const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['organization']
+      relations: ['organization'],
     });
     if (!user || !user.organization) {
       throw new Error('Organization not found for user');
@@ -48,9 +51,9 @@ export class SubscriptionsService {
   // ---- Subscription Plans ----
 
   findAllPlans() {
-    return this.plansRepository.find({ 
+    return this.plansRepository.find({
       relations: ['features'],
-      order: { price_per_month: 'ASC' } 
+      order: { price_per_month: 'ASC' },
     });
   }
 
@@ -61,58 +64,95 @@ export class SubscriptionsService {
   async createFeature(data: Partial<Feature>) {
     const feature = this.featuresRepository.create(data);
     const saved = await this.featuresRepository.save(feature);
-    await this.auditLogsService.logAction(undefined, 'CREATE_FEATURE', `Created feature: ${saved.feature_name}`);
+    await this.auditLogsService.logAction(
+      undefined,
+      'CREATE_FEATURE',
+      `Created feature: ${saved.feature_name}`,
+    );
     return saved;
   }
 
   async updateFeature(id: number, data: Partial<Feature>) {
     await this.featuresRepository.update(id, data);
     const updated = await this.featuresRepository.findOne({ where: { id } });
-    await this.auditLogsService.logAction(undefined, 'UPDATE_FEATURE', `Updated feature: ${updated?.feature_name}`);
+    await this.auditLogsService.logAction(
+      undefined,
+      'UPDATE_FEATURE',
+      `Updated feature: ${updated?.feature_name}`,
+    );
     return updated;
   }
 
   async removeFeature(id: number) {
     const feature = await this.featuresRepository.findOne({ where: { id } });
     await this.featuresRepository.delete(id);
-    if (feature) await this.auditLogsService.logAction(undefined, 'DELETE_FEATURE', `Deleted feature: ${feature.feature_name}`);
+    if (feature)
+      await this.auditLogsService.logAction(
+        undefined,
+        'DELETE_FEATURE',
+        `Deleted feature: ${feature.feature_name}`,
+      );
   }
 
   async createPlan(data: any) {
     const { feature_ids, ...planData } = data;
-    const plan = this.plansRepository.create(planData as any) as any as SubscriptionPlan;
-    
+    const plan = this.plansRepository.create(
+      planData,
+    ) as any as SubscriptionPlan;
+
     if (feature_ids && feature_ids.length > 0) {
-      plan.features = await this.featuresRepository.find({ where: { id: In(feature_ids) } });
+      plan.features = await this.featuresRepository.find({
+        where: { id: In(feature_ids) },
+      });
     }
 
     const saved = await this.plansRepository.save(plan);
-    await this.auditLogsService.logAction(undefined, 'CREATE_PLAN', `Created subscription plan: ${saved.plan_name}`);
+    await this.auditLogsService.logAction(
+      undefined,
+      'CREATE_PLAN',
+      `Created subscription plan: ${saved.plan_name}`,
+    );
     return saved;
   }
 
   async updatePlan(id: number, data: any) {
     const { feature_ids, ...planData } = data;
-    
+
     // Use save for updates involving relations
-    const plan = await this.plansRepository.findOne({ where: { id }, relations: ['features'] });
+    const plan = await this.plansRepository.findOne({
+      where: { id },
+      relations: ['features'],
+    });
     if (!plan) throw new Error('Plan not found');
 
     Object.assign(plan, planData);
 
     if (feature_ids) {
-      plan.features = await this.featuresRepository.find({ where: { id: In(feature_ids) } });
+      plan.features = await this.featuresRepository.find({
+        where: { id: In(feature_ids) },
+      });
     }
 
-    const updated = await this.plansRepository.save(plan) as unknown as SubscriptionPlan;
-    await this.auditLogsService.logAction(undefined, 'UPDATE_PLAN', `Updated plan: ${updated?.plan_name}`);
+    const updated = (await this.plansRepository.save(
+      plan,
+    )) as unknown as SubscriptionPlan;
+    await this.auditLogsService.logAction(
+      undefined,
+      'UPDATE_PLAN',
+      `Updated plan: ${updated?.plan_name}`,
+    );
     return updated;
   }
 
   async removePlan(id: number) {
     const plan = await this.plansRepository.findOne({ where: { id } });
     await this.plansRepository.delete(id);
-    if (plan) await this.auditLogsService.logAction(undefined, 'DELETE_PLAN', `Deleted plan: ${plan.plan_name}`);
+    if (plan)
+      await this.auditLogsService.logAction(
+        undefined,
+        'DELETE_PLAN',
+        `Deleted plan: ${plan.plan_name}`,
+      );
   }
 
   // ---- Invoices ----
@@ -125,8 +165,42 @@ export class SubscriptionsService {
   }
 
   async updateInvoiceStatus(id: number, status: string) {
+    const invoice = await this.invoicesRepository.findOne({
+      where: { id },
+      relations: ['organization', 'plan'],
+    });
+    if (!invoice) throw new Error('Invoice not found');
+
     await this.invoicesRepository.update(id, { status });
-    return this.invoicesRepository.findOne({ where: { id }, relations: ['organization', 'plan'] });
+    const updated = await this.invoicesRepository.findOne({
+      where: { id },
+      relations: ['organization', 'plan'],
+    });
+
+    await this.auditLogsService.logAction(
+      undefined,
+      'UPDATE_INVOICE',
+      `Updated invoice ${invoice.reference_number} status to ${status}`,
+    );
+
+    // If marked as PAID, notify the organization
+    if (status === 'PAID' && invoice.organization) {
+      // Find the admin user of this organization (Simplified: just find any user in the org)
+      const user = await this.userRepository.findOne({
+        where: { organization: { id: invoice.organization.id } },
+      });
+      if (user) {
+        await this.notificationsService.create({
+          title: 'ชำระเงินเรียบร้อยแล้ว',
+          message: `ใบแจ้งหนี้เลขที่ ${invoice.reference_number} สำหรับแพ็กเกจ ${invoice.plan?.plan_name} ได้รับการยืนยันแล้ว`,
+          type: NotificationType.SYSTEM,
+          recipient_id: user.id,
+          link: '/org/subscriptions',
+        });
+      }
+    }
+
+    return updated;
   }
 
   // ---- Feature Access Enforcement ----
@@ -134,14 +208,16 @@ export class SubscriptionsService {
   async findOrgSubscription(orgId: number) {
     return this.orgSubRepository.findOne({
       where: { org_id: orgId, status: 'ACTIVE' },
-      relations: ['plan', 'plan.features']
+      relations: ['plan', 'plan.features'],
     });
   }
 
   async canAccessFeature(orgId: number, featureCode: string): Promise<boolean> {
     const sub = await this.findOrgSubscription(orgId);
     if (!sub || !sub.plan) return false;
-    
-    return sub.plan.features?.some(f => f.feature_code.toLowerCase() === featureCode.toLowerCase());
+
+    return sub.plan.features?.some(
+      (f) => f.feature_code.toLowerCase() === featureCode.toLowerCase(),
+    );
   }
 }

@@ -2,12 +2,12 @@
   <!-- Header -->
   <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h2 class="dashboard-title h3 mb-1 text-primary fw-bold">Platform Governance Dashboard <span class="badge bg-danger ms-2" style="font-size: 10px;">v2.0 NEW</span></h2>
-      <p class="dashboard-subtitle mb-0 text-muted">System Administration & SaaS Operations Overview</p>
+      <h2 class="dashboard-title h3 mb-1 text-primary fw-bold">แดชบอร์ดผู้ดูแลระบบ <span class="badge bg-danger ms-2" style="font-size: 10px;">v2.0 NEW</span></h2>
+      <p class="dashboard-subtitle mb-0 text-muted">ภาพรวมการจัดการระบบและการดำเนินงาน</p>
     </div>
     <div class="d-flex gap-2">
        <div class="badge bg-primary bg-opacity-10 text-primary p-2 px-3 rounded-pill border border-primary border-opacity-25">
-          <i class="fa-solid fa-server me-2"></i> System Status: Online
+          <i class="fa-solid fa-server me-2"></i> สถานะระบบ: ออนไลน์
        </div>
     </div>
   </div>
@@ -19,13 +19,13 @@
       <div class="card kpi-card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="text-muted small fw-bold text-uppercase tracking-wider">Revenue (Last 30 Days)</span>
+            <span class="text-muted small fw-bold text-uppercase tracking-wider">รายได้ (30 วันที่ผ่านมา)</span>
             <i class="fa-solid fa-sack-dollar text-success fs-5"></i>
           </div>
           <div class="h3 fw-bold mb-1">฿{{ stats.revenueMonth | number }}</div>
           <div class="text-success small">
             <i class="fa-solid fa-arrow-trend-up me-1"></i>
-            <span>+12.5% from last month</span>
+            <span>+12.5% จากเดือนที่แล้ว</span>
           </div>
         </div>
       </div>
@@ -36,12 +36,12 @@
       <div class="card kpi-card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="text-muted small fw-bold text-uppercase tracking-wider">Active Organizations</span>
+            <span class="text-muted small fw-bold text-uppercase tracking-wider">องค์กรที่ใช้งานอยู่</span>
             <i class="fa-solid fa-building-circle-check text-primary fs-5"></i>
           </div>
           <div class="h3 fw-bold mb-1">{{ stats.activeOrganizations }} / {{ stats.totalOrganizations }}</div>
           <div class="text-muted small">
-            <span>Growth: +2 this week</span>
+            <span>เติบโต: +2 ในสัปดาห์นี้</span>
           </div>
         </div>
       </div>
@@ -52,13 +52,13 @@
       <div class="card kpi-card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="text-muted small fw-bold text-uppercase tracking-wider">Assessor Network</span>
+            <span class="text-muted small fw-bold text-uppercase tracking-wider">เครือข่ายผู้ตรวจประเมิน</span>
             <i class="fa-solid fa-user-shield text-warning fs-5"></i>
           </div>
-          <div class="h3 fw-bold mb-1">{{ stats.verifiedAssessors }} <span class="text-muted h6">Verified</span></div>
+          <div class="h3 fw-bold mb-1">{{ stats.verifiedAssessors }} <span class="text-muted h6">ยืนยันแล้ว</span></div>
           <div class="text-warning small" *ngIf="stats.pendingAssessors > 0">
             <i class="fa-solid fa-clock me-1"></i>
-            <span>{{ stats.pendingAssessors }} pending verification</span>
+            <span>{{ stats.pendingAssessors }} รอการยืนยัน</span>
           </div>
         </div>
       </div>
@@ -69,7 +69,7 @@
       <div class="card kpi-card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4">
           <div class="d-flex justify-content-between align-items-center mb-2">
-            <span class="text-muted small fw-bold text-uppercase tracking-wider">Infrastructure (Storage)</span>
+            <span class="text-muted small fw-bold text-uppercase tracking-wider">พื้นที่จัดเก็บข้อมูล (Storage)</span>
             <i class="fa-solid fa-database text-info fs-5"></i>
           </div>
           <div class="h3 fw-bold mb-1">{{ stats.storageUsageGb }} GB</div>
@@ -77,7 +77,7 @@
             <div class="progress-bar bg-info" [style.width.%]="(stats.storageUsageGb / 100) * 100"></div>
           </div>
           <div class="text-muted small mt-1">
-            <span>{{ stats.totalFiles }} files uploaded</span>
+            <span>{{ stats.totalFiles }} ไฟล์ที่อัปโหลด</span>
           </div>
         </div>
       </div>
@@ -90,15 +90,15 @@
     <div class="col-md-8">
       <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-          <h5 class="fw-bold mb-0">Subscription Plan Distribution</h5>
-          <button class="btn btn-sm btn-light rounded-pill">View Plans</button>
+          <h5 class="fw-bold mb-0">สัดส่วนแพ็กเกจการใช้งาน</h5>
+          <button routerLink="/admin/subscriptions" class="btn btn-sm btn-light rounded-pill">ดูแพ็กเกจ</button>
         </div>
         <div class="card-body p-4">
            <!-- Manual Bars for Demo if Charts not ready -->
            <div class="mb-4" *ngFor="let plan of stats.planDistribution">
               <div class="d-flex justify-content-between mb-1">
                  <span class="fw-semibold">{{ plan.name }}</span>
-                 <span class="text-muted">{{ plan.count }} Organizations</span>
+                 <span class="text-muted">{{ plan.count }} องค์กร</span>
               </div>
               <div class="progress" style="height: 12px; border-radius: 6px;">
                  <div class="progress-bar" 
@@ -108,7 +108,7 @@
               </div>
            </div>
            <div *ngIf="stats.planDistribution.length === 0" class="text-center py-4 text-muted">
-              No subscription data available
+              ไม่มีข้อมูลแพ็กเกจ
            </div>
         </div>
       </div>
@@ -118,27 +118,27 @@
     <div class="col-md-4">
       <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-header bg-white border-0 pt-4 px-4">
-          <h5 class="fw-bold mb-0">Certification Funnel</h5>
+          <h5 class="fw-bold mb-0">สถานะการขอรับรอง</h5>
         </div>
         <div class="card-body p-4">
            <div class="d-flex flex-column gap-3">
-              <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-primary border-4">
+               <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-primary border-4">
                  <div>
-                    <div class="small text-muted fw-bold">APPROVED</div>
+                    <div class="small text-muted fw-bold">อนุมัติแล้ว</div>
                     <div class="h4 mb-0 fw-bold">{{ stats.assessmentStats.approved }}</div>
                  </div>
                  <i class="fa-solid fa-circle-check text-primary fs-3"></i>
               </div>
               <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-warning border-4">
                  <div>
-                    <div class="small text-muted fw-bold">PENDING</div>
+                    <div class="small text-muted fw-bold">รอตรวจสอบ</div>
                     <div class="h4 mb-0 fw-bold">{{ stats.assessmentStats.pending }}</div>
                  </div>
                  <i class="fa-solid fa-hourglass-half text-warning fs-3"></i>
               </div>
               <div class="p-3 bg-light rounded-3 d-flex justify-content-between align-items-center border-start border-danger border-4">
                  <div>
-                    <div class="small text-muted fw-bold">REJECTED</div>
+                    <div class="small text-muted fw-bold">ไม่ผ่าน</div>
                     <div class="h4 mb-0 fw-bold">{{ stats.assessmentStats.rejected }}</div>
                  </div>
                  <i class="fa-solid fa-circle-xmark text-danger fs-3"></i>
@@ -154,19 +154,19 @@
     <div class="col-md-4">
        <div class="card border-0 shadow-sm rounded-4">
           <div class="card-body p-4">
-             <h6 class="fw-bold text-uppercase text-muted small mb-3">Governance Actions</h6>
+              <h6 class="fw-bold text-uppercase text-muted small mb-3">การจัดการระบบ</h6>
              <div class="d-grid gap-2">
                 <button routerLink="/admin/assessors" class="btn btn-outline-primary text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
-                   <span>Verify Assessors</span>
+                   <span>ยืนยันผู้ตรวจประเมิน</span>
                    <span class="badge bg-primary" *ngIf="stats.pendingAssessors > 0">{{ stats.pendingAssessors }}</span>
                    <i class="fa-solid fa-chevron-right small" *ngIf="stats.pendingAssessors === 0"></i>
                 </button>
                 <button routerLink="/admin/criteria" class="btn btn-outline-secondary text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
-                   <span>Update Criteria Standards</span>
+                   <span>อัปเดตเกณฑ์มาตรฐาน</span>
                    <i class="fa-solid fa-gear"></i>
                 </button>
                 <button routerLink="/admin/audit-logs" class="btn btn-outline-dark text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
-                   <span>Security Audit Logs</span>
+                   <span>ประวัติการเข้าใช้งานระบบ</span>
                    <i class="fa-solid fa-shield-halved"></i>
                 </button>
              </div>

@@ -38,9 +38,9 @@ export class NotificationService {
     return this.http.get<Notification[]>(this.apiUrl);
   }
 
-  getUnreadCount(): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>(`${this.apiUrl}/unread-count`).pipe(
-      tap((res: any) => this.unreadCountSubject.next(res))
+  getUnreadCount(): Observable<number> {
+    return this.http.get<number>(`${this.apiUrl}/unread-count`).pipe(
+      tap((count) => this.unreadCountSubject.next(count))
     );
   }
 
@@ -83,5 +83,9 @@ export class NotificationService {
 
   updateUnreadCount(): void {
     this.getUnreadCount().subscribe();
+  }
+
+  getAllSystemNotifications(): Observable<Notification[]> {
+    return this.http.get<Notification[]>(`${this.apiUrl}/system/history`);
   }
 }

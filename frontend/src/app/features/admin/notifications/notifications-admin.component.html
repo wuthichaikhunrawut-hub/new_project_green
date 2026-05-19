@@ -188,4 +188,76 @@
             </div>
         </div>
     </div>
+
+  <!-- History Section -->
+  <div class="card border-0 shadow-sm rounded-4 mt-4 overflow-hidden">
+    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
+      <div>
+        <h5 class="fw-bold mb-1"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>ประวัติการส่งประกาศ</h5>
+        <p class="text-muted small mb-0">รายการแจ้งเตือนทั้งหมดที่ถูกส่งโดยระบบ</p>
+      </div>
+      <button class="btn btn-light btn-sm rounded-pill px-3" (click)="loadHistory()" [disabled]="isLoadingHistory">
+        <i class="fa-solid fa-rotate-right me-1" [class.fa-spin]="isLoadingHistory"></i> รีเฟรช
+      </button>
+    </div>
+    
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th class="ps-4 py-3" style="width: 180px;">วัน-เวลา</th>
+            <th class="py-3" style="width: 200px;">ผู้รับ</th>
+            <th class="py-3">หัวข้อ / ข้อความ</th>
+            <th class="py-3" style="width: 150px;">ประเภท</th>
+            <th class="py-3" style="width: 120px;">สถานะ</th>
+            <th class="pe-4 py-3 text-end" style="width: 100px;">จัดการ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of history">
+            <td class="ps-4 text-muted small">
+              {{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+            <td>
+              <div class="fw-bold small">{{ item.recipient?.email || 'N/A' }}</div>
+              <div class="text-muted" style="font-size: 0.7rem;">ID: {{ item.recipient_id }}</div>
+            </td>
+            <td>
+              <div class="fw-bold text-dark">{{ item.title }}</div>
+              <div class="text-muted small text-truncate" style="max-width: 300px;">{{ item.message }}</div>
+            </td>
+            <td>
+              <span class="badge rounded-pill px-3 py-2" 
+                [ngClass]="{
+                  'bg-info text-dark': item.type === 'SYSTEM',
+                  'bg-primary': item.type === 'ASSESSMENT',
+                  'bg-warning text-dark': item.type === 'DEADLINE',
+                  'bg-danger': item.type === 'URGENT'
+                }">
+                {{ item.type }}
+              </span>
+            </td>
+            <td>
+              <span class="badge" [ngClass]="item.is_read ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'">
+                {{ item.is_read ? 'อ่านแล้ว' : 'ยังไม่อ่าน' }}
+              </span>
+            </td>
+            <td class="pe-4 text-end">
+              <button class="btn btn-sm btn-outline-danger border-0 rounded-circle">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="history.length === 0">
+            <td colspan="5" class="text-center py-5">
+              <div class="py-4">
+                <i class="fa-solid fa-inbox fs-1 mb-3 text-muted opacity-25"></i>
+                <p class="mb-0 text-muted">ยังไม่มีประวัติการส่งแจ้งเตือน</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>

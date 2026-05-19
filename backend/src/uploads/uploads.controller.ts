@@ -31,9 +31,11 @@ export class UploadsController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    
+
     return await this.uploadsService.uploadFile(file, folder, {
-      assessmentDetailId: assessmentDetailId ? Number(assessmentDetailId) : undefined,
+      assessmentDetailId: assessmentDetailId
+        ? Number(assessmentDetailId)
+        : undefined,
       userId: userId ? Number(userId) : undefined,
       carbonLogId: carbonLogId ? Number(carbonLogId) : undefined,
       category: category,
@@ -51,7 +53,10 @@ export class UploadsController {
   }
 
   @Patch(':id')
-  async updateFile(@Param('id') id: string, @Body('category') category: string) {
+  async updateFile(
+    @Param('id') id: string,
+    @Body('category') category: string,
+  ) {
     return await this.uploadsService.update(Number(id), { category });
   }
 }

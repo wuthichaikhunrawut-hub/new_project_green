@@ -4,14 +4,12 @@ import { NotificationsService } from './notifications.service';
 import { NotificationsController } from './notifications.controller';
 import { Notification } from './entities/notification.entity';
 import { UsersModule } from '../users/users.module';
+import { MailService } from './mail.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Notification]),
-    UsersModule, // Needed for potential user lookups or guards
-  ],
+  imports: [TypeOrmModule.forFeature([Notification]), UsersModule],
   controllers: [NotificationsController],
-  providers: [NotificationsService],
-  exports: [NotificationsService],
+  providers: [NotificationsService, MailService],
+  exports: [NotificationsService, MailService],
 })
 export class NotificationsModule {}

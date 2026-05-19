@@ -16,18 +16,18 @@ export class AppController {
     return [
       {
         id: 1,
-        category: "Energy Management",
-        criteria: "Use energy-efficient lighting",
+        category: 'Energy Management',
+        criteria: 'Use energy-efficient lighting',
         maxScore: 10,
-        currentScore: 0
+        currentScore: 0,
       },
       {
         id: 2,
-        category: "Waste Management", 
-        criteria: "Implement recycling program",
+        category: 'Waste Management',
+        criteria: 'Implement recycling program',
         maxScore: 10,
-        currentScore: 0
-      }
+        currentScore: 0,
+      },
     ];
   }
 

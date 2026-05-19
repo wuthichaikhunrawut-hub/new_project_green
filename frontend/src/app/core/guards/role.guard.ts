@@ -28,8 +28,8 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    // Normalize role name for comparison
-    const normalizedRole = String(role).toUpperCase().replace(' ', '_');
+    // Normalize role name for comparison (e.g., 'Organization Admin' -> 'ORGANIZATION_ADMIN')
+    const normalizedRole = String(role).toUpperCase().trim().split(' ').join('_');
 
     if (allowedRoles.map(r => r.toUpperCase()).includes(normalizedRole)) {
       return true;

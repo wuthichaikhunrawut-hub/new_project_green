@@ -23,11 +23,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   user: any = null;
   private subscription: Subscription = new Subscription();
 
-  // Dropdown open states
-  carbonOpen = true;
-  aiOpen = false;
-  assessmentOpen = false;
-  orgOpen = false;
+
 
   ngOnInit() {
     this.subscription.add(
@@ -35,12 +31,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.user = user;
       })
     );
-    // Auto-expand sections based on active route
-    const url = this.router.url;
-    if (url.includes('/carbon')) this.carbonOpen = true;
-    if (url.includes('/ai-scan')) this.aiOpen = true;
-    if (url.includes('/green-office') || url.includes('/assessment')) this.assessmentOpen = true;
-    if (url.includes('/org') || url.includes('/assessor/profile') || url.includes('/subscription')) this.orgOpen = true;
+
   }
 
   ngOnDestroy() {
@@ -49,13 +40,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /** Normalise the role string from backend into a clean category */
   get roleKey(): string {
-    const r = String(this.user?.role || '').trim();
-    if (['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(r)) return 'SYSTEM_ADMIN';
-    if (['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(r)) return 'ORG_ADMIN';
-    if (['Assessor', 'ASSESSOR'].includes(r)) return 'ASSESSOR';
-    if (['Executive', 'EXECUTIVE'].includes(r)) return 'EXECUTIVE';
-    if (['Employee', 'EMPLOYEE'].includes(r)) return 'EMPLOYEE';
-    if (['User', 'USER'].includes(r)) return 'USER';
+    const r = String(this.user?.role || '').trim().toUpperCase().split(' ').join('_');
+    if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
+    if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
+    if (r === 'ASSESSOR') return 'ASSESSOR';
+    if (r === 'EXECUTIVE') return 'EXECUTIVE';
+    if (r === 'EMPLOYEE') return 'EMPLOYEE';
+    if (r === 'USER') return 'USER';
     return '';
   }
 
@@ -122,10 +113,5 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  toggle(section: 'carbon' | 'ai' | 'assessment' | 'org') {
-    if (section === 'carbon') this.carbonOpen = !this.carbonOpen;
-    else if (section === 'ai') this.aiOpen = !this.aiOpen;
-    else if (section === 'assessment') this.assessmentOpen = !this.assessmentOpen;
-    else if (section === 'org') this.orgOpen = !this.orgOpen;
-  }
+
 }

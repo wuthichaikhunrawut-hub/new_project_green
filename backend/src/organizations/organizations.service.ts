@@ -16,21 +16,22 @@ export class OrganizationsService {
   }
 
   async findOne(id: number): Promise<Organization | null> {
-    return this.orgRepository.findOne({ 
+    return this.orgRepository.findOne({
       where: { id },
-      relations: ['users']
+      relations: ['users'],
     });
   }
 
   async findAll(): Promise<any[]> {
-    const orgs = await this.orgRepository.createQueryBuilder('org')
+    const orgs = await this.orgRepository
+      .createQueryBuilder('org')
       .leftJoinAndSelect('org.users', 'users')
       .orderBy('org.name', 'ASC')
       .getMany();
 
-    return orgs.map(org => ({
+    return orgs.map((org) => ({
       ...org,
-      userCount: org.users ? org.users.length : 0
+      userCount: org.users ? org.users.length : 0,
     }));
   }
 

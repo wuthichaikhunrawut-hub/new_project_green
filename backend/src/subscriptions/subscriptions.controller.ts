@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
 import { Feature } from './entities/feature.entity';
@@ -62,6 +71,9 @@ export class SubscriptionsController {
 
   @Put('invoices/:id/status')
   updateInvoiceStatus(@Param('id') id: string, @Body('status') status: string) {
-    return this.subscriptionsService.updateInvoiceStatus(parseInt(id, 10), status);
+    return this.subscriptionsService.updateInvoiceStatus(
+      parseInt(id, 10),
+      status,
+    );
   }
 }

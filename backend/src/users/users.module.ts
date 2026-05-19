@@ -11,9 +11,19 @@ import { BankAccount } from './entities/bank-account.entity';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, AssessorProfile, UserProfile, Role, UserRoleLink, BankAccount]), AuditLogsModule],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      AssessorProfile,
+      UserProfile,
+      Role,
+      UserRoleLink,
+      BankAccount,
+    ]),
+    AuditLogsModule,
+  ],
   providers: [UsersService],
   controllers: [UsersController],
-  exports: [UsersService]
+  exports: [UsersService],
 })
 export class UsersModule {}

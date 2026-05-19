@@ -50,7 +50,9 @@ export class UploadsService {
 
     if (!this.supabase || !this.bucket) {
       console.error('❌ Supabase not initialized. Bucket:', this.bucket);
-      throw new BadRequestException('Upload system is not ready (Supabase missing)');
+      throw new BadRequestException(
+        'Upload system is not ready (Supabase missing)',
+      );
     }
 
     // Handle filename encoding safety
@@ -121,7 +123,7 @@ export class UploadsService {
     // Extract path after /public/bucket-name/
     const publicUrlPart = `/public/${this.bucket}/`;
     const path = file.file_url.split(publicUrlPart)[1];
-    
+
     if (path) {
       const { error } = await this.supabase.storage
         .from(this.bucket)

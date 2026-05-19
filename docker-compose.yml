@@ -43,6 +43,9 @@ services:
       DB_PASSWORD: 1234
       DB_NAME: greenoffice
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      SUPABASE_URL: ${SUPABASE_URL:-https://bhtimppbjwycefsmqqqt.supabase.co}
+      SUPABASE_KEY: ${SUPABASE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodGltcHBiand5Y2Vmc21xcXF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNDc0MzMsImV4cCI6MjA5MzcyMzQzM30.RnXr1bH4K7TKbygRTv9UrxhcJL6wmy9YZ6A52-X3gKo}
+      SUPABASE_BUCKET: ${SUPABASE_BUCKET:-greensync-storage}
     ports:
       - "3001:3001"
     volumes:

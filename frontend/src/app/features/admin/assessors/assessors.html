@@ -9,6 +9,28 @@
     </button>
   </div>
 
+  <!-- Filters Section -->
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-search text-muted"></i></span>
+            <input type="text" class="form-control bg-light border-start-0" placeholder="ค้นหาชื่อผู้ใช้งาน หรือ อีเมล..." [(ngModel)]="searchText" (ngModelChange)="applyFilters()">
+          </div>
+        </div>
+        <div class="col-md-6">
+          <select class="form-select bg-light" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+            <option value="ALL">สถานะทั้งหมด</option>
+            <option value="PENDING">รอการอนุมัติ</option>
+            <option value="APPROVED">อนุมัติแล้ว</option>
+            <option value="SUSPENDED">ถูกระงับ</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-0">
       <div *ngIf="isLoading" class="text-center py-5">
@@ -27,7 +49,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let assessor of assessors">
+            <tr *ngFor="let assessor of filteredData">
               <td class="px-4 py-3 fw-semibold">{{ assessor.username }}</td>
               <td class="px-4 py-3 text-muted">{{ assessor.email }}</td>
               <td class="px-4 py-3 text-muted small" style="max-width: 250px;">
@@ -56,7 +78,7 @@
                 </button>
               </td>
             </tr>
-            <tr *ngIf="assessors.length === 0">
+            <tr *ngIf="filteredData.length === 0">
               <td colspan="6" class="text-center py-5 text-muted">ไม่พบบัญชี ASSESSOR ในระบบ</td>
             </tr>
           </tbody>
@@ -131,6 +153,23 @@
                       <td class="fw-semibold">{{ selectedAssessor.assessor_profile?.education_background || '-' }}</td>
                     </tr>
                     <tr>
+                      <td class="text-muted">สถานะการตรวจสอบ:</td>
+                      <td class="fw-semibold">
+                        <span class="badge bg-secondary" *ngIf="!selectedAssessor.assessor_profile?.verification_status">N/A</span>
+                        <span class="badge" 
+                              [ngClass]="{'bg-success': selectedAssessor.assessor_profile?.verification_status === 'Verified', 
+                                         'bg-warning text-dark': selectedAssessor.assessor_profile?.verification_status === 'Pending',
+                                         'bg-danger': selectedAssessor.assessor_profile?.verification_status === 'Rejected'}"
+                              *ngIf="selectedAssessor.assessor_profile?.verification_status">
+                          {{ selectedAssessor.assessor_profile?.verification_status }}
+                        </span>
+                      </td>
+                    </tr>
+                    <tr *ngIf="selectedAssessor.assessor_profile?.verified_at">
+                      <td class="text-muted">วันที่ตรวจสอบ:</td>
+                      <td class="fw-semibold">{{ selectedAssessor.assessor_profile?.verified_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                    </tr>
+                    <tr>
                       <td class="text-muted">สถานะปัจจุบัน:</td>
                       <td>
                         <span class="badge" [ngClass]="selectedAssessor.assessor_verified ? 'bg-success' : 'bg-warning text-dark'">
@@ -153,24 +192,42 @@
           </div>
 
           <!-- Bank Info -->
-          <div class="col-12" *ngIf="selectedAssessor.bank_accounts && selectedAssessor.bank_accounts.length > 0">
+          <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">
               <div class="card-body p-4">
-                <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-building-columns me-2"></i>ข้อมูลการรับเงิน (ช่องทางหลัก)</h6>
-                <div class="row">
-                  <div class="col-md-4">
-                    <div class="small text-muted">ธนาคาร</div>
-                    <div class="fw-bold text-primary">{{ selectedAssessor.bank_accounts[0].bank_name }}</div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="small text-muted">เลขที่บัญชี</div>
-                    <div class="fw-bold">{{ selectedAssessor.bank_accounts[0].account_no }}</div>
-                  </div>
-                  <div class="col-md-4">
-                    <div class="small text-muted">ชื่อบัญชี</div>
-                    <div class="fw-bold">{{ selectedAssessor.bank_accounts[0].account_name }}</div>
-                  </div>
+                <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-building-columns me-2"></i>ข้อมูลการรับเงิน (บัญชีธนาคาร)</h6>
+                
+                <div class="table-responsive" *ngIf="selectedAssessor.bank_accounts && selectedAssessor.bank_accounts.length > 0; else noBankData">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                      <tr>
+                        <th class="py-2 px-3 small text-muted">ธนาคาร</th>
+                        <th class="py-2 px-3 small text-muted">เลขที่บัญชี</th>
+                        <th class="py-2 px-3 small text-muted">ชื่อบัญชี</th>
+                        <th class="py-2 px-3 small text-muted text-center">สถานะ</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let bank of selectedAssessor.bank_accounts">
+                        <td class="px-3 py-2 fw-bold text-primary">{{ bank.bank_name || '-' }}</td>
+                        <td class="px-3 py-2 fw-semibold">{{ bank.account_no || '-' }}</td>
+                        <td class="px-3 py-2">{{ bank.account_name || '-' }}</td>
+                        <td class="px-3 py-2 text-center">
+                          <span class="badge" [ngClass]="bank.is_primary ? 'bg-success' : 'bg-secondary'">
+                            {{ bank.is_primary ? 'บัญชีหลัก' : 'บัญชีรอง' }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
+                
+                <ng-template #noBankData>
+                  <div class="text-center p-3 bg-light rounded border border-dashed">
+                    <p class="text-muted mb-0 small"><i class="fa-solid fa-circle-exclamation me-2"></i>ผู้ใช้งานรายนี้ยังไม่ได้เพิ่มข้อมูลบัญชีธนาคาร</p>
+                  </div>
+                </ng-template>
+
               </div>
             </div>
           </div>

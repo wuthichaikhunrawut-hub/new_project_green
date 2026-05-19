@@ -9,8 +9,11 @@ import { EmissionFactorsController } from './emission-factors.controller';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CarbonLog, EmissionFactor]), AuditLogsModule],
+  imports: [
+    TypeOrmModule.forFeature([CarbonLog, EmissionFactor]),
+    AuditLogsModule,
+  ],
   providers: [CarbonLogsService, EmissionFactorsService],
-  controllers: [CarbonLogsController, EmissionFactorsController]
+  controllers: [CarbonLogsController, EmissionFactorsController],
 })
 export class CarbonLogsModule {}

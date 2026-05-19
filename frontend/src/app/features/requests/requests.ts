@@ -28,6 +28,11 @@ export class RequestsComponent implements OnInit {
   searchTerm: string = '';
   statusFilter: string = '';
 
+  get isAllowedToSubmit(): boolean {
+    const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
+    return ['ORGANIZATION_ADMIN'].includes(role);
+  }
+
   ngOnInit() {
     this.loadRequests();
   }

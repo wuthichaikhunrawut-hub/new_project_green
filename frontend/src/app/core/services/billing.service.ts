@@ -2,6 +2,16 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+export interface PaymentMethod {
+  id: string;
+  type: string;
+  brand: string;
+  last4: string;
+  expMonth?: number;
+  expYear?: number;
+  isDefault: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -21,11 +31,11 @@ export class BillingService {
     return this.http.post<{ clientSecret: string }>(`${this.apiUrl}/setup-intent`, {}, { headers: this.getHeaders() });
   }
 
-  getPaymentMethods(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/methods`, { headers: this.getHeaders() });
+  getPaymentMethods(): Observable<PaymentMethod[]> {
+    return this.http.get<PaymentMethod[]>(`${this.apiUrl}/methods`, { headers: this.getHeaders() });
   }
 
-  deletePaymentMethod(id: string): Observable<any> {
+  deletePaymentMethod(id: string): Observable<unknown> {
     return this.http.delete(`${this.apiUrl}/methods/${id}`, { headers: this.getHeaders() });
   }
 }

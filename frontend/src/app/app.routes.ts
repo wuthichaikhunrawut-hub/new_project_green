@@ -42,77 +42,77 @@ export const routes: Routes = [
         loadComponent: () => import('./features/admin/dashboard/admin-dashboard').then(m => m.AdminDashboardComponent),
         title: 'Admin Dashboard - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/users',
         loadComponent: () => import('./features/admin/users/users').then(m => m.AdminUsersComponent),
         title: 'จัดการผู้ใช้งาน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/criteria',
         loadComponent: () => import('./features/admin/criteria/criteria').then(m => m.AdminCriteriaComponent),
         title: 'เกณฑ์ประเมิน Green Office - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/organizations',
         loadComponent: () => import('./features/admin/organizations/organizations').then(m => m.AdminOrganizationsComponent),
         title: 'จัดการองค์กร - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/emission-factors',
         loadComponent: () => import('./features/admin/emission-factors/emission-factors').then(m => m.AdminEmissionFactorsComponent),
         title: 'ค่าสัมประสิทธิ์คาร์บอน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/assessors',
         loadComponent: () => import('./features/admin/assessors/assessors').then(m => m.AdminAssessorsComponent),
         title: 'ยืนยันผู้ตรวจประเมิน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/settings',
         loadComponent: () => import('./features/admin/settings/settings').then(m => m.AdminSettingsComponent),
         title: 'ตั้งค่าระบบ - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/subscriptions',
         loadComponent: () => import('./features/admin/subscriptions/subscriptions').then(m => m.AdminSubscriptionsComponent),
         title: 'จัดการแพ็กเกจ - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/invoices',
         loadComponent: () => import('./features/admin/invoices/invoices').then(m => m.AdminInvoicesComponent),
         title: 'ประวัติการชำระเงิน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/audit-logs',
         loadComponent: () => import('./features/admin/audit-logs/audit-logs').then(m => m.AdminAuditLogsComponent),
         title: 'ประวัติการทำรายการ - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
       {
         path: 'admin/notifications',
         loadComponent: () => import('./features/admin/notifications/notifications-admin.component').then(m => m.NotificationsAdminComponent),
         title: 'ส่งการแจ้งเตือน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN'] }
       },
 
       // GROUP: ASSESSOR PAGES
@@ -217,14 +217,14 @@ export const routes: Routes = [
         loadComponent: () => import('./features/requests/requests').then(m => m.RequestsComponent),
         title: 'จัดการคำขอรับรอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
+        data: { roles: ['SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ASSESSOR', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       {
         path: 'requests/create',
         loadComponent: () => import('./features/requests/create/create-request').then(m => m.CreateRequestComponent),
         title: 'สร้างคำขอรับรอง - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE'] }
+        data: { roles: ['ORGANIZATION_ADMIN'] }
       },
       {
         path: 'requests/evaluate/:id',

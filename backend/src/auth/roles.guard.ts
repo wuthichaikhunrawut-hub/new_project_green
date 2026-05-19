@@ -6,7 +6,7 @@ import { SettingsService } from '../settings/settings.service';
 export class RolesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private settingsService: SettingsService
+    private settingsService: SettingsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -22,14 +22,23 @@ export class RolesGuard implements CanActivate {
 
     // 1. Check Hardcoded Roles (from Decorator)
     if (requiredRoles) {
-      const normalize = (r: string) => String(r || '').trim().toUpperCase().replace(/[\s_]/g, '');
+      const normalize = (r: string) =>
+        String(r || '')
+          .trim()
+          .toUpperCase()
+          .replace(/[\s_]/g, '');
       const userRole = normalize(user.role);
-      const hasRole = requiredRoles.some((role) => normalize(role) === userRole);
+      const hasRole = requiredRoles.some(
+        (role) => normalize(role) === userRole,
+      );
       if (hasRole) return true;
     }
 
     // 2. Check Dynamic Permissions (from Feature Decorator)
-    const featureCode = this.reflector.get<string>('feature', context.getHandler());
+    const featureCode = this.reflector.get<string>(
+      'feature',
+      context.getHandler(),
+    );
     if (featureCode) {
       const settingKey = `permission.${featureCode.toLowerCase()}`;
       const settings = await this.settingsService.getAllSettings();

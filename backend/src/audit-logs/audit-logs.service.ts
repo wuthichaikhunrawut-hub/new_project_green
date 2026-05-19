@@ -10,12 +10,17 @@ export class AuditLogsService {
     private auditLogRepository: Repository<AuditLog>,
   ) {}
 
-  async logAction(userId: number | undefined, action: string, comment: string, assessmentDetailId?: number): Promise<AuditLog> {
+  async logAction(
+    userId: number | undefined,
+    action: string,
+    comment: string,
+    assessmentDetailId?: number,
+  ): Promise<AuditLog> {
     const log = this.auditLogRepository.create({
       action,
       comment,
       action_by_user_id: userId,
-      assessment_detail_id: assessmentDetailId
+      assessment_detail_id: assessmentDetailId,
     });
     return this.auditLogRepository.save(log);
   }
@@ -24,7 +29,7 @@ export class AuditLogsService {
     return this.auditLogRepository.find({
       relations: ['user'],
       order: { created_at: 'DESC' },
-      take: 100 // default limit
+      take: 100, // default limit
     });
   }
 }

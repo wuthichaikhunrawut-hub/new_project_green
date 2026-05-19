@@ -14,7 +14,9 @@ export class AuthController {
 
   @Post('register/assessor')
   registerAssessor(@Body() registerAssessorDto: any) {
-    this.logger.log(`Register Assessor request for: ${registerAssessorDto.userData?.email}`);
+    this.logger.log(
+      `Register Assessor request for: ${registerAssessorDto.userData?.email}`,
+    );
     return this.authService.registerAssessor(registerAssessorDto);
   }
 

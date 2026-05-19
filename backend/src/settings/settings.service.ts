@@ -15,7 +15,10 @@ export class SettingsService implements OnModuleInit {
     try {
       await this.seedDefaults();
     } catch (err) {
-      console.warn('Could not seed default settings - table might not exist yet:', err.message);
+      console.warn(
+        'Could not seed default settings - table might not exist yet:',
+        err.message,
+      );
     }
   }
 
@@ -32,13 +35,19 @@ export class SettingsService implements OnModuleInit {
       'stripe.public_key': '',
       'stripe.secret_key': '',
       'stripe.webhook_secret': '',
-      'stripe.currency': 'thb'
+      'stripe.currency': 'thb',
     };
 
     for (const [key, value] of Object.entries(defaults)) {
       const existing = await this.settingRepo.findOne({ where: { key } });
       if (!existing) {
-        await this.settingRepo.save(this.settingRepo.create({ key, value, description: `Default setting for ${key}` }));
+        await this.settingRepo.save(
+          this.settingRepo.create({
+            key,
+            value,
+            description: `Default setting for ${key}`,
+          }),
+        );
       }
     }
   }
@@ -61,21 +70,30 @@ export class SettingsService implements OnModuleInit {
   private parseValue(key: string, value: string): any {
     if (value === 'true') return true;
     if (value === 'false') return false;
-    if (!key.startsWith('payment.') && !key.startsWith('stripe.') && !isNaN(Number(value)) && value !== '') {
+    if (
+      !key.startsWith('payment.') &&
+      !key.startsWith('stripe.') &&
+      !isNaN(Number(value)) &&
+      value !== ''
+    ) {
       return Number(value);
     }
     return value;
   }
 
-  async updateSettings(settings: Record<string, any>): Promise<Record<string, any>> {
+  async updateSettings(
+    settings: Record<string, any>,
+  ): Promise<Record<string, any>> {
     for (const [key, value] of Object.entries(settings)) {
-      let valStr = String(value);
+      const valStr = String(value);
       const existing = await this.settingRepo.findOne({ where: { key } });
       if (existing) {
         existing.value = valStr;
         await this.settingRepo.save(existing);
       } else {
-        await this.settingRepo.save(this.settingRepo.create({ key, value: valStr }));
+        await this.settingRepo.save(
+          this.settingRepo.create({ key, value: valStr }),
+        );
       }
     }
     return this.getAllSettings();

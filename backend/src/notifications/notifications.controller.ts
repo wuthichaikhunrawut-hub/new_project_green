@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Param, Body, UseGuards, Request, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Request,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -9,6 +19,12 @@ import { NotificationType } from './entities/notification.entity';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
+
+  @Get('system/history')
+  @Roles('ADMIN', 'SYSTEM_ADMIN')
+  findAllSystemWide() {
+    return this.notificationsService.findAllSystemWide();
+  }
 
   @Get()
   findAll(@Request() req) {
@@ -22,13 +38,17 @@ export class NotificationsController {
 
   @Post()
   @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
-  create(@Body() body: {
-    title: string;
-    message: string;
-    type: NotificationType;
-    recipient_id: number;
-    link?: string;
-  }, @Request() req) {
+  create(
+    @Body()
+    body: {
+      title: string;
+      message: string;
+      type: NotificationType;
+      recipient_id: number;
+      link?: string;
+    },
+    @Request() req,
+  ) {
     return this.notificationsService.create({
       ...body,
       sender_id: req.user.sub,
@@ -37,13 +57,17 @@ export class NotificationsController {
 
   @Post('bulk')
   @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
-  createBulk(@Body() body: {
-    title: string;
-    message: string;
-    type: NotificationType;
-    recipient_ids: number[];
-    link?: string;
-  }, @Request() req) {
+  createBulk(
+    @Body()
+    body: {
+      title: string;
+      message: string;
+      type: NotificationType;
+      recipient_ids: number[];
+      link?: string;
+    },
+    @Request() req,
+  ) {
     return this.notificationsService.createBulk({
       ...body,
       sender_id: req.user.sub,
