@@ -2,10 +2,16 @@ import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
-import { BillingService } from '../../../core/services/billing.service';
+import { BillingService, PaymentMethod } from '../../../core/services/billing.service';
 import { SettingsService } from '../../../core/services/settings.service';
 import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
-import { loadStripe, Stripe, StripeElements, StripeCardElement } from '@stripe/stripe-js';
+import { SubscriptionPlan } from '../../../core/services/subscriptions-admin.service';
+import {
+  loadStripe,
+  Stripe,
+  StripeElements,
+  StripePaymentElement,
+} from '@stripe/stripe-js';
 
 @Component({
   selector: 'app-billing',
@@ -25,15 +31,15 @@ export class BillingComponent implements OnInit {
 
   stripe: Stripe | null = null;
   elements: StripeElements | null = null;
-  paymentElement: any = null;
+  paymentElement: StripePaymentElement | null = null;
 
-  paymentMethods: any[] = [];
+  paymentMethods: PaymentMethod[] = [];
   isLoading = true;
   isStripeLoading = true;
   isSaving = false;
   errorMessage = '';
   
-  selectedPlan: any = null;
+  selectedPlan: SubscriptionPlan | null = null;
   billingCycle = 'monthly';
   nextBillingDate = new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
 
@@ -147,14 +153,21 @@ export class BillingComponent implements OnInit {
               }, 100);
             });
 
-            this.paymentElement.on('loaderror', (event: any) => {
+            this.paymentElement.on('loaderror', (event: { error?: { message?: string } }) => {
               console.error('Stripe Load Error:', event.error);
               this.isStripeLoading = false;
               this.errorMessage = 'ไม่สามารถโหลดฟอร์มชำระเงินได้ เนื่องจากปัญหาการเชื่อมต่อ กรุณารีเฟรชหน้าจอหรือตรวจสอบอินเทอร์เน็ตของคุณ';
             });
 
-            this.paymentElement.on('change', (event: any) => {
-              this.errorMessage = event.error ? event.error.message : '';
+            (
+              this.paymentElement as unknown as {
+                on(
+                  eventType: 'change',
+                  handler: (event: { error?: { message?: string } }) => void,
+                ): void;
+              }
+            ).on('change', (event) => {
+              this.errorMessage = event.error?.message ?? '';
             });
           },
           error: (err) => {

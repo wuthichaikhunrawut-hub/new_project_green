@@ -25,15 +25,15 @@
             <div class="p-4 bg-light rounded-4 mb-4 border border-light shadow-sm">
               <!-- Badge Ribbon -->
               <span *ngIf="selectedPlan?.badge" class="badge bg-primary text-white rounded-pill px-3 py-1 mb-3 shadow-sm d-inline-flex align-items-center" style="font-size: 0.75rem;">
-                <i class="fa-solid fa-star text-warning me-1" *ngIf="selectedPlan.badge === 'popular'"></i>
-                <i class="fa-solid fa-fire text-warning me-1" *ngIf="selectedPlan.badge === 'recommended'"></i>
-                <i class="fa-solid fa-building me-1" *ngIf="selectedPlan.badge === 'enterprise'"></i>
-                {{ selectedPlan.badge === 'recommended' ? 'แพ็กเกจแนะนำ' : selectedPlan.badge === 'popular' ? 'แพ็กเกจยอดนิยม' : 'สำหรับองค์กร' }}
+                <i class="fa-solid fa-star text-warning me-1" *ngIf="selectedPlan?.badge === 'popular'"></i>
+                <i class="fa-solid fa-fire text-warning me-1" *ngIf="selectedPlan?.badge === 'recommended'"></i>
+                <i class="fa-solid fa-building me-1" *ngIf="selectedPlan?.badge === 'enterprise'"></i>
+                {{ selectedPlan?.badge === 'recommended' ? 'แพ็กเกจแนะนำ' : selectedPlan?.badge === 'popular' ? 'แพ็กเกจยอดนิยม' : 'สำหรับองค์กร' }}
               </span>
               
               <h4 class="fw-bold m-0 text-dark">{{ selectedPlan?.plan_name || 'ไม่ระบุ' }}</h4>
               <div class="mt-3">
-                <span class="h1 fw-bold text-primary mb-0">฿{{ (billingCycle === 'monthly' ? selectedPlan?.price_per_month : selectedPlan?.price_per_month * 12 * 0.8) | number:'1.0-0' }}</span>
+                <span class="h1 fw-bold text-primary mb-0">฿{{ (billingCycle === 'monthly' ? (selectedPlan?.price_per_month ?? 0) : (selectedPlan?.price_per_month ?? 0) * 12 * 0.8) | number:'1.0-0' }}</span>
                 <span class="text-muted small fw-medium">/ {{ billingCycle === 'monthly' ? 'เดือน' : 'ปี' }}</span>
               </div>
             </div>
@@ -44,13 +44,13 @@
                 <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">
                   <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
                 </div>
-                ผู้ใช้งานสูงสุด {{ selectedPlan.max_users }} บัญชี
+                ผู้ใช้งานสูงสุด {{ selectedPlan?.max_users }} บัญชี
               </li>
               <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngIf="selectedPlan?.max_locations">
                 <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">
                   <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
                 </div>
-                สาขาสูงสุด {{ selectedPlan.max_locations }} สาขา
+                สาขาสูงสุด {{ selectedPlan?.max_locations }} สาขา
               </li>
               <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngFor="let f of selectedPlan?.features">
                 <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 24px; height: 24px;">
