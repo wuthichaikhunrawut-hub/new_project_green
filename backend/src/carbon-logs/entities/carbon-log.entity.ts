@@ -8,6 +8,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
+import { OrganizationUnit } from '../../organizations/entities/organization-unit.entity';
 import { EmissionFactor } from './emission-factor.entity';
 
 @Entity('carbon_activity_logs')
@@ -30,6 +31,13 @@ export class CarbonLog {
   })
   @JoinColumn({ name: 'org_id' })
   organization: Organization;
+
+  @Column({ name: 'org_unit_id', nullable: true })
+  org_unit_id: number;
+
+  @ManyToOne(() => OrganizationUnit, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'org_unit_id' })
+  organization_unit: OrganizationUnit;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   activity_type: string;

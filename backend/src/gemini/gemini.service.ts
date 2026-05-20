@@ -1,5 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ChatLog } from './entities/gemini.entity';
 
 export interface BillScanResult {
   type: string;
@@ -18,7 +21,10 @@ export interface ChatResult {
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
 
-  constructor() {
+  constructor(
+    @InjectRepository(ChatLog)
+    private readonly chatLogRepo: Repository<ChatLog>,
+  ) {
     // Initialize lazily — key is validated when uploadBill() is called
     this.genAI = null as any;
   }
@@ -82,7 +88,7 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     }
   }
 
-  async chat(message: string): Promise<ChatResult> {
+  async chat(message: string, userId?: number): Promise<ChatResult> {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey || apiKey === 'your_api_key_here') {
       throw new InternalServerErrorException(
@@ -112,6 +118,21 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       const response = await result.response;
       const reply = response.text().trim();
 
+      // Save to database asynchronously to avoid blocking user response
+      try {
+        const chatLog = this.chatLogRepo.create({
+          user_id: userId || null,
+          question: message,
+          answer: reply,
+          intent: 'chat',
+          related_module: 'general',
+          confidence_score: 1.0,
+        });
+        await this.chatLogRepo.save(chatLog);
+      } catch (dbError) {
+        console.error('Failed to save chat log:', dbError);
+      }
+
       return { reply };
     } catch (error) {
       console.error('Gemini chat error:', error);
@@ -119,5 +140,16 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
         'ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง',
       );
     }
+  }
+
+  async getChatHistory(userId: number): Promise<ChatLog[]> {
+    return this.chatLogRepo.find({
+      where: { user_id: userId },
+      order: { created_at: 'ASC' },
+    });
+  }
+
+  async clearChatHistory(userId: number): Promise<void> {
+    await this.chatLogRepo.delete({ user_id: userId });
   }
 }

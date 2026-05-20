@@ -212,6 +212,13 @@ export const routes: Routes = [
         data: { roles: ['ORG_ADMIN', 'ORGANIZATION_ADMIN', 'SYSTEM_ADMIN'] }
       },
       {
+        path: 'org-admin/quota-usage',
+        loadComponent: () => import('./features/org-admin/quota-usage/quota-usage').then(m => m.QuotaUsageComponent),
+        title: 'การใช้งานโควตา - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ORG_ADMIN', 'ORGANIZATION_ADMIN', 'SYSTEM_ADMIN'] }
+      },
+      {
         path: 'executive/dashboard',
         loadComponent: () => import('./features/executive/dashboard/dashboard').then(m => m.ExecutiveDashboardComponent),
         title: 'Executive Dashboard - Green Sync',
@@ -226,6 +233,13 @@ export const routes: Routes = [
         title: 'ข้อมูลหน่วยงาน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
+      },
+      {
+        path: 'org/branches',
+        loadComponent: () => import('./features/org-admin/org-branches/org-branches').then(m => m.OrgBranchesComponent),
+        title: 'จัดการสาขาและแผนก - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['ORG_ADMIN', 'ORGANIZATION_ADMIN', 'SYSTEM_ADMIN'] }
       },
       {
         path: 'assessor/profile',

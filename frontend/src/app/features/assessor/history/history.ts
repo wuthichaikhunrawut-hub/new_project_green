@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AssessorService } from '../../../core/services/assessor.service';
-import { AssessorAssignmentItem } from '../../../core/models/assessor.model';
 import { ToastService } from '../../../shared/services/toast.service';
+import { UploadService } from '../../../core/services/upload.service';
+import { AssessorAssignmentItem } from '../../../core/models/assessor.model';
 
 @Component({
   selector: 'app-assessor-history',
@@ -17,9 +18,21 @@ export class AssessorHistoryComponent implements OnInit {
   private readonly assessorService = inject(AssessorService);
   private readonly toast = inject(ToastService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly uploadService = inject(UploadService);
 
   history: AssessorAssignmentItem[] = [];
   isLoading = true;
+
+  // Certificate Modal
+  isCertModalOpen = false;
+  certModalItem: AssessorAssignmentItem | null = null;
+  certNo = '';
+  issuedAt = '';
+  expiredAt = '';
+  certFileUrl = '';
+  uploadedFileName = '';
+  isUploading = false;
+  isSavingCert = false;
 
   // Filters
   searchTerm = '';
@@ -166,4 +179,73 @@ export class AssessorHistoryComponent implements OnInit {
       year: 'numeric', month: 'long', day: 'numeric'
     });
   }
+
+  openCertModal(item: AssessorAssignmentItem): void {
+    this.certModalItem = item;
+    this.certNo = '';
+    this.issuedAt = '';
+    this.expiredAt = '';
+    this.certFileUrl = '';
+    this.uploadedFileName = '';
+    this.isCertModalOpen = true;
+  }
+
+  closeCertModal(): void {
+    this.isCertModalOpen = false;
+    this.certModalItem = null;
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      this.uploadedFileName = file.name;
+      this.isUploading = true;
+      this.cdr.markForCheck();
+
+      this.uploadService.uploadFile(file, 'certificates').subscribe({
+        next: (res) => {
+          this.certFileUrl = res.file_url || res.url || '';
+          this.isUploading = false;
+          this.toast.success('อัปโหลดไฟล์ใบรับรองสำเร็จ');
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.isUploading = false;
+          this.toast.error('อัปโหลดไฟล์ใบรับรองล้มเหลว');
+          this.cdr.markForCheck();
+        }
+      });
+    }
+  }
+
+  removeUploadedFile(event: Event): void {
+    event.stopPropagation();
+    this.certFileUrl = '';
+    this.uploadedFileName = '';
+  }
+
+  saveCertificate(): void {
+    if (!this.certModalItem) return;
+    this.isSavingCert = true;
+    this.assessorService.updateCertificate(this.certModalItem.id, {
+      certificate_no: this.certNo || undefined,
+      issued_at: this.issuedAt || undefined,
+      expired_at: this.expiredAt || undefined,
+      certificate_url: this.certFileUrl || undefined
+    }).subscribe({
+      next: () => {
+        this.toast.success('บันทึกข้อมูลใบรับรองเรียบร้อยแล้ว');
+        this.isSavingCert = false;
+        this.closeCertModal();
+        this.load(); // Refresh to update status
+      },
+      error: () => {
+        this.toast.error('ไม่สามารถบันทึกใบรับรองได้');
+        this.isSavingCert = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
 }
+

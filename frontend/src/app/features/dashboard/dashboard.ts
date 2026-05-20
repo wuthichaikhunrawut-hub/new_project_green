@@ -4,6 +4,7 @@ import { GreenOfficeService } from '../../core/services/green-office.service';
 import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import { OrgService } from '../../core/services/org.service';
 import { AuthService } from '../../core/services/auth.service';
+import { RequestsService } from '../../core/services/requests.service';
 import { ScoreIndicatorInput } from '../../core/services/audit-score.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -22,6 +23,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private carbonService = inject(CarbonService);
   private orgService = inject(OrgService);
   private authService = inject(AuthService);
+  private requestsService = inject(RequestsService);
   private platformId = inject(PLATFORM_ID);
 
   // Chart References
@@ -45,6 +47,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   orgData: any = null;
   orgTarget = 0;
+  certificate: any = null;
+  waitingForCertificate = false;
 
   private carbonLogs: CarbonLog[] = [];
   private chartsRendered = false;
@@ -69,6 +73,23 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       if (this.chartsRendered) {
         this.renderSustainabilityGauge();
       }
+    });
+
+    this.requestsService.getRequests().subscribe({
+      next: (requests) => {
+        // Find the latest APPROVED assessment
+        const approved = requests.find(r => r.status === 'APPROVED');
+        if (approved) {
+          const cert = approved.certificates?.find((c: any) => c.certificate_url || c.certificate_no);
+          if (cert) {
+            this.certificate = cert;
+            this.waitingForCertificate = false;
+          } else {
+            this.waitingForCertificate = true;
+          }
+        }
+      },
+      error: () => console.error('Could not fetch assessment requests')
     });
 
     this.carbonService.getLogs().subscribe({

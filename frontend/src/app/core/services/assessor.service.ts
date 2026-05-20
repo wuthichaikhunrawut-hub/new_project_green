@@ -95,4 +95,20 @@ export class AssessorService {
       { headers: this.getHeaders() },
     );
   }
+
+  updateCertificate(
+    id: number,
+    payload: {
+      certificate_no?: string;
+      issued_at?: string;
+      expired_at?: string;
+      certificate_url?: string;
+    }
+  ): Observable<AssessorAssessment> {
+    return this.http.patch<AssessorAssessment>(
+      `${this.apiUrl}/assessments/${id}/certificate`,
+      payload,
+      { headers: this.getHeaders() }
+    );
+  }
 }

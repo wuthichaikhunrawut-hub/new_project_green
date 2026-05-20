@@ -47,4 +47,5 @@ export interface Assessment {
   organization?: any;
   assessor?: any;
   details?: AssessmentDetail[];
+  certificates?: any[];
 }

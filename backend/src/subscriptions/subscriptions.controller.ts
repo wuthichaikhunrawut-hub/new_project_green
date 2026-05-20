@@ -6,6 +6,8 @@ import {
   Delete,
   Body,
   Param,
+  Query,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
@@ -74,6 +76,22 @@ export class SubscriptionsController {
     return this.subscriptionsService.updateInvoiceStatus(
       parseInt(id, 10),
       status,
+    );
+  }
+
+  // Feature Usage Logs
+  @Get('usage')
+  @Roles('ORGANIZATION_ADMIN')
+  getUsageLogs(
+    @Request() req: any,
+    @Query('month') month?: string,
+    @Query('year') year?: string,
+  ) {
+    const orgId = Number(req.user.orgId);
+    return this.subscriptionsService.getFeatureUsageLogs(
+      orgId,
+      month ? Number(month) : undefined,
+      year ? Number(year) : undefined,
     );
   }
 }

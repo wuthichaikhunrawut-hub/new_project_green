@@ -4,6 +4,10 @@ export interface ExecutiveApprovedAssessment {
   totalScore: number;
   certifiedLevel: string | null;
   approvedAt: string | null;
+  certificateUrl?: string | null;
+  certificateNo?: string | null;
+  issuedAt?: string | null;
+  expiredAt?: string | null;
 }
 
 export interface CarbonScopePoint {

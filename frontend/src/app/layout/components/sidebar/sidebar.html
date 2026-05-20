@@ -91,7 +91,11 @@
       <div class="nav-label">จัดการองค์กร</div>
       <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-id-card"></i>
-        <span>โปรไฟล์องค์กร</span>
+        <span>โปรไฟล์</span>
+      </a>
+      <a routerLink="/org/branches" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-sitemap"></i>
+        <span>จัดการสาขาและแผนก</span>
       </a>
       <a routerLink="/admin/users" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-users-gear"></i>
@@ -139,6 +143,10 @@
       <a routerLink="/subscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-box-archive"></i>
         <span>แพ็กเกจการใช้งาน</span>
+      </a>
+      <a routerLink="/org-admin/quota-usage" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>การใช้งานโควตา</span>
       </a>
       <a routerLink="/subscription/billing" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-credit-card"></i>
@@ -188,10 +196,10 @@
         </a>
       </ng-container>
 
-      <div class="nav-label">ข้อมูลองค์กรและการแจ้งเตือน</div>
+      <div class="nav-label">ข้อมูลบัญชีและการแจ้งเตือน</div>
       <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-id-card"></i>
-        <span>โปรไฟล์องค์กร</span>
+        <span>โปรไฟล์</span>
       </a>
       <a *ngIf="!isExecutive" routerLink="/subscription" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-box-archive"></i>
