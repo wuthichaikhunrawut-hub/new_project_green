@@ -11,6 +11,7 @@ import {
 import { Organization } from '../../organizations/entities/organization.entity';
 import { User } from '../../users/entities/user.entity';
 import { AssessmentDetail } from './assessment-detail.entity';
+import { Certificate } from './certificate.entity';
 
 @Entity('assessments')
 export class Assessment {
@@ -71,6 +72,9 @@ export class Assessment {
     default: () => 'CURRENT_TIMESTAMP',
   })
   updated_at: Date;
+
+  @OneToMany(() => Certificate, (certificate) => certificate.assessment)
+  certificates: Certificate[];
 
   @OneToMany(() => AssessmentDetail, (detail) => detail.assessment, {
     cascade: true,

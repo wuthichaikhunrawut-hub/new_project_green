@@ -9,6 +9,9 @@
   <!-- Header -->
   <div class="chat-header">
     <div class="chat-header-info">
+      <button class="chat-history-toggle" (click)="toggleHistory()" title="ประวัติการสนทนา">
+        <i class="fa-solid fa-bars"></i>
+      </button>
       <div class="chat-avatar">
         <i class="fa-solid fa-leaf"></i>
       </div>
@@ -17,9 +20,36 @@
         <p class="chat-subtitle">AI ผู้ช่วยด้านสิ่งแวดล้อม</p>
       </div>
     </div>
-    <button class="chat-clear-btn" (click)="clearChat()" title="ล้างการสนทนา">
-      <i class="fa-solid fa-rotate-left"></i>
+    <button class="chat-clear-btn" (click)="startNewChat()" title="เริ่มบทสนทนาใหม่">
+      <i class="fa-solid fa-plus"></i>
     </button>
+  </div>
+
+  <!-- History Drawer -->
+  <div class="chat-history-drawer" [class.open]="showHistory">
+    <div class="drawer-header">
+      <span class="font-bold text-sm text-slate-800">ประวัติการสนทนา</span>
+      <button (click)="toggleHistory()" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="drawer-content">
+      <div *ngIf="sessions.length === 0" class="text-center text-slate-400 text-xs py-4">
+        ไม่มีประวัติการสนทนา
+      </div>
+      <div *ngFor="let s of sessions" 
+           class="history-item" 
+           [class.active]="s.id === activeSessionId"
+           (click)="selectSession(s)">
+        <i class="fa-regular fa-message mr-2"></i>
+        <span>{{ s.title }}</span>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="clear-history-btn" (click)="clearChat()">
+        <i class="fa-solid fa-trash-can mr-2"></i> ลบประวัติทั้งหมด
+      </button>
+    </div>
   </div>
 
   <!-- Messages -->

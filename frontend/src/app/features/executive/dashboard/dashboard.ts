@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ExecutiveService } from '../../../core/services/executive.service';
 import {
@@ -16,12 +16,20 @@ import { ToastService } from '../../../shared/services/toast.service';
 export class ExecutiveDashboardComponent implements OnInit {
   private readonly executiveService = inject(ExecutiveService);
   private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   isLoading = true;
   data: ExecutiveDashboardResponse | null = null;
+  certificate: any = null;
+  waitingForCertificate = false;
 
   ngOnInit(): void {
     this.load();
+  }
+
+  get latestCertificate(): any {
+    if (!this.data || !this.data.approvedAssessments) return null;
+    return this.data.approvedAssessments.find(a => a.certificateUrl) || null;
   }
 
   load(): void {
@@ -30,10 +38,22 @@ export class ExecutiveDashboardComponent implements OnInit {
       next: (response) => {
         this.data = response;
         this.isLoading = false;
+        
+        const approved = this.data.approvedAssessments?.[0];
+        if (approved) {
+          if (approved.certificateUrl || approved.certificateNo) {
+            this.certificate = approved;
+            this.waitingForCertificate = false;
+          } else {
+            this.waitingForCertificate = true;
+          }
+        }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.toast.error('โหลดรายงานผู้บริหารไม่สำเร็จ');
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }

@@ -379,7 +379,7 @@
       <!-- View-only note -->
       <div class="readonly-note" *ngIf="!canEdit">
         <i class="fa-solid fa-lock"></i>
-        คำขอนี้ปิดการแก้ไขแล้ว ({{ getStatusLabel(request?.status ?? '') }})
+        คำขอนี้ปิดการแก้ไขแล้ว ({{ getStatusLabel(request.status) }})
         <button class="back-link" (click)="goBack()">
           <i class="fa-solid fa-arrow-left"></i> ย้อนกลับ
         </button>

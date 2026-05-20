@@ -35,6 +35,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
   confirmMessage = '';
   confirmVariant: 'primary' | 'danger' = 'primary';
 
+
   get totalScore(): number {
     return this.scoreItems.reduce((a, i) => a + (i.assessor_score || 0), 0);
   }
@@ -115,6 +116,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
     if (action === 'revision') this.executeRevision();
   }
 
+
   private buildDetailsPayload() {
     return this.scoreItems.map((item) => ({
       assessment_detail_id: item.assessment_detail_id,
@@ -130,7 +132,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
         notes: this.overallComment,
         total_score: this.totalScore,
         certified_level: this.getCertificationLevel(),
-        details: this.buildDetailsPayload(),
+        details: this.buildDetailsPayload()
       })
       .subscribe({
         next: () => {

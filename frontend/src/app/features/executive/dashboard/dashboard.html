@@ -1,7 +1,7 @@
 <div class="max-w-7xl mx-auto space-y-8">
   <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
     <div>
-      <h1 class="text-2xl font-bold text-slate-900">Executive Dashboard</h1>
+      <h1 class="text-2xl font-bold text-slate-900">แดชบอร์ดผู้บริหาร (Executive Dashboard)</h1>
       <p class="text-sm text-slate-500 mt-1">
         ภาพรวมผลรับรอง Green Office และความคืบหน้าการลดคาร์บอนสู่เป้าหมาย Net Zero
       </p>
@@ -20,6 +20,47 @@
       <div class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
     </div>
   } @else if (data) {
+    @if (certificate && !waitingForCertificate) {
+      <div class="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 p-6 shadow-lg text-white flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+          <div class="bg-white p-3 rounded-full shadow-md flex-shrink-0">
+            <img src="assets/image/Green_office_imge.png" alt="Green Office Seal" class="h-12 w-12 object-contain">
+          </div>
+          <div>
+            <h2 class="text-xl font-bold mb-1">ได้รับการรับรองสำนักงานสีเขียว (Green Office)</h2>
+            <div class="flex flex-wrap gap-4 text-emerald-50 text-sm">
+              @if (certificate.certificateNo) { <span><i class="fa-solid fa-hashtag mr-1"></i> {{ certificate.certificateNo }}</span> }
+              @if (certificate.issuedAt) { <span><i class="fa-regular fa-calendar-check mr-1"></i> ออกให้เมื่อ: {{ certificate.issuedAt | date:'dd MMM yyyy' }}</span> }
+              @if (certificate.expiredAt) { <span><i class="fa-regular fa-calendar-xmark mr-1"></i> หมดอายุ: {{ certificate.expiredAt | date:'dd MMM yyyy' }}</span> }
+            </div>
+          </div>
+        </div>
+        <a [href]="certificate.certificateUrl" target="_blank" 
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-emerald-700 font-semibold rounded-xl hover:bg-emerald-50 transition-colors shadow-sm whitespace-nowrap">
+          <i class="fa-solid fa-download"></i> ดาวน์โหลดใบรับรอง
+        </a>
+      </div>
+    }
+    
+    @if (waitingForCertificate) {
+      <!-- Waiting for Certificate Banner -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="absolute -right-12 -top-12 text-amber-100 opacity-50 rotate-12">
+          <i class="fa-solid fa-hourglass-half" style="font-size: 15rem;"></i>
+        </div>
+        
+        <div class="relative z-10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider mb-3">
+            <i class="fa-solid fa-clock-rotate-left"></i> ผ่านการอนุมัติแล้ว
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">ผ่านการประเมินสำนักงานสีเขียว</h2>
+          <p class="text-amber-800">
+            อยู่ระหว่างรวบรวมข้อมูลส่ง อบก. และรอรับใบรับรองอย่างเป็นทางการ
+          </p>
+        </div>
+      </div>
+    }
+
     <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
       <div class="rounded-2xl border border-slate-200 bg-white p-5">
         <p class="text-xs uppercase tracking-wide text-slate-500">ผลรับรอง (Approved)</p>
@@ -34,7 +75,7 @@
         <p class="text-lg font-semibold text-slate-900 mt-2">{{ data.latestCertifiedLevel || '-' }}</p>
       </div>
       <div class="rounded-2xl border border-slate-200 bg-white p-5">
-        <p class="text-xs uppercase tracking-wide text-slate-500">Progress to Net Zero</p>
+        <p class="text-xs uppercase tracking-wide text-slate-500">ความคืบหน้าสู่ Net Zero</p>
         <p class="text-3xl font-bold text-blue-700 mt-2">{{ data.netZeroProgressPercent | number:'1.0-2' }}%</p>
         <p class="text-xs text-slate-500 mt-2">
           เป้าหมายลด {{ data.targetReductionPercent | number:'1.0-2' }}%
@@ -43,7 +84,7 @@
     </section>
 
     <section class="rounded-2xl border border-slate-200 bg-white p-6">
-      <h2 class="font-semibold text-slate-900 mb-4">Carbon Trend by Scope (tCO₂e)</h2>
+      <h2 class="font-semibold text-slate-900 mb-4">แนวโน้มการปล่อยคาร์บอนแยกตามขอบเขต (tCO₂e)</h2>
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         @for (scope of [1,2,3]; track scope) {
           <article class="rounded-xl border border-slate-100 p-4">
@@ -85,12 +126,13 @@
               <th class="text-left font-medium px-4 py-3">คะแนนรวม</th>
               <th class="text-left font-medium px-4 py-3">ระดับรับรอง</th>
               <th class="text-left font-medium px-4 py-3">วันที่อนุมัติ</th>
+              <th class="text-right font-medium px-4 py-3">ใบรับรอง</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             @if (data.approvedAssessments.length === 0) {
               <tr>
-                <td colspan="4" class="px-4 py-10 text-center text-slate-400">
+                <td colspan="5" class="px-4 py-10 text-center text-slate-400">
                   ยังไม่มีผลประเมินที่อนุมัติแล้ว
                 </td>
               </tr>
@@ -101,6 +143,15 @@
                   <td class="px-4 py-3 text-slate-700">{{ row.totalScore | number:'1.1-2' }}</td>
                   <td class="px-4 py-3 text-slate-700">{{ row.certifiedLevel || '-' }}</td>
                   <td class="px-4 py-3 text-slate-500">{{ row.approvedAt ? (row.approvedAt | date:'dd/MM/yyyy') : '-' }}</td>
+                  <td class="px-4 py-3 text-right">
+                    @if (row.certificateUrl) {
+                      <a [href]="row.certificateUrl" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors">
+                        <i class="fa-solid fa-download"></i> ดาวน์โหลด
+                      </a>
+                    } @else {
+                      <span class="text-slate-400 text-xs">-</span>
+                    }
+                  </td>
                 </tr>
               }
             }

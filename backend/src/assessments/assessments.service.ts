@@ -67,7 +67,7 @@ export class AssessmentsService {
 
     if (normalizedRole === 'ADMIN' || normalizedRole === 'SYSTEM_ADMIN') {
       return this.assessmentRepository.find({
-        relations: ['organization', 'assessor'],
+        relations: ['organization', 'assessor', 'certificates'],
         order: { submitted_at: 'DESC' },
       });
     }
@@ -76,14 +76,14 @@ export class AssessmentsService {
     // (assignment UI not yet implemented - this ensures assessors are not blocked)
     if (normalizedRole === 'ASSESSOR') {
       return this.assessmentRepository.find({
-        relations: ['organization', 'assessor'],
+        relations: ['organization', 'assessor', 'certificates'],
         order: { submitted_at: 'DESC' },
       });
     }
 
     return this.assessmentRepository.find({
       where: { organization: { id: orgId } },
-      relations: ['organization'],
+      relations: ['organization', 'certificates'],
       order: { submitted_at: 'DESC' },
     });
   }
@@ -96,6 +96,7 @@ export class AssessmentsService {
         'details',
         'details.criteria',
         'details.evidence_files',
+        'certificates',
       ],
     });
 

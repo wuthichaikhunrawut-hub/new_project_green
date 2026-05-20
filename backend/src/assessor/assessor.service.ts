@@ -10,9 +10,11 @@ import { Repository, In } from 'typeorm';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { AssessmentDetail } from '../assessments/entities/assessment-detail.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
+import { Certificate } from '../assessments/entities/certificate.entity';
 import { ApproveAssessmentDto } from './dto/approve-assessment.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
 import { SaveEvidenceReviewDto } from './dto/save-evidence-review.dto';
+import { UpdateCertificateDto } from './dto/update-certificate.dto';
 import {
   AssessorAssignmentItem,
   AssessorDashboardResponse,
@@ -41,6 +43,8 @@ export class AssessorService {
     private readonly detailRepo: Repository<AssessmentDetail>,
     @InjectRepository(CarbonLog)
     private readonly carbonLogRepo: Repository<CarbonLog>,
+    @InjectRepository(Certificate)
+    private readonly certificateRepo: Repository<Certificate>,
   ) {}
 
   async getDashboard(assessorUserId: number): Promise<AssessorDashboardResponse> {
@@ -61,7 +65,7 @@ export class AssessorService {
     try {
       const assessments = await this.assessmentRepo.find({
         where: { status: In(COMPLETED_STATUSES) },
-        relations: ['organization'],
+        relations: ['organization', 'certificates'],
         order: { updated_at: 'DESC' },
         take: 100,
       });
@@ -214,6 +218,24 @@ export class AssessorService {
       }
 
       await this.assessmentRepo.save(assessment);
+
+      if (dto.certificate_no || dto.certificate_url || dto.issued_at || dto.expired_at) {
+        let cert = await this.certificateRepo.findOne({
+          where: { assessment_id: assessmentId },
+        });
+        if (!cert) {
+          cert = this.certificateRepo.create({
+            assessment_id: assessmentId,
+            org_id: assessment.org_id,
+          });
+        }
+        cert.certificate_no = dto.certificate_no !== undefined ? dto.certificate_no : cert.certificate_no;
+        cert.issued_at = dto.issued_at ? new Date(dto.issued_at) : (cert.issued_at || new Date());
+        cert.expired_at = dto.expired_at ? new Date(dto.expired_at) : cert.expired_at;
+        cert.certificate_url = dto.certificate_url !== undefined ? dto.certificate_url : cert.certificate_url;
+        await this.certificateRepo.save(cert);
+      }
+
       return this.getAssessmentDetail(assessmentId);
     } catch (error) {
       if (
@@ -225,6 +247,39 @@ export class AssessorService {
       this.logger.error(`approveAssessment failed id=${assessmentId}`, error);
       throw new InternalServerErrorException(
         'ไม่สามารถอนุมัติคำขอได้',
+      );
+    }
+  }
+
+  async updateCertificate(
+    assessmentId: number,
+    assessorUserId: number,
+    dto: UpdateCertificateDto,
+  ): Promise<Assessment> {
+    try {
+      const assessment = await this.getAssessmentDetail(assessmentId);
+      await this.assignAssessorIfNeeded(assessment, assessorUserId);
+
+      let cert = await this.certificateRepo.findOne({
+        where: { assessment_id: assessmentId },
+      });
+      if (!cert) {
+        cert = this.certificateRepo.create({
+          assessment_id: assessmentId,
+          org_id: assessment.org_id,
+        });
+      }
+      cert.certificate_no = dto.certificate_no !== undefined ? dto.certificate_no : cert.certificate_no;
+      cert.issued_at = dto.issued_at ? new Date(dto.issued_at) : (cert.issued_at || new Date());
+      cert.expired_at = dto.expired_at ? new Date(dto.expired_at) : cert.expired_at;
+      cert.certificate_url = dto.certificate_url !== undefined ? dto.certificate_url : cert.certificate_url;
+      await this.certificateRepo.save(cert);
+
+      return this.getAssessmentDetail(assessmentId);
+    } catch (error) {
+      this.logger.error(`updateCertificate failed id=${assessmentId}`, error);
+      throw new InternalServerErrorException(
+        'ไม่สามารถบันทึกข้อมูลใบรับรองได้',
       );
     }
   }
@@ -286,13 +341,13 @@ export class AssessorService {
         assessor_user_id: assessorUserId,
         status: In(ACTIVE_STATUSES),
       },
-      relations: ['organization'],
+      relations: ['organization', 'certificates'],
       order: { created_at: 'DESC' },
     });
 
     const unassigned = await this.assessmentRepo.find({
       where: { status: In(['PENDING', 'SUBMITTED', 'IN_REVIEW']) },
-      relations: ['organization'],
+      relations: ['organization', 'certificates'],
       order: { created_at: 'DESC' },
     });
 
@@ -343,6 +398,7 @@ export class AssessorService {
           ? new Date(a.submitted_at).toISOString()
           : null,
         carbonSummary,
+        hasCertificate: a.certificates && a.certificates.some(c => c.certificate_url || c.certificate_no),
       });
     }
     return items;

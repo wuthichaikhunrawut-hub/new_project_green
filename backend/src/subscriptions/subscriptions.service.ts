@@ -11,6 +11,7 @@ import { NotificationType } from '../notifications/entities/notification.entity'
 
 import { Organization } from '../organizations/entities/organization.entity';
 import { User } from '../users/entities/user.entity';
+import { FeatureUsageLog } from './entities/feature-usage-log.entity';
 
 @Injectable()
 export class SubscriptionsService {
@@ -23,6 +24,8 @@ export class SubscriptionsService {
     private featuresRepository: Repository<Feature>,
     @InjectRepository(OrganizationSubscription)
     private orgSubRepository: Repository<OrganizationSubscription>,
+    @InjectRepository(FeatureUsageLog)
+    private usageLogRepository: Repository<FeatureUsageLog>,
     @InjectRepository(Organization)
     private orgRepository: Repository<Organization>,
     @InjectRepository(User)
@@ -219,5 +222,72 @@ export class SubscriptionsService {
     return sub.plan.features?.some(
       (f) => f.feature_code.toLowerCase() === featureCode.toLowerCase(),
     );
+  }
+
+  getQuotaLimit(planName: string, featureCode: string): number {
+    if (featureCode === 'AI_SCAN') {
+      if (planName.toLowerCase().includes('free')) return 50;
+      if (planName.toLowerCase().includes('basic')) return 200;
+      if (planName.toLowerCase().includes('pro')) return 1000;
+      return 0; // Default if unknown plan
+    }
+    return 999999; // Unlimited for other features
+  }
+
+  async checkFeatureQuota(orgId: number, featureCode: string): Promise<{ allowed: boolean; used: number; limit: number }> {
+    const sub = await this.findOrgSubscription(orgId);
+    if (!sub || !sub.plan) return { allowed: false, used: 0, limit: 0 };
+
+    const limit = this.getQuotaLimit(sub.plan.plan_name, featureCode);
+    
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const log = await this.usageLogRepository.findOne({
+      where: { org_id: orgId, feature_code: featureCode, usage_month: month, usage_year: year }
+    });
+
+    const used = log ? log.usage_count : 0;
+    
+    return {
+      allowed: used < limit,
+      used,
+      limit
+    };
+  }
+
+  async logFeatureUsage(orgId: number, featureCode: string, amount: number = 1): Promise<void> {
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    let log = await this.usageLogRepository.findOne({
+      where: { org_id: orgId, feature_code: featureCode, usage_month: month, usage_year: year }
+    });
+
+    if (log) {
+      log.usage_count += amount;
+      await this.usageLogRepository.save(log);
+    } else {
+      log = this.usageLogRepository.create({
+        org_id: orgId,
+        feature_code: featureCode,
+        usage_count: amount,
+        usage_month: month,
+        usage_year: year,
+      });
+      await this.usageLogRepository.save(log);
+    }
+  }
+
+  async getFeatureUsageLogs(orgId: number, month?: number, year?: number) {
+    const m = month || new Date().getMonth() + 1;
+    const y = year || new Date().getFullYear();
+
+    return this.usageLogRepository.find({
+      where: { org_id: orgId, usage_month: m, usage_year: y },
+      order: { feature_code: 'ASC' }
+    });
   }
 }

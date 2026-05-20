@@ -25,6 +25,7 @@ export interface User {
   updated_at?: string;
   last_login_at?: string;
   organization?: any; // Will replace with Organization interface soon
+  org_unit_id?: number;
   user_profile?: UserProfile;
   organizationName?: string; // For display
   avatarUrl?: string;

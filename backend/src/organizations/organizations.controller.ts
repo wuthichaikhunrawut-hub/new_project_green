@@ -5,6 +5,7 @@ import {
   Post,
   Param,
   Body,
+  Delete,
   ParseIntPipe,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
@@ -36,5 +37,33 @@ export class OrganizationsController {
     @Body() updateData: UpdateOrganizationDto,
   ) {
     return this.organizationsService.update(id, updateData);
+  }
+
+  // --- Organization Units ---
+
+  @Post(':orgId/units')
+  createUnit(
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Body() unitData: any,
+  ) {
+    return this.organizationsService.createUnit(orgId, unitData);
+  }
+
+  @Get(':orgId/units')
+  findUnits(@Param('orgId', ParseIntPipe) orgId: number) {
+    return this.organizationsService.findUnitsByOrg(orgId);
+  }
+
+  @Patch('units/:id')
+  updateUnit(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateData: any,
+  ) {
+    return this.organizationsService.updateUnit(id, updateData);
+  }
+
+  @Delete('units/:id')
+  removeUnit(@Param('id', ParseIntPipe) id: number) {
+    return this.organizationsService.removeUnit(id);
   }
 }

@@ -12,6 +12,7 @@ import {
   JoinTable,
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
+import { OrganizationUnit } from '../../organizations/entities/organization-unit.entity';
 import { Assessment } from '../../assessments/entities/assessment.entity';
 import { AssessorProfile } from './assessor-profile.entity';
 import { UserProfile } from './user-profile.entity';
@@ -63,6 +64,13 @@ export class User {
   @ManyToOne(() => Organization, (org) => org.users, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'org_id' })
   organization: Organization;
+
+  @Column({ name: 'org_unit_id', nullable: true })
+  org_unit_id: number;
+
+  @ManyToOne(() => OrganizationUnit, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'org_unit_id' })
+  organization_unit: OrganizationUnit;
 
   // Added references for Assessor relationships (reverse side)
   // Assessor's assigned assessments

@@ -23,16 +23,16 @@
       ทั้งหมด <span class="stab-count">{{ assignments.length }}</span>
     </button>
     <button class="stab stab-pending" [class.stab-active]="statusFilter === 'PENDING'" (click)="statusFilter = 'PENDING'">
-      รอตรวจ <span class="stab-count">{{ countByStatus['PENDING'] ?? 0 }}</span>
+        รอประเมิน <span class="stab-count">{{ countByStatus['PENDING'] || 0 }}</span>
     </button>
     <button class="stab stab-review" [class.stab-active]="statusFilter === 'IN_REVIEW'" (click)="statusFilter = 'IN_REVIEW'">
-      กำลังตรวจ <span class="stab-count">{{ countByStatus['IN_REVIEW'] ?? 0 }}</span>
+        กำลังตรวจ <span class="stab-count">{{ countByStatus['IN_REVIEW'] || 0 }}</span>
     </button>
     <button class="stab stab-submitted" [class.stab-active]="statusFilter === 'SUBMITTED'" (click)="statusFilter = 'SUBMITTED'">
-      ส่งแล้ว <span class="stab-count">{{ countByStatus['SUBMITTED'] ?? 0 }}</span>
+        รอพิจารณา <span class="stab-count">{{ countByStatus['SUBMITTED'] || 0 }}</span>
     </button>
     <button class="stab stab-revision" [class.stab-active]="statusFilter === 'REVISION_REQUESTED'" (click)="statusFilter = 'REVISION_REQUESTED'">
-      รอแก้ไข <span class="stab-count">{{ countByStatus['REVISION_REQUESTED'] ?? 0 }}</span>
+        รอแก้ไข <span class="stab-count">{{ countByStatus['REVISION_REQUESTED'] || 0 }}</span>
     </button>
   </div>
 
@@ -111,7 +111,7 @@
             <div class="org-name-row">
               <span class="org-name">{{ item.orgName }}</span>
               <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
-              <span class="badge-mock" *ngIf="item.carbonSummary?.isMock">ข้อมูลตัวอย่าง</span>
+              <span class="badge-mock" *ngIf="item.carbonSummary.isMock">ข้อมูลตัวอย่าง</span>
             </div>
             <div class="org-meta">
               <span><i class="fa-solid fa-calendar-alt"></i> ปีประเมิน {{ item.assessmentYear }}</span>
@@ -135,18 +135,18 @@
             Carbon Footprint
           </div>
           <div class="carbon-total-row">
-            <span class="carbon-total-num">{{ item.carbonSummary?.totalEmission | number:'1.1-1' }}</span>
+            <span class="carbon-total-num">{{ item.carbonSummary.totalEmission | number:'1.1-1' }}</span>
             <span class="carbon-unit">tCO₂e รวม</span>
           </div>
           <div class="scope-bar-list">
-            <div class="scope-row" *ngFor="let scope of item.carbonSummary?.scopes">
+            <div class="scope-row" *ngFor="let scope of item.carbonSummary.scopes">
               <div class="scope-label-wrap">
                 <span class="scope-dot" [style.background]="getScopeColor(scope.scope)"></span>
                 <span class="scope-name-sm">S{{ scope.scope }}</span>
               </div>
               <div class="scope-track">
                 <div class="scope-fill-bar"
-                  [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary?.totalEmission ?? 0)"
+                  [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)"
                   [style.min-width]="scope.totalEmission > 0 ? '4px' : '0'"
                   [style.background]="getScopeColor(scope.scope)">
                 </div>
@@ -187,10 +187,10 @@
       <div class="gc-carbon">
         <div class="gc-carbon-label">
           <i class="fa-solid fa-leaf"></i>
-          {{ item.carbonSummary?.totalEmission | number:'1.1-1' }} tCO₂e
+          {{ item.carbonSummary.totalEmission | number:'1.1-1' }} tCO₂e
         </div>
         <div class="gc-scopes">
-          <span *ngFor="let s of item.carbonSummary?.scopes" class="gc-scope-chip"
+          <span *ngFor="let s of item.carbonSummary.scopes" class="gc-scope-chip"
             [style.background]="getScopeColor(s.scope) + '20'"
             [style.color]="getScopeColor(s.scope)">
             S{{ s.scope }}: {{ s.totalEmission | number:'1.0-0' }}

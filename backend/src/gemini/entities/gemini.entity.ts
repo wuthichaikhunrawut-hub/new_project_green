@@ -14,7 +14,7 @@ export class ChatLog {
   id: number;
 
   @Column({ name: 'user_id', nullable: true })
-  user_id: number;
+  user_id: number | null;
 
   @Column({ type: 'text', nullable: true })
   question: string;

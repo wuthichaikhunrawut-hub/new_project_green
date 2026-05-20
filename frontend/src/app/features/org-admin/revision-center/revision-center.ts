@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { OrgAdminService } from '../../../core/services/org-admin.service';
@@ -20,6 +20,7 @@ export class OrgAdminRevisionCenterComponent implements OnInit {
   private readonly orgAdminService = inject(OrgAdminService);
   private readonly carbonService = inject(CarbonService);
   private readonly toast = inject(ToastService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   isLoading = true;
   isSaving = false;
@@ -48,10 +49,12 @@ export class OrgAdminRevisionCenterComponent implements OnInit {
         this.carbonLogs = response.carbonLogs;
         this.activeRevision = this.revisions[0] ?? null;
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
-        this.toast.error('โหลด Revision Center ไม่สำเร็จ');
+        this.toast.error('โหลดข้อมูลไม่สำเร็จ');
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }

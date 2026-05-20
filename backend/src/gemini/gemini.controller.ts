@@ -1,21 +1,37 @@
 import {
   Controller,
   Post,
+  Get,
+  Delete,
   Body,
   UploadedFile,
   UseInterceptors,
   BadRequestException,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GeminiService } from './gemini.service';
 import { memoryStorage } from 'multer';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FeatureQuotaInterceptor } from '../subscriptions/interceptors/feature-quota.interceptor';
+import { FeatureCode } from '../subscriptions/decorators/feature-code.decorator';
+
+interface JwtUser {
+  sub: number;
+  email: string;
+  role: string;
+}
 
 @Controller('gemini')
+@UseGuards(JwtAuthGuard)
 export class GeminiController {
   constructor(private readonly geminiService: GeminiService) {}
 
   @Post('ocr')
+  @FeatureCode('AI_SCAN')
   @UseInterceptors(
+    FeatureQuotaInterceptor,
     FileInterceptor('file', {
       storage: memoryStorage(),
       limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
@@ -49,10 +65,27 @@ export class GeminiController {
   }
 
   @Post('chat')
-  async chat(@Body() body: { message: string }) {
+  async chat(
+    @Body() body: { message: string },
+    @Request() req: { user: JwtUser },
+  ) {
     if (!body?.message?.trim()) {
       throw new BadRequestException('Message is required');
     }
-    return this.geminiService.chat(body.message);
+    const userId = Number(req.user.sub);
+    return this.geminiService.chat(body.message, userId);
+  }
+
+  @Get('history')
+  async getHistory(@Request() req: { user: JwtUser }) {
+    const userId = Number(req.user.sub);
+    return this.geminiService.getChatHistory(userId);
+  }
+
+  @Delete('history')
+  async clearHistory(@Request() req: { user: JwtUser }) {
+    const userId = Number(req.user.sub);
+    await this.geminiService.clearChatHistory(userId);
+    return { success: true };
   }
 }

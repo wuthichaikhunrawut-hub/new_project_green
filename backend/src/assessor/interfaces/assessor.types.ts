@@ -31,6 +31,7 @@ export interface AssessorAssignmentItem {
   totalScore: number;
   submittedAt: string | null;
   carbonSummary: OrgCarbonSummary;
+  hasCertificate?: boolean;
 }
 
 export interface AssessorDashboardResponse {

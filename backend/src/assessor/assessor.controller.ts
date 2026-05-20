@@ -16,6 +16,7 @@ import { Roles } from '../auth/roles.decorator';
 import { ApproveAssessmentDto } from './dto/approve-assessment.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
 import { SaveEvidenceReviewDto } from './dto/save-evidence-review.dto';
+import { UpdateCertificateDto } from './dto/update-certificate.dto';
 
 interface JwtUser {
   sub: number;
@@ -75,6 +76,15 @@ export class AssessorController {
     @Request() req: { user: JwtUser },
   ) {
     return this.assessorService.approveAssessment(id, this.userId(req), dto);
+  }
+
+  @Patch('assessments/:id/certificate')
+  updateCertificate(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateCertificateDto,
+    @Request() req: { user: JwtUser },
+  ) {
+    return this.assessorService.updateCertificate(id, this.userId(req), dto);
   }
 
   @Patch('assessments/:id/request-revision')

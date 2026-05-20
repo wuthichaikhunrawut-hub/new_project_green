@@ -33,6 +33,7 @@ export class ExecutiveService {
 
       const approvedAssessments = await this.assessmentRepo.find({
         where: { org_id: orgId, status: 'APPROVED' },
+        relations: ['certificates'],
         order: { updated_at: 'DESC' },
       });
 
@@ -74,6 +75,10 @@ export class ExecutiveService {
           totalScore: Number(item.total_score || 0),
           certifiedLevel: item.certified_level ?? null,
           approvedAt: item.updated_at ? item.updated_at.toISOString() : null,
+          certificateUrl: item.certificates && item.certificates.length > 0 ? item.certificates[0].certificate_url : null,
+          certificateNo: item.certificates && item.certificates.length > 0 ? item.certificates[0].certificate_no : null,
+          issuedAt: item.certificates && item.certificates.length > 0 && item.certificates[0].issued_at ? item.certificates[0].issued_at.toISOString() : null,
+          expiredAt: item.certificates && item.certificates.length > 0 && item.certificates[0].expired_at ? item.certificates[0].expired_at.toISOString() : null,
         })),
         carbonByScope,
       };

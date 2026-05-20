@@ -16,6 +16,51 @@
     </div>
   </div>
 
+  <!-- TGO Certificate Banner -->
+  <div class="mb-6 fade-in-up">
+    <!-- Certificate Banner (If has certificate) -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6" *ngIf="certificate && !waitingForCertificate">
+      <div class="absolute -right-12 -top-12 text-emerald-100 opacity-50 rotate-12">
+        <i class="fa-solid fa-certificate" style="font-size: 15rem;"></i>
+      </div>
+      
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
+          <i class="fa-solid fa-award"></i> TGO Certified
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">ผ่านการรับรองสำนักงานสีเขียว</h2>
+        <p class="text-slate-600">
+          เลขที่ใบรับรอง: <strong class="text-slate-900">{{ certificate?.certificate_no || '-' }}</strong> 
+          (หมดอายุ {{ certificate?.expired_at | date:'d MMM yyyy' }})
+        </p>
+      </div>
+
+      <div class="relative z-10 shrink-0">
+        <a [href]="certificate?.certificate_url" target="_blank" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
+          <i class="fa-solid fa-download"></i>
+          ดาวน์โหลดใบรับรองจาก อบก.
+        </a>
+      </div>
+    </div>
+
+    <!-- Waiting for Certificate Banner -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6" *ngIf="waitingForCertificate">
+      <div class="absolute -right-12 -top-12 text-amber-100 opacity-50 rotate-12">
+        <i class="fa-solid fa-hourglass-half" style="font-size: 15rem;"></i>
+      </div>
+      
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold uppercase tracking-wider mb-3">
+          <i class="fa-solid fa-clock-rotate-left"></i> Approval Passed
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">ผ่านการประเมินสำนักงานสีเขียว</h2>
+        <p class="text-amber-800">
+          อยู่ระหว่างรวบรวมข้อมูลส่ง อบก. และรอรับใบรับรองอย่างเป็นทางการ
+        </p>
+      </div>
+    </div>
+  </div>
+
   <!-- Row 1: 4 KPI Cards (Stripe Style) -->
   <div class="grid-4-cols mb-6 fade-in-up">
     <!-- Card 1 -->
