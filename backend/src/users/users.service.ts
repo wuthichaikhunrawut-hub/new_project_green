@@ -199,8 +199,7 @@ export class UsersService {
     if (!user) return null;
 
     const primaryBank =
-      user.bank_accounts?.find((b) => b.is_primary) ||
-      user.bank_accounts?.[0];
+      user.bank_accounts?.find((b) => b.is_primary) || user.bank_accounts?.[0];
 
     const res = {
       ...user,
@@ -349,9 +348,11 @@ export class UsersService {
       await this.userProfileRepository.save(profile);
     }
 
-    const mergedBankAccount = bank_account || (profileBankName !== undefined || profileBankAccountNo !== undefined
-      ? { bank_name: profileBankName, account_no: profileBankAccountNo }
-      : null);
+    const mergedBankAccount =
+      bank_account ||
+      (profileBankName !== undefined || profileBankAccountNo !== undefined
+        ? { bank_name: profileBankName, account_no: profileBankAccountNo }
+        : null);
 
     if (mergedBankAccount) {
       let account = await this.bankAccountRepository.findOne({
@@ -360,7 +361,10 @@ export class UsersService {
       if (!account) {
         const newAccount = this.bankAccountRepository.create({
           bank_name: mergedBankAccount.bank_name || '',
-          account_no: mergedBankAccount.account_no !== undefined ? mergedBankAccount.account_no : mergedBankAccount.bank_account_no || '',
+          account_no:
+            mergedBankAccount.account_no !== undefined
+              ? mergedBankAccount.account_no
+              : mergedBankAccount.bank_account_no || '',
           account_name: user_profile?.first_name || 'Assessor Account',
           user: { id },
           is_primary: true,
@@ -370,7 +374,10 @@ export class UsersService {
         if (mergedBankAccount.bank_name !== undefined) {
           account.bank_name = mergedBankAccount.bank_name;
         }
-        const accNo = mergedBankAccount.account_no !== undefined ? mergedBankAccount.account_no : mergedBankAccount.bank_account_no;
+        const accNo =
+          mergedBankAccount.account_no !== undefined
+            ? mergedBankAccount.account_no
+            : mergedBankAccount.bank_account_no;
         if (accNo !== undefined) {
           account.account_no = accNo;
         }

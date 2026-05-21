@@ -1,7 +1,7 @@
 <div class="container-fluid p-4 animate-in">
   <div class="page-header mb-4">
     <div class="page-header-left">
-      <h2 class="page-title">จัดการค่าสัมประสิทธิ์คาร์บอน (Emission Factors)</h2>
+      <h2 class="page-title">จัดการค่าสัมประสิทธิ์คาร์บอน</h2>
       <p class="page-subtitle mb-0">ปรับปรุงค่าอ้างอิงและตัวคูณสำหรับคำนวณคาร์บอนฟุตพริ้นท์ให้ทันสมัย</p>
     </div>
     <div class="page-actions">
@@ -9,8 +9,10 @@
       <i class="fa-solid fa-plus me-2"></i> เพิ่มตัวคูณใหม่
     </button>
   </div>
+  </div>
 
-  <div class="card border-0 shadow-sm rounded-4 d-flex flex-column" style="min-height: calc(100vh - 160px);">
+  <div class="main-content-center w-100">
+    <div class="card border-0 shadow-sm rounded-4 d-flex flex-column" style="min-height: calc(100vh - 160px);">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
       <div class="row">
         <div class="col-md-4">
@@ -32,17 +34,17 @@
         </li>
         <li class="nav-item">
           <a class="nav-link" [class.active]="activeTab === 1" (click)="setTab(1)" style="cursor: pointer;">
-            <i class="fa-solid fa-bolt me-2"></i>Scope 1
+            <i class="fa-solid fa-bolt me-2"></i>สโคป 1
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [class.active]="activeTab === 2" (click)="setTab(2)" style="cursor: pointer;">
-            <i class="fa-solid fa-plug me-2"></i>Scope 2
+            <i class="fa-solid fa-plug me-2"></i>สโคป 2
           </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" [class.active]="activeTab === 3" (click)="setTab(3)" style="cursor: pointer;">
-            <i class="fa-solid fa-truck me-2"></i>Scope 3
+            <i class="fa-solid fa-truck me-2"></i>สโคป 3
           </a>
         </li>
       </ul>
@@ -59,10 +61,10 @@
           <thead class="bg-light">
             <tr>
               <th scope="col" class="py-3 px-4">หมวดหมู่</th>
-              <th scope="col" class="py-3 px-4">ชื่อประเภท (Emission Name)</th>
-              <th scope="col" class="py-3 px-4 text-end">ค่าตัวคูณ (kgCO2e)</th>
-              <th scope="col" class="py-3 px-4">หน่วย (Unit)</th>
-              <th scope="col" class="py-3 px-4 text-center">อ้างอิง GWP / ปี</th>
+              <th scope="col" class="py-3 px-4">ชื่อประเภท</th>
+              <th scope="col" class="py-3 px-4 text-end">ค่าตัวคูณ</th>
+              <th scope="col" class="py-3 px-4">หน่วย</th>
+              <th scope="col" class="py-3 px-4 text-center">อ้างอิง / ปี</th>
               <th scope="col" class="py-3 px-4 text-center">สถานะ</th>
               <th scope="col" class="py-3 px-4 text-end">จัดการ</th>
             </tr>
@@ -71,7 +73,7 @@
             <tr *ngFor="let item of filteredFactors()">
               <td class="px-4 py-3">
                 <span class="badge" [ngClass]="{'bg-primary': item.scope === 1, 'bg-warning text-dark': item.scope === 2, 'bg-info text-dark': item.scope === 3}">
-                  Scope {{ item.scope }}
+                  สโคป {{ item.scope }}
                 </span>
               </td>
               <td class="px-4 py-3 fw-semibold text-dark">{{ item.name }}</td>
@@ -123,9 +125,9 @@
       <div class="modal-body p-4">
         
         <div class="mb-3">
-          <label class="form-label text-muted small fw-bold">Scope</label>
+          <label class="form-label text-muted small fw-bold">สโคป</label>
           <select class="form-select" [(ngModel)]="selectedFactor.scope">
-            <option *ngFor="let s of scopes" [value]="s">Scope {{ s }}</option>
+            <option *ngFor="let s of scopes" [value]="s">สโคป {{ s }}</option>
           </select>
         </div>
 

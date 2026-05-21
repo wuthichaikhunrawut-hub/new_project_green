@@ -55,10 +55,7 @@ export class OrganizationsController {
   }
 
   @Patch('units/:id')
-  updateUnit(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateData: any,
-  ) {
+  updateUnit(@Param('id', ParseIntPipe) id: number, @Body() updateData: any) {
     return this.organizationsService.updateUnit(id, updateData);
   }
 

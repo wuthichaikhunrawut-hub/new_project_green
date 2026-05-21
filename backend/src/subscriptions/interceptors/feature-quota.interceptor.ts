@@ -21,7 +21,10 @@ export class FeatureQuotaInterceptor implements NestInterceptor {
     private subscriptionsService: SubscriptionsService,
   ) {}
 
-  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+  async intercept(
+    context: ExecutionContext,
+    next: CallHandler,
+  ): Promise<Observable<any>> {
     const featureCode = this.reflector.get<string>(
       FEATURE_CODE_KEY,
       context.getHandler(),
@@ -42,24 +45,41 @@ export class FeatureQuotaInterceptor implements NestInterceptor {
     const orgId = Number(user.orgId);
 
     // 1. Check if plan has the feature
-    const hasFeature = await this.subscriptionsService.canAccessFeature(orgId, featureCode);
+    const hasFeature = await this.subscriptionsService.canAccessFeature(
+      orgId,
+      featureCode,
+    );
     if (!hasFeature) {
-      throw new ForbiddenException(`Feature ${featureCode} is not included in your current plan.`);
+      throw new ForbiddenException(
+        `Feature ${featureCode} is not included in your current plan.`,
+      );
     }
 
     // 2. Check quota
-    const quota = await this.subscriptionsService.checkFeatureQuota(orgId, featureCode);
+    const quota = await this.subscriptionsService.checkFeatureQuota(
+      orgId,
+      featureCode,
+    );
     if (!quota.allowed) {
-      throw new ForbiddenException(`Quota exceeded for feature ${featureCode}. Used: ${quota.used}/${quota.limit}`);
+      throw new ForbiddenException(
+        `Quota exceeded for feature ${featureCode}. Used: ${quota.used}/${quota.limit}`,
+      );
     }
 
     // 3. Handle request and log usage on success
     return next.handle().pipe(
       tap(async () => {
         try {
-          await this.subscriptionsService.logFeatureUsage(orgId, featureCode, 1);
+          await this.subscriptionsService.logFeatureUsage(
+            orgId,
+            featureCode,
+            1,
+          );
         } catch (error) {
-          this.logger.error(`Failed to log feature usage for org ${orgId}, feature ${featureCode}`, error);
+          this.logger.error(
+            `Failed to log feature usage for org ${orgId}, feature ${featureCode}`,
+            error,
+          );
         }
       }),
     );

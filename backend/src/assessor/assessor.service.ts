@@ -29,7 +29,12 @@ const SCOPE_LABELS: Record<number, string> = {
   3: 'Scope 3 — ก๊าซเรือนกระจกทางอ้อม',
 };
 
-const ACTIVE_STATUSES = ['PENDING', 'SUBMITTED', 'IN_REVIEW', 'REVISION_REQUESTED'];
+const ACTIVE_STATUSES = [
+  'PENDING',
+  'SUBMITTED',
+  'IN_REVIEW',
+  'REVISION_REQUESTED',
+];
 const COMPLETED_STATUSES = ['APPROVED', 'REJECTED'];
 
 @Injectable()
@@ -47,7 +52,9 @@ export class AssessorService {
     private readonly certificateRepo: Repository<Certificate>,
   ) {}
 
-  async getDashboard(assessorUserId: number): Promise<AssessorDashboardResponse> {
+  async getDashboard(
+    assessorUserId: number,
+  ): Promise<AssessorDashboardResponse> {
     try {
       const assessments = await this.loadAssessmentsForAssessor(assessorUserId);
       const stats = this.buildStats(assessments);
@@ -78,15 +85,15 @@ export class AssessorService {
     }
   }
 
-  async getAssignments(assessorUserId: number): Promise<AssessorAssignmentItem[]> {
+  async getAssignments(
+    assessorUserId: number,
+  ): Promise<AssessorAssignmentItem[]> {
     try {
       const assessments = await this.loadAssessmentsForAssessor(assessorUserId);
       return this.buildAssignments(assessments);
     } catch (error) {
       this.logger.error('getAssignments failed', error);
-      throw new InternalServerErrorException(
-        'ไม่สามารถโหลดรายการมอบหมายได้',
-      );
+      throw new InternalServerErrorException('ไม่สามารถโหลดรายการมอบหมายได้');
     }
   }
 
@@ -95,9 +102,7 @@ export class AssessorService {
       return await this.computeCarbonSummary(orgId);
     } catch (error) {
       this.logger.error(`getOrgCarbonSummary failed for org ${orgId}`, error);
-      throw new InternalServerErrorException(
-        'ไม่สามารถคำนวณข้อมูลคาร์บอนได้',
-      );
+      throw new InternalServerErrorException('ไม่สามารถคำนวณข้อมูลคาร์บอนได้');
     }
   }
 
@@ -120,9 +125,7 @@ export class AssessorService {
     } catch (error) {
       if (error instanceof NotFoundException) throw error;
       this.logger.error(`getAssessmentDetail failed id=${assessmentId}`, error);
-      throw new InternalServerErrorException(
-        'ไม่สามารถโหลดรายละเอียดคำขอได้',
-      );
+      throw new InternalServerErrorException('ไม่สามารถโหลดรายละเอียดคำขอได้');
     }
   }
 
@@ -219,7 +222,12 @@ export class AssessorService {
 
       await this.assessmentRepo.save(assessment);
 
-      if (dto.certificate_no || dto.certificate_url || dto.issued_at || dto.expired_at) {
+      if (
+        dto.certificate_no ||
+        dto.certificate_url ||
+        dto.issued_at ||
+        dto.expired_at
+      ) {
         let cert = await this.certificateRepo.findOne({
           where: { assessment_id: assessmentId },
         });
@@ -229,10 +237,20 @@ export class AssessorService {
             org_id: assessment.org_id,
           });
         }
-        cert.certificate_no = dto.certificate_no !== undefined ? dto.certificate_no : cert.certificate_no;
-        cert.issued_at = dto.issued_at ? new Date(dto.issued_at) : (cert.issued_at || new Date());
-        cert.expired_at = dto.expired_at ? new Date(dto.expired_at) : cert.expired_at;
-        cert.certificate_url = dto.certificate_url !== undefined ? dto.certificate_url : cert.certificate_url;
+        cert.certificate_no =
+          dto.certificate_no !== undefined
+            ? dto.certificate_no
+            : cert.certificate_no;
+        cert.issued_at = dto.issued_at
+          ? new Date(dto.issued_at)
+          : cert.issued_at || new Date();
+        cert.expired_at = dto.expired_at
+          ? new Date(dto.expired_at)
+          : cert.expired_at;
+        cert.certificate_url =
+          dto.certificate_url !== undefined
+            ? dto.certificate_url
+            : cert.certificate_url;
         await this.certificateRepo.save(cert);
       }
 
@@ -245,9 +263,7 @@ export class AssessorService {
         throw error;
       }
       this.logger.error(`approveAssessment failed id=${assessmentId}`, error);
-      throw new InternalServerErrorException(
-        'ไม่สามารถอนุมัติคำขอได้',
-      );
+      throw new InternalServerErrorException('ไม่สามารถอนุมัติคำขอได้');
     }
   }
 
@@ -269,10 +285,20 @@ export class AssessorService {
           org_id: assessment.org_id,
         });
       }
-      cert.certificate_no = dto.certificate_no !== undefined ? dto.certificate_no : cert.certificate_no;
-      cert.issued_at = dto.issued_at ? new Date(dto.issued_at) : (cert.issued_at || new Date());
-      cert.expired_at = dto.expired_at ? new Date(dto.expired_at) : cert.expired_at;
-      cert.certificate_url = dto.certificate_url !== undefined ? dto.certificate_url : cert.certificate_url;
+      cert.certificate_no =
+        dto.certificate_no !== undefined
+          ? dto.certificate_no
+          : cert.certificate_no;
+      cert.issued_at = dto.issued_at
+        ? new Date(dto.issued_at)
+        : cert.issued_at || new Date();
+      cert.expired_at = dto.expired_at
+        ? new Date(dto.expired_at)
+        : cert.expired_at;
+      cert.certificate_url =
+        dto.certificate_url !== undefined
+          ? dto.certificate_url
+          : cert.certificate_url;
       await this.certificateRepo.save(cert);
 
       return this.getAssessmentDetail(assessmentId);
@@ -327,9 +353,7 @@ export class AssessorService {
         throw error;
       }
       this.logger.error(`requestRevision failed id=${assessmentId}`, error);
-      throw new InternalServerErrorException(
-        'ไม่สามารถส่งกลับแก้ไขได้',
-      );
+      throw new InternalServerErrorException('ไม่สามารถส่งกลับแก้ไขได้');
     }
   }
 
@@ -398,7 +422,9 @@ export class AssessorService {
           ? new Date(a.submitted_at).toISOString()
           : null,
         carbonSummary,
-        hasCertificate: a.certificates && a.certificates.some(c => c.certificate_url || c.certificate_no),
+        hasCertificate:
+          a.certificates &&
+          a.certificates.some((c) => c.certificate_url || c.certificate_no),
       });
     }
     return items;
@@ -445,9 +471,7 @@ export class AssessorService {
     const scopes = Array.from(scopeMap.values());
     const totalEmission = scopes.reduce((s, x) => s + x.totalEmission, 0);
 
-    if (!hasRealData && totalEmission === 0) {
-      return this.mockCarbonSummary(orgId, orgName);
-    }
+    // Fallback to mock removed, always return real calculation
 
     return {
       orgId,
@@ -550,10 +574,11 @@ export class AssessorService {
   }
 
   private resolveCertificationLevel(assessment: Assessment): string {
-    const max = assessment.details?.reduce(
-      (s, d) => s + Number(d.criteria?.max_score ?? 5),
-      0,
-    ) ?? 0;
+    const max =
+      assessment.details?.reduce(
+        (s, d) => s + Number(d.criteria?.max_score ?? 5),
+        0,
+      ) ?? 0;
     const total = this.calculateTotalScore(assessment);
     const percent = max > 0 ? (total / max) * 100 : 0;
     if (percent >= 90) return 'ระดับ ทอง (Gold)';
