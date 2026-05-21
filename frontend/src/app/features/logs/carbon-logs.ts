@@ -1,9 +1,12 @@
+import { ToastService } from '../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
+import { OrgBranchesService, OrgBranch } from '../../core/services/org-branches.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-carbon-logs',
@@ -13,13 +16,18 @@ import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
   styleUrl: './carbon-logs.css'
 })
 export class CarbonLogsComponent implements OnInit {
+  private toast = inject(ToastService);
   private carbonService = inject(CarbonService);
   private cdr = inject(ChangeDetectorRef);
+  private branchService = inject(OrgBranchesService);
+  private authService = inject(AuthService);
 
   logs: CarbonLog[] = [];
   isLoading = false;
   lastUpdatedAt: Date | null = null;
-  
+  branches: OrgBranch[] = [];
+  selectedUnitId: number | null = null;
+
   // Real Statistics
   monthlyElectricity = 0;
   monthlyWater = 0;
@@ -33,6 +41,7 @@ export class CarbonLogsComponent implements OnInit {
   searchQuery = '';
   filterType: 'ALL' | 'Electricity' | 'Water' | 'Gasoline' = 'ALL';
   filterSource: 'ALL' | 'AI_OCR' | 'MANUAL' = 'ALL';
+  filterBranchId: number | 'ALL' = 'ALL';
 
   page = 1;
   pageSize = 8;
@@ -51,6 +60,13 @@ export class CarbonLogsComponent implements OnInit {
 
   ngOnInit() {
     this.fetchLogs();
+    const orgId = this.authService.getOrganizationId();
+    if (orgId) {
+      this.branchService.getBranches(orgId).subscribe({
+        next: (res) => { this.branches = res; },
+        error: () => { /* ไม่บังคับ */ }
+      });
+    }
   }
 
   fetchLogs() {
@@ -65,7 +81,6 @@ export class CarbonLogsComponent implements OnInit {
         const prevMonth = prevMonthDate.getMonth() + 1;
         const prevYear = prevMonthDate.getFullYear();
 
-        // Calculate Stats
         this.monthlyElectricity = data
           .filter(l => l.type === 'Electricity' && l.date.includes(`${currentYear}-${String(currentMonth).padStart(2, '0')}`))
           .reduce((sum, l) => sum + l.amount, 0);
@@ -89,7 +104,7 @@ export class CarbonLogsComponent implements OnInit {
 
         this.activityCount = data.length;
         this.lastUpdatedAt = new Date();
-        
+
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -109,6 +124,7 @@ export class CarbonLogsComponent implements OnInit {
 
       if (this.filterType !== 'ALL' && type !== this.filterType) return false;
       if (this.filterSource !== 'ALL' && source !== this.filterSource) return false;
+      if (this.filterBranchId !== 'ALL' && l.org_unit_id !== this.filterBranchId) return false;
 
       if (!q) return true;
       const hay = `${type} ${l.unit} ${source} ${l.amount} ${l.emission} ${l.date}`.toLowerCase();
@@ -150,8 +166,8 @@ export class CarbonLogsComponent implements OnInit {
     const e = this.electricityTrendPercent;
     const w = this.waterTrendPercent;
 
-    if (typeof e === 'number' && e >= 10) return `à¸à¸²à¸£à¹ƒà¸Šà¹‰à¹„à¸Ÿà¸Ÿà¹‰à¸²à¹€à¸žà¸´à¹ˆà¸¡à¸‚à¸¶à¹‰à¸™ ${e.toFixed(0)}%`;
-    if (typeof w === 'number' && w >= 10) return `à¸à¸²à¸£à¹ƒà¸Šà¹‰à¸™à¹‰à¸³à¹€à¸žà¸´à¹ˆà¸¡à¸‚à¸¶à¹‰à¸™ ${w.toFixed(0)}%`;
+    if (typeof e === 'number' && e >= 10) return `การใช้ไฟฟ้าเพิ่มขึ้น ${e.toFixed(0)}%`;
+    if (typeof w === 'number' && w >= 10) return `การใช้น้ำเพิ่มขึ้น ${w.toFixed(0)}%`;
     return 'AI Insight';
   }
 
@@ -197,13 +213,13 @@ export class CarbonLogsComponent implements OnInit {
           this.isScanning = false;
           if (res.amount) {
             this.newEntry.usage_amount = res.amount;
-            this.newEntry.activity_type = 'Electricity'; // default assume PEA for now
-            alert(`AI ตรวจพบปริมาณการใช้: ${res.amount}`);
+            this.newEntry.activity_type = 'Electricity';
+            this.toast.success(`AI ตรวจพบปริมาณการใช้: ${res.amount}`);
           }
         },
-        error: (err) => {
+        error: () => {
           this.isScanning = false;
-          alert('เกิดข้อผิดพลาดในการแปลผล AI');
+          this.toast.error('เกิดข้อผิดพลาดในการแปลผล AI');
         }
       });
     }
@@ -218,9 +234,9 @@ export class CarbonLogsComponent implements OnInit {
           this.isUploading = false;
           this.newEntry.evidence_url = res.url;
         },
-        error: (err) => {
+        error: () => {
           this.isUploading = false;
-          alert('ไม่สามารถอัพโหลดไฟล์หลักฐานได้');
+          this.toast.error('ไม่สามารถอัพโหลดไฟล์หลักฐานได้');
         }
       });
     }
@@ -228,15 +244,15 @@ export class CarbonLogsComponent implements OnInit {
 
   saveLog() {
     if (!this.newEntry.activity_type || !this.newEntry.usage_amount) {
-      alert('กรุณากรอกข้อมูลให้ครบถ้วน');
+      this.toast.warning('กรุณากรอกข้อมูลให้ครบถ้วน');
       return;
     }
 
     let unit = '';
     let factor = 0;
-    
-    if (this.newEntry.activity_type === 'Electricity') { unit = 'kWh'; factor = 0.5; } 
-    else if (this.newEntry.activity_type === 'Water') { unit = 'm3'; factor = 0.3; } 
+
+    if (this.newEntry.activity_type === 'Electricity') { unit = 'kWh'; factor = 0.5; }
+    else if (this.newEntry.activity_type === 'Water') { unit = 'm3'; factor = 0.3; }
     else if (this.newEntry.activity_type === 'Gasoline') { unit = 'Litre'; factor = 2.3; }
 
     const calculatedEmission = this.newEntry.usage_amount * factor;
@@ -248,14 +264,14 @@ export class CarbonLogsComponent implements OnInit {
       unit: unit,
       emission: calculatedEmission,
       source: 'MANUAL',
-      evidence_url: this.newEntry.evidence_url
+      evidence_url: this.newEntry.evidence_url,
+      org_unit_id: this.selectedUnitId ?? undefined
     };
 
     this.carbonService.addLog(payload).subscribe({
-      next: (res) => {
-        alert('บันทึกข้อมูลเรียบร้อยแล้ว!');
-        this.fetchLogs(); // refresh table
-        // Reset Form
+      next: () => {
+        this.toast.success('บันทึกข้อมูลเรียบร้อยแล้ว!');
+        this.fetchLogs();
         this.newEntry = {
           activity_type: '',
           month: new Date().getMonth() + 1,
@@ -264,10 +280,11 @@ export class CarbonLogsComponent implements OnInit {
           evidence_file: null,
           evidence_url: ''
         };
+        this.selectedUnitId = null;
         document.getElementById('closeModalBtn')?.click();
       },
-      error: (err) => {
-        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+      error: () => {
+        this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
       }
     });
   }
@@ -277,10 +294,10 @@ export class CarbonLogsComponent implements OnInit {
     if (confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้?')) {
       this.carbonService.deleteLog(id).subscribe({
         next: () => {
-          this.fetchLogs(); // refresh table
+          this.fetchLogs();
         },
-        error: (err) => {
-          alert('เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้');
+        error: () => {
+          this.toast.error('เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้');
         }
       });
     }

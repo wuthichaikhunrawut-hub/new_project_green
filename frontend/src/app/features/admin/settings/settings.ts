@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +30,8 @@ import { SettingsService } from '../../../core/services/settings.service';
   `
 })
 export class AdminSettingsComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private settingsService = inject(SettingsService);
 
   settings = {
@@ -76,11 +79,11 @@ export class AdminSettingsComponent implements OnInit {
     this.settingsService.updateSettings(this.settings).subscribe({
       next: (data) => {
         this.settings = { ...this.settings, ...data };
-        alert('บันทึกการตั้งค่าสำเร็จ!');
+        this.toast.success('บันทึกการตั้งค่าสำเร็จ!');
       },
       error: (err) => {
         console.error('Failed to update settings:', err);
-        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
       }
     });
   }

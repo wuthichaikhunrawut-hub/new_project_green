@@ -1,10 +1,10 @@
 <div class="bg-mesh px-4 sm:px-6 lg:px-8 py-8 animate-in">
 
   <!-- ── Page Header ── -->
-  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-    <div>
-      <h1 class="text-2xl font-extrabold text-gray-900 tracking-tight">บันทึกกิจกรรมก๊าซเรือนกระจก</h1>
-      <p class="mt-1 text-sm text-gray-500 max-w-xl">ติดตามกิจกรรมที่ส่งผลต่อ Carbon Footprint ขององค์กรแบบเป็นระบบ พร้อม AI Insight เพื่อหาโอกาสลดการปล่อย</p>
+  <div class="page-header mb-8">
+    <div class="page-header-left">
+      <h1 class="page-title">บันทึกกิจกรรมก๊าซเรือนกระจก</h1>
+      <p class="page-subtitle">ติดตามกิจกรรมที่ส่งผลต่อ Carbon Footprint ขององค์กรแบบเป็นระบบ พร้อม AI Insight เพื่อหาโอกาสลดการปล่อย</p>
       <div *ngIf="lastUpdatedAt" class="mt-1.5 text-xs text-gray-400 font-medium">
         <i class="fa-solid fa-rotate mr-1"></i> อัปเดตล่าสุด: {{ lastUpdatedAt | thaiDate }}
       </div>
@@ -161,6 +161,12 @@
           <option value="MANUAL">กรอกเอง</option>
         </select>
 
+        <!-- Branch filter -->
+        <select *ngIf="branches.length > 0" class="rounded-lg border border-gray-200 bg-white py-1.5 px-3 text-sm font-medium text-gray-700 shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all" [(ngModel)]="filterBranchId" (change)="onFilterChanged()">
+          <option value="ALL">ทุกสาขา</option>
+          <option *ngFor="let b of branches" [ngValue]="b.id">{{ b.unit_name }}</option>
+        </select>
+
         <!-- Search -->
         <div class="flex items-center rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
           <span class="pl-3 text-gray-400 text-sm"><i class="fa-solid fa-magnifying-glass"></i></span>
@@ -299,6 +305,14 @@
       </div>
       <div class="modal-body pt-0">
         <form (ngSubmit)="saveLog()">
+          <!-- สาขา/แผนก -->
+          <div class="mb-4" *ngIf="branches.length > 0">
+            <label class="form-label small fw-black text-muted text-uppercase tracking-wider">สาขา/แผนก</label>
+            <select class="form-select custom-input-formal" [(ngModel)]="selectedUnitId" name="unitId">
+              <option [ngValue]="null">-- ไม่ระบุสาขา --</option>
+              <option *ngFor="let b of branches" [ngValue]="b.id">{{ b.unit_name }}</option>
+            </select>
+          </div>
           <div class="mb-4">
             <label class="form-label small fw-black text-muted text-uppercase tracking-wider">ประเภทกิจกรรม</label>
             <select class="form-select custom-input-formal" [(ngModel)]="newEntry.activity_type" name="activityType" required>

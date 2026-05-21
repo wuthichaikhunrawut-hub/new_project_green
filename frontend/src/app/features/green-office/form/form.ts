@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
@@ -35,6 +36,8 @@ interface Question {
   styleUrl: './form.css'
 })
 export class GreenOfficeFormComponent implements OnInit {
+  private toast = inject(ToastService);
+
 
   // ชื่อหมวด (title) hardcode ไว้เพราะ DB ไม่มีเก็บ
   private categoryTitles: { [key: number]: string } = {
@@ -310,11 +313,11 @@ export class GreenOfficeFormComponent implements OnInit {
   }
 
   saveProgress() {
-    alert('บันทึกฉบับร่างเรียบร้อยแล้ว ข้อมูลของคุณถูกจัดเก็บในระบบชั่วคราว');
+    this.toast.success('บันทึกฉบับร่างเรียบร้อยแล้ว ข้อมูลของคุณถูกจัดเก็บในระบบชั่วคราว');
   }
 
   downloadPDF() {
-    alert('กำลังสร้างรายงานประเมินตนเอง (PDF)... กรุณารอสักครู่');
+    this.toast.success('กำลังสร้างรายงานประเมินตนเอง (PDF)... กรุณารอสักครู่');
   }
 
   submitAssessment() {
@@ -328,18 +331,18 @@ export class GreenOfficeFormComponent implements OnInit {
     }
 
     if (incompleteItems.length > 0) {
-      alert(`ไม่สามารถส่งแบบประเมินได้:\nข้อต่อไปนี้ได้รับคะแนนเต็ม แต่ยังไม่มีการแนบหลักฐาน: ${incompleteItems.join(', ')}`);
+      this.toast.error(`ไม่สามารถส่งแบบประเมินได้:\nข้อต่อไปนี้ได้รับคะแนนเต็ม แต่ยังไม่มีการแนบหลักฐาน: ${incompleteItems.join(', ')}`);
       return;
     }
 
     if (isAllComplete) {
-      alert('ส่งแบบประเมินเรียบร้อยแล้ว! คณะกรรมการจะดำเนินการตรวจประเมินในลำดับถัดไป');
+      this.toast.success('ส่งแบบประเมินเรียบร้อยแล้ว! คณะกรรมการจะดำเนินการตรวจประเมินในลำดับถัดไป');
     } else {
-      alert('กรุณากรอกข้อมูลให้ครบทุกหมวดก่อนส่งแบบประเมิน');
+      this.toast.success('กรุณากรอกข้อมูลให้ครบทุกหมวดก่อนส่งแบบประเมิน');
     }
   }
 
   analyzeAI() {
-    alert('AI กำลังวิเคราะห์ข้อมูลการประเมิน...\nข้อแนะนำเบื้องต้น: หมวดที่ 1 ควรเพิ่มหลักฐานภาพถ่ายการประชุมคณะทำงานเพื่อให้ได้คะแนนเต็ม');
+    this.toast.success('AI กำลังวิเคราะห์ข้อมูลการประเมิน...\nข้อแนะนำเบื้องต้น: หมวดที่ 1 ควรเพิ่มหลักฐานภาพถ่ายการประชุมคณะทำงานเพื่อให้ได้คะแนนเต็ม');
   }
 }

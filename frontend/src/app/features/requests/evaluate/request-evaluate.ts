@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -39,6 +40,7 @@ interface CategoryGroup {
   styleUrl: './request-evaluate.css'
 })
 export class RequestEvaluateComponent implements OnInit, OnDestroy {
+  private toast = inject(ToastService);
   private route = inject(ActivatedRoute);
   private location = inject(Location);
   private requestsService = inject(RequestsService);
@@ -145,7 +147,7 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        alert('ไม่พบข้อมูลคำร้องนี้');
+        this.toast.success('ไม่พบข้อมูลคำร้องนี้');
         this.goBack();
       }
     });
@@ -332,14 +334,14 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
       next: () => {
         this.isSaving = false;
         if (newStatus) {
-          alert(newStatus === 'APPROVED' ? '✅ อนุมัติคำขอเรียบร้อยแล้ว' :
+          this.toast.success(newStatus === 'APPROVED' ? '✅ อนุมัติคำขอเรียบร้อยแล้ว' :
             newStatus === 'REVISION_REQUESTED' ? '🔄 ส่งกลับให้องค์กรแก้ไขแล้ว' : '❌ ปฏิเสธคำขอเรียบร้อยแล้ว');
           this.goBack();
         }
         this.cdr.markForCheck();
       },
       error: () => {
-        alert('เกิดข้อผิดพลาดในการบันทึก');
+        this.toast.error('เกิดข้อผิดพลาดในการบันทึก');
         this.isSaving = false;
       }
     });

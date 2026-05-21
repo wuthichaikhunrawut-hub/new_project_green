@@ -12,6 +12,7 @@ import { NotificationType } from '../notifications/entities/notification.entity'
 import { Organization } from '../organizations/entities/organization.entity';
 import { User } from '../users/entities/user.entity';
 import { FeatureUsageLog } from './entities/feature-usage-log.entity';
+import { Payment } from './entities/payment.entity';
 
 @Injectable()
 export class SubscriptionsService {
@@ -26,6 +27,8 @@ export class SubscriptionsService {
     private orgSubRepository: Repository<OrganizationSubscription>,
     @InjectRepository(FeatureUsageLog)
     private usageLogRepository: Repository<FeatureUsageLog>,
+    @InjectRepository(Payment)
+    private paymentRepository: Repository<Payment>,
     @InjectRepository(Organization)
     private orgRepository: Repository<Organization>,
     @InjectRepository(User)
@@ -186,6 +189,10 @@ export class SubscriptionsService {
       `Updated invoice ${invoice.reference_number} status to ${status}`,
     );
 
+    if (status === 'PAID') {
+      await this.recordPaymentForInvoice(id, 'PAID');
+    }
+
     // If marked as PAID, notify the organization
     if (status === 'PAID' && invoice.organization) {
       // Find the admin user of this organization (Simplified: just find any user in the org)
@@ -289,5 +296,74 @@ export class SubscriptionsService {
       where: { org_id: orgId, usage_month: m, usage_year: y },
       order: { feature_code: 'ASC' }
     });
+  }
+
+  async getOrganizationFeatureQuotaSummary(orgId: number) {
+    const sub = await this.findOrgSubscription(orgId);
+    if (!sub || !sub.plan || !sub.plan.features) {
+      return [];
+    }
+
+    const now = new Date();
+    const month = now.getMonth() + 1;
+    const year = now.getFullYear();
+
+    const logs = await this.usageLogRepository.find({
+      where: { org_id: orgId, usage_month: month, usage_year: year },
+    });
+
+    return sub.plan.features.map((feature) => {
+      const limit = this.getQuotaLimit(sub.plan.plan_name, feature.feature_code);
+      const log = logs.find((entry) => entry.feature_code === feature.feature_code);
+      return {
+        feature_code: feature.feature_code,
+        feature_name: feature.feature_name,
+        used: log?.usage_count ?? 0,
+        limit,
+        allowed: limit === 0 ? true : (log?.usage_count ?? 0) < limit,
+      };
+    });
+  }
+
+  async getOrganizationPayments(orgId: number) {
+    return this.paymentRepository.find({
+      where: { org_id: orgId },
+      order: { paid_at: 'DESC', created_at: 'DESC' },
+    });
+  }
+
+  async createPaymentRecord(data: Partial<Payment>) {
+    const payment = this.paymentRepository.create(data);
+    return this.paymentRepository.save(payment);
+  }
+
+  async recordPaymentForInvoice(invoiceId: number, status: string) {
+    const invoice = await this.invoicesRepository.findOne({
+      where: { id: invoiceId },
+    });
+    if (!invoice) {
+      throw new Error('Invoice not found');
+    }
+
+    const existingPayment = await this.paymentRepository.findOne({
+      where: { invoice_id: invoiceId },
+    });
+
+    const paymentData: Partial<Payment> = {
+      invoice_id: invoiceId,
+      org_id: invoice.org_id,
+      amount: invoice.amount ?? 0,
+      currency: 'THB',
+      payment_method: 'stripe',
+      payment_status: status,
+      paid_at: status === 'PAID' ? new Date() : undefined,
+    };
+
+    if (existingPayment) {
+      await this.paymentRepository.update(existingPayment.id, paymentData);
+      return this.paymentRepository.findOne({ where: { id: existingPayment.id } });
+    }
+
+    return this.createPaymentRecord(paymentData);
   }
 }

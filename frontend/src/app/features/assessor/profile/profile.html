@@ -1,11 +1,11 @@
 <div class="container-fluid p-4 animate-in">
   <!-- Header -->
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="fw-bold mb-1 text-primary"><i class="fa-solid fa-user-shield me-2"></i>โปรไฟล์ผู้ตรวจประเมิน</h2>
-      <p class="text-muted mb-0">จัดการข้อมูลส่วนตัว วุฒิการศึกษา และข้อมูลการรับเงินค่าตอบแทน</p>
+  <div class="page-header mb-4">
+    <div class="page-header-left">
+      <h2 class="page-title"><i class="fa-solid fa-user-shield me-2"></i>โปรไฟล์ผู้ตรวจประเมิน</h2>
+      <p class="page-subtitle mb-0">จัดการข้อมูลส่วนตัว วุฒิการศึกษา และข้อมูลการรับเงินค่าตอบแทน</p>
     </div>
-    <div class="d-flex gap-2">
+    <div class="page-actions d-flex gap-2">
       <button class="btn btn-outline-secondary px-4 rounded-pill" (click)="loadProfile()" [disabled]="isLoading">
         <i class="fa-solid fa-rotate me-2"></i>รีเฟรช
       </button>

@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +14,8 @@ import { GreenOfficeService } from '../../../core/services/green-office.service'
   styleUrl: './evidence.css'
 })
 export class GreenOfficeEvidenceComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private uploadService = inject(UploadService);
   private authService = inject(AuthService);
   private greenOfficeService = inject(GreenOfficeService);
@@ -135,12 +138,12 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         this.isUploading = false;
         this.pendingFile = null; // Clear after success
         this.cdr.markForCheck(); // Force UI update
-        alert('อัปโหลดไฟล์สำเร็จ!');
+        this.toast.success('อัปโหลดไฟล์สำเร็จ!');
       },
       error: (err) => {
         console.error('Upload error:', err);
         this.isUploading = false;
-        alert('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
+        this.toast.error('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
       }
     });
   }
@@ -160,12 +163,12 @@ export class GreenOfficeEvidenceComponent implements OnInit {
           this.files = this.files.filter(f => f.id !== id);
           this.isUploading = false;
           this.cdr.markForCheck(); // Force UI update
-          alert('ลบไฟล์เรียบร้อยแล้วครับ!');
+          this.toast.success('ลบไฟล์เรียบร้อยแล้วครับ!');
         },
         error: (err) => {
           console.error('Delete error:', err);
           this.isUploading = false;
-          alert('เกิดข้อผิดพลาดในการลบไฟล์');
+          this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
         }
       });
     }
@@ -175,7 +178,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
     if (file.url) {
       window.open(file.url, '_blank');
     } else {
-      alert('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
+      this.toast.success('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
     }
   }
 
@@ -196,12 +199,12 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         this.editingFileId = null;
         this.isUploading = false;
         this.cdr.markForCheck(); // Force UI update
-        alert('อัปเดตหมวดหมู่เรียบร้อยครับ! 😊');
+        this.toast.success('อัปเดตหมวดหมู่เรียบร้อยครับ! 😊');
       },
       error: (err) => {
         console.error('Update error:', err);
         this.isUploading = false;
-        alert('เกิดข้อผิดพลาดในการอัปเดตหมวดหมู่');
+        this.toast.error('เกิดข้อผิดพลาดในการอัปเดตหมวดหมู่');
       }
     });
   }

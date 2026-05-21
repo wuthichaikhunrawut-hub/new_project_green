@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -17,6 +18,8 @@ interface GroupedCriteria {
   styleUrls: ['./criteria.css']
 })
 export class AdminCriteriaComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private criteriaService = inject(GreenCriteriaService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -104,28 +107,28 @@ export class AdminCriteriaComponent implements OnInit {
     if (this.selectedCriteria.id) {
       this.criteriaService.updateCriteria(this.selectedCriteria.id, this.selectedCriteria).subscribe({
         next: () => {
-          alert('บันทึกข้อมูลสำเร็จ');
+          this.toast.success('บันทึกข้อมูลสำเร็จ');
           this.closeModal();
           this.loadCriteria();
           this.isSaving = false;
         },
         error: (err) => {
           console.error(err);
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
           this.isSaving = false;
         }
       });
     } else {
       this.criteriaService.createCriteria(this.selectedCriteria).subscribe({
         next: () => {
-          alert('เพิ่มเกณฑ์การประเมินสำเร็จ');
+          this.toast.success('เพิ่มเกณฑ์การประเมินสำเร็จ');
           this.closeModal();
           this.loadCriteria();
           this.isSaving = false;
         },
         error: (err) => {
           console.error(err);
-          alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+          this.toast.error('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
           this.isSaving = false;
         }
       });
@@ -140,7 +143,7 @@ export class AdminCriteriaComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          alert('เกิดข้อผิดพลาดในการลบ');
+          this.toast.error('เกิดข้อผิดพลาดในการลบ');
         }
       });
     }

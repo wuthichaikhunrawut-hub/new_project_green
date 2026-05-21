@@ -22,6 +22,8 @@ export class SubscriptionComponent implements OnInit {
   billingCycle = 'monthly'; // 'monthly' | 'yearly'
   plans: any[] = [];
   permissionSettings: Record<string, string> = {};
+  quotaSummary: Record<string, { feature_name: string; used: number; limit: number; allowed: boolean }> = {};
+  payments: any[] = [];
   isLoading = true;
 
   ngOnInit() {
@@ -46,21 +48,32 @@ export class SubscriptionComponent implements OnInit {
       next: (res) => {
         this.plans = res.plans || [];
         this.permissionSettings = res.settings || {};
-        
-        // Load my subscription right after plans
-        this.userSubService.getMySubscription().subscribe({
-          next: (sub) => {
-            if (sub && sub.plan) {
-              this.currentPlan = sub.plan;
+
+        forkJoin({
+          subscription: this.userSubService.getMySubscription(),
+          usage: this.userSubService.getMyUsage(),
+          payments: this.userSubService.getMyPayments(),
+        }).subscribe({
+          next: (data) => {
+            if (data.subscription && data.subscription.plan) {
+              this.currentPlan = data.subscription.plan;
             }
-            this.isLoading = false;
-            this.cdr.markForCheck(); // Force UI update!
-          },
-          error: (err) => {
-            console.error('MySub error:', err);
+            this.quotaSummary = (data.usage || []).reduce(
+              (acc: any, item: any) => ({
+                ...acc,
+                [item.feature_code]: item,
+              }),
+              {},
+            );
+            this.payments = data.payments || [];
             this.isLoading = false;
             this.cdr.markForCheck();
-          }
+          },
+          error: (err) => {
+            console.error('Subscription loading failed:', err);
+            this.isLoading = false;
+            this.cdr.markForCheck();
+          },
         });
       },
       error: (err) => {
@@ -79,6 +92,28 @@ export class SubscriptionComponent implements OnInit {
       return `(${val} ครั้ง/เดือน)`;
     }
     return '(ไม่จำกัด)';
+  }
+
+  getFeatureUsageText(featureCode: string): string {
+    if (!featureCode) return '';
+    const key = featureCode.toUpperCase();
+    const quota = this.quotaSummary[key];
+    if (!quota) return '';
+    if (quota.limit === 0) {
+      return `ใช้ไป ${quota.used} ครั้ง (ไม่จำกัด)`;
+    }
+    return `ใช้ไป ${quota.used}/${quota.limit} ครั้ง`;
+  }
+
+  getCurrentQuotaSummary(): string {
+    const quota = this.quotaSummary['AI_SCAN'] || this.quotaSummary['ai_scan'];
+    if (!quota) {
+      return '';
+    }
+    if (quota.limit === 0) {
+      return `AI Scan เดือนนี้: ใช้งาน ${quota.used} ครั้ง (ไม่จำกัด)`;
+    }
+    return `AI Scan เดือนนี้: ${quota.used}/${quota.limit} ครั้ง`;
   }
 
   toggleBillingCycle() {

@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -12,6 +13,8 @@ import { AuthService, AuthResponse } from '../../../core/services/auth.service';
   styleUrl: './register.css'
 })
 export class RegisterComponent {
+  private toast = inject(ToastService);
+
   private router = inject(Router);
   private authService = inject(AuthService);
 
@@ -53,7 +56,7 @@ export class RegisterComponent {
 
   onRegister() {
     if (this.userData.password !== this.userData.confirmPassword) {
-      alert('รหัสผ่านไม่ตรงกัน');
+      this.toast.success('รหัสผ่านไม่ตรงกัน');
       return;
     }
 
@@ -71,12 +74,12 @@ export class RegisterComponent {
     this.authService.register(payload).subscribe({
       next: (res: AuthResponse) => {
         this.isLoading = false;
-        alert('ลงทะเบียนสำเร็จ! เข้าสู่ระบบอัตโนมัติ');
+        this.toast.success('ลงทะเบียนสำเร็จ! เข้าสู่ระบบอัตโนมัติ');
         this.router.navigate(['/dashboard']);
       },
       error: (err: any) => {
         this.isLoading = false;
-        alert(err.error?.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
+        this.toast.error(err.error?.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
       }
     });
   }

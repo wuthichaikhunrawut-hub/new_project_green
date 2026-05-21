@@ -20,7 +20,7 @@ export class BillingService {
   private apiUrl = 'http://localhost:3001/payments';
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('access_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`

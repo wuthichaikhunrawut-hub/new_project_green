@@ -23,7 +23,7 @@ export class QuotaUsageComponent implements OnInit {
 
   fetchLogs() {
     this.isLoading = true;
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('access_token');
     const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
 
     this.http.get<any[]>('http://localhost:3001/admin/subscriptions/usage', { headers })

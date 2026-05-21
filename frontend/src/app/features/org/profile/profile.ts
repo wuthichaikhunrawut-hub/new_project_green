@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -16,6 +17,8 @@ import { forkJoin } from 'rxjs';
   styleUrl: './profile.css'
 })
 export class OrgProfileComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private fb = inject(FormBuilder);
   private orgService = inject(OrgService);
   private authService = inject(AuthService);
@@ -151,13 +154,13 @@ export class OrgProfileComponent implements OnInit {
           this.orgForm.disable();
           this.isLoading = false;
           this.cdr.markForCheck();
-          alert('บันทึกข้อมูลองค์กรเรียบร้อยแล้ว');
+          this.toast.success('บันทึกข้อมูลองค์กรเรียบร้อยแล้ว');
         },
         error: (err) => {
           console.error('Error updating org:', err);
           this.isLoading = false;
           this.cdr.markForCheck();
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลองค์กร');
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูลองค์กร');
         }
       });
     } else {
@@ -184,13 +187,13 @@ export class OrgProfileComponent implements OnInit {
           this.userForm.disable();
           this.isLoading = false;
           this.cdr.markForCheck();
-          alert('บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว');
+          this.toast.success('บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว');
         },
         error: (err) => {
           console.error('Error updating user:', err);
           this.isLoading = false;
           this.cdr.markForCheck();
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว');
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว');
         }
       });
     } else {
@@ -199,6 +202,6 @@ export class OrgProfileComponent implements OnInit {
   }
 
   onLogoUpload() {
-    alert('????????????????????????????????????????????');
+    this.toast.success('????????????????????????????????????????????');
   }
 }

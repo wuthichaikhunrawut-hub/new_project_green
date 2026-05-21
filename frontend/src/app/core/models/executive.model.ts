@@ -16,6 +16,11 @@ export interface CarbonScopePoint {
   totalEmission: number;
 }
 
+export interface CarbonUnitPoint {
+  unitName: string;
+  totalEmission: number;
+}
+
 export interface ExecutiveDashboardResponse {
   orgId: number;
   orgName: string;
@@ -26,4 +31,5 @@ export interface ExecutiveDashboardResponse {
   netZeroProgressPercent: number;
   approvedAssessments: ExecutiveApprovedAssessment[];
   carbonByScope: CarbonScopePoint[];
+  carbonByUnit: CarbonUnitPoint[];
 }

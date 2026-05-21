@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
@@ -21,6 +22,8 @@ import {
   styleUrl: './billing.css'
 })
 export class BillingComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private billingService = inject(BillingService);
   private settingsService = inject(SettingsService);
   private userSubService = inject(UserSubscriptionsService);
@@ -219,7 +222,7 @@ export class BillingComponent implements OnInit {
       // Success - reload methods
       this.loadPaymentMethods();
       this.isSaving = false;
-      alert('บันทึกข้อมูลการชำระเงินเรียบร้อยแล้ว');
+      this.toast.success('บันทึกข้อมูลการชำระเงินเรียบร้อยแล้ว');
       // Re-init payment element to clear it
       await this.initStripe();
     }

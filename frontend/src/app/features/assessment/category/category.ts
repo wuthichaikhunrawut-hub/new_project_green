@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -41,6 +42,8 @@ interface UploadedFile {
   styleUrls: ['./category.css']
 })
 export class CategoryPageComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private criteriaService = inject(GreenCriteriaService);
@@ -228,7 +231,7 @@ export class CategoryPageComponent implements OnInit {
       this.pendingFiles[questionId] = [];
       this.isUploading = false;
       this.recalculateProgress();
-      alert('อัปโหลดไฟล์หลักฐานสำเร็จ!');
+      this.toast.success('อัปโหลดไฟล์หลักฐานสำเร็จ!');
       return;
     }
 
@@ -254,7 +257,7 @@ export class CategoryPageComponent implements OnInit {
       },
       error: (err) => {
         console.error('Upload error:', err);
-        alert(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
+        this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
         this.isUploading = false;
       }
     });
@@ -275,12 +278,12 @@ export class CategoryPageComponent implements OnInit {
             }
             this.isUploading = false;
             this.recalculateProgress();
-            alert('ลบไฟล์เรียบร้อยแล้วครับ!');
+            this.toast.success('ลบไฟล์เรียบร้อยแล้วครับ!');
           },
           error: (err) => {
             console.error('Delete error:', err);
             this.isUploading = false;
-            alert('เกิดข้อผิดพลาดในการลบไฟล์');
+            this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
           }
         });
       } else if (!fileToDelete.id) {
@@ -320,7 +323,7 @@ export class CategoryPageComponent implements OnInit {
     if (file.url) {
       window.open(file.url, '_blank');
     } else {
-      alert('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
+      this.toast.success('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
     }
   }
 }

@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +15,8 @@ import { User } from '../../../core/models/user.model';
   styleUrls: ['./org-branches.css']
 })
 export class OrgBranchesComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private branchesService = inject(OrgBranchesService);
   private usersService = inject(UsersService);
   private authService = inject(AuthService);
@@ -102,7 +105,7 @@ export class OrgBranchesComponent implements OnInit {
           this.isSaving = false;
         },
         error: () => {
-          alert('เกิดข้อผิดพลาดในการบันทึกสาขา');
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกสาขา');
           this.isSaving = false;
         }
       });
@@ -114,7 +117,7 @@ export class OrgBranchesComponent implements OnInit {
           this.isSaving = false;
         },
         error: () => {
-          alert('เกิดข้อผิดพลาดในการสร้างสาขา');
+          this.toast.error('เกิดข้อผิดพลาดในการสร้างสาขา');
           this.isSaving = false;
         }
       });
@@ -141,7 +144,7 @@ export class OrgBranchesComponent implements OnInit {
         }
         this.cdr.markForCheck();
       },
-      error: () => alert('ไม่สามารถอัปเดตสังกัดของพนักงานได้')
+      error: () => this.toast.error('ไม่สามารถอัปเดตสังกัดของพนักงานได้')
     });
   }
 }

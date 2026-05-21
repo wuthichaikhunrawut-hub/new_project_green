@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +12,8 @@ import { AssessorsAdminService, AssessorUser } from '../../../core/services/asse
   styleUrls: ['./assessors.css']
 })
 export class AdminAssessorsComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private svc = inject(AssessorsAdminService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -72,11 +75,11 @@ export class AdminAssessorsComponent implements OnInit {
     
     this.svc.suspendAssessor(user.id, !user.is_active).subscribe({
       next: () => {
-        alert(`${action} บัญชี ${user.username} เรียบร้อยแล้ว`);
+        this.toast.success(`${action} บัญชี ${user.username} เรียบร้อยแล้ว`);
         this.loadAssessors();
       },
       error: () => {
-        alert(`เกิดข้อผิดพลาด ไม่สามารถ${action}ได้`);
+        this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถ${action}ได้`);
       }
     });
   }
@@ -99,12 +102,12 @@ export class AdminAssessorsComponent implements OnInit {
     
     this.svc.verifyAssessor(this.selectedAssessor.id, verified).subscribe({
       next: () => {
-        alert(`ดำเนินการ${action}เรียบร้อยแล้ว`);
+        this.toast.success(`ดำเนินการ${action}เรียบร้อยแล้ว`);
         this.loadAssessors();
         this.closeModal();
       },
       error: () => {
-        alert(`เกิดข้อผิดพลาด ไม่สามารถดำเนินการได้`);
+        this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถดำเนินการได้`);
       }
     });
   }

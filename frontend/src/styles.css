@@ -112,24 +112,26 @@ h6 { font-size: 0.9rem; }
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
-
-.btn-success {
-  background-color: var(--color-success) !important;
-  border-color: var(--color-success) !important;
-  color: white !important;
-  box-shadow: var(--shadow-sm);
-}
-
-.btn-success:hover {
-  background-color: var(--color-success-hover) !important;
-  border-color: var(--color-success-hover) !important;
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
 .btn-outline-success {
   color: var(--color-success) !important;
   border-color: var(--color-success) !important;
+}
+.page-header-left h1,
+.page-header-left h2,
+.page-header-left h3,
+.page-header-left .page-title {
+  font-size: 1.75rem;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.page-header-left p,
+.page-header-left .page-subtitle {
+  color: var(--color-text-muted) !important;
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
 }
 
 .btn-outline-success:hover {
@@ -208,6 +210,64 @@ h6 { font-size: 0.9rem; }
   font-weight: 500 !important;
   padding: 0.35em 0.65em !important;
   border-radius: 9999px !important;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.page-header-left {
+  min-width: 0;
+}
+
+.page-header-left h1,
+.page-header-left h2,
+.page-header-left h3,
+.page-header-left .page-title {
+  font-size: 1.75rem;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.page-header-left p,
+.page-header-left .page-subtitle {
+  color: var(--color-text-muted) !important;
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 700 !important;
+  color: var(--color-primary) !important;
+  margin: 0;
+  line-height: 1.15;
+}
+
+.page-title-sm {
+  font-size: 1.35rem;
+}
+
+.page-subtitle {
+  color: var(--color-text-muted) !important;
+  margin-top: 0.35rem;
+  font-size: 0.95rem;
+}
+
+.page-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
 .bg-success {

@@ -33,7 +33,7 @@ export class Payment {
   payment_status: string;
 
   @Column({ type: 'timestamp without time zone', nullable: true })
-  paid_at: Date;
+  paid_at: Date | null;
 
   @CreateDateColumn({
     type: 'timestamp without time zone',
