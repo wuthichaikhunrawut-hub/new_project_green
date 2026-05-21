@@ -35,7 +35,7 @@ export interface Invoice {
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsAdminService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:3001/admin/subscriptions';
+  private baseUrl = 'http://localhost:3001/subscriptions';
 
   getPlans(): Observable<SubscriptionPlan[]> {
     return this.http.get<SubscriptionPlan[]>(`${this.baseUrl}/plans`);

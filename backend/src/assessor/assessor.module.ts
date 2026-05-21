@@ -11,7 +11,12 @@ import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Assessment, AssessmentDetail, CarbonLog, Certificate]),
+    TypeOrmModule.forFeature([
+      Assessment,
+      AssessmentDetail,
+      CarbonLog,
+      Certificate,
+    ]),
     AuthModule,
     SettingsModule,
   ],

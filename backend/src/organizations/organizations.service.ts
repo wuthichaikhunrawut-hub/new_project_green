@@ -45,7 +45,10 @@ export class OrganizationsService {
 
   // --- Organization Units ---
 
-  async createUnit(orgId: number, unitData: Partial<OrganizationUnit>): Promise<OrganizationUnit> {
+  async createUnit(
+    orgId: number,
+    unitData: Partial<OrganizationUnit>,
+  ): Promise<OrganizationUnit> {
     const unit = this.orgUnitRepository.create({ ...unitData, org_id: orgId });
     return this.orgUnitRepository.save(unit);
   }
@@ -58,9 +61,15 @@ export class OrganizationsService {
     });
   }
 
-  async updateUnit(unitId: number, updateData: Partial<OrganizationUnit>): Promise<OrganizationUnit | null> {
+  async updateUnit(
+    unitId: number,
+    updateData: Partial<OrganizationUnit>,
+  ): Promise<OrganizationUnit | null> {
     await this.orgUnitRepository.update(unitId, updateData);
-    return this.orgUnitRepository.findOne({ where: { id: unitId }, relations: ['parent_unit'] });
+    return this.orgUnitRepository.findOne({
+      where: { id: unitId },
+      relations: ['parent_unit'],
+    });
   }
 
   async removeUnit(unitId: number): Promise<void> {

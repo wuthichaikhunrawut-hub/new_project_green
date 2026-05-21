@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   UseGuards,
@@ -82,5 +83,11 @@ export class NotificationsController {
   @Patch('read-all')
   markAllAsRead(@Request() req) {
     return this.notificationsService.markAllAsRead(req.user.sub);
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN', 'SYSTEM_ADMIN')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.notificationsService.remove(id);
   }
 }

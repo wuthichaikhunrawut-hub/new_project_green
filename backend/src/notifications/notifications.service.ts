@@ -105,7 +105,13 @@ export class NotificationsService {
     return this.notificationsRepository.save(notification);
   }
 
-  async markAllAsRead(userId: number): Promise<void> {
+  async remove(id: number): Promise<void> {
+    const result = await this.notificationsRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException('Notification not found');
+    }
+  }
+
     await this.notificationsRepository.update(
       { recipient_id: userId, is_read: false },
       { is_read: true },

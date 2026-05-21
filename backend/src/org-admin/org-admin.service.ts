@@ -55,7 +55,11 @@ export class OrgAdminService {
         throw new BadRequestException('กรุณาระบุข้อความสำหรับส่งกลับผู้ใช้งาน');
       }
       const assessment = await this.assessmentRepo.findOne({
-        where: { id: assessmentId, org_id: orgId, status: 'REVISION_REQUESTED' },
+        where: {
+          id: assessmentId,
+          org_id: orgId,
+          status: 'REVISION_REQUESTED',
+        },
       });
       if (!assessment) {
         throw new NotFoundException('ไม่พบงานที่ตีกลับสำหรับองค์กรนี้');
@@ -70,7 +74,9 @@ export class OrgAdminService {
       ) {
         throw error;
       }
-      throw new InternalServerErrorException('ไม่สามารถส่งงานกลับให้ผู้ใช้งานได้');
+      throw new InternalServerErrorException(
+        'ไม่สามารถส่งงานกลับให้ผู้ใช้งานได้',
+      );
     }
   }
 
@@ -81,7 +87,11 @@ export class OrgAdminService {
   ): Promise<Assessment> {
     try {
       const assessment = await this.assessmentRepo.findOne({
-        where: { id: assessmentId, org_id: orgId, status: 'REVISION_REQUESTED' },
+        where: {
+          id: assessmentId,
+          org_id: orgId,
+          status: 'REVISION_REQUESTED',
+        },
       });
       if (!assessment) {
         throw new NotFoundException('ไม่พบงานที่ตีกลับสำหรับองค์กรนี้');
@@ -97,7 +107,9 @@ export class OrgAdminService {
       if (error instanceof NotFoundException) {
         throw error;
       }
-      throw new InternalServerErrorException('ไม่สามารถส่งกลับให้ผู้ตรวจประเมินได้');
+      throw new InternalServerErrorException(
+        'ไม่สามารถส่งกลับให้ผู้ตรวจประเมินได้',
+      );
     }
   }
 }

@@ -1,16 +1,21 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SettingsService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
   private apiUrl = 'http://localhost:3001/settings';
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('access_token');
+    let token = null;
+    if (isPlatformBrowser(this.platformId)) {
+      token = localStorage.getItem('access_token');
+    }
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });

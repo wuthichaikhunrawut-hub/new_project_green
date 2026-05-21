@@ -18,9 +18,9 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
-@Controller('admin/subscriptions')
+@Controller('subscriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
+@Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'USER')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
@@ -28,6 +28,19 @@ export class SubscriptionsController {
   @Get('plans')
   findAllPlans() {
     return this.subscriptionsService.findAllPlans();
+  }
+
+  @Get('status')
+  async getStatus(@Request() req: any) {
+    return this.subscriptionsService.getUserSubscriptionStatusByUserId(
+      req.user.id,
+    );
+  }
+
+  @Get('payments')
+  async getPayments(@Request() req: any) {
+    const orgId = Number(req.user.orgId);
+    return this.subscriptionsService.getOrganizationPayments(orgId);
   }
 
   @Get('features')

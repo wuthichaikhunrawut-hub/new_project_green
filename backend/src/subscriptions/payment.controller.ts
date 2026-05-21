@@ -26,23 +26,25 @@ export class PaymentController {
   @HttpCode(HttpStatus.OK)
   async handleStripeWebhook(@Body() event: any) {
     console.log('--- Stripe Webhook Received ---', event.type);
-    
+
     // Example: invoice.payment_succeeded
     if (event.type === 'invoice.payment_succeeded') {
       const invoiceData = event.data.object;
-      
+
       // In a real app, verify signature using raw body
       // const signature = req.headers['stripe-signature'];
-      
+
       const customerId = invoiceData.customer;
       const amountPaid = invoiceData.amount_paid / 100;
       const currency = invoiceData.currency.toUpperCase();
-      
-      console.log(`Payment succeeded for customer ${customerId}: ${amountPaid} ${currency}`);
-      
+
+      console.log(
+        `Payment succeeded for customer ${customerId}: ${amountPaid} ${currency}`,
+      );
+
       // We would look up the organization by stripe_customer_id
       // and insert a record into Payment table
-      
+
       // Since we don't have stripe_customer_id query directly in service right now,
       // this is just the skeleton to fulfill Phase 3 requirement.
     }

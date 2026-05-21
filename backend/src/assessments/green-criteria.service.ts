@@ -47,9 +47,10 @@ export class GreenCriteriaService {
       order: { category_number: 'ASC', criteria_code: 'ASC' },
     });
 
-    const filtered = (orgId && orgId > 0 && !hasPassed)
-      ? criteria.filter((item) => item.category_number !== 7)
-      : criteria;
+    const filtered =
+      orgId && orgId > 0 && !hasPassed
+        ? criteria.filter((item) => item.category_number !== 7)
+        : criteria;
 
     return filtered.map((item) => ({
       id: item.id,

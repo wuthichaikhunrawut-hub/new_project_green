@@ -139,6 +139,17 @@ export class NotificationsAdminComponent implements OnInit {
     return [];
   }
 
+  deleteHistoryItem(id: number) {
+    this.notificationService.deleteNotification(id).subscribe({
+      next: () => {
+        this.loadHistory();
+      },
+      error: (err) => {
+        console.error('Failed to delete notification:', err);
+      }
+    });
+  }
+  
   resetForm() {
     this.notification = {
       title: '',
@@ -150,6 +161,7 @@ export class NotificationsAdminComponent implements OnInit {
     this.selectedOrgId = null;
     this.selectedUserId = null;
   }
+
 
   // Preview Helpers
   getPreviewIcon(): string {

@@ -75,6 +75,10 @@ export class NotificationService {
     );
   }
 
+  deleteNotification(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
   markAllAsRead(): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/read-all`, {}).pipe(
       tap(() => this.unreadCountSubject.next(0))

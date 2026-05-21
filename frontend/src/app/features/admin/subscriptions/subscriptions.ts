@@ -1,6 +1,6 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { SubscriptionsAdminService, SubscriptionPlan, Feature } from '../../../core/services/subscriptions-admin.service';
@@ -61,11 +61,15 @@ export class AdminSubscriptionsComponent implements OnInit {
   selectedFeatureIds: number[] = [];
   selectedPlanQuotas: Record<string, number> = {}; // { feature_code: quota }
 
+  private platformId = inject(PLATFORM_ID);
+
   ngOnInit() { 
-    // Use setTimeout to ensure initial load happens after component is fully ready
-    setTimeout(() => {
-      this.loadData(); 
-    }, 0);
+    if (isPlatformBrowser(this.platformId)) {
+      // Use setTimeout to ensure initial load happens after component is fully ready
+      setTimeout(() => {
+        this.loadData(); 
+      }, 0);
+    }
   }
 
   getPlanUsageCount(featureId: number): number {
@@ -98,15 +102,18 @@ export class AdminSubscriptionsComponent implements OnInit {
   }
 
   getQuotaKey(planId: number | undefined, featCode: string): string {
-    return `quota.plan:${planId}.feat:${featCode.toLowerCase()}`;
+    const code = featCode || '';
+    return `quota.plan:${planId}.feat:${code.toLowerCase()}`;
   }
 
   getQuota(featCode: string): number {
-    return this.selectedPlanQuotas[featCode] || 0;
+    const code = featCode || '';
+    return this.selectedPlanQuotas[code] || 0;
   }
 
   setQuota(featCode: string, value: number) {
-    this.selectedPlanQuotas[featCode] = value;
+    const code = featCode || '';
+    this.selectedPlanQuotas[code] = value;
   }
 
   getPlanFeatureQuota(planId: number, featCode: string): string {
@@ -116,7 +123,8 @@ export class AdminSubscriptionsComponent implements OnInit {
   }
 
   hasPermission(featureCode: string, role: string): boolean {
-    const settingKey = `permission.${featureCode.toLowerCase()}`;
+    const code = featureCode || '';
+    const settingKey = `permission.${code.toLowerCase()}`;
     const value = this.permissionSettings[settingKey];
     if (!value) return false;
     
@@ -132,7 +140,8 @@ export class AdminSubscriptionsComponent implements OnInit {
   }
 
   togglePermission(featureCode: string, role: string) {
-    const settingKey = `permission.${featureCode.toLowerCase()}`;
+    const code = featureCode || '';
+    const settingKey = `permission.${code.toLowerCase()}`;
     let currentVal = this.permissionSettings[settingKey] || '[]';
     let roles: string[] = [];
 

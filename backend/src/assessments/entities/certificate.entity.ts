@@ -29,7 +29,12 @@ export class Certificate {
   @Column({ type: 'timestamp without time zone', nullable: true })
   expired_at: Date;
 
-  @Column({ name: 'certificate_url', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'certificate_url',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   certificate_url: string;
 
   @CreateDateColumn({

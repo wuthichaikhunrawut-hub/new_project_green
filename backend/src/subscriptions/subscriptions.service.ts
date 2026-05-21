@@ -236,41 +236,58 @@ export class SubscriptionsService {
       if (planName.toLowerCase().includes('free')) return 50;
       if (planName.toLowerCase().includes('basic')) return 200;
       if (planName.toLowerCase().includes('pro')) return 1000;
-      return 0; // Default if unknown plan
+      return 5; // ปรับค่า Default ให้เป็น 5 แทน 0 เพื่อป้องกัน Division by zero ใน Frontend
     }
     return 999999; // Unlimited for other features
   }
 
-  async checkFeatureQuota(orgId: number, featureCode: string): Promise<{ allowed: boolean; used: number; limit: number }> {
+  async checkFeatureQuota(
+    orgId: number,
+    featureCode: string,
+  ): Promise<{ allowed: boolean; used: number; limit: number }> {
     const sub = await this.findOrgSubscription(orgId);
     if (!sub || !sub.plan) return { allowed: false, used: 0, limit: 0 };
 
     const limit = this.getQuotaLimit(sub.plan.plan_name, featureCode);
-    
+
     const now = new Date();
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
     const log = await this.usageLogRepository.findOne({
-      where: { org_id: orgId, feature_code: featureCode, usage_month: month, usage_year: year }
+      where: {
+        org_id: orgId,
+        feature_code: featureCode,
+        usage_month: month,
+        usage_year: year,
+      },
     });
 
     const used = log ? log.usage_count : 0;
-    
+
     return {
       allowed: used < limit,
       used,
-      limit
+      limit,
     };
   }
 
-  async logFeatureUsage(orgId: number, featureCode: string, amount: number = 1): Promise<void> {
+  async logFeatureUsage(
+    orgId: number,
+    featureCode: string,
+    amount: number = 1,
+  ): Promise<void> {
     const now = new Date();
     const month = now.getMonth() + 1;
     const year = now.getFullYear();
 
     let log = await this.usageLogRepository.findOne({
-      where: { org_id: orgId, feature_code: featureCode, usage_month: month, usage_year: year }
+      where: {
+        org_id: orgId,
+        feature_code: featureCode,
+        usage_month: month,
+        usage_year: year,
+      },
     });
 
     if (log) {
@@ -294,7 +311,7 @@ export class SubscriptionsService {
 
     return this.usageLogRepository.find({
       where: { org_id: orgId, usage_month: m, usage_year: y },
-      order: { feature_code: 'ASC' }
+      order: { feature_code: 'ASC' },
     });
   }
 
@@ -313,8 +330,13 @@ export class SubscriptionsService {
     });
 
     return sub.plan.features.map((feature) => {
-      const limit = this.getQuotaLimit(sub.plan.plan_name, feature.feature_code);
-      const log = logs.find((entry) => entry.feature_code === feature.feature_code);
+      const limit = this.getQuotaLimit(
+        sub.plan.plan_name,
+        feature.feature_code,
+      );
+      const log = logs.find(
+        (entry) => entry.feature_code === feature.feature_code,
+      );
       return {
         feature_code: feature.feature_code,
         feature_name: feature.feature_name,
@@ -361,9 +383,30 @@ export class SubscriptionsService {
 
     if (existingPayment) {
       await this.paymentRepository.update(existingPayment.id, paymentData);
-      return this.paymentRepository.findOne({ where: { id: existingPayment.id } });
+      return this.paymentRepository.findOne({
+        where: { id: existingPayment.id },
+      });
     }
 
     return this.createPaymentRecord(paymentData);
+  }
+
+  async getUserSubscriptionStatusByUserId(userId: number) {
+    const org = await this.getOrganizationByUserId(userId);
+    const sub = await this.findOrgSubscription(org.id);
+    const quotas = await this.getOrganizationFeatureQuotaSummary(org.id);
+
+    // ดึงค่า AI_SCAN quota
+    const aiQuota = quotas.find((q) => q.feature_code === 'AI_SCAN') || {
+      used: 0,
+      limit: 0,
+    };
+
+    return {
+      planName: sub?.plan?.plan_name || 'Free Plan',
+      aiScanLimit: aiQuota.limit,
+      aiScanUsed: aiQuota.used,
+      expiryDate: sub?.end_date,
+    };
   }
 }
