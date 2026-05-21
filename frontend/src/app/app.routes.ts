@@ -159,6 +159,20 @@ export const routes: Routes = [
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR'] }
       },
       {
+        path: 'org/branches',
+        loadComponent: () => import('./features/org-admin/org-branches/org-branches').then(m => m.OrgBranchesComponent),
+        title: 'จัดการสาขาและแผนก - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN'] }
+      },
+      {
+        path: 'chatbot',
+        loadComponent: () => import('./features/chatbot/chatbot').then(m => m.ChatbotComponent),
+        title: 'แชทบอท AI - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER'] }
+      },
+      {
         path: 'assessor/notifications',
         loadComponent: () => import('./features/assessor/notifications/notifications').then(m => m.AssessorNotificationsComponent),
         title: 'การแจ้งเตือน - Green Sync',

@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +12,8 @@ import { Organization, OrgType } from '../../../core/models/organization.model';
   templateUrl: './organizations.html'
 })
 export class AdminOrganizationsComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private orgService = inject(OrgService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -111,28 +114,28 @@ export class AdminOrganizationsComponent implements OnInit {
     if (this.selectedOrg.id) {
        this.orgService.updateOrganization(this.selectedOrg.id, this.selectedOrg).subscribe({
          next: () => {
-           alert('บันทึกข้อมูลสำเร็จ');
+           this.toast.success('บันทึกข้อมูลสำเร็จ');
            this.isSaving = false;
            this.closeEditModal();
            this.loadOrganizations();
          },
          error: (err: any) => {
            console.error('Failed to update org:', err);
-           alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+           this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
            this.isSaving = false;
          }
        });
     } else {
        this.orgService.create(this.selectedOrg).subscribe({
          next: () => {
-           alert('สร้างองค์กรใหม่สำเร็จ');
+           this.toast.success('สร้างองค์กรใหม่สำเร็จ');
            this.isSaving = false;
            this.closeEditModal();
            this.loadOrganizations();
          },
          error: (err: any) => {
            console.error('Failed to create org:', err);
-           alert('เกิดข้อผิดพลาดในการสร้างองค์กร');
+           this.toast.error('เกิดข้อผิดพลาดในการสร้างองค์กร');
            this.isSaving = false;
          }
        });
@@ -145,12 +148,12 @@ export class AdminOrganizationsComponent implements OnInit {
     
     this.orgService.updateOrganization(org.id, { is_active: !org.is_active }).subscribe({
       next: () => {
-        alert(`${action}องค์กรเรียบร้อยแล้ว`);
+        this.toast.success(`${action}องค์กรเรียบร้อยแล้ว`);
         this.loadOrganizations();
       },
       error: (err: any) => {
         console.error('Failed to toggle active status:', err);
-        alert('เกิดข้อผิดพลาดในการดำเนินการ');
+        this.toast.error('เกิดข้อผิดพลาดในการดำเนินการ');
       }
     });
   }
@@ -163,7 +166,7 @@ export class AdminOrganizationsComponent implements OnInit {
   exportToCSV() {
     const dataToExport = this.filteredOrganizations();
     if (dataToExport.length === 0) {
-      alert('ไม่มีข้อมูลให้ส่งออก');
+      this.toast.warning('ไม่มีข้อมูลให้ส่งออก');
       return;
     }
 

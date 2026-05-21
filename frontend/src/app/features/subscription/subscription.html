@@ -9,6 +9,20 @@
 
   <div *ngIf="!isLoading" class="row justify-content-center">
     
+    <div *ngIf="currentPlan && getCurrentQuotaSummary()" class="col-12 mb-4">
+      <div class="alert alert-info rounded-4 shadow-sm border border-info border-opacity-25">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <strong>สถานะโควตาแพ็กเกจ</strong>
+            <div class="small text-muted">{{ getCurrentQuotaSummary() }}</div>
+          </div>
+          <div class="text-primary small text-end">
+            แพ็กเกจปัจจุบัน: {{ currentPlan.plan_name }}
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Billing Cycle Toggle -->
     <div class="d-flex justify-content-center mb-5 animate-in" style="animation-delay: 0.1s;">
       <div class="billing-toggle-container shadow-sm">
@@ -112,6 +126,43 @@
               </span>
             </li>
           </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading" class="row justify-content-center mt-4">
+    <div class="col-12">
+      <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+          <h5 class="card-title mb-3">ประวัติการชำระเงิน</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr>
+                  <th>วันที่</th>
+                  <th>ยอดเงิน</th>
+                  <th>สถานะ</th>
+                  <th>ช่องทาง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let payment of payments">
+                  <td>{{ payment.paid_at ? (payment.paid_at | date:'dd MMM yyyy') : (payment.created_at | date:'dd MMM yyyy') }}</td>
+                  <td>฿{{ payment.amount | number:'1.0-0' }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="payment.payment_status === 'PAID' ? 'bg-success' : payment.payment_status === 'PENDING' ? 'bg-warning text-dark' : 'bg-secondary'">
+                      {{ payment.payment_status || 'ไม่ระบุ' }}
+                    </span>
+                  </td>
+                  <td>{{ payment.payment_method || 'ไม่ระบุ' }}</td>
+                </tr>
+                <tr *ngIf="payments.length === 0">
+                  <td colspan="4" class="text-center text-muted py-4">ยังไม่มีประวัติการชำระเงิน</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

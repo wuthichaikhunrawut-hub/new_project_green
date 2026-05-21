@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { forkJoin } from 'rxjs';
@@ -16,6 +17,8 @@ import { SettingsService } from '../../../core/services/settings.service';
   styleUrls: ['./subscriptions.css']
 })
 export class AdminSubscriptionsComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private svc = inject(SubscriptionsAdminService);
   private settingsService = inject(SettingsService);
   private cdr = inject(ChangeDetectorRef);
@@ -159,12 +162,12 @@ export class AdminSubscriptionsComponent implements OnInit {
     this.settingsService.updateSettings(this.permissionSettings).subscribe({
       next: () => {
         this.isSaving = false;
-        alert('บันทึกการตั้งค่าสิทธิ์เรียบร้อยแล้ว');
+        this.toast.success('บันทึกการตั้งค่าสิทธิ์เรียบร้อยแล้ว');
         this.cdr.markForCheck();
       },
       error: () => {
         this.isSaving = false;
-        alert('เกิดข้อผิดพลาดในการบันทึกสิทธิ์');
+        this.toast.error('เกิดข้อผิดพลาดในการบันทึกสิทธิ์');
         this.cdr.markForCheck();
       }
     });
@@ -216,11 +219,11 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.closeFeatureModal();
         this.loadData();
         this.isSaving = false;
-        alert('บันทึกฟีเจอร์สำเร็จ');
+        this.toast.success('บันทึกฟีเจอร์สำเร็จ');
         this.cdr.markForCheck();
       },
       error: () => {
-        alert('ไม่สามารถบันทึกฟีเจอร์ได้');
+        this.toast.error('ไม่สามารถบันทึกฟีเจอร์ได้');
         this.isSaving = false;
         this.cdr.markForCheck();
       }
@@ -231,7 +234,7 @@ export class AdminSubscriptionsComponent implements OnInit {
     if (!confirm('ยืนยันการลบฟีเจอร์?')) return;
     this.svc.deleteFeature(id).subscribe({
       next: () => {
-        alert('ลบฟีเจอร์สำเร็จ');
+        this.toast.success('ลบฟีเจอร์สำเร็จ');
         this.loadData();
       }
     });
@@ -280,11 +283,11 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.closeModal(); 
         this.loadData(); 
         this.isSaving = false; 
-        alert('บันทึกแพ็กเกจสำเร็จ');
+        this.toast.success('บันทึกแพ็กเกจสำเร็จ');
         this.cdr.markForCheck();
       },
       error: () => { 
-        alert('ไม่สามารถบันทึกแพ็กเกจได้');
+        this.toast.error('ไม่สามารถบันทึกแพ็กเกจได้');
         this.isSaving = false; 
         this.cdr.markForCheck();
       }
@@ -295,7 +298,7 @@ export class AdminSubscriptionsComponent implements OnInit {
     if (!confirm('ยืนยันการลบแพ็กเกจ?')) return;
     this.svc.deletePlan(id).subscribe({ 
       next: () => {
-        alert('ลบแพ็กเกจสำเร็จ');
+        this.toast.success('ลบแพ็กเกจสำเร็จ');
         this.loadData();
       }
     });

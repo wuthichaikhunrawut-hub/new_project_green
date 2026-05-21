@@ -10,7 +10,7 @@ export class SettingsService {
   private apiUrl = 'http://localhost:3001/settings';
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('access_token');
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });

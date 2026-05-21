@@ -7,4 +7,5 @@ export class CreateCarbonLogDto {
   emission_factor_id?: number;
   evidence_url?: string;
   data_source?: string;
+  org_unit_id?: number;
 }

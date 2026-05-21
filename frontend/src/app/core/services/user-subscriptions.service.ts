@@ -10,7 +10,7 @@ export class UserSubscriptionsService {
   private apiUrl = 'http://localhost:3001/subscriptions';
 
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('access_token');
     return new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
@@ -19,6 +19,14 @@ export class UserSubscriptionsService {
 
   getMySubscription(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/my`, { headers: this.getHeaders() });
+  }
+
+  getMyUsage(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/my/usage`, { headers: this.getHeaders() });
+  }
+
+  getMyPayments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/my/payments`, { headers: this.getHeaders() });
   }
 
   getPlans(): Observable<any[]> {

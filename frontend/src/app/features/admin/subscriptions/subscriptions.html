@@ -1,12 +1,11 @@
 <div class="premium-page-wrapper">
   <div class="container-fluid p-4 admin-subscription-container animate-in">
-  <div class="mb-5 px-3">
-    <div class="d-flex justify-content-between align-items-center">
-      <div>
-        <h2 class="fw-bold mb-1" style="color: var(--brand-green) !important;">จัดการแพ็กเกจสมาชิก</h2>
-        <p class="text-muted mb-0 small">ระบบจัดการฟีเจอร์และแพ็กเกจระดับ Enterprise (Admin Portal)</p>
-      </div>
-      <div class="d-flex gap-2">
+  <div class="page-header px-3">
+    <div class="page-header-left">
+      <h2 class="page-title">จัดการแพ็กเกจสมาชิก</h2>
+      <p class="page-subtitle mb-0">ระบบจัดการฟีเจอร์และแพ็กเกจระดับ Enterprise (Admin Portal)</p>
+    </div>
+    <div class="page-actions d-flex gap-2">
         <div class="btn-group p-1 bg-white shadow-sm rounded-pill border-0">
           <button class="btn rounded-pill px-4 btn-sm transition-all" [class.btn-success]="activeTab === 'features'" [class.text-muted]="activeTab !== 'features'" (click)="activeTab = 'features'" [style.background]="activeTab === 'features' ? 'var(--brand-green)' : 'transparent'" [style.color]="activeTab === 'features' ? 'white' : ''">
             คลังฟีเจอร์
@@ -321,4 +320,4 @@
       </div>
     </div>
   </div>
-</div></div>
+</div>

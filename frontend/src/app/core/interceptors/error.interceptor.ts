@@ -1,3 +1,4 @@
+import { ToastService } from '../services/toast.service';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { catchError, throwError, EMPTY } from 'rxjs';
 import { Router } from '@angular/router';
@@ -34,7 +35,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
       
       // ตรงนี้ใส่ Logic แจ้งเตือน Alert สวยๆ ได้
-      // alert('เกิดข้อผิดพลาด: ' + error.message);
+      // this.toast.error('เกิดข้อผิดพลาด: ' + error.message);
       return throwError(() => error);
     })
   );

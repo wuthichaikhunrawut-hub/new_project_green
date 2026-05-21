@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,6 +12,8 @@ import { EmissionFactorsService, EmissionFactor } from '../../../core/services/e
   styleUrls: ['./emission-factors.css']
 })
 export class AdminEmissionFactorsComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private factorsService = inject(EmissionFactorsService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -93,28 +96,28 @@ export class AdminEmissionFactorsComponent implements OnInit {
     if (this.selectedFactor.id) {
       this.factorsService.updateFactor(this.selectedFactor.id, this.selectedFactor).subscribe({
         next: () => {
-          alert('บันทึกข้อมูลสำเร็จ');
+          this.toast.success('บันทึกข้อมูลสำเร็จ');
           this.closeModal();
           this.loadFactors();
           this.isSaving = false;
         },
         error: (err) => {
           console.error(err);
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
           this.isSaving = false;
         }
       });
     } else {
       this.factorsService.createFactor(this.selectedFactor).subscribe({
         next: () => {
-          alert('เพิ่มค่าสัมประสิทธิ์สำเร็จ');
+          this.toast.success('เพิ่มค่าสัมประสิทธิ์สำเร็จ');
           this.closeModal();
           this.loadFactors();
           this.isSaving = false;
         },
         error: (err) => {
           console.error(err);
-          alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+          this.toast.error('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
           this.isSaving = false;
         }
       });
@@ -129,7 +132,7 @@ export class AdminEmissionFactorsComponent implements OnInit {
         },
         error: (err) => {
           console.error(err);
-          alert('เกิดข้อผิดพลาดในการลบ');
+          this.toast.error('เกิดข้อผิดพลาดในการลบ');
         }
       });
     }

@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +14,8 @@ import { Assessment } from '../../../core/models/assessment.model';
   templateUrl: './create-request.html'
 })
 export class CreateRequestComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private authService = inject(AuthService);
   private requestsService = inject(RequestsService);
   private router = inject(Router);
@@ -51,13 +54,13 @@ export class CreateRequestComponent implements OnInit {
 
     this.requestsService.createRequest(newRequest).subscribe({
       next: () => {
-        alert('ส่งคำขอรับรองเรียบร้อยแล้ว!');
+        this.toast.success('ส่งคำขอรับรองเรียบร้อยแล้ว!');
         this.isSubmitting = false;
         this.router.navigate(['/requests']);
       },
       error: (err: any) => {
         console.error('Failed to submit request', err);
-        alert('เกิดข้อผิดพลาดในการส่งคำขอ');
+        this.toast.error('เกิดข้อผิดพลาดในการส่งคำขอ');
         this.isSubmitting = false;
       }
     });

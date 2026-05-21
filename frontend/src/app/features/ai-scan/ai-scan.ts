@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { ToastService } from '../../core/services/toast.service';
+import {  Component , inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GeminiService, BillScanResult } from '../../services/gemini';
@@ -11,6 +12,8 @@ import { GeminiService, BillScanResult } from '../../services/gemini';
   styleUrl: './ai-scan.css'
 })
 export class AiScanComponent {
+  private toast = inject(ToastService);
+
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   isProcessing = false;
@@ -75,7 +78,7 @@ export class AiScanComponent {
     console.log('Saving Data:', this.formData);
     setTimeout(() => {
       this.isSaving = false;
-      alert('บันทึกข้อมูลเข้าสู่ระบบเรียบร้อย!');
+      this.toast.success('บันทึกข้อมูลเข้าสู่ระบบเรียบร้อย!');
       this.reset();
     }, 1500);
   }

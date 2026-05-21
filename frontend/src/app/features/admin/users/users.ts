@@ -1,3 +1,4 @@
+import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +15,8 @@ import { AuthService } from '../../../core/services/auth.service';
   styleUrls: ['./users.css']
 })
 export class AdminUsersComponent implements OnInit {
+  private toast = inject(ToastService);
+
   private usersService = inject(UsersService);
   private orgService = inject(OrgService);
   private authService = inject(AuthService);
@@ -152,14 +155,14 @@ export class AdminUsersComponent implements OnInit {
       // Update existing
       this.usersService.updateUser(this.selectedUser.id, this.selectedUser).subscribe({
         next: () => {
-          alert('บันทึกข้อมูลสำเร็จ');
+          this.toast.success('บันทึกข้อมูลสำเร็จ');
           this.isSaving = false;
           this.closeEditModal();
           this.loadUsers();
         },
         error: (err) => {
           console.error('Failed to update user:', err);
-          alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (err.error?.message || err.message));
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (err.error?.message || err.message));
           this.isSaving = false;
         }
       });
@@ -167,14 +170,14 @@ export class AdminUsersComponent implements OnInit {
       // Create new
       this.usersService.createUser(this.selectedUser).subscribe({
         next: () => {
-          alert('เพิ่มผู้ใช้งานสำเร็จ');
+          this.toast.success('เพิ่มผู้ใช้งานสำเร็จ');
           this.isSaving = false;
           this.closeEditModal();
           this.loadUsers();
         },
         error: (err) => {
           console.error('Failed to create user:', err);
-          alert('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน: ' + (err.error?.message || err.message));
+          this.toast.error('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน: ' + (err.error?.message || err.message));
           this.isSaving = false;
         }
       });
@@ -188,12 +191,12 @@ export class AdminUsersComponent implements OnInit {
 
     this.usersService.updateUser(user.id, { is_active: !user.is_active }).subscribe({
       next: () => {
-        alert(`${action}บัญชีเรียบร้อยแล้ว`);
+        this.toast.success(`${action}บัญชีเรียบร้อยแล้ว`);
         this.loadUsers();
       },
       error: (err) => {
         console.error('Failed to toggle active status:', err);
-        alert('เกิดข้อผิดพลาดในการดำเนินการ');
+        this.toast.error('เกิดข้อผิดพลาดในการดำเนินการ');
       }
     });
   }
@@ -205,12 +208,12 @@ export class AdminUsersComponent implements OnInit {
     // For now assuming the service has it or will have it:
     this.usersService.deleteUser(user.id).subscribe({
       next: () => {
-        alert('ลบบัญชีผู้ใช้งานเรียบร้อยแล้ว');
+        this.toast.success('ลบบัญชีผู้ใช้งานเรียบร้อยแล้ว');
         this.loadUsers();
       },
       error: (err) => {
         console.error('Failed to delete user:', err);
-        alert('เกิดข้อผิดพลาดในการลบผู้ใช้งาน');
+        this.toast.error('เกิดข้อผิดพลาดในการลบผู้ใช้งาน');
       }
     });
   }
@@ -221,11 +224,11 @@ export class AdminUsersComponent implements OnInit {
 
     this.usersService.updateUser(user.id, { password: newPassword }).subscribe({
       next: () => {
-        alert('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว สำรองรหัสผ่านใหม่ให้ผู้ใช้งานด้วยครับ');
+        this.toast.success('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว สำรองรหัสผ่านใหม่ให้ผู้ใช้งานด้วยครับ');
       },
       error: (err) => {
         console.error('Failed to reset password:', err);
-        alert('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
+        this.toast.error('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
       }
     });
   }
@@ -265,7 +268,7 @@ export class AdminUsersComponent implements OnInit {
   exportToCSV() {
     const dataToExport = this.filteredUsers();
     if (dataToExport.length === 0) {
-      alert('ไม่มีข้อมูลให้ส่งออก');
+      this.toast.warning('ไม่มีข้อมูลให้ส่งออก');
       return;
     }
 

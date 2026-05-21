@@ -10,6 +10,7 @@ import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import {
   CarbonScopePoint,
+  CarbonUnitPoint,
   ExecutiveDashboardResponse,
 } from './interfaces/executive.types';
 
@@ -38,6 +39,7 @@ export class ExecutiveService {
       });
 
       const carbonByScope = await this.getCarbonByScope(orgId);
+      const carbonByUnit = await this.getCarbonByUnit(orgId);
       const approvedCount = approvedAssessments.length;
       const avgApprovedScore =
         approvedCount > 0
@@ -81,8 +83,10 @@ export class ExecutiveService {
           expiredAt: item.certificates && item.certificates.length > 0 && item.certificates[0].expired_at ? item.certificates[0].expired_at.toISOString() : null,
         })),
         carbonByScope,
+        carbonByUnit,
       };
     } catch (error) {
+      console.error('getDashboard error:', error);
       if (error instanceof NotFoundException) {
         throw error;
       }
@@ -110,6 +114,23 @@ export class ExecutiveService {
     return rows.map((row) => ({
       scope: Number(row.scope),
       year: Number(row.year),
+      totalEmission: Number(row.totalEmission),
+    }));
+  }
+
+  private async getCarbonByUnit(orgId: number): Promise<CarbonUnitPoint[]> {
+    const rows = await this.carbonRepo
+      .createQueryBuilder('log')
+      .leftJoin('log.organization_unit', 'unit')
+      .where('log.org_id = :orgId', { orgId })
+      .select('unit.unit_name', 'unitName')
+      .addSelect('COALESCE(SUM(log.total_emission), 0)', 'totalEmission')
+      .groupBy('unit.unit_name')
+      .orderBy('SUM(log.total_emission)', 'DESC')
+      .getRawMany<{ unitName: string | null; totalEmission: string }>();
+
+    return rows.map((row) => ({
+      unitName: row.unitName || 'ไม่ระบุสาขา',
       totalEmission: Number(row.totalEmission),
     }));
   }

@@ -2,6 +2,7 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
 
 export interface CarbonLog {
@@ -13,6 +14,7 @@ export interface CarbonLog {
   emission: number;
   source: string;
   evidence_url?: string;
+  org_unit_id?: number | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,12 +44,35 @@ export class CarbonService {
 
   // ดึงข้อมูลทั้งหมด
   getLogs(): Observable<CarbonLog[]> {
-    return this.http.get<CarbonLog[]>(this.apiUrl, { headers: this.getHeaders() });
+    return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
+      map(data => data.map(item => ({
+        id: String(item.id),
+        date: `${item.year}-${String(item.month).padStart(2, '0')}-01`,
+        type: item.activity_type,
+        amount: item.usage_amount,
+        unit: item.activity_type === 'Electricity' ? 'kWh' : (item.activity_type === 'Water' ? 'm3' : 'Litre'),
+        emission: item.total_emission,
+        source: item.data_source,
+        evidence_url: item.evidence_url,
+        org_unit_id: item.org_unit_id
+      })))
+    );
   }
 
-  // จำลองการบันทึกข้อมูล -> เปลี่ยนเป็นยิง API จริง
+  // ยิง API จริง
   addLog(log: CarbonLog): Observable<CarbonLog> {
-    return this.http.post<CarbonLog>(this.apiUrl, log, { headers: this.getHeaders() });
+    const dDate = new Date(log.date);
+    const payload = {
+      activity_type: log.type,
+      month: dDate.getMonth() + 1,
+      year: dDate.getFullYear(),
+      usage_amount: log.amount,
+      total_emission: log.emission,
+      data_source: log.source,
+      evidence_url: log.evidence_url,
+      org_unit_id: log.org_unit_id
+    };
+    return this.http.post<CarbonLog>(this.apiUrl, payload, { headers: this.getHeaders() });
   }
 
   deleteLog(id: string): Observable<void> {

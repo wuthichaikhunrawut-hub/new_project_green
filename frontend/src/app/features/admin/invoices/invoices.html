@@ -1,11 +1,12 @@
 <div class="premium-page-wrapper">
   <div class="container-fluid p-4 admin-invoice-container animate-in">
-    <div class="d-flex justify-content-between align-items-center mb-5 px-3">
-      <div>
-        <h2 class="fw-bold mb-1" style="color: var(--brand-green) !important;">ประวัติการชำระเงิน / ใบแจ้งหนี้</h2>
-        <p class="text-muted mb-0 small">ตรวจสอบสถานะใบแจ้งหนี้และประวัติการชำระเงินขององค์กร</p>
+    <div class="page-header mb-5 px-3">
+      <div class="page-header-left">
+        <h2 class="page-title">ประวัติการชำระเงิน / ใบแจ้งหนี้</h2>
+        <p class="page-subtitle mb-0">ตรวจสอบสถานะใบแจ้งหนี้และประวัติการชำระเงินขององค์กร</p>
       </div>
-      <button class="btn btn-white shadow-sm border-0 rounded-pill px-4 text-muted fw-bold" (click)="loadInvoices()" style="font-size: 0.9rem;">
+      <div class="page-actions">
+        <button class="btn btn-white shadow-sm border-0 rounded-pill px-4 text-muted fw-bold" (click)="loadInvoices()" style="font-size: 0.9rem;">
         <i class="fa-solid fa-rotate-right me-2"></i> รีเฟรชข้อมูล
       </button>
     </div>
