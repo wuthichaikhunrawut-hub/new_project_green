@@ -82,10 +82,37 @@ export class GeminiController {
     return this.geminiService.getChatHistory(userId);
   }
 
+  @Post('evidence-validation')
+  @FeatureCode('AI_SCAN')
+  @UseInterceptors(
+    FeatureQuotaInterceptor,
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    }),
+  )
+  async validateEvidence(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('categoryId') categoryId: string,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    return this.geminiService.validateEvidence(file.buffer, file.mimetype, categoryId || 'ไม่ระบุหมวดหมู่');
+  }
+
   @Delete('history')
   async clearHistory(@Request() req: { user: JwtUser }) {
     const userId = Number(req.user.sub);
     await this.geminiService.clearChatHistory(userId);
     return { success: true };
+  }
+
+  @Post('executive-summary')
+  async getExecutiveSummary(@Body() body: any) {
+    return this.geminiService.generateExecutiveSummary(body);
+  }
+
+  @Post('recommendations')
+  async getRecommendations(@Body() body: any) {
+    return this.geminiService.getRecommendations(body);
   }
 }

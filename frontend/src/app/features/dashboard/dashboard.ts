@@ -1,10 +1,11 @@
-import { Component, OnInit, AfterViewInit, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, AfterViewInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { GreenOfficeService } from '../../core/services/green-office.service';
 import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import { OrgService } from '../../core/services/org.service';
 import { AuthService } from '../../core/services/auth.service';
 import { RequestsService } from '../../core/services/requests.service';
+import { InsightsService } from '../../core/services/insights.service';
 import { ScoreIndicatorInput } from '../../core/services/audit-score.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -24,7 +25,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private orgService = inject(OrgService);
   private authService = inject(AuthService);
   private requestsService = inject(RequestsService);
+  private insightsService = inject(InsightsService);
   private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
 
   // Chart References
   private mainChart: any | null = null;
@@ -49,19 +52,26 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   orgTarget = 0;
   certificate: any = null;
   waitingForCertificate = false;
+  isLoading = true;
 
   private carbonLogs: CarbonLog[] = [];
   private chartsRendered = false;
 
   scoreIndicators: ScoreIndicatorInput[] = [];
   recentActivities = [];
+  
+  aiRecommendations: any[] = [];
+  isGeneratingAI = true;
 
   ngOnInit() {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const orgId = this.authService.getOrganizationId();
     if (orgId) {
       this.orgService.getOrganization(orgId).subscribe((data: any) => {
         this.orgData = data;
         this.orgTarget = data.target_reduction_percent || 0;
+        this.cdr.markForCheck();
       });
     }
 
@@ -69,6 +79,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       const totalMax = criteria.reduce((sum, c) => sum + (c.max_score || 0), 0);
       const totalGot = criteria.reduce((sum, c) => sum + (c.current_score || 0), 0);
       this.greenScore = totalMax > 0 ? Math.round((totalGot / totalMax) * 100) : 0; 
+      this.cdr.markForCheck();
 
       if (this.chartsRendered) {
         this.renderSustainabilityGauge();
@@ -88,6 +99,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             this.waitingForCertificate = true;
           }
         }
+        this.cdr.markForCheck();
       },
       error: () => console.error('Could not fetch assessment requests')
     });
@@ -114,18 +126,58 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           this.renewablePercentage = totalEnergy > 0 ? Math.round((renewable / totalEnergy) * 100) : 0;
         }
         
-        if (this.chartsRendered) {
-          this.renderAllCharts();
-        }
+        // Hide loader when main data is fetched
+        setTimeout(() => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          
+          // Render charts after the *ngIf="!isLoading" DOM elements are created
+          setTimeout(() => {
+            if (this.chartsRendered) {
+              this.renderAllCharts();
+            }
+          }, 100);
+        }, 300);
+
+        // Fetch AI Recommendations based on data
+        this.fetchAIRecommendations();
       },
-      error: () => console.error('Could not fetch logs for dashboard')
+      error: () => {
+        console.error('Could not fetch logs for dashboard');
+        this.isLoading = false;
+        this.isGeneratingAI = false;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  private fetchAIRecommendations() {
+    const data = {
+      weakPoints: [
+        { topic: 'พลังงาน', score: this.energyUsage > 1000 ? 'สูงเกินเกณฑ์' : 'ปกติ' },
+        { topic: 'รีไซเคิล', score: this.wasteRecycled < 50 ? 'ต้องปรับปรุง' : 'ผ่านเกณฑ์' }
+      ]
+    };
+    this.insightsService.getRecommendations(data).subscribe({
+      next: (res) => {
+        this.aiRecommendations = res.recommendations || [];
+        this.isGeneratingAI = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.aiRecommendations = [{ title: 'ไม่สามารถโหลดข้อเสนอแนะ AI ได้', action: 'กรุณาลองใหม่อีกครั้งภายหลัง', expectedImpact: 'ต่ำ' }];
+        this.isGeneratingAI = false;
+        this.cdr.markForCheck();
+      }
     });
   }
 
   ngAfterViewInit() {
     this.chartsRendered = true;
     setTimeout(() => {
-      this.renderAllCharts();
+      if (!this.isLoading) {
+        this.renderAllCharts();
+      }
     }, 100);
   }
 

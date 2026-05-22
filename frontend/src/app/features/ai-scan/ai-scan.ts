@@ -1,5 +1,5 @@
 import { ToastService } from '../../core/services/toast.service';
-import {  Component , inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GeminiService, BillScanResult } from '../../services/gemini';
@@ -13,6 +13,7 @@ import { GeminiService, BillScanResult } from '../../services/gemini';
 })
 export class AiScanComponent {
   private toast = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
 
   selectedFile: File | null = null;
   previewUrl: string | null = null;
@@ -38,7 +39,10 @@ export class AiScanComponent {
       this.errorMessage = null;
       // Create image preview
       const reader = new FileReader();
-      reader.onload = () => this.previewUrl = reader.result as string;
+      reader.onload = () => {
+        this.previewUrl = reader.result as string;
+        this.cdr.markForCheck();
+      };
       reader.readAsDataURL(file);
     }
   }
@@ -47,6 +51,7 @@ export class AiScanComponent {
     if (!this.selectedFile) return;
     this.isProcessing = true;
     this.errorMessage = null;
+    this.cdr.markForCheck();
 
     this.geminiService.uploadBill(this.selectedFile).subscribe({
       next: (result: BillScanResult) => {
@@ -60,11 +65,13 @@ export class AiScanComponent {
           this.formData.unit = result.unit || this.formData.unit;
           this.formData.date = result.date || this.formData.date;
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('AI scan failed:', err);
         this.isProcessing = false;
         this.errorMessage = err?.error?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -73,6 +80,7 @@ export class AiScanComponent {
 
   confirmSave() {
     this.isSaving = true;
+    this.cdr.markForCheck();
     
     // Simulate API call to save data into database
     console.log('Saving Data:', this.formData);
@@ -80,6 +88,7 @@ export class AiScanComponent {
       this.isSaving = false;
       this.toast.success('บันทึกข้อมูลเข้าสู่ระบบเรียบร้อย!');
       this.reset();
+      this.cdr.markForCheck();
     }, 1500);
   }
 
@@ -95,5 +104,6 @@ export class AiScanComponent {
       unit: 'kWh',
       date: ''
     };
+    this.cdr.markForCheck();
   }
 }

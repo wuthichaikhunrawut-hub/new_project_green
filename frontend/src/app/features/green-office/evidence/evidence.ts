@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UploadService } from '../../../core/services/upload.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GreenOfficeService } from '../../../core/services/green-office.service';
+import { GeminiService } from '../../../services/gemini';
 
 @Component({
   selector: 'app-green-office-evidence',
@@ -20,6 +21,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
   private authService = inject(AuthService);
   private greenOfficeService = inject(GreenOfficeService);
   private cdr = inject(ChangeDetectorRef);
+  private geminiService = inject(GeminiService);
 
   files: any[] = [];
 
@@ -126,24 +128,66 @@ export class GreenOfficeEvidenceComponent implements OnInit {
 
     this.uploadService.uploadFile(file, 'evidence', { userId, category }).subscribe({
       next: (res) => {
-        this.files.unshift({
+        const newFile = {
           id: res.id,
           name: res.file_name,
           size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
           uploadDate: new Date(res.uploaded_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }),
           category: this.selectedCategory || 'หมวดที่ยังไม่ระบุ',
           status: 'pending',
-          url: res.file_url
-        });
+          url: res.file_url,
+          rawFile: file // Add rawFile for AI validation
+        };
+        this.files.unshift(newFile);
         this.isUploading = false;
         this.pendingFile = null; // Clear after success
         this.cdr.markForCheck(); // Force UI update
         this.toast.success('อัปโหลดไฟล์สำเร็จ!');
+        
+        // Auto-validate if category is known
+        if (newFile.category !== 'หมวดที่ยังไม่ระบุ') {
+          this.validateFile(newFile);
+        }
       },
       error: (err) => {
         console.error('Upload error:', err);
         this.isUploading = false;
         this.toast.error('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
+      }
+    });
+  }
+
+  validateFile(fileObj: any) {
+    if (!fileObj.category || fileObj.category === 'หมวดที่ยังไม่ระบุ') {
+      this.toast.error('กรุณาระบุหมวดหมู่ก่อนทำการตรวจสอบด้วย AI');
+      return;
+    }
+    
+    if (!fileObj.rawFile) {
+      this.toast.error('ไม่สามารถตรวจสอบไฟล์เดิมได้ในขณะนี้ กรุณาอัปโหลดใหม่เพื่อตรวจสอบ');
+      return;
+    }
+
+    fileObj.isValidating = true;
+    fileObj.aiResult = null;
+    this.cdr.markForCheck();
+
+    this.geminiService.validateEvidence(fileObj.rawFile, fileObj.category).subscribe({
+      next: (res: any) => {
+        fileObj.isValidating = false;
+        fileObj.aiResult = res;
+        this.cdr.markForCheck();
+        if (res.isValid) {
+          this.toast.success('เอกสารผ่านการตรวจสอบเบื้องต้นจาก AI!');
+        } else {
+          this.toast.error('พบข้อสังเกตในเอกสาร กรุณาตรวจสอบอีกครั้ง');
+        }
+      },
+      error: (err: any) => {
+        console.error('AI validation error:', err);
+        fileObj.isValidating = false;
+        this.cdr.markForCheck();
+        this.toast.error('การตรวจสอบด้วย AI ล้มเหลว');
       }
     });
   }

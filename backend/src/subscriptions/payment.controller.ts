@@ -10,43 +10,78 @@ import {
   Headers,
   HttpCode,
   HttpStatus,
+  RawBodyRequest,
+  BadRequestException,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { StripeService } from './stripe.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SubscriptionsService } from './subscriptions.service';
+import Stripe from 'stripe';
 
 @Controller('payments')
 export class PaymentController {
+  private stripe: any;
+  private endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   constructor(
     private readonly stripeService: StripeService,
     private readonly subscriptionsService: SubscriptionsService,
-  ) {}
+  ) {
+    const secretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_fake';
+    this.stripe = new Stripe(secretKey, { apiVersion: '2023-10-16' as any });
+  }
 
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
-  async handleStripeWebhook(@Body() event: any) {
+  async handleStripeWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('stripe-signature') signature: string,
+  ) {
+    let event: any;
+
+    try {
+      if (this.endpointSecret && signature && req.rawBody) {
+        event = this.stripe.webhooks.constructEvent(
+          req.rawBody,
+          signature,
+          this.endpointSecret,
+        );
+      } else {
+        event = req.body;
+      }
+    } catch (err) {
+      console.error(`⚠️ Webhook signature verification failed.`, err.message);
+      throw new BadRequestException(`Webhook Error: ${err.message}`);
+    }
+
     console.log('--- Stripe Webhook Received ---', event.type);
 
-    // Example: invoice.payment_succeeded
-    if (event.type === 'invoice.payment_succeeded') {
-      const invoiceData = event.data.object;
-
-      // In a real app, verify signature using raw body
-      // const signature = req.headers['stripe-signature'];
-
-      const customerId = invoiceData.customer;
-      const amountPaid = invoiceData.amount_paid / 100;
-      const currency = invoiceData.currency.toUpperCase();
-
-      console.log(
-        `Payment succeeded for customer ${customerId}: ${amountPaid} ${currency}`,
-      );
-
-      // We would look up the organization by stripe_customer_id
-      // and insert a record into Payment table
-
-      // Since we don't have stripe_customer_id query directly in service right now,
-      // this is just the skeleton to fulfill Phase 3 requirement.
+    try {
+      switch (event.type) {
+        case 'invoice.payment_succeeded':
+          const invoice = event.data.object;
+          await this.subscriptionsService.handleInvoicePaymentSucceeded(invoice);
+          break;
+        case 'invoice.payment_failed':
+          const failedInvoice = event.data.object;
+          await this.subscriptionsService.handleInvoicePaymentFailed(failedInvoice);
+          break;
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
+          const subscription = event.data.object;
+          await this.subscriptionsService.handleSubscriptionChange(subscription);
+          break;
+        case 'checkout.session.completed':
+          const session = event.data.object;
+          await this.subscriptionsService.handleCheckoutSessionCompleted(session);
+          break;
+        default:
+          console.log(`Unhandled event type ${event.type}`);
+      }
+    } catch (error) {
+      console.error('Error processing webhook:', error);
     }
 
     return { received: true };
@@ -56,44 +91,18 @@ export class PaymentController {
   @Post('setup-intent')
   async createSetupIntent(@Req() req) {
     try {
-      console.log('--- SetupIntent Request Started ---');
-      console.log('User ID (sub):', req.user.sub);
-      const org = await this.subscriptionsService.getOrganizationByUserId(
-        req.user.sub,
-      );
-      console.log('Org Found:', org?.name, 'ID:', org?.id);
-
+      const org = await this.subscriptionsService.getOrganizationByUserId(req.user.sub);
       let stripeCustomerId = org.stripe_customer_id;
 
       if (!stripeCustomerId) {
-        console.log('No Stripe Customer ID found. Creating new customer...');
-        const customer = await this.stripeService.createCustomer(
-          req.user.email,
-          org.name,
-        );
+        const customer = await this.stripeService.createCustomer(req.user.email, org.name);
         stripeCustomerId = customer.id;
-        console.log('New Stripe Customer Created:', stripeCustomerId);
-        // Update org with stripe_customer_id
-        await this.subscriptionsService.updateOrganizationStripeId(
-          org.id,
-          stripeCustomerId,
-        );
+        await this.subscriptionsService.updateOrganizationStripeId(org.id, stripeCustomerId);
       }
 
-      console.log(
-        'Calling Stripe to create SetupIntent for:',
-        stripeCustomerId,
-      );
-      const setupIntent =
-        await this.stripeService.createSetupIntent(stripeCustomerId);
-      console.log('SetupIntent Created Successfully:', setupIntent.id);
-
-      return {
-        clientSecret: setupIntent.client_secret,
-      };
+      const setupIntent = await this.stripeService.createSetupIntent(stripeCustomerId);
+      return { clientSecret: setupIntent.client_secret };
     } catch (error) {
-      console.error('--- SetupIntent Request Failed ---');
-      console.error(error);
       throw error;
     }
   }
@@ -101,14 +110,10 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard)
   @Get('methods')
   async listPaymentMethods(@Req() req) {
-    const org = await this.subscriptionsService.getOrganizationByUserId(
-      req.user.userId,
-    );
+    const org = await this.subscriptionsService.getOrganizationByUserId(req.user.sub);
     if (!org.stripe_customer_id) return [];
 
-    const methods = await this.stripeService.listPaymentMethods(
-      org.stripe_customer_id,
-    );
+    const methods = await this.stripeService.listPaymentMethods(org.stripe_customer_id);
     return (methods.data || []).map((m: any) => ({
       id: m.id,
       type: m.type,
@@ -116,7 +121,7 @@ export class PaymentController {
       last4: m.card?.last4 || '',
       expMonth: m.card?.exp_month,
       expYear: m.card?.exp_year,
-      isDefault: false, // Logic for default could be added if stored
+      isDefault: false,
     }));
   }
 

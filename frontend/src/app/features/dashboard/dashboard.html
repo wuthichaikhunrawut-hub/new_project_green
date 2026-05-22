@@ -1,5 +1,28 @@
-<div id="dashboard-wrapper" class="p-6 md:p-8 animate-in">
+<!-- Skeleton Loader -->
+<div *ngIf="isLoading" class="p-6 md:p-8 animate-pulse">
+  <div class="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
+    <div class="h-8 bg-gray-200 rounded w-48"></div>
+    <div class="flex gap-2">
+      <div class="h-8 w-8 bg-gray-200 rounded-full"></div>
+      <div class="h-8 w-8 bg-gray-200 rounded-full"></div>
+    </div>
+  </div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div *ngFor="let i of [1,2,3,4]" class="bg-white rounded-xl h-24 border border-gray-100 p-4">
+      <div class="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+      <div class="h-6 bg-gray-200 rounded w-16 mb-2"></div>
+      <div class="h-3 bg-gray-200 rounded w-32"></div>
+    </div>
+  </div>
 
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="col-span-1 md:col-span-2 bg-white rounded-xl h-80 border border-gray-100 p-4"></div>
+    <div class="col-span-1 bg-white rounded-xl h-80 border border-gray-100 p-4"></div>
+  </div>
+</div>
+
+<div *ngIf="!isLoading" id="dashboard-wrapper" class="p-6 md:p-8 animate-in fade-in-up">
   <!-- Header Match Reference -->
   <div class="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
     <div class="dash-header-title">
@@ -158,10 +181,10 @@
     </div>
   </div>
 
-  <!-- Row 3: Donut, Bar, Insights -->
-  <div class="grid-3-cols fade-in-up" style="animation-delay: 0.2s">
+  <!-- Row 3: Donut, Bar -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in-up" style="animation-delay: 0.2s">
     <!-- Donut Chart -->
-    <div class="dashboard-card">
+    <div class="dashboard-card h-full">
       <div class="chart-title mb-1">แหล่งปล่อยคาร์บอน</div>
       <div class="chart-subtitle mb-4">สัดส่วนการปล่อยตามขอบเขต (Scope)</div>
       <div class="w-full h-[260px] flex items-center justify-center relative">
@@ -170,33 +193,68 @@
     </div>
 
     <!-- Bar Chart -->
-    <div class="dashboard-card">
+    <div class="dashboard-card h-full">
       <div class="chart-title mb-1">การใช้พลังงานย้อนหลัง</div>
       <div class="chart-subtitle mb-4">พลังงานหมุนเวียน vs ไฟฟ้าจากสายส่ง (kWh)</div>
       <div class="w-full h-[260px]">
         <div id="apexEnergyBar"></div>
       </div>
     </div>
+  </div>
 
-    <!-- AI Insights Checklist -->
-    <div class="dashboard-card">
-      <div class="ai-insights-header">
-        <span>ข้อเสนอแนะอัจฉริยะจาก AI</span>
-      </div>
-      <div class="flex flex-col">
-        <div class="ai-item">
-          <div class="ai-icon-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ai-text">พิจารณาเปลี่ยนหลอดไฟในอาคารเป็น LED ทั้งหมดเพื่อลดการใช้พลังงานลงได้ 15%</div>
+  <!-- Row 4: AI Insights Row -->
+  <div class="mt-6 dashboard-card fade-in-up bg-gradient-to-br from-white to-emerald-50/30" style="animation-delay: 0.3s">
+    <div class="ai-insights-header flex justify-between items-center mb-5 pb-3 border-b border-emerald-100">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+          <i class="fa-solid fa-sparkles text-lg"></i>
         </div>
-        <div class="ai-item">
-          <div class="ai-icon-check"><i class="fa-solid fa-check"></i></div>
-          <div class="ai-text">ปรับปรุงระบบรดน้ำต้นไม้ให้เป็นระบบจับความชื้นอัตโนมัติ และซ่อมจุดรั่วไหลของน้ำโดยเร็ว
+        <div>
+          <h3 class="font-bold text-slate-800 text-lg">ข้อเสนอแนะอัจฉริยะจาก AI</h3>
+          <p class="text-xs text-slate-500">วิเคราะห์ข้อมูลเพื่อหาแนวทางลดคาร์บอนที่มีประสิทธิภาพที่สุด</p>
+        </div>
+      </div>
+    </div>
+    
+    <div *ngIf="isGeneratingAI" class="grid grid-cols-1 md:grid-cols-3 gap-4 animate-pulse">
+      <div *ngFor="let i of [1,2,3]" class="h-32 bg-white rounded-xl border border-slate-100 shadow-sm"></div>
+    </div>
+
+    <div *ngIf="!isGeneratingAI" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div *ngFor="let rec of aiRecommendations" class="p-4 rounded-xl bg-white border border-emerald-100 shadow-sm flex flex-col justify-between transition-transform hover:-translate-y-1 hover:shadow-md relative overflow-hidden group">
+        <!-- Decoration -->
+        <div class="absolute -right-4 -top-4 w-16 h-16 bg-emerald-50 rounded-full group-hover:bg-emerald-100 transition-colors z-0"></div>
+        
+        <div class="relative z-10">
+          <div class="flex items-start gap-3 mb-3">
+            <div class="flex-shrink-0 mt-0.5">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm">
+                <i class="fa-solid fa-lightbulb text-sm"></i>
+              </div>
+            </div>
+            <h4 class="font-bold text-[15px] text-slate-800 leading-tight">{{ rec.title }}</h4>
+          </div>
+          <p class="text-[13px] text-slate-600 mb-4 leading-relaxed">{{ rec.action }}</p>
+        </div>
+        
+        <div class="relative z-10 mt-auto pt-3 border-t border-slate-50 flex items-center justify-between">
+          <span class="text-xs font-semibold text-slate-500">ผลกระทบต่อเป้าหมาย:</span>
+          <div class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md"
+               [ngClass]="{
+                 'bg-emerald-100 text-emerald-700': rec.expectedImpact === 'สูง' || rec.expectedImpact === 'High',
+                 'bg-amber-100 text-amber-700': rec.expectedImpact === 'ปานกลาง' || rec.expectedImpact === 'Medium',
+                 'bg-slate-100 text-slate-700': rec.expectedImpact === 'ต่ำ' || rec.expectedImpact === 'Low'
+               }">
+            {{ rec.expectedImpact }}
           </div>
         </div>
-        <div class="ai-item">
-          <div class="ai-icon-check" style="background: #ef4444;"><i class="fa-solid fa-exclamation"></i></div>
-          <div class="ai-text">ตรวจพบระบบปรับอากาศ (HVAC) โซน A ทำงานเกินเวลาที่กำหนด 12% ในสัปดาห์ที่ผ่านมา</div>
+      </div>
+      
+      <div *ngIf="aiRecommendations.length === 0" class="col-span-1 md:col-span-3 text-center py-8 text-slate-500 text-sm bg-white rounded-xl border border-dashed border-slate-200">
+        <div class="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3 text-slate-300">
+          <i class="fa-solid fa-robot text-xl"></i>
         </div>
+        ไม่พบข้อเสนอแนะในขณะนี้
       </div>
     </div>
   </div>

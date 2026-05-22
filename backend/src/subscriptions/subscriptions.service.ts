@@ -54,6 +54,52 @@ export class SubscriptionsService {
     await this.orgRepository.update(orgId, { stripe_customer_id: stripeId });
   }
 
+  async getOrganizationByStripeCustomerId(stripeId: string): Promise<Organization | null> {
+    return this.orgRepository.findOne({ where: { stripe_customer_id: stripeId } });
+  }
+
+  // ---- Stripe Webhook Handlers ----
+
+  async handleInvoicePaymentSucceeded(invoice: any) {
+    const org = await this.getOrganizationByStripeCustomerId(invoice.customer);
+    if (!org) return;
+    
+    console.log(`Payment succeeded for org ${org.name}, amount: ${invoice.amount_paid}`);
+    
+    await this.createPaymentRecord({
+      org_id: org.id,
+      amount: invoice.amount_paid / 100,
+      currency: invoice.currency.toUpperCase(),
+      payment_method: 'stripe',
+      payment_status: 'PAID',
+      paid_at: new Date(),
+    });
+  }
+
+  async handleInvoicePaymentFailed(invoice: any) {
+    const org = await this.getOrganizationByStripeCustomerId(invoice.customer);
+    if (!org) return;
+    console.log(`Payment failed for org ${org.name}`);
+  }
+
+  async handleSubscriptionChange(subscription: any) {
+    const org = await this.getOrganizationByStripeCustomerId(subscription.customer);
+    if (!org) return;
+    console.log(`Subscription ${subscription.status} for org ${org.name}`);
+    const activeSub = await this.orgSubRepository.findOne({ where: { org_id: org.id } });
+    if (activeSub) {
+      activeSub.status = subscription.status === 'active' || subscription.status === 'trialing' ? 'ACTIVE' : 'EXPIRED';
+      activeSub.end_date = new Date(subscription.current_period_end * 1000);
+      await this.orgSubRepository.save(activeSub);
+    }
+  }
+
+  async handleCheckoutSessionCompleted(session: any) {
+    const org = await this.getOrganizationByStripeCustomerId(session.customer);
+    if (!org) return;
+    console.log(`Checkout completed for org ${org.name}`);
+  }
+
   // ---- Subscription Plans ----
 
   findAllPlans() {
@@ -357,6 +403,24 @@ export class SubscriptionsService {
   async createPaymentRecord(data: Partial<Payment>) {
     const payment = this.paymentRepository.create(data);
     return this.paymentRepository.save(payment);
+  }
+
+  async cancelSubscription(orgId: number) {
+    const sub = await this.orgSubRepository.findOne({ where: { org_id: orgId, status: 'ACTIVE' } });
+    if (!sub) throw new Error('No active subscription found');
+    
+    // In a real production app, also cancel on Stripe via Stripe API
+    sub.auto_renew = false;
+    sub.status = 'CANCELLED';
+    await this.orgSubRepository.save(sub);
+    
+    await this.auditLogsService.logAction(
+      undefined,
+      'CANCEL_SUBSCRIPTION',
+      `Organization ${orgId} cancelled their subscription`,
+    );
+    
+    return { success: true, message: 'Subscription cancelled successfully' };
   }
 
   async recordPaymentForInvoice(invoiceId: number, status: string) {

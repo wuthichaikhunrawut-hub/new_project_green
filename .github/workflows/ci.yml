@@ -1,0 +1,50 @@
+name: GreenSync CI/CD
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: |
+          backend/package-lock.json
+          frontend/package-lock.json
+
+    - name: Install Dependencies (Backend)
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Build Backend
+      working-directory: ./backend
+      run: npm run build
+
+    - name: Install Dependencies (Frontend)
+      working-directory: ./frontend
+      run: npm ci --legacy-peer-deps
+
+    - name: Build Frontend
+      working-directory: ./frontend
+      run: npm run build -- --configuration production
+
+  docker-build:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build Docker Compose Services
+      run: docker-compose build

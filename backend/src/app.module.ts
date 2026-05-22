@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { GeminiModule } from './gemini/gemini.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -19,11 +20,17 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AssessorModule } from './assessor/assessor.module';
 import { OrgAdminModule } from './org-admin/org-admin.module';
 import { ExecutiveModule } from './executive/executive.module';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100, // Limit each IP to 100 requests per 60 seconds
+    }]),
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -60,4 +67,8 @@ import { ExecutiveModule } from './executive/executive.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
