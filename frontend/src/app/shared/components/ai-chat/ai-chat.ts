@@ -1,4 +1,4 @@
-import { Component, inject, PLATFORM_ID, OnInit } from '@angular/core';
+import { Component, inject, PLATFORM_ID, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -19,6 +19,7 @@ interface ChatMessage {
 export class AiChatComponent implements OnInit {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
 
   isOpen = false;
   isLoading = false;
@@ -60,9 +61,11 @@ export class AiChatComponent implements OnInit {
             this.selectSession(this.sessions[0]);
           }
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load chat history:', err);
+        this.cdr.markForCheck();
       }
     });
   }
@@ -79,6 +82,7 @@ export class AiChatComponent implements OnInit {
             const found = this.sessions.find(s => s.id === oldActiveId);
             if (found) {
               this.activeSessionId = found.id;
+              this.cdr.markForCheck();
               return;
             }
           }
@@ -86,6 +90,7 @@ export class AiChatComponent implements OnInit {
             this.activeSessionId = this.sessions[0].id;
           }
         }
+        this.cdr.markForCheck();
       }
     });
   }
@@ -170,6 +175,7 @@ export class AiChatComponent implements OnInit {
     this.messages.push({ role: 'user', text, time: new Date() });
     this.inputMessage = '';
     this.isLoading = true;
+    this.cdr.markForCheck();
 
     this.http.post<{ reply: string }>(
       'http://localhost:3001/gemini/chat',
@@ -179,6 +185,7 @@ export class AiChatComponent implements OnInit {
       next: (res) => {
         this.messages.push({ role: 'bot', text: res.reply, time: new Date() });
         this.isLoading = false;
+        this.cdr.markForCheck();
         this.scrollToBottom();
         this.loadHistoryAfterMessage();
       },
@@ -189,6 +196,7 @@ export class AiChatComponent implements OnInit {
           : '❌ ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
         this.messages.push({ role: 'bot', text: errorText, time: new Date() });
         this.isLoading = false;
+        this.cdr.markForCheck();
         this.scrollToBottom();
       }
     });
@@ -213,9 +221,11 @@ export class AiChatComponent implements OnInit {
           this.sessions = [];
           this.setDefaultMessage();
           this.showHistory = false;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Failed to clear chat history:', err);
+          this.cdr.markForCheck();
         }
       });
     }

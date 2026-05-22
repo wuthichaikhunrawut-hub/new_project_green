@@ -1,18 +1,9 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login';
 import { MainLayoutComponent } from './layout/main-layout/main-layout';
-import { DashboardComponent } from './features/dashboard/dashboard';
-import { CarbonLogsComponent } from './features/logs/carbon-logs';
-import { AiScanComponent } from './features/ai-scan/ai-scan';
 import { RegisterComponent } from './features/auth/register/register';
 import { AssessorRegisterComponent } from './features/auth/assessor-register/assessor-register';
 import { HomeComponent } from './features/home/home';
-
-import { CategoryPageComponent } from './features/assessment/category/category';
-import { GreenOfficeFormComponent } from './features/green-office/form/form';
-import { GreenOfficeEvidenceComponent } from './features/green-office/evidence/evidence';
-import { OrgProfileComponent } from './features/org/profile/profile';
-import { SubscriptionComponent } from './features/subscription/subscription';
 import { RoleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
@@ -39,7 +30,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        component: DashboardComponent,
+        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.DashboardComponent),
         title: 'Green Sync - ภาพรวมระบบ',
         canActivate: [RoleGuard],
         data: { roles: ['USER', 'EXECUTIVE', 'EMPLOYEE', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'] }
@@ -183,14 +174,14 @@ export const routes: Routes = [
       // GROUP 3: CARBON FOOTPRINT
       {
         path: 'carbon/logs',
-        component: CarbonLogsComponent,
+        loadComponent: () => import('./features/logs/carbon-logs').then(m => m.CarbonLogsComponent),
         title: 'บันทึกก๊าซเรือนกระจก',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       {
         path: 'ai-scan',
-        component: AiScanComponent,
+        loadComponent: () => import('./features/ai-scan/ai-scan').then(m => m.AiScanComponent),
         title: 'AI Scan - วิเคราะห์ภาพถ่ายเพื่อลดคาร์บอน',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
@@ -199,21 +190,21 @@ export const routes: Routes = [
       // GROUP 2: GREEN OFFICE ASSESSMENTS
       {
         path: 'assessment',
-        component: GreenOfficeFormComponent,
+        loadComponent: () => import('./features/green-office/form/form').then(m => m.GreenOfficeFormComponent),
         title: 'แบบประเมินตนเอง - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       { 
         path: 'assessment/category/:id', 
-        component: CategoryPageComponent,
+        loadComponent: () => import('./features/assessment/category/category').then(m => m.CategoryPageComponent),
         title: 'แบบประเมินตนเอง - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       { 
         path: 'green-office/evidence', 
-        component: GreenOfficeEvidenceComponent,
+        loadComponent: () => import('./features/green-office/evidence/evidence').then(m => m.GreenOfficeEvidenceComponent),
         title: 'จัดการไฟล์หลักฐาน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
@@ -243,7 +234,7 @@ export const routes: Routes = [
       // GROUP 1: ORGANIZATION
       { 
         path: 'org/profile', 
-        component: OrgProfileComponent,
+        loadComponent: () => import('./features/org/profile/profile').then(m => m.OrgProfileComponent),
         title: 'ข้อมูลหน่วยงาน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
@@ -285,7 +276,7 @@ export const routes: Routes = [
       },
       { 
         path: 'subscription', 
-        component: SubscriptionComponent,
+        loadComponent: () => import('./features/subscription/subscription').then(m => m.SubscriptionComponent),
         title: 'แพ็กเกจการใช้งาน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }

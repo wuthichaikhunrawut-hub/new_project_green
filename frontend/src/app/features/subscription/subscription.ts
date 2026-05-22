@@ -133,4 +133,22 @@ export class SubscriptionComponent implements OnInit {
       } 
     });
   }
+
+  cancelSubscription() {
+    if (confirm('คุณแน่ใจหรือไม่ที่จะยกเลิกแพ็กเกจปัจจุบัน? คุณจะสูญเสียสิทธิ์การใช้งานพรีเมียมทันที')) {
+      this.isLoading = true;
+      this.userSubService.cancelSubscription().subscribe({
+        next: () => {
+          alert('ยกเลิกแพ็กเกจเรียบร้อยแล้ว');
+          this.loadData();
+        },
+        error: (err) => {
+          console.error(err);
+          this.isLoading = false;
+          alert('เกิดข้อผิดพลาดในการยกเลิกแพ็กเกจ');
+          this.cdr.markForCheck();
+        }
+      });
+    }
+  }
 }

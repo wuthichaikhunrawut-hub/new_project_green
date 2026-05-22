@@ -9,13 +9,14 @@ export interface BillScanResult {
   date: string;
   confidence: number;
   rawText: string;
+
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class GeminiService {
-  private apiUrl = 'http://localhost:3001/gemini/ocr';
+  private apiUrl = 'http://localhost:3001/gemini';
 
   constructor(private http: HttpClient) {}
 
@@ -26,7 +27,13 @@ export class GeminiService {
   uploadBill(file: File): Observable<BillScanResult> {
     const formData = new FormData();
     formData.append('file', file);
-    // Backend endpoint is /gemini/ocr
-    return this.http.post<BillScanResult>(this.apiUrl, formData);
+    return this.http.post<BillScanResult>(`${this.apiUrl}/ocr`, formData);
+  }
+
+  validateEvidence(file: File, categoryId: string): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('categoryId', categoryId);
+    return this.http.post<any>(`${this.apiUrl}/evidence-validation`, formData);
   }
 }

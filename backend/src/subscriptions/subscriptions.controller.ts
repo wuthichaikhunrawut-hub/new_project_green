@@ -43,6 +43,12 @@ export class SubscriptionsController {
     return this.subscriptionsService.getOrganizationPayments(orgId);
   }
 
+  @Delete('my/cancel')
+  async cancelMySubscription(@Request() req: any) {
+    const orgId = Number(req.user.orgId);
+    return this.subscriptionsService.cancelSubscription(orgId);
+  }
+
   @Get('features')
   findAllFeatures() {
     return this.subscriptionsService.findAllFeatures();

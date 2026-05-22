@@ -32,4 +32,8 @@ export class UserSubscriptionsService {
   getPlans(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/plans`, { headers: this.getHeaders() });
   }
+
+  cancelSubscription(): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/my/cancel`, { headers: this.getHeaders() });
+  }
 }

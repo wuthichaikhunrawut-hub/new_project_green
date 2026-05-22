@@ -84,32 +84,80 @@
     </div>
   </div>
 
+  <!-- AI Executive Summary for Admin -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-primary bg-opacity-10 border border-primary border-opacity-25">
+        <div class="card-body p-4 d-flex gap-4 align-items-start">
+          <div class="ai-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; font-size: 24px;">
+            <i class="fa-solid fa-robot"></i>
+          </div>
+          <div class="flex-grow-1">
+            <h5 class="fw-bold text-primary mb-2 d-flex justify-content-between align-items-center">
+               บทวิเคราะห์ระบบโดย AI
+               <button *ngIf="!isLoadingAi" (click)="retryAi()" class="btn btn-sm btn-outline-primary rounded-pill">
+                  <i class="fa-solid fa-rotate-right me-1"></i> โหลดใหม่
+               </button>
+            </h5>
+            
+            <ng-container *ngIf="isLoadingAi">
+               <div class="skeleton skel-text mb-2" style="width: 90%; height: 16px;"></div>
+               <div class="skeleton skel-text mb-2" style="width: 95%; height: 16px;"></div>
+               <div class="skeleton skel-text mb-2" style="width: 80%; height: 16px;"></div>
+            </ng-container>
+
+            <ng-container *ngIf="!isLoadingAi">
+              <div class="text-dark opacity-75 lh-base">{{ adminAiSummary }}</div>
+            </ng-container>
+
+            <!-- AI Checklist section -->
+            <div class="mt-4 border-top pt-3 border-primary border-opacity-25">
+              <h6 class="fw-bold text-slate-800 mb-3"><i class="fa-solid fa-list-check text-emerald-500 mr-2"></i> ข้อเสนอแนะการจัดการระบบ (Actionable Insights)</h6>
+              
+              <div *ngIf="isGeneratingRecommendations" class="d-flex flex-column gap-2 animate-pulse">
+                <div class="skeleton skel-text" style="width: 100%; height: 50px;"></div>
+                <div class="skeleton skel-text" style="width: 100%; height: 50px;"></div>
+              </div>
+
+              <div *ngIf="!isGeneratingRecommendations" class="d-flex flex-column gap-2">
+                <div *ngFor="let rec of aiRecommendations" class="p-3 rounded bg-white border border-primary border-opacity-10 d-flex align-items-start gap-3">
+                  <div class="mt-1">
+                    <div class="rounded-circle bg-emerald-100 text-emerald-600 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                      <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-1 text-dark">{{ rec.title }}</h6>
+                    <p class="small text-muted mb-1">{{ rec.action }}</p>
+                    <span class="badge bg-emerald-100 text-emerald-700 uppercase tracking-wider" style="font-size: 10px;">
+                      ผลกระทบ: {{ rec.expectedImpact }}
+                    </span>
+                  </div>
+                </div>
+                <div *ngIf="aiRecommendations.length === 0" class="text-center py-2 text-muted small">
+                  ไม่พบข้อเสนอแนะเพิ่มเติม
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Charts and Lists Row -->
   <div class="row g-4 mb-4">
-    <!-- Subscription Distribution -->
+    
+    <!-- Growth Chart -->
     <div class="col-md-8">
       <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-          <h5 class="fw-bold mb-0">สัดส่วนแพ็กเกจการใช้งาน</h5>
-          <button routerLink="/admin/subscriptions" class="btn btn-sm btn-light rounded-pill">ดูแพ็กเกจ</button>
+          <h5 class="fw-bold mb-0">แนวโน้มการเติบโตขององค์กร</h5>
+          <span class="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill">6 เดือนล่าสุด</span>
         </div>
         <div class="card-body p-4">
-           <!-- Manual Bars for Demo if Charts not ready -->
-           <div class="mb-4" *ngFor="let plan of stats.planDistribution">
-              <div class="d-flex justify-content-between mb-1">
-                 <span class="fw-semibold">{{ plan.name }}</span>
-                 <span class="text-muted">{{ plan.count }} องค์กร</span>
-              </div>
-              <div class="progress" style="height: 12px; border-radius: 6px;">
-                 <div class="progress-bar" 
-                      [ngClass]="{'bg-primary': plan.name === 'Enterprise', 'bg-success': plan.name === 'Pro', 'bg-secondary': plan.name === 'Free'}"
-                      [style.width.%]="(plan.count / stats.totalOrganizations) * 100">
-                 </div>
-              </div>
-           </div>
-           <div *ngIf="stats.planDistribution.length === 0" class="text-center py-4 text-muted">
-              ไม่มีข้อมูลแพ็กเกจ
-           </div>
+           <div id="adminGrowthChart"></div>
         </div>
       </div>
     </div>
@@ -151,10 +199,37 @@
 
   <!-- Bottom Row: Quick Actions & Recent Logs -->
   <div class="row g-4">
+    
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold mb-0">สัดส่วนแพ็กเกจการใช้งาน</h5>
+          <button routerLink="/admin/subscriptions" class="btn btn-sm btn-light rounded-pill">ดูแพ็กเกจ</button>
+        </div>
+        <div class="card-body p-4">
+           <div class="mb-4" *ngFor="let plan of stats.planDistribution">
+              <div class="d-flex justify-content-between mb-1">
+                 <span class="fw-semibold">{{ plan.name }}</span>
+                 <span class="text-muted">{{ plan.count }} องค์กร</span>
+              </div>
+              <div class="progress" style="height: 12px; border-radius: 6px;">
+                 <div class="progress-bar" 
+                      [ngClass]="{'bg-primary': plan.name === 'Enterprise', 'bg-success': plan.name === 'Pro', 'bg-secondary': plan.name === 'Free'}"
+                      [style.width.%]="stats.totalOrganizations > 0 ? (plan.count / stats.totalOrganizations) * 100 : 0">
+                 </div>
+              </div>
+           </div>
+           <div *ngIf="stats.planDistribution.length === 0" class="text-center py-4 text-muted">
+              ไม่มีข้อมูลแพ็กเกจ
+           </div>
+        </div>
+      </div>
+    </div>
+
     <div class="col-md-4">
        <div class="card border-0 shadow-sm rounded-4">
           <div class="card-body p-4">
-              <h6 class="fw-bold text-uppercase text-muted small mb-3">การจัดการระบบ</h6>
+              <h6 class="fw-bold text-uppercase text-muted small mb-3">การจัดการระบบด่วน</h6>
              <div class="d-grid gap-2">
                 <button routerLink="/admin/assessors" class="btn btn-outline-primary text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
                    <span>ยืนยันผู้ตรวจประเมิน</span>
@@ -174,29 +249,5 @@
        </div>
     </div>
     
-    <div class="col-md-8">
-       <div class="card border-0 shadow-sm rounded-4">
-          <div class="card-header bg-white border-0 pt-4 px-4">
-             <h5 class="fw-bold mb-0">System Performance Summary</h5>
-          </div>
-          <div class="card-body p-4">
-             <div class="row text-center">
-                <div class="col-md-4 border-end">
-                   <div class="text-muted small fw-bold">PLATFORM PASS RATE</div>
-                   <div class="h3 fw-bold text-success">{{ stats.successRate }}%</div>
-                </div>
-                <div class="col-md-4 border-end">
-                   <div class="text-muted small fw-bold">AVG REVIEW TIME</div>
-                   <div class="h3 fw-bold text-dark">3.2 Days</div>
-                </div>
-                <div class="col-md-4">
-                   <div class="text-muted small fw-bold">TOTAL REDUCTION</div>
-                   <div class="h3 fw-bold text-primary">{{ stats.carbonReduction | number }}</div>
-                   <div class="small text-muted">kgCO2e</div>
-                </div>
-             </div>
-          </div>
-       </div>
-    </div>
   </div>
 </div>

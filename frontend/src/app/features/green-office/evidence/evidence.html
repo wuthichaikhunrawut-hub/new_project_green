@@ -200,101 +200,137 @@
           </div>
 
           <!-- File row -->
-          <div
-            *ngFor="let file of filteredFiles"
-            class="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/60 transition-colors group">
+          <div *ngFor="let file of filteredFiles" class="group">
+            <div class="flex items-center gap-4 px-5 py-3.5 hover:bg-gray-50/60 transition-colors">
 
-            <!-- File icon -->
-            <div class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border"
-                 [ngClass]="{
-                   'bg-red-50 border-red-100': file.name.includes('.pdf'),
-                   'bg-blue-50 border-blue-100': file.name.includes('.jpg') || file.name.includes('.png'),
-                   'bg-indigo-50 border-indigo-100': file.name.includes('.docx'),
-                   'bg-gray-50 border-gray-100': !file.name.includes('.pdf') && !file.name.includes('.jpg') && !file.name.includes('.png') && !file.name.includes('.docx')
-                 }">
-              <i class="fa-solid text-base"
-                 [ngClass]="{
-                   'fa-file-pdf text-red-500': file.name.includes('.pdf'),
-                   'fa-file-image text-blue-500': file.name.includes('.jpg') || file.name.includes('.png'),
-                   'fa-file-word text-indigo-500': file.name.includes('.docx'),
-                   'fa-file text-gray-400': !file.name.includes('.pdf') && !file.name.includes('.jpg') && !file.name.includes('.png') && !file.name.includes('.docx')
-                 }"></i>
-            </div>
+              <!-- File icon -->
+              <div class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center border"
+                   [ngClass]="{
+                     'bg-red-50 border-red-100': file.name.includes('.pdf'),
+                     'bg-blue-50 border-blue-100': file.name.includes('.jpg') || file.name.includes('.png'),
+                     'bg-indigo-50 border-indigo-100': file.name.includes('.docx'),
+                     'bg-gray-50 border-gray-100': !file.name.includes('.pdf') && !file.name.includes('.jpg') && !file.name.includes('.png') && !file.name.includes('.docx')
+                   }">
+                <i class="fa-solid text-base"
+                   [ngClass]="{
+                     'fa-file-pdf text-red-500': file.name.includes('.pdf'),
+                     'fa-file-image text-blue-500': file.name.includes('.jpg') || file.name.includes('.png'),
+                     'fa-file-word text-indigo-500': file.name.includes('.docx'),
+                     'fa-file text-gray-400': !file.name.includes('.pdf') && !file.name.includes('.jpg') && !file.name.includes('.png') && !file.name.includes('.docx')
+                   }"></i>
+              </div>
 
-            <!-- File info -->
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-semibold text-gray-800 truncate">{{ file.name }}</p>
-              <p class="text-xs text-gray-400 mt-0.5">{{ file.size }} · {{ file.uploadDate }}</p>
-            </div>
+              <!-- File info -->
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-gray-800 truncate">{{ file.name }}</p>
+                <p class="text-xs text-gray-400 mt-0.5">{{ file.size }} · {{ file.uploadDate }}</p>
+              </div>
 
-            <!-- Category badge / Editor -->
-            <div class="hidden sm:flex shrink-0 items-center">
-              <span *ngIf="editingFileId !== file.id" 
-                    class="px-2 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500 border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors"
-                    (click)="startEdit(file)">
-                {{ file.category }}
-              </span>
-              
-              <div *ngIf="editingFileId === file.id" class="flex items-center gap-2">
-                <select
-                  class="rounded-lg border border-indigo-200 py-1 px-2 text-[10px] font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-500"
-                  #categorySelect
-                  (change)="updateCategory(file, categorySelect.value)">
-                  <option value="" disabled>เลือกหมวดหมู่...</option>
-                  <option [selected]="file.category === 'หมวดที่ 1'" value="หมวดที่ 1">หมวดที่ 1</option>
-                  <option [selected]="file.category === 'หมวดที่ 2'" value="หมวดที่ 2">หมวดที่ 2</option>
-                  <option [selected]="file.category === 'หมวดที่ 3'" value="หมวดที่ 3">หมวดที่ 3</option>
-                  <option [selected]="file.category === 'หมวดที่ 4'" value="หมวดที่ 4">หมวดที่ 4</option>
-                  <option [selected]="file.category === 'หมวดที่ 5'" value="หมวดที่ 5">หมวดที่ 5</option>
-                  <option [selected]="file.category === 'หมวดที่ 6'" value="หมวดที่ 6">หมวดที่ 6</option>
-                  <option [selected]="file.category === 'หมวดที่ 7'" value="หมวดที่ 7" *ngIf="hasCategory7">หมวดที่ 7</option>
-                </select>
-                <button (click)="cancelEdit()" class="text-gray-400 hover:text-red-500">
-                  <i class="fa-solid fa-xmark text-[10px]"></i>
+              <!-- Category badge / Editor -->
+              <div class="hidden sm:flex shrink-0 items-center">
+                <span *ngIf="editingFileId !== file.id" 
+                      class="px-2 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500 border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors"
+                      (click)="startEdit(file)">
+                  {{ file.category }}
+                </span>
+                
+                <div *ngIf="editingFileId === file.id" class="flex items-center gap-2">
+                  <select
+                    class="rounded-lg border border-indigo-200 py-1 px-2 text-[10px] font-bold text-gray-700 outline-none focus:ring-2 focus:ring-indigo-500"
+                    #categorySelect
+                    (change)="updateCategory(file, categorySelect.value)">
+                    <option value="" disabled>เลือกหมวดหมู่...</option>
+                    <option [selected]="file.category === 'หมวดที่ 1'" value="หมวดที่ 1">หมวดที่ 1</option>
+                    <option [selected]="file.category === 'หมวดที่ 2'" value="หมวดที่ 2">หมวดที่ 2</option>
+                    <option [selected]="file.category === 'หมวดที่ 3'" value="หมวดที่ 3">หมวดที่ 3</option>
+                    <option [selected]="file.category === 'หมวดที่ 4'" value="หมวดที่ 4">หมวดที่ 4</option>
+                    <option [selected]="file.category === 'หมวดที่ 5'" value="หมวดที่ 5">หมวดที่ 5</option>
+                    <option [selected]="file.category === 'หมวดที่ 6'" value="หมวดที่ 6">หมวดที่ 6</option>
+                    <option [selected]="file.category === 'หมวดที่ 7'" value="หมวดที่ 7" *ngIf="hasCategory7">หมวดที่ 7</option>
+                  </select>
+                  <button (click)="cancelEdit()" class="text-gray-400 hover:text-red-500">
+                    <i class="fa-solid fa-xmark text-[10px]"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Status badge -->
+              <div class="shrink-0">
+                <span *ngIf="file.status === 'approved'"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
+                  <i class="fa-solid fa-check text-[10px]"></i> ผ่าน
+                </span>
+                <span *ngIf="file.status === 'pending'"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
+                  <i class="fa-solid fa-clock text-[10px]"></i> รอตรวจ
+                </span>
+                <span *ngIf="file.status === 'rejected'"
+                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
+                  <i class="fa-solid fa-xmark text-[10px]"></i> ไม่ผ่าน
+                </span>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="shrink-0 flex items-center gap-1 transition-opacity">
+                <button
+                  class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-blue-100 hover:text-blue-600 flex items-center justify-center transition-colors"
+                  title="ดูไฟล์"
+                  (click)="openPreview(file)">
+                  <i class="fa-regular fa-eye text-xs text-gray-500 hover:text-blue-600"></i>
+                </button>
+                <button *ngIf="file.rawFile && !file.isValidating"
+                  class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-green-100 hover:text-green-600 flex items-center justify-center transition-colors"
+                  title="ตรวจสอบด้วย AI"
+                  (click)="validateFile(file)">
+                  <i class="fa-solid fa-robot text-xs text-gray-500 hover:text-green-600"></i>
+                </button>
+                <button
+                  class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-indigo-100 hover:text-indigo-600 flex items-center justify-center transition-colors"
+                  title="แก้ไขหมวดหมู่"
+                  (click)="startEdit(file)">
+                  <i class="fa-regular fa-pen-to-square text-xs text-gray-500 hover:text-indigo-600"></i>
+                </button>
+                <button
+                  class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-red-100 flex items-center justify-center transition-colors"
+                  title="ลบไฟล์"
+                  (click)="deleteFile(file.id, $event)">
+                  <i class="fa-regular fa-trash-can text-xs text-gray-500 hover:text-red-500"></i>
                 </button>
               </div>
-            </div>
 
-            <!-- Status badge -->
-            <div class="shrink-0">
-              <span *ngIf="file.status === 'approved'"
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-green-50 text-green-700 border border-green-200">
-                <i class="fa-solid fa-check text-[10px]"></i> ผ่าน
-              </span>
-              <span *ngIf="file.status === 'pending'"
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-50 text-yellow-700 border border-yellow-200">
-                <i class="fa-solid fa-clock text-[10px]"></i> รอตรวจ
-              </span>
-              <span *ngIf="file.status === 'rejected'"
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200">
-                <i class="fa-solid fa-xmark text-[10px]"></i> ไม่ผ่าน
-              </span>
             </div>
-
-            <!-- Action buttons -->
-            <div class="shrink-0 flex items-center gap-1 transition-opacity">
-              <button
-                class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-blue-100 hover:text-blue-600 flex items-center justify-center transition-colors"
-                title="ดูไฟล์"
-                (click)="openPreview(file)">
-                <i class="fa-regular fa-eye text-xs text-gray-500 hover:text-blue-600"></i>
-              </button>
-              <button
-                class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-indigo-100 hover:text-indigo-600 flex items-center justify-center transition-colors"
-                title="แก้ไขหมวดหมู่"
-                (click)="startEdit(file)">
-                <i class="fa-regular fa-pen-to-square text-xs text-gray-500 hover:text-indigo-600"></i>
-              </button>
-              <button
-                class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-red-100 flex items-center justify-center transition-colors"
-                title="ลบไฟล์"
-                (click)="deleteFile(file.id, $event)">
-                <i class="fa-regular fa-trash-can text-xs text-gray-500 hover:text-red-500"></i>
-              </button>
+            
+            <!-- AI Validation Result (Expandable) -->
+            <div *ngIf="file.isValidating || file.aiResult" class="px-5 pb-4 pt-1 bg-gray-50/30 border-t border-dashed border-gray-100">
+              <div *ngIf="file.isValidating" class="flex items-center gap-2 text-xs text-blue-500 font-semibold py-2">
+                <i class="fa-solid fa-robot fa-bounce"></i> AI กำลังวิเคราะห์เอกสารเทียบกับเกณฑ์ {{ file.category }}...
+              </div>
+              
+              <div *ngIf="file.aiResult && !file.isValidating" class="mt-2 p-4 rounded-xl border"
+                   [ngClass]="file.aiResult.isValid ? 'bg-green-50/50 border-green-100' : 'bg-orange-50/50 border-orange-100'">
+                <div class="flex items-center gap-2 mb-2">
+                  <i class="fa-solid fa-robot" [ngClass]="file.aiResult.isValid ? 'text-green-500' : 'text-orange-500'"></i>
+                  <h4 class="text-sm font-bold" [ngClass]="file.aiResult.isValid ? 'text-green-700' : 'text-orange-700'">
+                    {{ file.aiResult.isValid ? 'ตรงตามเกณฑ์ (ผ่าน)' : 'พบข้อสังเกต/ยังไม่สมบูรณ์' }}
+                  </h4>
+                  <span class="ml-auto text-xs font-bold px-2 py-0.5 rounded-full"
+                        [ngClass]="file.aiResult.confidenceScore >= 80 ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'">
+                    ความมั่นใจ: {{ file.aiResult.confidenceScore }}%
+                  </span>
+                </div>
+                <p class="text-xs text-gray-600 leading-relaxed mb-2"><strong>วิเคราะห์:</strong> {{ file.aiResult.findings }}</p>
+                
+                <div *ngIf="file.aiResult.missingItems?.length > 0" class="mt-2 pt-2 border-t" [ngClass]="file.aiResult.isValid ? 'border-green-200' : 'border-orange-200'">
+                  <p class="text-xs font-bold mb-1" [ngClass]="file.aiResult.isValid ? 'text-green-700' : 'text-orange-700'">คำแนะนำเพิ่มเติม/สิ่งที่ขาดหาย:</p>
+                  <ul class="list-disc list-inside text-[11px] text-gray-600 space-y-0.5">
+                    <li *ngFor="let item of file.aiResult.missingItems">{{ item }}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
+            <!-- End AI Result -->
 
           </div>
-        </div>
 
       </div>
     </div>

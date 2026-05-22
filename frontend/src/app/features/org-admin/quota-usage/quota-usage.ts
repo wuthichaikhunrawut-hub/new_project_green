@@ -1,6 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
 
 @Component({
@@ -12,6 +12,8 @@ import { Title } from '@angular/platform-browser';
 export class QuotaUsageComponent implements OnInit {
   private http = inject(HttpClient);
   private titleService = inject(Title);
+  private cdr = inject(ChangeDetectorRef);
+  private platformId = inject(PLATFORM_ID);
 
   logs: any[] = [];
   isLoading = true;
@@ -22,19 +24,22 @@ export class QuotaUsageComponent implements OnInit {
   }
 
   fetchLogs() {
-    this.isLoading = true;
-    const token = localStorage.getItem('access_token');
-    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    if (!isPlatformBrowser(this.platformId)) return;
 
-    this.http.get<any[]>('http://localhost:3001/admin/subscriptions/usage', { headers })
+    this.isLoading = true;
+    this.cdr.markForCheck();
+
+    this.http.get<any[]>('http://localhost:3001/subscriptions/my/usage')
       .subscribe({
         next: (res) => {
           this.logs = res;
           this.isLoading = false;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Error fetching usage logs:', err);
           this.isLoading = false;
+          this.cdr.markForCheck();
         }
       });
   }
