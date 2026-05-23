@@ -176,43 +176,57 @@ export class AdminUsersComponent implements OnInit {
     if (!this.selectedUser) return;
     this.isSaving = true;
 
-    // Map org_id back to organization object or handled by backend
-    if (this.selectedOrgId) {
-      this.selectedUser.organization = { id: this.selectedOrgId } as any;
-    } else {
-      this.selectedUser.organization = null;
+    const payload: any = {
+      email: this.selectedUser.email,
+      role: this.selectedUser.role,
+      is_active: this.selectedUser.is_active,
+      user_profile: this.selectedUser.user_profile
+    };
+
+    if (this.selectedUser.password) {
+      payload.password = this.selectedUser.password;
     }
 
-    this.selectedUser.org_unit_id = this.selectedBranchId || undefined;
+    if (this.selectedOrgId) {
+      payload.organization = { id: this.selectedOrgId };
+    } else {
+      payload.organization = null;
+    }
+
+    payload.org_unit_id = this.selectedBranchId || undefined;
 
     if (this.selectedUser.id) {
       // Update existing
-      this.usersService.updateUser(this.selectedUser.id, this.selectedUser).subscribe({
+      this.usersService.updateUser(this.selectedUser.id, payload).subscribe({
         next: () => {
           this.toast.success('บันทึกข้อมูลสำเร็จ');
           this.isSaving = false;
           this.closeEditModal();
           this.loadUsers();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Failed to update user:', err);
           this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (err.error?.message || err.message));
           this.isSaving = false;
+          this.cdr.detectChanges();
         }
       });
     } else {
       // Create new
-      this.usersService.createUser(this.selectedUser).subscribe({
+      this.usersService.createUser(payload).subscribe({
         next: () => {
           this.toast.success('เพิ่มผู้ใช้งานสำเร็จ');
           this.isSaving = false;
           this.closeEditModal();
           this.loadUsers();
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Failed to create user:', err);
           this.toast.error('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน: ' + (err.error?.message || err.message));
           this.isSaving = false;
+          this.cdr.detectChanges();
         }
       });
     }
