@@ -11,8 +11,7 @@
   <!-- ── Logo ── -->
   <div class="sidebar-header">
     <a routerLink="/" class="sidebar-logo">
-      <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="logo-img"
-        style="height: 44px; width: auto; transition: all 0.3s ease;">
+      <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="logo-img h-[44px]">
       <span class="brand-name" *ngIf="!isCollapsed">Green Sync <small>v1.0</small></span>
     </a>
   </div>
@@ -272,6 +271,13 @@
       </a>
 
     </ng-container>
+
+    <!-- ═══════════════ COMMON (All Roles) ═══════════════ -->
+    <div class="nav-label mt-3">ช่วยเหลือและสนับสนุน</div>
+    <a routerLink="/support" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+      <i class="fa-solid fa-headset"></i>
+      <span>ศูนย์ช่วยเหลือ</span>
+    </a>
 
   </nav>
 

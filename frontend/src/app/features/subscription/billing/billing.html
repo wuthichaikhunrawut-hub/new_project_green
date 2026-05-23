@@ -14,7 +14,7 @@
   </div>
 
   <!-- Main Content Wrapper with Max Width for readability -->
-  <div style="max-width: 1100px;">
+  <div class="max-w-[1100px]">
     <div class="row g-4 justify-content-center">
       <!-- Left Column: Plan Summary (Light Style) -->
       <div class="col-lg-5 col-md-5 order-2 order-md-1">
@@ -24,7 +24,7 @@
             
             <div class="p-4 bg-light rounded-4 mb-4 border border-light shadow-sm">
               <!-- Badge Ribbon -->
-              <span *ngIf="selectedPlan?.badge" class="badge bg-primary text-white rounded-pill px-3 py-1 mb-3 shadow-sm d-inline-flex align-items-center" style="font-size: 0.75rem;">
+              <span *ngIf="selectedPlan?.badge" class="badge bg-primary text-white rounded-pill px-3 py-1 mb-3 shadow-sm d-inline-flex align-items-center text-xs">
                 <i class="fa-solid fa-star text-warning me-1" *ngIf="selectedPlan?.badge === 'popular'"></i>
                 <i class="fa-solid fa-fire text-warning me-1" *ngIf="selectedPlan?.badge === 'recommended'"></i>
                 <i class="fa-solid fa-building me-1" *ngIf="selectedPlan?.badge === 'enterprise'"></i>
@@ -41,20 +41,20 @@
             <div class="mb-3 text-dark fw-bold small">แพ็กเกจนี้ประกอบด้วย:</div>
             <ul class="list-unstyled mb-0 flex-grow-1">
               <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngIf="selectedPlan?.max_users">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">
-                  <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 w-[24px]">
+                  <i class="fa-solid fa-check text-[0.65rem]"></i>
                 </div>
                 ผู้ใช้งานสูงสุด {{ selectedPlan?.max_users }} บัญชี
               </li>
               <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngIf="selectedPlan?.max_locations">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 24px; height: 24px;">
-                  <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 w-[24px]">
+                  <i class="fa-solid fa-check text-[0.65rem]"></i>
                 </div>
                 สาขาสูงสุด {{ selectedPlan?.max_locations }} สาขา
               </li>
               <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngFor="let f of selectedPlan?.features">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 24px; height: 24px;">
-                  <i class="fa-solid fa-check" style="font-size: 0.65rem;"></i>
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[24px]">
+                  <i class="fa-solid fa-check text-[0.65rem]"></i>
                 </div>
                 {{ f.feature_name }}
               </li>
@@ -77,7 +77,7 @@
           <!-- Card Header -->
           <div class="card-header bg-white border-bottom pt-4 px-4 px-lg-5 pb-3">
             <div class="d-flex align-items-center">
-              <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 48px; height: 48px;">
+              <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm w-[48px]">
                 <i class="fa-solid fa-credit-card text-primary fs-4"></i>
               </div>
               <div>
@@ -116,7 +116,7 @@
               <ng-container *ngIf="selectedPlan && selectedPlan.price_per_month > 0">
                 <!-- Popular Alert -->
                 <div *ngIf="selectedPlan.badge === 'popular'" class="alert alert-primary bg-primary bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                  <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[40px]">
                     <i class="fa-solid fa-star"></i>
                   </div>
                   <div>
@@ -127,7 +127,7 @@
 
                 <!-- Recommended Alert -->
                 <div *ngIf="selectedPlan.badge === 'recommended'" class="alert alert-info bg-info bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                  <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[40px]">
                     <i class="fa-solid fa-fire"></i>
                   </div>
                   <div>
@@ -138,7 +138,7 @@
 
                 <!-- Enterprise Alert -->
                 <div *ngIf="selectedPlan.badge === 'enterprise'" class="alert alert-dark bg-dark bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                  <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[40px]">
                     <i class="fa-solid fa-building"></i>
                   </div>
                   <div>
@@ -149,7 +149,7 @@
 
                 <!-- Default Paid Alert (If no badge) -->
                 <div *ngIf="!selectedPlan.badge" class="alert alert-info bg-info bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                  <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[40px]">
                     <i class="fa-solid fa-rocket"></i>
                   </div>
                   <div>
@@ -161,7 +161,7 @@
 
               <!-- Free Plan Alert (0 Baht) -->
               <div *ngIf="selectedPlan && selectedPlan.price_per_month == 0" class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 40px; height: 40px;">
+                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[40px]">
                   <i class="fa-solid fa-gift"></i>
                 </div>
                 <div>
@@ -171,7 +171,7 @@
               </div>
 
               <!-- Stripe Element Mount Point -->
-              <div #paymentElement id="payment-element" class="p-3 border rounded-3 bg-light mb-4 shadow-sm" style="min-height: 250px;">
+              <div #paymentElement id="payment-element" class="p-3 border rounded-3 bg-light mb-4 shadow-sm h-[250px]">
                 <!-- Stripe.js injects the Payment Element here -->
               </div>
 
@@ -179,7 +179,7 @@
                 [disabled]="isSaving || isStripeLoading" 
                 (click)="handleSubmit()"
                 class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-3 text-white transition-all"
-                style="font-size: 1.1rem; letter-spacing: 0.5px;">
+                class="tracking-wide">
                 <i class="fa-solid fa-lock me-2" *ngIf="!isSaving"></i>
                 <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                 <span *ngIf="!isSaving">
@@ -190,8 +190,8 @@
           </div> <!-- End card-body -->
         </div> <!-- End card -->
         
-        <div class="text-center mt-4 animate-in" style="animation-delay: 0.4s">
-          <p class="text-muted small">พบปัญหาในการชำระเงิน? <a href="#" class="text-primary text-decoration-none fw-bold">ติดต่อศูนย์ช่วยเหลือ</a></p>
+        <div class="text-center mt-4 animate-in" >
+          <p class="text-muted small">พบปัญหาในการชำระเงิน? <a href="mailto:support@greensync.com" class="text-primary text-decoration-none fw-bold">ติดต่อศูนย์ช่วยเหลือ</a></p>
         </div>
       </div> <!-- End col -->
     </div> <!-- End row -->

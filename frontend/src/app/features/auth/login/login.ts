@@ -23,6 +23,11 @@ export class LoginComponent {
   errorMessage = '';
   isLoading = false;
 
+  forgotPassword() {
+    this.errorMessage = 'ระบบรีเซ็ตรหัสผ่านกำลังอยู่ในระหว่างการพัฒนาครับ';
+    this.cdr.markForCheck();
+  }
+
   onLogin() {
     this.isLoading = true;
     this.errorMessage = '';

@@ -1,7 +1,7 @@
 <div class="container-fluid p-4 p-lg-5 animate-in">
   <div class="text-center mb-4 max-w-2xl mx-auto">
-    <span class="badge bg-primary text-white px-4 py-2 rounded-pill fw-bold mb-3 shadow-sm d-inline-flex align-items-center" style="font-size: 0.85rem; letter-spacing: 1px;">
-      <i class="fa-solid fa-crown text-warning me-2" style="font-size: 1rem;"></i> GREEN SYNC SUBSCRIPTION
+    <span class="badge bg-primary text-white px-4 py-2 rounded-pill fw-bold mb-3 shadow-sm d-inline-flex align-items-center text-sm" class="tracking-wide">
+      <i class="fa-solid fa-crown text-warning me-2" class="text-base"></i> GREEN SYNC SUBSCRIPTION
     </span>
     <h2 class="fw-bold mb-2">ยกระดับการจัดการคาร์บอนสู่มาตรฐานสากล</h2>
     <p class="text-muted small">เลือกแพ็กเกจที่เหมาะสมกับขนาดองค์กร เพื่อประสิทธิภาพสูงสุดในการก้าวสู่ Net Zero</p>
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Billing Cycle Toggle -->
-    <div class="d-flex justify-content-center mb-5 animate-in" style="animation-delay: 0.1s;">
+    <div class="d-flex justify-content-center mb-5 animate-in" >
       <div class="billing-toggle-container shadow-sm">
         <button 
           class="btn rounded-pill px-4 py-2 toggle-btn fw-bold transition-all"
@@ -41,7 +41,7 @@
           class="btn rounded-pill px-4 py-2 toggle-btn fw-bold transition-all d-flex align-items-center"
           [class.active]="billingCycle === 'yearly'"
           (click)="billingCycle = 'yearly'">
-          รายปี <span class="badge bg-white text-primary ms-2 shadow-sm rounded-pill px-2 py-1" style="font-size: 0.65rem;">-20%</span>
+          รายปี <span class="badge bg-white text-primary ms-2 shadow-sm rounded-pill px-2 py-1 text-[0.65rem]">-20%</span>
         </button>
       </div>
     </div>
@@ -61,8 +61,7 @@
            [style.box-shadow]="plan.badge ? '0 20px 40px -10px rgba(16,185,129,0.25) !important' : ''">
         
         <!-- Premium Badge Ribbon -->
-        <div *ngIf="plan.badge" class="position-absolute top-0 start-50 translate-middle-x bg-primary text-white px-4 py-1 rounded-bottom fw-bold shadow"
-             style="font-size: 0.75rem; letter-spacing: 0.5px; z-index: 10; text-transform: uppercase;">
+        <div *ngIf="plan.badge" class="position-absolute top-0 start-50 translate-middle-x bg-primary text-white px-4 py-1 rounded-bottom fw-bold shadow text-xs" class="tracking-wide">
           <i class="fa-solid fa-star me-1 text-warning" *ngIf="plan.badge === 'popular'"></i>
           <i class="fa-solid fa-fire me-1 text-warning" *ngIf="plan.badge === 'recommended'"></i>
           <i class="fa-solid fa-building me-1" *ngIf="plan.badge === 'enterprise'"></i>
@@ -72,7 +71,7 @@
         <div class="card-body p-4 d-flex flex-column" [class.pt-5]="plan.badge">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h4 class="fw-bold m-0" [class.text-primary]="plan.badge">{{ plan.plan_name }}</h4>
-            <span *ngIf="currentPlan?.id === plan.id" class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-bold border border-primary border-opacity-10" style="font-size: 0.7rem;">
+            <span *ngIf="currentPlan?.id === plan.id" class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-bold border border-primary border-opacity-10 text-[0.7rem]">
               <i class="fa-solid fa-check me-1"></i> ปัจจุบัน
             </span>
           </div>
@@ -90,7 +89,7 @@
               <span class="text-muted ms-1 small" *ngIf="plan.price_per_month > 0">/ เดือน</span>
             </div>
             
-            <div class="small text-primary fw-bold mt-1" *ngIf="billingCycle === 'yearly' && plan.price_per_month > 0" style="font-size: 0.75rem;">
+            <div class="small text-primary fw-bold mt-1" *ngIf="billingCycle === 'yearly' && plan.price_per_month > 0" class="text-xs">
               <i class="fa-solid fa-bolt me-1"></i> ประหยัด ฿{{ plan.price_per_month * 12 * 0.2 | number }} ต่อปี
             </div>
           </div>
@@ -106,7 +105,7 @@
             </span>
           </button>
           
-          <div class="mb-2 text-dark fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">สิ่งที่รวมอยู่ในแพ็กเกจ:</div>
+          <div class="mb-2 text-dark fw-bold text-xs" class="tracking-wide">สิ่งที่รวมอยู่ในแพ็กเกจ:</div>
           
           <ul class="list-unstyled mb-0">
             <li class="feature-item" *ngIf="plan.max_users">

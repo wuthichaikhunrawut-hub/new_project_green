@@ -16,9 +16,16 @@ export class GreenOfficeController {
   }
 
   @Put(':id/score')
-  updateScore(@Param('id') id: string, @Body('score') score: number) {
-    // For now, just return success
-    // TODO: Implement actual score update logic
-    return { success: true, criteriaId: id, score };
+  updateScore(
+    @Param('id') id: string,
+    @Body('score') score: number,
+    @Headers('x-org-id') orgId?: string,
+  ) {
+    let numericOrgId = 0;
+    if (orgId) {
+      numericOrgId = parseInt(orgId, 10);
+      if (isNaN(numericOrgId)) numericOrgId = 0;
+    }
+    return this.greenCriteriaService.updateScore(+id, score, numericOrgId);
   }
 }

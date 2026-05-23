@@ -20,6 +20,17 @@ export class StripeService implements OnModuleInit {
     }
   }
 
+  async constructEvent(payload: Buffer, signature: string) {
+    if (!this.stripe) await this.initStripe();
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test';
+    try {
+      return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+    } catch (error) {
+      console.error('Webhook signature verification failed:', error);
+      throw error;
+    }
+  }
+
   async createCustomer(email: string, name: string) {
     if (!this.stripe) await this.initStripe();
     try {

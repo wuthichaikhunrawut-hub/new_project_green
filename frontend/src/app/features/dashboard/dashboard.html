@@ -44,7 +44,7 @@
     <!-- Certificate Banner (If has certificate) -->
     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6" *ngIf="certificate && !waitingForCertificate">
       <div class="absolute -right-12 -top-12 text-emerald-100 opacity-50 rotate-12">
-        <i class="fa-solid fa-certificate" style="font-size: 15rem;"></i>
+        <i class="fa-solid fa-certificate" class="text-[15rem]"></i>
       </div>
       
       <div class="relative z-10">
@@ -69,7 +69,7 @@
     <!-- Waiting for Certificate Banner -->
     <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6" *ngIf="waitingForCertificate">
       <div class="absolute -right-12 -top-12 text-amber-100 opacity-50 rotate-12">
-        <i class="fa-solid fa-hourglass-half" style="font-size: 15rem;"></i>
+        <i class="fa-solid fa-hourglass-half" class="text-[15rem]"></i>
       </div>
       
       <div class="relative z-10">
@@ -124,7 +124,7 @@
   </div>
 
   <!-- Row 2: Main Line Chart & Radials -->
-  <div class="grid-main-charts mb-6 fade-in-up" style="animation-delay: 0.1s">
+  <div class="grid-main-charts mb-6 fade-in-up" >
     <!-- Main Line Chart -->
     <div class="dashboard-card">
       <div class="chart-header">
@@ -182,7 +182,7 @@
   </div>
 
   <!-- Row 3: Donut, Bar -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in-up" style="animation-delay: 0.2s">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 fade-in-up" >
     <!-- Donut Chart -->
     <div class="dashboard-card h-full">
       <div class="chart-title mb-1">แหล่งปล่อยคาร์บอน</div>
@@ -203,7 +203,7 @@
   </div>
 
   <!-- Row 4: AI Insights Row -->
-  <div class="mt-6 dashboard-card fade-in-up bg-gradient-to-br from-white to-emerald-50/30" style="animation-delay: 0.3s">
+  <div class="mt-6 dashboard-card fade-in-up bg-gradient-to-br from-white to-emerald-50/30" >
     <div class="ai-insights-header flex justify-between items-center mb-5 pb-3 border-b border-emerald-100">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">

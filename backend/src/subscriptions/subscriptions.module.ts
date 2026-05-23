@@ -18,6 +18,7 @@ import { User } from '../users/entities/user.entity';
 import { StripeService } from './stripe.service';
 import { PaymentController } from './payment.controller';
 import { UserSubscriptionsController } from './user-subscriptions.controller';
+import { WebhooksController } from './webhooks.controller';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { UserSubscriptionsController } from './user-subscriptions.controller';
     SubscriptionsController,
     PaymentController,
     UserSubscriptionsController,
+    WebhooksController,
   ],
   providers: [SubscriptionsService, StripeService],
   exports: [SubscriptionsService, StripeService],

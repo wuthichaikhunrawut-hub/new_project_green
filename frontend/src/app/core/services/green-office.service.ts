@@ -1,7 +1,7 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { of, Observable, catchError, map } from 'rxjs';
+import { of, Observable, catchError, map, throwError } from 'rxjs';
 import { AssessmentCriteria as GreenCriteria } from '../models/assessment.model';
 import { MOCK_CRITERIA } from '../mock-data/mock-green-office';
 
@@ -35,29 +35,28 @@ export class GreenOfficeService {
           current_score: item.current_score || 0,
           status: 'Pending' as const
         }))),
-        // Fallback to MOCK data if backend is not ready yet to prevent crash
-        catchError(() => of(MOCK_CRITERIA))
+        // If backend is not available, we throw error so caller can handle
+        catchError(err => throwError(() => err))
       );
   }
 
   // อัปเดตคะแนนประเมินตนเอง
   updateScore(criteriaId: number, score: number): Observable<boolean> {
-    return this.http.put<boolean>(`${this.apiUrl}/${criteriaId}/score`, { score }, { headers: this.getHeaders() })
+    return this.http.put<any>(`${this.apiUrl}/${criteriaId}/score`, { score }, { headers: this.getHeaders() })
       .pipe(
-        catchError(() => {
-           console.log('Mocking save since API failed');
-           return of(true);
-        })
+        map(res => res.success || true),
+        catchError(err => throwError(() => err))
       );
   }
 
-  // จำลองการอัปโหลดไฟล์หลักฐาน
+  // อัปโหลดไฟล์หลักฐาน
   uploadEvidence(file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<string>(`${this.apiUrl}/upload`, formData, { headers: this.getHeaders() })
+    return this.http.post<any>(`${this.apiUrl}/upload`, formData, { headers: this.getHeaders() })
       .pipe(
-        catchError(() => of('https://fake-storage.com/' + file.name))
+        map(res => res.url || 'https://fake-storage.com/' + file.name),
+        catchError(err => throwError(() => err))
       );
   }
 }

@@ -14,6 +14,8 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent, title: 'ลงทะเบียนองค์กร - Green Sync' },
   { path: 'register/assessor', component: AssessorRegisterComponent, title: 'ลงทะเบียนผู้ตรวจประเมิน - Green Sync' },
+  { path: 'privacy-policy', loadComponent: () => import('./features/legal/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent), title: 'นโยบายความเป็นส่วนตัว - Green Sync' },
+  { path: 'terms', loadComponent: () => import('./features/legal/terms/terms').then(m => m.TermsComponent), title: 'ข้อตกลงการให้บริการ - Green Sync' },
   {
     path: 'assessor/report/:id',
     loadComponent: () => import('./features/assessor/report/report').then(m => m.AssessorReportComponent),
@@ -292,6 +294,13 @@ export const routes: Routes = [
         path: 'notifications',
         loadComponent: () => import('./features/notifications/notifications.component').then(m => m.NotificationsComponent),
         title: 'การแจ้งเตือน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE', 'ASSESSOR'] }
+      },
+      {
+        path: 'support',
+        loadComponent: () => import('./features/support/support').then(m => m.SupportComponent),
+        title: 'ศูนย์ช่วยเหลือ - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE', 'ASSESSOR'] }
       },

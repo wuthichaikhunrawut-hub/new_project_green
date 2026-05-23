@@ -33,7 +33,7 @@
           </thead>
           <tbody>
             <ng-container *ngFor="let group of groupedCriteria">
-              <tr class="table-light border-top" style="cursor: pointer; background-color: #f8fafc;" (click)="toggleGroup(group)">
+              <tr class="table-light border-top bg-slate-50" (click)="toggleGroup(group)">
                 <td colspan="6" class="px-4 py-3 fw-bold text-dark">
                   <div class="d-flex align-items-center">
                     <i class="fa-solid me-3 text-primary transition-all" [ngClass]="group.expanded ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
@@ -45,14 +45,14 @@
               <ng-container *ngIf="group.expanded">
                 <tr *ngFor="let item of group.items">
                   <td class="px-4 py-3 text-center">
-                    <div style="width: 2px; height: 100%; background-color: #cbd5e1; margin: 0 auto; min-height: 40px; border-radius: 2px;"></div>
+                    <div class="w-[2px]"></div>
                   </td>
                   <td class="px-4 py-3 fw-bold text-primary">{{ item.criteria_code }}</td>
                   <td class="px-4 py-3">
-                    <div class="fw-semibold text-truncate" style="max-width: 300px;" [title]="item.criteria_name">
+                    <div class="fw-semibold text-truncate max-w-[300px]" [title]="item.criteria_name">
                       {{ item.criteria_name }}
                     </div>
-                    <div class="small text-muted text-truncate" style="max-width: 300px;" [title]="item.description">
+                    <div class="small text-muted text-truncate max-w-[300px]" [title]="item.description">
                       {{ item.description || '-' }}
                     </div>
                   </td>
@@ -80,7 +80,7 @@
 </div>
 
 <!-- Edit Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedCriteria" style="background-color: rgba(0,0,0,0.5);">
+<div class="modal d-block" tabindex="-1" *ngIf="selectedCriteria" class="bg-black/50">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom-0 pb-0">

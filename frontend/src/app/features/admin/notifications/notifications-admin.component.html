@@ -144,13 +144,13 @@
                     <div class="preview-content">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <span class="preview-badge" [ngClass]="getPreviewBadgeClass()">{{ getCategoryLabel() }}</span>
-                            <span class="text-muted" style="font-size: 0.6rem;">เมื่อสักครู่</span>
+                            <span class="text-muted text-[0.6rem]">เมื่อสักครู่</span>
                         </div>
                         <div class="fw-bold text-dark mb-1">{{ notification.title || 'หัวข้อแจ้งเตือนจะแสดงที่นี่' }}</div>
                         <div class="text-muted small mb-2">{{ notification.message || 'เนื้อหาข้อความจะแสดงตัวอย่างให้คุณตรวจสอบความถูกต้องก่อนกดส่ง...' }}</div>
                         
                         <div class="border-top pt-2 mt-2 d-flex align-items-center justify-content-between">
-                            <span class="text-muted" style="font-size: 0.7rem;">
+                            <span class="text-muted text-[0.7rem]">
                                 <i class="fa-solid fa-user-tag me-1"></i>ถึง: {{ getRecipientLabel() }}
                             </span>
                             <i *ngIf="notification.link" class="fa-solid fa-chevron-right text-primary fs-7"></i>
@@ -182,7 +182,7 @@
                 <div class="premium-card bg-light border-0 py-3 text-center">
                     <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
                         <i class="fa-solid fa-shield-halved"></i>
-                        <span style="font-size: 0.75rem;">Enterprise Secure Delivery</span>
+                        <span class="text-xs">Enterprise Secure Delivery</span>
                     </div>
                 </div>
             </div>
@@ -205,12 +205,12 @@
       <table class="table table-hover align-middle mb-0">
         <thead class="bg-light">
           <tr>
-            <th class="ps-4 py-3" style="width: 180px;">วัน-เวลา</th>
-            <th class="py-3" style="width: 200px;">ผู้รับ</th>
+            <th class="ps-4 py-3 w-[180px]">วัน-เวลา</th>
+            <th class="py-3 w-[200px]">ผู้รับ</th>
             <th class="py-3">หัวข้อ / ข้อความ</th>
-            <th class="py-3" style="width: 150px;">ประเภท</th>
-            <th class="py-3" style="width: 120px;">สถานะ</th>
-            <th class="pe-4 py-3 text-end" style="width: 100px;">จัดการ</th>
+            <th class="py-3 w-[150px]">ประเภท</th>
+            <th class="py-3 w-[120px]">สถานะ</th>
+            <th class="pe-4 py-3 text-end w-[100px]">จัดการ</th>
           </tr>
         </thead>
         <tbody>
@@ -220,11 +220,11 @@
             </td>
             <td>
               <div class="fw-bold small">{{ item.recipient?.email || 'N/A' }}</div>
-              <div class="text-muted" style="font-size: 0.7rem;">ID: {{ item.recipient_id }}</div>
+              <div class="text-muted text-[0.7rem]">ID: {{ item.recipient_id }}</div>
             </td>
             <td>
               <div class="fw-bold text-dark">{{ item.title }}</div>
-              <div class="text-muted small text-truncate" style="max-width: 300px;">{{ item.message }}</div>
+              <div class="text-muted small text-truncate max-w-[300px]">{{ item.message }}</div>
             </td>
             <td>
               <span class="badge rounded-pill px-3 py-2" 

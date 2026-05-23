@@ -39,6 +39,7 @@ export class RegisterComponent {
     confirmPassword: ''
   };
 
+  acceptTerms: boolean = false;
   currentStep = 1;
   isLoading = false;
 

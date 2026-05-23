@@ -28,22 +28,22 @@
       <!-- Scope Tabs -->
       <ul class="nav nav-tabs px-4 border-bottom-0 mt-3">
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer;">
+          <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" class="cursor-pointer">
             <i class="fa-solid fa-layer-group me-2"></i>ทั้งหมด
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 1" (click)="setTab(1)" style="cursor: pointer;">
+          <a class="nav-link" [class.active]="activeTab === 1" (click)="setTab(1)" class="cursor-pointer">
             <i class="fa-solid fa-bolt me-2"></i>สโคป 1
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 2" (click)="setTab(2)" style="cursor: pointer;">
+          <a class="nav-link" [class.active]="activeTab === 2" (click)="setTab(2)" class="cursor-pointer">
             <i class="fa-solid fa-plug me-2"></i>สโคป 2
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" [class.active]="activeTab === 3" (click)="setTab(3)" style="cursor: pointer;">
+          <a class="nav-link" [class.active]="activeTab === 3" (click)="setTab(3)" class="cursor-pointer">
             <i class="fa-solid fa-truck me-2"></i>สโคป 3
           </a>
         </li>
@@ -115,7 +115,7 @@
 </div>
 
 <!-- Edit Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedFactor" style="background-color: rgba(0,0,0,0.5);">
+<div class="modal d-block" tabindex="-1" *ngIf="selectedFactor" class="bg-black/50">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom-0 pb-0">

@@ -6,7 +6,7 @@
         <p class="page-subtitle mb-0">ตรวจสอบสถานะใบแจ้งหนี้และประวัติการชำระเงินขององค์กร</p>
       </div>
       <div class="page-actions">
-        <button class="btn btn-white shadow-sm border-0 rounded-pill px-4 text-muted fw-bold" (click)="loadInvoices()" style="font-size: 0.9rem;">
+        <button class="btn btn-white shadow-sm border-0 rounded-pill px-4 text-muted fw-bold" (click)="loadInvoices()" class="text-sm">
         <i class="fa-solid fa-rotate-right me-2"></i> รีเฟรชข้อมูล
       </button>
     </div>
@@ -21,35 +21,35 @@
           <table class="table table-premium table-hover mb-0" style="table-layout: fixed;">
             <thead>
               <tr>
-                <th class="ps-5" style="width: 18%;">เลขที่อ้างอิง (Ref No.)</th>
-                <th style="width: 15%;">วันที่ออกบิล</th>
-                <th style="width: 20%;">องค์กร</th>
-                <th style="width: 15%;">แพ็กเกจ</th>
-                <th class="text-end" style="width: 12%;">ยอดชำระ (บาท)</th>
-                <th class="text-center" style="width: 10%;">สถานะ</th>
-                <th class="text-end pe-5" style="width: 10%;">จัดการ</th>
+                <th class="ps-5 w-[18%]">เลขที่อ้างอิง (Ref No.)</th>
+                <th class="w-[15%]">วันที่ออกบิล</th>
+                <th class="w-[20%]">องค์กร</th>
+                <th class="w-[15%]">แพ็กเกจ</th>
+                <th class="text-end w-[12%]">ยอดชำระ (บาท)</th>
+                <th class="text-center w-[10%]">สถานะ</th>
+                <th class="text-end pe-5 w-[10%]">จัดการ</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let inv of invoices">
                 <td class="ps-5">
-                  <span class="invoice-ref fw-bold" style="color: var(--brand-green);">{{ inv.reference_number || '-' }}</span>
+                  <span class="invoice-ref fw-bold text-emerald-600">{{ inv.reference_number || '-' }}</span>
                 </td>
-                <td class="text-muted" style="font-size: 0.85rem;">{{ inv.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-muted text-sm">{{ inv.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td class="fw-bold text-slate-800">{{ inv.organization ? inv.organization.name : '-' }}</td>
                 <td>
                   <span class="badge bg-light text-muted border px-3 py-1">{{ inv.plan ? inv.plan.plan_name : 'N/A' }}</span>
                 </td>
-                <td class="text-end fw-bold" style="color: var(--brand-green);">฿{{ inv.amount | number:'1.2-2' }}</td>
+                <td class="text-end fw-bold text-emerald-600">฿{{ inv.amount | number:'1.2-2' }}</td>
                 <td class="text-center">
                   <span class="status-badge" [ngClass]="statusColors[inv.status]">{{ statusLabels[inv.status] || inv.status }}</span>
                 </td>
                 <td class="text-end pe-5">
                   <div class="d-flex gap-2 justify-content-end">
-                    <button class="btn btn-sm px-3 rounded-pill fw-bold text-success transition-all" *ngIf="inv.status === 'PENDING'" (click)="markAsPaid(inv.id)" style="font-size: 0.75rem; background: #ecfdf5; border: 1px solid #a7f3d0;">
+                    <button class="btn btn-sm px-3 rounded-pill fw-bold text-success transition-all" *ngIf="inv.status === 'PENDING'" (click)="markAsPaid(inv.id)" class="text-xs bg-emerald-50 border border-emerald-200">
                       <i class="fa-solid fa-check me-1"></i> ยืนยันชำระเงิน
                     </button>
-                    <button class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all" *ngIf="inv.status === 'PENDING'" (click)="cancel(inv.id)" style="font-size: 0.75rem; background: #fef2f2; border: 1px solid #fca5a5;">
+                    <button class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all" *ngIf="inv.status === 'PENDING'" (click)="cancel(inv.id)" class="text-xs bg-red-50 border border-red-300">
                       <i class="fa-solid fa-xmark me-1"></i> ยกเลิกบิล
                     </button>
                   </div>

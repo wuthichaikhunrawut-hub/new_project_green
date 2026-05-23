@@ -48,7 +48,7 @@
   </div>
 
   <!-- KPI Grid -->
-  <div class="kpi-grid fade-in-up" style="animation-delay: 0.1s">
+  <div class="kpi-grid fade-in-up" >
     <div class="kpi-card">
       <div class="kpi-header">
         <span class="kpi-title">Green Office Score</span>
@@ -101,7 +101,7 @@
   </div>
 
   <!-- Main Analytics -->
-  <div class="analytics-grid fade-in-up" style="animation-delay: 0.2s">
+  <div class="analytics-grid fade-in-up" >
     <div class="panel">
       <div class="panel-header">
         <div>
@@ -125,14 +125,14 @@
           <p class="panel-subtitle">วิเคราะห์จุดศูนย์เสียด้วย AI (Radar)</p>
         </div>
       </div>
-      <div class="chart-container" style="height: 300px;">
+      <div class="chart-container h-[300px]">
         <div id="apexRadar"></div>
       </div>
     </div>
   </div>
 
   <!-- AI Recommendations -->
-  <div class="panel fade-in-up" style="animation-delay: 0.3s">
+  <div class="panel fade-in-up" >
     <div class="panel-header">
       <div>
         <h3 class="panel-title"><i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-2"></i> Smart Interventions</h3>
@@ -146,10 +146,10 @@
       <ng-container *ngIf="isLoadingRecommendations">
         <div class="rec-card" *ngFor="let i of [1, 2]">
           <div class="rec-header">
-            <div class="skeleton" style="width: 40px; height: 40px; border-radius: 8px;"></div>
-            <div class="rec-content" style="width: 100%;">
-              <div class="skeleton skel-text" style="width: 60%; height: 20px;"></div>
-              <div class="skeleton skel-text" style="width: 100%; height: 14px; margin-top: 8px;"></div>
+            <div class="skeleton w-[40px]"></div>
+            <div class="rec-content w-[100%]">
+              <div class="skeleton skel-text w-[60%]"></div>
+              <div class="skeleton skel-text w-[100%]"></div>
             </div>
           </div>
         </div>

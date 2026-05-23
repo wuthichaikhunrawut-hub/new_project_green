@@ -3,7 +3,7 @@ import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GeminiService, BillScanResult } from '../../services/gemini';
-
+import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 @Component({
   selector: 'app-ai-scan',
   standalone: true,
@@ -29,7 +29,10 @@ export class AiScanComponent {
     date: ''
   };
 
-  constructor(private geminiService: GeminiService) {}
+  constructor(
+    private geminiService: GeminiService,
+    private carbonService: CarbonService
+  ) {}
 
   onFileChange(event: any) {
     const file = event.target.files[0];
@@ -82,14 +85,45 @@ export class AiScanComponent {
     this.isSaving = true;
     this.cdr.markForCheck();
     
-    // Simulate API call to save data into database
-    console.log('Saving Data:', this.formData);
-    setTimeout(() => {
-      this.isSaving = false;
-      this.toast.success('บันทึกข้อมูลเข้าสู่ระบบเรียบร้อย!');
-      this.reset();
-      this.cdr.markForCheck();
-    }, 1500);
+    if (this.selectedFile) {
+      this.carbonService.uploadFile(this.selectedFile, 'carbon').subscribe({
+        next: (res) => this.saveToBackend(res.url),
+        error: (err) => {
+          this.isSaving = false;
+          this.toast.error('อัปโหลดไฟล์หลักฐานไม่สำเร็จ');
+          this.cdr.markForCheck();
+        }
+      });
+    } else {
+      this.saveToBackend();
+    }
+  }
+
+  private saveToBackend(evidenceUrl?: string) {
+    const log: CarbonLog = {
+      date: new Date().toISOString(), // In real app, parse this.formData.date
+      type: this.formData.type,
+      amount: this.formData.amount || 0,
+      unit: this.formData.unit,
+      emission: 0,
+      source: 'AI Scan',
+      evidence_url: evidenceUrl
+    };
+
+    this.carbonService.addLog(log).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.toast.success('บันทึกข้อมูลเข้าสู่ระบบเรียบร้อย!');
+        this.reset();
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        this.isSaving = false;
+        this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        console.error(err);
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   reset() {

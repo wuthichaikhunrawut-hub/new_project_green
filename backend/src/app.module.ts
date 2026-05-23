@@ -1,7 +1,8 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { GeminiModule } from './gemini/gemini.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -43,7 +44,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'greenoffice'),
         autoLoadEntities: true,
-        synchronize: true, // Enabled for development to sync new columns
+        synchronize: process.env.NODE_ENV !== 'production', // Prevent dropping DB in production
         logging: false,
       }),
     }),
@@ -65,7 +66,13 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     ExecutiveModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -2,7 +2,7 @@
   <!-- Header -->
   <div class="page-header mb-4">
     <div class="page-header-left">
-      <h2 class="page-title">แดชบอร์ดผู้ดูแลระบบ <span class="badge bg-danger ms-2" style="font-size: 10px;">v2.0 NEW</span></h2>
+      <h2 class="page-title">แดชบอร์ดผู้ดูแลระบบ <span class="badge bg-danger ms-2 text-[10px]">v2.0 NEW</span></h2>
       <p class="page-subtitle mb-0">ภาพรวมการจัดการระบบและการดำเนินงาน</p>
     </div>
     <div class="page-actions d-flex gap-2">
@@ -73,7 +73,7 @@
             <i class="fa-solid fa-database text-info fs-5"></i>
           </div>
           <div class="h3 fw-bold mb-1">{{ stats.storageUsageGb }} GB</div>
-          <div class="progress mt-2" style="height: 6px;">
+          <div class="progress mt-2 h-[6px]">
             <div class="progress-bar bg-info" [style.width.%]="(stats.storageUsageGb / 100) * 100"></div>
           </div>
           <div class="text-muted small mt-1">
@@ -89,7 +89,7 @@
     <div class="col-12">
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-primary bg-opacity-10 border border-primary border-opacity-25">
         <div class="card-body p-4 d-flex gap-4 align-items-start">
-          <div class="ai-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 50px; height: 50px; font-size: 24px;">
+          <div class="ai-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 w-[50px]">
             <i class="fa-solid fa-robot"></i>
           </div>
           <div class="flex-grow-1">
@@ -101,9 +101,9 @@
             </h5>
             
             <ng-container *ngIf="isLoadingAi">
-               <div class="skeleton skel-text mb-2" style="width: 90%; height: 16px;"></div>
-               <div class="skeleton skel-text mb-2" style="width: 95%; height: 16px;"></div>
-               <div class="skeleton skel-text mb-2" style="width: 80%; height: 16px;"></div>
+               <div class="skeleton skel-text mb-2 w-[90%]"></div>
+               <div class="skeleton skel-text mb-2 w-[95%]"></div>
+               <div class="skeleton skel-text mb-2 w-[80%]"></div>
             </ng-container>
 
             <ng-container *ngIf="!isLoadingAi">
@@ -115,21 +115,21 @@
               <h6 class="fw-bold text-slate-800 mb-3"><i class="fa-solid fa-list-check text-emerald-500 mr-2"></i> ข้อเสนอแนะการจัดการระบบ (Actionable Insights)</h6>
               
               <div *ngIf="isGeneratingRecommendations" class="d-flex flex-column gap-2 animate-pulse">
-                <div class="skeleton skel-text" style="width: 100%; height: 50px;"></div>
-                <div class="skeleton skel-text" style="width: 100%; height: 50px;"></div>
+                <div class="skeleton skel-text w-[100%]"></div>
+                <div class="skeleton skel-text w-[100%]"></div>
               </div>
 
               <div *ngIf="!isGeneratingRecommendations" class="d-flex flex-column gap-2">
                 <div *ngFor="let rec of aiRecommendations" class="p-3 rounded bg-white border border-primary border-opacity-10 d-flex align-items-start gap-3">
                   <div class="mt-1">
-                    <div class="rounded-circle bg-emerald-100 text-emerald-600 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <div class="rounded-circle bg-emerald-100 text-emerald-600 d-flex align-items-center justify-content-center w-[32px]">
                       <i class="fa-solid fa-lightbulb"></i>
                     </div>
                   </div>
                   <div>
                     <h6 class="fw-bold mb-1 text-dark">{{ rec.title }}</h6>
                     <p class="small text-muted mb-1">{{ rec.action }}</p>
-                    <span class="badge bg-emerald-100 text-emerald-700 uppercase tracking-wider" style="font-size: 10px;">
+                    <span class="badge bg-emerald-100 text-emerald-700 uppercase tracking-wider text-[10px]">
                       ผลกระทบ: {{ rec.expectedImpact }}
                     </span>
                   </div>
@@ -212,7 +212,7 @@
                  <span class="fw-semibold">{{ plan.name }}</span>
                  <span class="text-muted">{{ plan.count }} องค์กร</span>
               </div>
-              <div class="progress" style="height: 12px; border-radius: 6px;">
+              <div class="progress h-[12px]">
                  <div class="progress-bar" 
                       [ngClass]="{'bg-primary': plan.name === 'Enterprise', 'bg-success': plan.name === 'Pro', 'bg-secondary': plan.name === 'Free'}"
                       [style.width.%]="stats.totalOrganizations > 0 ? (plan.count / stats.totalOrganizations) * 100 : 0">

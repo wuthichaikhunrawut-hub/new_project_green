@@ -31,37 +31,37 @@
     <!-- Green Office Tabs -->
     <ul class="nav nav-tabs px-4 border-bottom-0 mt-3 overflow-auto flex-nowrap" style="scrollbar-width: none;">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'ALL'" (click)="setTab('ALL')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-layer-group me-2"></i>ทั้งหมด
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'GOVERNMENT'" (click)="setTab('GOVERNMENT')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'GOVERNMENT'" (click)="setTab('GOVERNMENT')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-building-columns me-2"></i>ภาครัฐ
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'STATE_ENTERPRISE'" (click)="setTab('STATE_ENTERPRISE')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'STATE_ENTERPRISE'" (click)="setTab('STATE_ENTERPRISE')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-landmark me-2"></i>รัฐวิสาหกิจ
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'PRIVATE'" (click)="setTab('PRIVATE')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'PRIVATE'" (click)="setTab('PRIVATE')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-building me-2"></i>เอกชน
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'EDUCATION'" (click)="setTab('EDUCATION')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'EDUCATION'" (click)="setTab('EDUCATION')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-graduation-cap me-2"></i>การศึกษา
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'INDUSTRIAL_OFFICE'" (click)="setTab('INDUSTRIAL_OFFICE')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'INDUSTRIAL_OFFICE'" (click)="setTab('INDUSTRIAL_OFFICE')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-industry me-2"></i>สำนักงานในโรงงาน
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'LOCAL_ADMIN'" (click)="setTab('LOCAL_ADMIN')" style="cursor: pointer; white-space: nowrap;">
+        <a class="nav-link" [class.active]="activeTab === 'LOCAL_ADMIN'" (click)="setTab('LOCAL_ADMIN')" class="cursor-pointer whitespace-nowrap">
           <i class="fa-solid fa-map-location-dot me-2"></i>ท้องถิ่น
         </a>
       </li>
@@ -106,7 +106,7 @@
                                     <span *ngSwitchCase="'SILVER'" class="badge rounded-pill bg-light text-secondary border border-secondary shadow-sm px-3">
                                         <i class="fa-solid fa-medal me-1"></i>G-Silver (ดีมาก)
                                     </span>
-                                    <span *ngSwitchCase="'BRONZE'" class="badge rounded-pill bg-orange text-white border border-danger shadow-sm px-3" style="background-color: #cd7f32;">
+                                    <span *ngSwitchCase="'BRONZE'" class="badge rounded-pill bg-orange text-white border border-danger shadow-sm px-3 bg-[#cd7f32]">
                                         <i class="fa-solid fa-medal me-1"></i>G-Bronze (ดี)
                                     </span>
                                     <span *ngSwitchDefault class="text-muted small italic">ยังไม่ได้รับรอง</span>
@@ -175,7 +175,7 @@
 </div>
 
 <!-- Edit Org Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedOrg" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+<div class="modal d-block" tabindex="-1" *ngIf="selectedOrg" class="bg-black/60 backdrop-blur-sm" >
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow-lg">
             <div class="modal-header border-bottom p-4">

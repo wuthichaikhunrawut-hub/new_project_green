@@ -13,6 +13,7 @@ import { Organization } from '../organizations/entities/organization.entity';
 import { User } from '../users/entities/user.entity';
 import { FeatureUsageLog } from './entities/feature-usage-log.entity';
 import { Payment } from './entities/payment.entity';
+import { StripeService } from './stripe.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -35,6 +36,7 @@ export class SubscriptionsService {
     private userRepository: Repository<User>,
     private auditLogsService: AuditLogsService,
     private notificationsService: NotificationsService,
+    private stripeService: StripeService,
   ) {}
 
   // ... (previous methods)
@@ -59,6 +61,33 @@ export class SubscriptionsService {
   }
 
   // ---- Stripe Webhook Handlers ----
+
+  async handleStripeWebhook(signature: string, payload: Buffer) {
+    try {
+      const event = await this.stripeService.constructEvent(payload, signature);
+      console.log('Stripe Webhook Event Received:', event.type);
+
+      switch (event.type) {
+        case 'invoice.payment_succeeded':
+          await this.handleInvoicePaymentSucceeded(event.data.object);
+          break;
+        case 'invoice.payment_failed':
+          await this.handleInvoicePaymentFailed(event.data.object);
+          break;
+        case 'customer.subscription.updated':
+        case 'customer.subscription.deleted':
+          await this.handleSubscriptionChange(event.data.object);
+          break;
+        case 'checkout.session.completed':
+          await this.handleCheckoutSessionCompleted(event.data.object);
+          break;
+      }
+      return { received: true };
+    } catch (err: any) {
+      console.error('Stripe Webhook Error:', err.message);
+      return { received: false, error: err.message };
+    }
+  }
 
   async handleInvoicePaymentSucceeded(invoice: any) {
     const org = await this.getOrganizationByStripeCustomerId(invoice.customer);

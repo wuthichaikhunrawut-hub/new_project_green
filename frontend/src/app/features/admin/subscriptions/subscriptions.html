@@ -38,17 +38,17 @@
         <div class="capability-card feature-inventory-card">
           <div class="card-head">
             <div class="capability-icon"><i class="fa-solid fa-cube"></i></div>
-            <span class="badge rounded-pill bg-light text-success border px-2 py-1 extra-small" style="font-size: 0.65rem;">{{ feat.feature_code }}</span>
+            <span class="badge rounded-pill bg-light text-success border px-2 py-1 extra-small text-[0.65rem]">{{ feat.feature_code }}</span>
           </div>
           <h6 class="capability-name mb-1">{{ feat.feature_name }}</h6>
           <p class="capability-desc line-clamp-2 mb-0">{{ feat.description || 'ไม่มีคำอธิบาย' }}</p>
           <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top border-subtle">
-            <span class="extra-small text-muted" style="font-size: 0.75rem;">ใช้ใน {{ getPlanUsageCount(feat.id) }} แพ็กเกจ</span>
+            <span class="extra-small text-muted text-xs">ใช้ใน {{ getPlanUsageCount(feat.id) }} แพ็กเกจ</span>
             <div class="d-flex gap-2">
-              <button class="btn btn-light btn-sm px-3 rounded-pill fw-bold text-muted transition-all" (click)="openFeatureModal(feat)" style="font-size: 0.75rem;">
+              <button class="btn btn-light btn-sm px-3 rounded-pill fw-bold text-muted transition-all" (click)="openFeatureModal(feat)" class="text-xs">
                 <i class="fa-solid fa-pen-nib me-1"></i> แก้ไข
               </button>
-              <button class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all" (click)="deleteFeature(feat.id)" style="font-size: 0.75rem; background: #fef2f2; border: 1px solid #fca5a5;">
+              <button class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all" (click)="deleteFeature(feat.id)" class="text-xs bg-red-50 border border-red-300">
                 <i class="fa-solid fa-trash-alt me-1"></i> ลบ
               </button>
             </div>
@@ -69,7 +69,7 @@
       <!-- Professional Pricing Table -->
       <div class="col-12">
         <div class="d-flex flex-wrap justify-content-start w-100 mt-3" style="gap: 2rem;">
-          <div *ngFor="let plan of plans" style="flex: 0 1 340px; max-width: 340px;">
+          <div *ngFor="let plan of plans" class="w-[340px]">
         <div class="pricing-preview-card glass-card h-100" [class.opacity-50]="!plan.is_active" [class.active]="plan.badge === 'recommended'">
           <!-- Badge -->
           <ng-container *ngIf="plan.badge">
@@ -123,10 +123,10 @@
           </div>
 
           <div class="mt-auto d-flex gap-2 justify-content-center border-top border-subtle pt-4 mt-3">
-            <button class="btn btn-light btn-sm w-100 rounded-pill fw-bold text-muted transition-all" (click)="openModal(plan)" style="font-size: 0.85rem;">
+            <button class="btn btn-light btn-sm w-100 rounded-pill fw-bold text-muted transition-all" (click)="openModal(plan)" class="text-sm">
               <i class="fa-solid fa-pen-nib me-1"></i> แก้ไข
             </button>
-            <button class="btn btn-sm w-100 rounded-pill fw-bold text-danger transition-all" (click)="delete(plan.id)" style="font-size: 0.85rem; background: #fef2f2; border: 1px solid #fca5a5;">
+            <button class="btn btn-sm w-100 rounded-pill fw-bold text-danger transition-all" (click)="delete(plan.id)" class="text-sm bg-red-50 border border-red-300">
               <i class="fa-solid fa-trash-alt me-1"></i> ลบ
             </button>
           </div>
@@ -149,10 +149,10 @@
           </button>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0" style="font-size: 0.875rem; table-layout: fixed;">
+          <table class="table table-hover align-middle mb-0 text-sm">
             <thead class="bg-light">
               <tr>
-                <th class="ps-4 py-3 text-muted fw-bold border-0" style="width: 25%;">ฟีเจอร์ระบบ</th>
+                <th class="ps-4 py-3 text-muted fw-bold border-0 w-[25%]">ฟีเจอร์ระบบ</th>
                 <th *ngFor="let role of roles" class="text-center py-3 text-muted fw-bold border-0">{{ role }}</th>
               </tr>
             </thead>
@@ -160,7 +160,7 @@
               <tr *ngFor="let feat of allFeatures">
                 <td class="ps-4 py-3 fw-semibold text-slate-900 border-bottom border-subtle">
                   {{ feat.feature_name }}
-                  <div class="extra-small text-muted fw-normal" style="font-size: 0.7rem;">{{ feat.feature_code }}</div>
+                  <div class="extra-small text-muted fw-normal text-[0.7rem]">{{ feat.feature_code }}</div>
                 </td>
                 <td *ngFor="let role of roles" class="text-center py-3 border-bottom border-subtle">
                   <div class="form-check form-switch d-inline-block">
@@ -178,13 +178,13 @@
 </div>
 
 <!-- Modal: Package Configuration (Green Sync Edition) -->
-<div class="modal d-block premium-modal animate-in" *ngIf="selectedPlan" tabindex="-1" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);">
+<div class="modal d-block premium-modal animate-in" *ngIf="selectedPlan" tabindex="-1" class="bg-black/60 backdrop-blur-sm">
   <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <!-- Minimal Header -->
       <div class="modal-header-minimal d-flex justify-content-between align-items-center">
         <div class="title-group">
-          <h4 style="color: var(--brand-green);">{{ selectedPlan.id ? 'แก้ไขแพ็กเกจสมาชิก' : 'สร้างแพ็กเกจใหม่' }}</h4>
+          <h4 class="text-emerald-600">{{ selectedPlan.id ? 'แก้ไขแพ็กเกจสมาชิก' : 'สร้างแพ็กเกจใหม่' }}</h4>
           <p>กำหนดค่าเชิงพาณิชย์และฟีเจอร์สำหรับองค์กร</p>
         </div>
         <div class="d-flex align-items-center gap-4">
@@ -196,7 +196,7 @@
               <input class="form-check-input m-0" type="checkbox" [(ngModel)]="selectedPlan.is_active" style="width: 2.2em; height: 1.1em;">
             </div>
           </div>
-          <button type="button" class="btn-close shadow-none" (click)="closeModal()" style="font-size: 0.75rem;"></button>
+          <button type="button" class="btn-close shadow-none" (click)="closeModal()" class="text-xs"></button>
         </div>
       </div>
 
@@ -260,7 +260,7 @@
               <div class="col-md-6" *ngFor="let feat of allFeatures">
                 <div class="capability-card p-3" [class.active]="isFeatureSelected(feat.id)" (click)="toggleFeature(feat.id)">
                   <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="capability-icon" style="width:32px; height:32px;"><i class="fa-solid fa-cube small"></i></div>
+                    <div class="capability-icon w-[32px]"><i class="fa-solid fa-cube small"></i></div>
                     <div class="form-check form-switch p-0 m-0">
                       <input class="form-check-input m-0" type="checkbox" [checked]="isFeatureSelected(feat.id)" (click)="$event.stopPropagation()" (change)="toggleFeature(feat.id)">
                     </div>
@@ -293,7 +293,7 @@
 </div>
 
 <!-- Modal: Feature Inventory -->
-<div class="modal d-block premium-modal animate-in" *ngIf="selectedFeature" tabindex="-1" style="background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px);">
+<div class="modal d-block premium-modal animate-in" *ngIf="selectedFeature" tabindex="-1" class="bg-black/60 backdrop-blur-sm">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header-minimal border-0">

@@ -49,6 +49,20 @@ export class GreenCriteriaController {
     return this.greenCriteriaService.update(+id, data);
   }
 
+  @Put(':id/score')
+  updateScore(
+    @Param('id') id: string,
+    @Body('score') score: number,
+    @Headers('x-org-id') orgIdStr?: string,
+  ) {
+    let orgId = 0;
+    if (orgIdStr) {
+      orgId = parseInt(orgIdStr, 10);
+      if (isNaN(orgId)) orgId = 0;
+    }
+    return this.greenCriteriaService.updateScore(+id, score, orgId);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.greenCriteriaService.remove(+id);

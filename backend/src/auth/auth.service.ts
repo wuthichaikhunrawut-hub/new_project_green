@@ -33,7 +33,7 @@ export class AuthService {
     });
 
     // 2. Hash password
-    const hashedPassword = await bcrypt.hash(registerDto.userData.password, 10);
+    const hashedPassword = await bcrypt.hash(registerDto.userData.password, 12);
 
     // 3. Create User
     const user = await this.usersService.create({
@@ -108,7 +108,7 @@ export class AuthService {
     }
 
     // 1. Hash password
-    const hashedPassword = await bcrypt.hash(registerDto.userData.password, 10);
+    const hashedPassword = await bcrypt.hash(registerDto.userData.password, 12);
 
     // 2. Create User as ASSESSOR
     const user = await this.usersService.create({

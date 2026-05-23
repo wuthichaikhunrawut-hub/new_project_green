@@ -1,5 +1,5 @@
 <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center vh-100">
-    <div class="spinner-border" style="color: #2D6A4F;" role="status">
+    <div class="spinner-border" class="text-[#2D6A4F]" role="status">
         <span class="visually-hidden">กำลังโหลด...</span>
     </div>
 </div>
@@ -52,7 +52,7 @@
                         <div class="org-col">
                             <div class="org-row"><span class="org-lbl">จำนวนบุคลากร</span> <span class="org-val">{{ assessment.organization?.number_of_employees ? (assessment.organization.number_of_employees + ' คน') : '-' }}</span></div>
                             <div class="org-row"><span class="org-lbl">พื้นที่ใช้สอย</span> <span class="org-val">{{ assessment.organization?.total_floor_area ? (assessment.organization.total_floor_area | number:'1.0-0') + ' ตร.ม.' : '-' }}</span></div>
-                            <div class="org-row"><span class="org-lbl">วันที่ตรวจประเมิน</span> <span class="org-val" style="color: #2D6A4F; font-weight: 700;">{{ formatDate(assessment.updated_at) }}</span></div>
+                            <div class="org-row"><span class="org-lbl">วันที่ตรวจประเมิน</span> <span class="org-val" class="text-[#2D6A4F]">{{ formatDate(assessment.updated_at) }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -81,10 +81,10 @@
                     <table class="tbl">
                         <thead>
                             <tr>
-                                <th style="width: 10%; text-align: center;">หมวด</th>
-                                <th style="width: 56%;">รายการประเมิน</th>
-                                <th style="width: 17%; text-align: right;">เต็ม</th>
-                                <th style="width: 17%; text-align: right;">ได้</th>
+                                <th class="w-[10%]">หมวด</th>
+                                <th class="w-[56%]">รายการประเมิน</th>
+                                <th class="w-[17%]">เต็ม</th>
+                                <th class="w-[17%]">ได้</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -95,7 +95,7 @@
                                 <td class="c-score">{{ cat.score | number:'1.1-1' }}</td>
                             </tr>
                             <tr class="row-total">
-                                <td colspan="2" style="text-align: right;">คะแนนรวมสะสมสุทธิ</td>
+                                <td colspan="2" class="text-right">คะแนนรวมสะสมสุทธิ</td>
                                 <td class="c-max">{{ maxScoreSum }}</td>
                                 <td class="c-score">{{ assessment.total_score | number:'1.1-1' }}</td>
                             </tr>
@@ -129,8 +129,8 @@
                         </div>
                         <ng-template #noCarbonTpl>
                             <div class="no-carbon">
-                                <i class="fa-solid fa-leaf" style="color: #95D5B2; font-size: 18px;"></i>
-                                <p style="margin: 4px 0 0;">ยังไม่มีข้อมูลการบันทึกก๊าซเรือนกระจก</p>
+                                <i class="fa-solid fa-leaf" class="text-[18px]"></i>
+                                <p class="mt-1">ยังไม่มีข้อมูลการบันทึกก๊าซเรือนกระจก</p>
                             </div>
                         </ng-template>
                     </div>

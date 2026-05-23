@@ -52,7 +52,7 @@
             <tr *ngFor="let assessor of filteredData">
               <td class="px-4 py-3 fw-semibold">{{ assessor.username }}</td>
               <td class="px-4 py-3 text-muted">{{ assessor.email }}</td>
-              <td class="px-4 py-3 text-muted small" style="max-width: 250px;">
+              <td class="px-4 py-3 text-muted small max-w-[250px]">
                 <span [title]="assessor.bio">{{ assessor.bio || '-' }}</span>
               </td>
               <td class="px-4 py-3 text-center">
@@ -89,7 +89,7 @@
 </div>
 
 <!-- Assessor Details Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedAssessor" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+<div class="modal d-block" tabindex="-1" *ngIf="selectedAssessor" class="bg-black/60 backdrop-blur-sm" >
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -112,7 +112,7 @@
                 <table class="table table-borderless table-sm mb-0">
                   <tbody>
                     <tr>
-                      <td class="text-muted" style="width: 120px;">ชื่อ-นามสกุล:</td>
+                      <td class="text-muted w-[120px]">ชื่อ-นามสกุล:</td>
                       <td class="fw-semibold">{{ selectedAssessor.username || '-' }}</td>
                     </tr>
                     <tr>
@@ -141,7 +141,7 @@
                 <table class="table table-borderless table-sm mb-0">
                   <tbody>
                     <tr>
-                      <td class="text-muted" style="width: 120px;">เลขใบอนุญาต:</td>
+                      <td class="text-muted w-[120px]">เลขใบอนุญาต:</td>
                       <td class="fw-bold text-primary">{{ selectedAssessor.assessor_profile?.license_number || '-' }}</td>
                     </tr>
                     <tr>

@@ -31,8 +31,7 @@
             <div class="avatar-circle mx-auto bg-primary bg-opacity-10 text-primary display-4 fw-bold shadow-sm">
               {{ user.username?.charAt(0) | uppercase }}
             </div>
-            <div class="position-absolute bottom-0 end-0 bg-success border border-white border-3 rounded-circle"
-              style="width: 20px; height: 20px;" *ngIf="user.assessor_profile?.verification_status === 'Verified'"
+            <div class="position-absolute bottom-0 end-0 bg-success border border-white border-3 rounded-circle w-[20px]" *ngIf="user.assessor_profile?.verification_status === 'Verified'"
               title="ผ่านการยืนยันตัวตน"></div>
           </div>
           <h4 class="fw-bold mb-1">{{ user.username }}</h4>
@@ -130,7 +129,7 @@
                 <i class="fa-solid fa-file-pdf fs-4"></i>
               </div>
               <div class="text-start">
-                <div class="fw-bold fw-sm text-truncate" style="max-width: 200px;">ใบรับรองคุณสมบัติ.pdf</div>
+                <div class="fw-bold fw-sm text-truncate max-w-[200px]">ใบรับรองคุณสมบัติ.pdf</div>
                 <small class="text-muted">อัปโหลดเมื่อ {{ user.assessor_profile.updated_at | date:'dd/MM/yyyy'
                   }}</small>
               </div>

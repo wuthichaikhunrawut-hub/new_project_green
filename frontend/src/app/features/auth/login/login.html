@@ -6,7 +6,7 @@
 
     <!-- TOP: Logo (absolute) -->
     <a routerLink="/" class="brand-logo">
-      <img src="assets/image/Green_office_imge.png" alt="GreenSync" style="height: 45px; width: auto;">
+      <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="h-[45px]">
     </a>
 
     <!-- BOTTOM: Text overlay on image -->
@@ -57,7 +57,7 @@
         <div class="field-group">
           <label for="password">
             รหัสผ่าน
-            <a href="#" class="forgot-link">ลืมรหัสผ่าน?</a>
+            <a href="javascript:void(0)" (click)="forgotPassword()" class="forgot-link">ลืมรหัสผ่าน?</a>
           </label>
           <div class="input-wrapper">
             <i class="fa-solid fa-lock"></i>

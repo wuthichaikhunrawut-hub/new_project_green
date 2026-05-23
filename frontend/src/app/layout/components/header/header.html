@@ -29,8 +29,7 @@
       [routerLink]="['/notifications']">
       <i class="fa-solid fa-bell fs-5"></i>
       <span *ngIf="unreadNotifications > 0" 
-        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-        style="font-size: 0.65rem;">
+        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-[0.65rem]">
         {{ unreadNotifications > 99 ? '99+' : unreadNotifications }}
       </span>
     </button>

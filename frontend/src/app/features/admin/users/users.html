@@ -31,7 +31,7 @@
     <!-- Role Tabs -->
     <ul class="nav nav-tabs px-4 border-bottom-0 mt-3">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ALL'" [class.fw-bold]="activeTab === 'ALL'" (click)="setTab('ALL')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ALL'" [class.fw-bold]="activeTab === 'ALL'" (click)="setTab('ALL')" class="cursor-pointer">
           <i class="fa-solid fa-users me-2"></i>ทั้งหมด
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.all }}</span>
         </a>
@@ -39,13 +39,13 @@
       
       <!-- System Admin Tabs -->
       <li class="nav-item" *ngIf="isSystemAdmin">
-        <a class="nav-link" [class.active]="activeTab === 'ADMIN'" [class.fw-bold]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ADMIN'" [class.fw-bold]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" class="cursor-pointer">
           <i class="fa-solid fa-user-shield me-2"></i>แอดมินระบบ
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.admin }}</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="isSystemAdmin">
-        <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" [class.fw-bold]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" [class.fw-bold]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" class="cursor-pointer">
           <i class="fa-solid fa-user-check me-2"></i>ผู้ตรวจประเมิน
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.assessor }}</span>
         </a>
@@ -53,13 +53,13 @@
 
       <!-- Shared / Org Tabs -->
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ADMIN_ORG'" [class.fw-bold]="activeTab === 'ADMIN_ORG'" (click)="setTab('ADMIN_ORG')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'ADMIN_ORG'" [class.fw-bold]="activeTab === 'ADMIN_ORG'" (click)="setTab('ADMIN_ORG')" class="cursor-pointer">
           <i class="fa-solid fa-user-gear me-2"></i>Admin Org
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.adminOrg }}</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'MEMBER'" [class.fw-bold]="activeTab === 'MEMBER'" (click)="setTab('MEMBER')" style="cursor: pointer;">
+        <a class="nav-link" [class.active]="activeTab === 'MEMBER'" [class.fw-bold]="activeTab === 'MEMBER'" (click)="setTab('MEMBER')" class="cursor-pointer">
           <i class="fa-solid fa-building-user me-2"></i>สมาชิกในองค์กร
           <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.member }}</span>
         </a>
@@ -88,7 +88,7 @@
             <tr *ngFor="let user of filteredUsers()">
               <td class="px-4 py-3">
                 <div class="d-flex align-items-center">
-                  <div class="avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
+                  <div class="avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold w-[40px]">
                     {{ user.user_profile?.first_name ? user.user_profile?.first_name?.charAt(0) : user.email.charAt(0).toUpperCase() }}
                   </div>
                   <div>
@@ -165,7 +165,7 @@
 </div>
 
 <!-- Edit User Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedUser" style="background-color: rgba(0,0,0,0.6); backdrop-filter: blur(4px);">
+<div class="modal d-block" tabindex="-1" *ngIf="selectedUser" class="bg-black/60 backdrop-blur-sm" >
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
