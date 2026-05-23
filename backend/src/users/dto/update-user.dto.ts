@@ -8,6 +8,7 @@ export class UpdateUserDto {
   is_active?: boolean;
   password?: string;
   organization?: { id: number };
+  org_unit_id?: number;
   user_profile?: {
     first_name?: string;
     last_name?: string;
