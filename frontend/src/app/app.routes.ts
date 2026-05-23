@@ -5,6 +5,7 @@ import { RegisterComponent } from './features/auth/register/register';
 import { AssessorRegisterComponent } from './features/auth/assessor-register/assessor-register';
 import { HomeComponent } from './features/home/home';
 import { RoleGuard } from './core/guards/role.guard';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   // 1. หน้าแรกสุด ถ้ายังไม่ login ให้ดีดไปหน้า login
@@ -28,7 +29,7 @@ export const routes: Routes = [
   {
     path: '',
     component: MainLayoutComponent,
-    // canActivate: [authGuard], // เดี๋ยวค่อยมาเปิดใช้งานเมื่อทำระบบ Guard เสร็จ
+    canActivate: [authGuard],
     children: [
       {
         path: 'dashboard',
@@ -241,13 +242,7 @@ export const routes: Routes = [
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
-      {
-        path: 'org/branches',
-        loadComponent: () => import('./features/org-admin/org-branches/org-branches').then(m => m.OrgBranchesComponent),
-        title: 'จัดการสาขาและแผนก - Green Sync',
-        canActivate: [RoleGuard],
-        data: { roles: ['ORG_ADMIN', 'ORGANIZATION_ADMIN', 'SYSTEM_ADMIN'] }
-      },
+
       {
         path: 'assessor/profile',
         loadComponent: () => import('./features/assessor/profile/profile').then(m => m.AssessorProfileComponent),

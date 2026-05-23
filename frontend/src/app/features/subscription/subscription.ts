@@ -32,14 +32,6 @@ export class SubscriptionComponent implements OnInit {
 
   loadData() {
     this.isLoading = true;
-    
-    // Safety Timeout: Force stop loading after 5 seconds
-    setTimeout(() => {
-      if (this.isLoading) {
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    }, 5000);
 
     forkJoin({
       plans: this.userSubService.getPlans(),

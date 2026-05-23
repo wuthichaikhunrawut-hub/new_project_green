@@ -26,6 +26,10 @@ export class GeminiService {
   constructor(
     @InjectRepository(ChatLog)
     private readonly chatLogRepo: Repository<ChatLog>,
+    @InjectRepository(ChatSession)
+    private readonly chatSessionRepo: Repository<ChatSession>,
+    @InjectRepository(ChatMessage)
+    private readonly chatMessageRepo: Repository<ChatMessage>,
   ) {}
 
   private getClient(): GoogleGenAI {
@@ -97,7 +101,33 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     }
   }
 
-  async chat(message: string, userId?: number): Promise<ChatResult> {
+  async getSessions(userId: number): Promise<ChatSession[]> {
+    return this.chatSessionRepo.find({
+      where: { user_id: userId },
+      order: { updated_at: 'DESC' },
+    });
+  }
+
+  async getSessionMessages(sessionId: number, userId: number): Promise<ChatMessage[]> {
+    const session = await this.chatSessionRepo.findOne({
+      where: { id: sessionId, user_id: userId },
+      relations: ['messages'],
+      order: { updated_at: 'DESC' }
+    });
+    if (!session) throw new InternalServerErrorException('Session not found');
+    return session.messages.sort((a, b) => a.created_at.getTime() - b.created_at.getTime());
+  }
+
+  async createSession(userId: number, title: string): Promise<ChatSession> {
+    const session = this.chatSessionRepo.create({ user_id: userId, title });
+    return this.chatSessionRepo.save(session);
+  }
+
+  async deleteSession(sessionId: number, userId: number): Promise<void> {
+    await this.chatSessionRepo.delete({ id: sessionId, user_id: userId });
+  }
+
+  async chat(message: string, userId?: number, sessionId?: number): Promise<ChatResult> {
     const ai = this.getClient();
 
     try {
@@ -114,16 +144,18 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 - ถ้าคำถามไม่เกี่ยวกับหัวข้อข้างต้น ให้แจ้งว่าคุณช่วยได้เฉพาะเรื่อง Green Office และ Carbon Footprint เท่านั้น`;
 
       let historyContext = '';
-      if (userId) {
-        const history = await this.chatLogRepo.find({
-          where: { user_id: userId },
-          order: { created_at: 'DESC' },
-          take: 5
+      let session: ChatSession | null = null;
+      
+      if (userId && sessionId) {
+        session = await this.chatSessionRepo.findOne({
+          where: { id: sessionId, user_id: userId },
+          relations: ['messages']
         });
-        if (history.length > 0) {
-          history.reverse();
+        
+        if (session && session.messages.length > 0) {
+          const recentMessages = session.messages.sort((a, b) => b.created_at.getTime() - a.created_at.getTime()).slice(0, 10).reverse();
           historyContext = '--- ประวัติการสนทนาก่อนหน้า ---\n' + 
-            history.map(h => `ผู้ใช้: ${h.question}\nGreenBot: ${h.answer}`).join('\n\n') + 
+            recentMessages.map(m => `${m.role === 'user' ? 'ผู้ใช้' : 'GreenBot'}: ${m.content}`).join('\n\n') + 
             '\n------------------------------\n\n';
         }
       }
@@ -138,15 +170,16 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       const reply = response.text?.trim() || 'ขออภัย ไม่สามารถตอบกลับได้ในขณะนี้';
 
       try {
-        const chatLog = this.chatLogRepo.create({
-          user_id: userId || null,
-          question: message,
-          answer: reply,
-          intent: 'chat',
-          related_module: 'general',
-          confidence_score: 1.0,
-        });
-        await this.chatLogRepo.save(chatLog);
+        if (session) {
+          const userMsg = this.chatMessageRepo.create({ role: 'user', content: message, session });
+          const botMsg = this.chatMessageRepo.create({ role: 'assistant', content: reply, session });
+          await this.chatMessageRepo.save([userMsg, botMsg]);
+          
+          if (session.messages.length === 0 || session.title === 'New Conversation') {
+            session.title = message.substring(0, 30) + (message.length > 30 ? '...' : '');
+            await this.chatSessionRepo.save(session);
+          }
+        }
       } catch (dbError) {
         console.error('Failed to save chat log:', dbError);
       }

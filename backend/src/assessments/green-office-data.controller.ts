@@ -1,7 +1,7 @@
 import { Controller, Get, Headers } from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
 
-@Controller('green-office')
+@Controller('green-office-data')
 export class GreenOfficeDataController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 

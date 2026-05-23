@@ -55,6 +55,27 @@ export class AssessmentsService {
     return this.findOne(savedAssessment.id, orgId);
   }
 
+  async getDraft(orgId: number): Promise<Assessment> {
+    let draft = await this.assessmentRepository.findOne({
+      where: { organization: { id: orgId }, status: 'DRAFT' },
+      relations: [
+        'organization',
+        'details',
+        'details.criteria',
+        'details.evidence_files',
+      ],
+    });
+
+    if (!draft) {
+      // Create a new draft if not exists
+      const createAssessmentDto = new CreateAssessmentDto();
+      createAssessmentDto.status = 'DRAFT';
+      // create() uses findOne which loads relations
+      draft = await this.create(createAssessmentDto, orgId);
+    }
+    return draft;
+  }
+
   async findAll(
     orgId: number,
     role: string = '',

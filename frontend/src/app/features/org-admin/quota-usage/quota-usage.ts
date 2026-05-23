@@ -29,7 +29,11 @@ export class QuotaUsageComponent implements OnInit {
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    this.http.get<any[]>('http://localhost:3001/subscriptions/my/usage')
+    this.http.get<any[]>('http://localhost:3001/subscriptions/my/quotas', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('access_token')}`
+      }
+    })
       .subscribe({
         next: (res) => {
           this.logs = res;

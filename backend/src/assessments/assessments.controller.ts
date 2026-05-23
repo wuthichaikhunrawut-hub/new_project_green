@@ -46,6 +46,12 @@ export class AssessmentsController {
     );
   }
 
+  @Get('draft')
+  getDraft(@Headers() headers: any) {
+    const orgId = this.getOrgId(headers);
+    return this.assessmentsService.getDraft(orgId);
+  }
+
   @Get()
   findAll(@Headers() headers: any) {
     const role = this.getUserRole(headers);

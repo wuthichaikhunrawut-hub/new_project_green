@@ -9,6 +9,7 @@ import {
   BadRequestException,
   UseGuards,
   Request,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GeminiService } from './gemini.service';
@@ -66,14 +67,39 @@ export class GeminiController {
 
   @Post('chat')
   async chat(
-    @Body() body: { message: string },
+    @Body() body: { message: string, sessionId?: number },
     @Request() req: { user: JwtUser },
   ) {
     if (!body?.message?.trim()) {
       throw new BadRequestException('Message is required');
     }
     const userId = Number(req.user.sub);
-    return this.geminiService.chat(body.message, userId);
+    return this.geminiService.chat(body.message, userId, body.sessionId);
+  }
+
+  @Get('sessions')
+  async getSessions(@Request() req: { user: JwtUser }) {
+    const userId = Number(req.user.sub);
+    return this.geminiService.getSessions(userId);
+  }
+
+  @Post('sessions')
+  async createSession(@Request() req: { user: JwtUser }, @Body() body: { title?: string }) {
+    const userId = Number(req.user.sub);
+    return this.geminiService.createSession(userId, body.title || 'New Conversation');
+  }
+
+  @Get('sessions/:id/messages')
+  async getSessionMessages(@Request() req: { user: JwtUser }, @Param('id') id: string) {
+    const userId = Number(req.user.sub);
+    return this.geminiService.getSessionMessages(+id, userId);
+  }
+
+  @Delete('sessions/:id')
+  async deleteSession(@Request() req: { user: JwtUser }, @Param('id') id: string) {
+    const userId = Number(req.user.sub);
+    await this.geminiService.deleteSession(+id, userId);
+    return { success: true };
   }
 
   @Get('history')

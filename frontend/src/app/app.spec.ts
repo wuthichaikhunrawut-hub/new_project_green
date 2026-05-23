@@ -14,10 +14,16 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  it(`should have as title 'green-office-app'`, () => {
+    const fixture = TestBed.createComponent(App);
+    const app = fixture.componentInstance;
+    expect(app.title).toEqual('green-office-app');
+  });
+
+  it('should render router-outlet', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, project-green');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });

@@ -18,29 +18,53 @@ interface ChatMessage {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-<div class="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 flex flex-col">
-
-  <!-- Header -->
-  <div class="border-b border-white/10 bg-white/5 backdrop-blur px-6 py-4 flex items-center gap-4 flex-shrink-0">
-    <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
-      <i class="fa-solid fa-robot text-white"></i>
+<div class="min-h-screen bg-slate-900 flex">
+  
+  <!-- Sidebar -->
+  <div class="w-64 bg-slate-950 border-r border-white/10 flex flex-col flex-shrink-0 transition-all duration-300">
+    <div class="p-4">
+      <button (click)="newSession()" class="w-full py-2 px-4 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors flex items-center justify-center gap-2">
+        <i class="fa-solid fa-plus"></i> แชทใหม่
+      </button>
     </div>
-    <div>
-      <h1 class="text-white font-bold text-lg">GreenSync AI Assistant</h1>
-      <div class="flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-emerald-400 text-xs font-medium">พร้อมให้บริการ</span>
-      </div>
+    
+    <div class="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
+      <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 mb-2">ประวัติการสนทนา</div>
+      @for (session of sessions; track session.id) {
+        <div class="group flex items-center justify-between rounded-lg px-3 py-2 cursor-pointer hover:bg-white/5 transition-colors"
+             [ngClass]="{'bg-white/10': currentSessionId === session.id}"
+             (click)="selectSession(session.id)">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <i class="fa-regular fa-message text-slate-400 text-sm"></i>
+            <span class="text-slate-300 text-sm truncate">{{ session.title }}</span>
+          </div>
+          <button (click)="deleteSession(session.id, $event)" class="text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity">
+            <i class="fa-solid fa-trash-can text-xs"></i>
+          </button>
+        </div>
+      }
     </div>
-    <button (click)="clearMessages()" class="ml-auto text-white/40 hover:text-white/70 transition-colors text-sm">
-      <i class="fa-solid fa-trash-can mr-1"></i> ล้างประวัติ
-    </button>
   </div>
 
-  <!-- Messages -->
-  <div class="flex-1 overflow-y-auto px-4 py-6 space-y-4" #chatArea style="max-height: calc(100vh - 140px);">
+  <!-- Main Chat Area -->
+  <div class="flex-1 flex flex-col min-w-0 bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900">
+    <!-- Header -->
+    <div class="border-b border-white/10 bg-white/5 backdrop-blur px-6 py-4 flex items-center gap-4 flex-shrink-0">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
+        <i class="fa-solid fa-robot text-white"></i>
+      </div>
+      <div>
+        <h1 class="text-white font-bold text-lg">GreenSync AI Assistant</h1>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-emerald-400 text-xs font-medium">พร้อมให้บริการ</span>
+        </div>
+      </div>
+    </div>
 
-    <!-- Welcome -->
+    <!-- Messages -->
+    <div class="flex-1 overflow-y-auto px-4 py-6 space-y-4" #chatArea style="max-height: calc(100vh - 140px);">
+      <!-- Welcome -->
     @if (messages.length === 0) {
       <div class="flex flex-col items-center justify-center py-16 text-center">
         <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-2xl mb-6">
@@ -111,6 +135,8 @@ interface ChatMessage {
     </div>
     <p class="text-center text-slate-600 text-xs mt-2">GreenSync AI อาจเกิดข้อผิดพลาดได้ กรุณาตรวจสอบข้อมูลสำคัญก่อนนำไปใช้</p>
   </div>
+    </div>
+  </div>
 </div>
   `
 })
@@ -120,6 +146,8 @@ export class ChatbotComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
 
   messages: ChatMessage[] = [];
+  sessions: any[] = [];
+  currentSessionId: number | null = null;
   inputText = '';
   isTyping = false;
 
@@ -130,7 +158,59 @@ export class ChatbotComponent implements OnInit {
     'วิเคราะห์กลยุทธ์ความยั่งยืนสำหรับองค์กร'
   ];
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadSessions();
+  }
+
+  getHeaders() {
+    const token = isPlatformBrowser(this.platformId) ? localStorage.getItem('access_token') : '';
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
+
+  loadSessions() {
+    this.http.get<any[]>('http://localhost:3001/gemini/sessions', { headers: this.getHeaders() }).subscribe({
+      next: (res) => {
+        this.sessions = res;
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  selectSession(id: number) {
+    this.currentSessionId = id;
+    this.messages = [];
+    this.http.get<any[]>(`http://localhost:3001/gemini/sessions/${id}/messages`, { headers: this.getHeaders() }).subscribe({
+      next: (res) => {
+        this.messages = res.map(m => ({
+          id: String(m.id),
+          role: m.role,
+          content: m.content,
+          timestamp: new Date(m.created_at)
+        }));
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  newSession() {
+    this.currentSessionId = null;
+    this.messages = [];
+    this.cdr.markForCheck();
+  }
+
+  deleteSession(id: number, event: Event) {
+    event.stopPropagation();
+    this.http.delete(`http://localhost:3001/gemini/sessions/${id}`, { headers: this.getHeaders() }).subscribe({
+      next: () => {
+        this.sessions = this.sessions.filter(s => s.id !== id);
+        if (this.currentSessionId === id) this.newSession();
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   sendQuick(prompt: string) {
     this.inputText = prompt;
@@ -154,6 +234,9 @@ export class ChatbotComponent implements OnInit {
 
   clearMessages() {
     this.messages = [];
+    if (this.currentSessionId) {
+      this.deleteSession(this.currentSessionId, new Event('click'));
+    }
     this.cdr.markForCheck();
   }
 
@@ -182,25 +265,28 @@ export class ChatbotComponent implements OnInit {
     this.messages.push(loadingMsg);
     this.cdr.markForCheck();
 
-    const token = isPlatformBrowser(this.platformId) ? localStorage.getItem('access_token') : '';
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    });
+    const headers = this.getHeaders();
+    const payload: any = { message: text };
+    if (this.currentSessionId) {
+      payload.sessionId = this.currentSessionId;
+    }
 
-    this.http.post<{ response: string }>('http://localhost:3001/chatbot/ask', { message: text }, { headers }).subscribe({
+    this.http.post<{ reply: string }>('http://localhost:3001/gemini/chat', payload, { headers }).subscribe({
       next: (res) => {
         const idx = this.messages.findIndex(m => m.id === loadingMsg.id);
         if (idx !== -1) {
           this.messages[idx] = {
             id: loadingMsg.id,
             role: 'assistant',
-            content: res.response || 'ขออภัย ไม่สามารถประมวลผลได้ในขณะนี้',
+            content: res.reply || 'ขออภัย ไม่สามารถประมวลผลได้ในขณะนี้',
             timestamp: new Date(),
             isLoading: false
           };
         }
         this.isTyping = false;
+        if (!this.currentSessionId) {
+          this.loadSessions();
+        }
         this.cdr.markForCheck();
       },
       error: () => {

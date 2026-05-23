@@ -5,7 +5,7 @@ import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { AssessmentCardComponent } from '../../../shared/components/assessment/assessment-card/assessment-card';
 import { timeout } from 'rxjs';
-import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
+import { AssessmentDataService } from '../../../core/services/assessment-data.service';
 
 interface Category {
   id: number;
@@ -17,6 +17,7 @@ interface Category {
 }
 
 interface Question {
+  detailId: number;
   id: string;
   title: string;
   description: string;
@@ -60,6 +61,7 @@ export class GreenOfficeFormComponent implements OnInit {
   activeCategory = 1;
   isLoading = true;
   errorMsg = '';
+  assessmentId: number | null = null;
 
   questions: Question[] = [];
   activeSubCategory: string = '';
@@ -67,7 +69,7 @@ export class GreenOfficeFormComponent implements OnInit {
 
   private cdr = inject(ChangeDetectorRef);
 
-  constructor(private criteriaService: GreenCriteriaService) {}
+  constructor(private assessmentData: AssessmentDataService) {}
 
   ngOnInit(): void {
     this.loadCriteria();
@@ -76,32 +78,33 @@ export class GreenOfficeFormComponent implements OnInit {
   loadCriteria(): void {
     this.isLoading = true;
     this.errorMsg = '';
-    this.criteriaService.getCriteriaList().pipe(
+    this.assessmentData.getDraft().pipe(
       timeout(8000)
     ).subscribe({
-      next: (data: GreenCriteria[]) => {
+      next: (data: any) => {
         try {
-          if (!data || data.length === 0) {
-            this.errorMsg = 'ไม่พบข้อมูลเกณฑ์การประเมินในระบบ (Data is empty)';
+          if (!data || !data.details || data.details.length === 0) {
+            this.errorMsg = 'ไม่พบข้อมูลแบบร่างประเมินในระบบ (Data is empty)';
             this.isLoading = false;
             return;
           }
-          this.buildFromApiData(data);
+          this.assessmentId = data.id;
+          this.buildFromApiData(data.details);
           this.cdr.markForCheck();
         } catch (e: any) {
-          console.error('Error parsing criteria data:', e);
-          this.errorMsg = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูลเกณฑ์: ' + e.message;
+          console.error('Error parsing assessment data:', e);
+          this.errorMsg = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล: ' + e.message;
         } finally {
           this.isLoading = false;
           this.cdr.markForCheck();
         }
       },
       error: (err) => {
-        console.error('Failed to load criteria', err);
+        console.error('Failed to load assessment draft', err);
         if (err.name === 'TimeoutError') {
           this.errorMsg = 'การเชื่อมต่อล่าช้าเกินไป (Connection Timeout) กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อผู้ดูแลระบบ';
         } else {
-          this.errorMsg = 'ไม่สามารถโหลดข้อมูลเกณฑ์การประเมินได้ (' + (err.message || err.statusText || 'Unknown Error') + ')';
+          this.errorMsg = 'ไม่สามารถโหลดข้อมูลแบบร่างได้ (' + (err.message || err.statusText || 'Unknown Error') + ')';
         }
         this.isLoading = false;
         this.cdr.markForCheck();
@@ -109,24 +112,26 @@ export class GreenOfficeFormComponent implements OnInit {
     });
   }
 
-  private buildFromApiData(data: GreenCriteria[]): void {
+  private buildFromApiData(details: any[]): void {
     // สร้าง allQuestions โดยจัดกลุ่มตาม category_number
     const grouped: { [key: number]: Question[] } = {};
     const catNums = new Set<number>();
 
-    for (const item of data) {
+    for (const detail of details) {
+      const item = detail.criteria;
       const catNum = item.category_number ?? 1;
       catNums.add(catNum);
       if (!grouped[catNum]) grouped[catNum] = [];
       grouped[catNum].push({
+        detailId: detail.id,
         id: item.criteria_code || String(item.id),
         title: item.criteria_name,
         description: item.description || '',
-        implementationStatus: 'none',
-        score: null,
+        implementationStatus: detail.self_score > 0 ? 'implemented' : 'none',
+        score: detail.self_score || null,
         details: '',
-        fileCount: 0,
-        status: 'ยังไม่เริ่ม',
+        fileCount: detail.evidence_files ? detail.evidence_files.length : 0,
+        status: detail.self_score > 0 ? 'ดำเนินการแล้ว' : 'ยังไม่เริ่ม',
         max_score: item.max_score ?? 5,
       });
     }
@@ -156,7 +161,34 @@ export class GreenOfficeFormComponent implements OnInit {
     // เลือก category แรกเป็นค่าเริ่มต้น
     if (this.categories.length > 0) {
       this.selectCategory(this.categories[0].id);
+      this.recalculateAllCategoriesProgress();
     }
+  }
+
+  recalculateAllCategoriesProgress() {
+    this.categories.forEach(cat => {
+      const questions = this.allQuestions[cat.id] ?? [];
+      const answeredCount = questions.filter(q => q.score !== null && q.score > 0).length;
+      cat.progress = questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+
+      const sumScores = questions.reduce((acc, q) => acc + (q.score || 0), 0);
+      const maxPossible = questions.reduce((acc, q) => acc + (q.max_score || 5), 0);
+      cat.currentScore = maxPossible > 0
+        ? Number(((sumScores / maxPossible) * cat.totalWeight).toFixed(2))
+        : 0;
+
+      if (cat.progress === 100) cat.status = 'completed';
+      else if (cat.progress > 0) cat.status = 'in-progress';
+      else cat.status = 'pending';
+    });
+
+    this.radarChartData = {
+      labels: this.radarChartLabels,
+      datasets: [{
+        ...this.radarChartData.datasets[0],
+        data: this.categories.map(c => (c.currentScore / c.totalWeight) * 100)
+      }]
+    };
   }
 
   get filteredQuestions(): Question[] {
@@ -313,7 +345,28 @@ export class GreenOfficeFormComponent implements OnInit {
   }
 
   saveProgress() {
-    this.toast.success('บันทึกฉบับร่างเรียบร้อยแล้ว ข้อมูลของคุณถูกจัดเก็บในระบบชั่วคราว');
+    if (!this.assessmentId) return;
+
+    const detailsToUpdate: any[] = [];
+    for (const catId in this.allQuestions) {
+      this.allQuestions[catId].forEach(q => {
+        detailsToUpdate.push({
+          assessment_detail_id: q.detailId,
+          self_score: q.score || 0
+        });
+      });
+    }
+
+    const payload = {
+      total_score: this.totalScore,
+      details: detailsToUpdate
+    };
+
+    this.toast.success('กำลังบันทึกข้อมูลแบบร่าง...');
+    this.assessmentData.updateDraft(this.assessmentId, payload).subscribe({
+      next: () => this.toast.success('บันทึกฉบับร่างเรียบร้อยแล้ว!'),
+      error: () => this.toast.error('ไม่สามารถบันทึกแบบร่างได้ กรุณาลองใหม่อีกครั้ง')
+    });
   }
 
   downloadPDF() {
@@ -336,7 +389,12 @@ export class GreenOfficeFormComponent implements OnInit {
     }
 
     if (isAllComplete) {
-      this.toast.success('ส่งแบบประเมินเรียบร้อยแล้ว! คณะกรรมการจะดำเนินการตรวจประเมินในลำดับถัดไป');
+      if (!this.assessmentId) return;
+      const payload = { status: 'SUBMITTED', total_score: this.totalScore };
+      this.assessmentData.updateDraft(this.assessmentId, payload).subscribe({
+        next: () => this.toast.success('ส่งแบบประเมินเรียบร้อยแล้ว! คณะกรรมการจะดำเนินการตรวจประเมินในลำดับถัดไป'),
+        error: () => this.toast.error('เกิดข้อผิดพลาดในการส่งแบบประเมิน')
+      });
     } else {
       this.toast.success('กรุณากรอกข้อมูลให้ครบทุกหมวดก่อนส่งแบบประเมิน');
     }

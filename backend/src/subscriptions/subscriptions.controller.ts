@@ -113,4 +113,11 @@ export class SubscriptionsController {
       year ? Number(year) : undefined,
     );
   }
+
+  @Get('my/quotas')
+  @Roles('ORGANIZATION_ADMIN', 'SYSTEM_ADMIN')
+  async getMyQuotas(@Request() req: any) {
+    const orgId = Number(req.user.orgId);
+    return this.subscriptionsService.getOrganizationFeatureQuotaSummary(orgId);
+  }
 }
