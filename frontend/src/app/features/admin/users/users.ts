@@ -6,6 +6,7 @@ import { UsersService, Role } from '../../../core/services/users.service';
 import { User } from '../../../core/models/user.model';
 import { OrgService } from '../../../core/services/org.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { OrgBranchesService, OrgBranch } from '../../../core/services/org-branches.service';
 
 @Component({
   selector: 'app-admin-users',
@@ -21,6 +22,7 @@ export class AdminUsersComponent implements OnInit {
   private orgService = inject(OrgService);
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
+  private branchService = inject(OrgBranchesService);
 
   isSystemAdmin = false;
   isOrgAdmin = false;
@@ -48,6 +50,8 @@ export class AdminUsersComponent implements OnInit {
   roles: Role[] = [];
   organizations: any[] = [];
   selectedOrgId: number | null = null;
+  branches: OrgBranch[] = [];
+  selectedBranchId: number | null = null;
 
   ngOnInit() {
     this.authService.currentUser$.subscribe(user => {
@@ -81,6 +85,25 @@ export class AdminUsersComponent implements OnInit {
       },
       error: (err) => console.error('Failed to load organizations:', err)
     });
+  }
+
+  loadBranches(orgId: number) {
+    this.branchService.getBranches(orgId).subscribe({
+      next: (data) => {
+        this.branches = data;
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Failed to load branches:', err)
+    });
+  }
+
+  onOrgChange() {
+    this.selectedBranchId = null;
+    if (this.selectedOrgId) {
+      this.loadBranches(this.selectedOrgId);
+    } else {
+      this.branches = [];
+    }
   }
 
   loadRoles() {
@@ -120,12 +143,21 @@ export class AdminUsersComponent implements OnInit {
       // Set org id for dropdown
       if (this.selectedUser.organization) {
         this.selectedOrgId = this.selectedUser.organization.id;
+        this.onOrgChange();
       } else {
         this.selectedOrgId = null;
+        this.branches = [];
       }
+      this.selectedBranchId = this.selectedUser.org_unit_id || null;
     } else {
       // Setup empty user for creation
       this.selectedOrgId = this.isOrgAdmin ? this.currentOrgId : null;
+      if (this.selectedOrgId) {
+        this.onOrgChange();
+      } else {
+        this.branches = [];
+      }
+      this.selectedBranchId = null;
       this.selectedUser = {
         email: '',
         password: '',
@@ -146,10 +178,12 @@ export class AdminUsersComponent implements OnInit {
 
     // Map org_id back to organization object or handled by backend
     if (this.selectedOrgId) {
-      this.selectedUser.organization = { id: this.selectedOrgId };
+      this.selectedUser.organization = { id: this.selectedOrgId } as any;
     } else {
       this.selectedUser.organization = null;
     }
+
+    this.selectedUser.org_unit_id = this.selectedBranchId || undefined;
 
     if (this.selectedUser.id) {
       // Update existing

@@ -213,9 +213,16 @@
           </div>
           <div class="col-md-6" *ngIf="isSystemAdmin">
             <label class="form-label text-muted small fw-bold">สังกัดองค์กร</label>
-            <select class="form-select rounded-3" [(ngModel)]="selectedOrgId">
+            <select class="form-select rounded-3" [(ngModel)]="selectedOrgId" (ngModelChange)="onOrgChange()">
               <option [ngValue]="null">ไม่มีสังกัด</option>
               <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
+            </select>
+          </div>
+          <div class="col-md-6" *ngIf="branches.length > 0">
+            <label class="form-label text-muted small fw-bold">สังกัดสาขา/แผนก</label>
+            <select class="form-select rounded-3" [(ngModel)]="selectedBranchId">
+              <option [ngValue]="null">ไม่มีสังกัด (ส่วนกลาง)</option>
+              <option *ngFor="let b of branches" [value]="b.id">{{ b.unit_name }}</option>
             </select>
           </div>
         </div>
