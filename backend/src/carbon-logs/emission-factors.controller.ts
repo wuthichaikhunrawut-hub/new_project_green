@@ -10,9 +10,13 @@ import {
 } from '@nestjs/common';
 import { EmissionFactorsService } from './emission-factors.service';
 import { EmissionFactor } from './entities/emission-factor.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('admin/emission-factors')
-// @UseGuards(AdminRoleGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('SYSTEM_ADMIN')
 export class EmissionFactorsController {
   constructor(
     private readonly emissionFactorsService: EmissionFactorsService,

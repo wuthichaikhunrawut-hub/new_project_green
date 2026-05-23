@@ -1,7 +1,9 @@
-import { Controller, Get, Headers } from '@nestjs/common';
+import { Controller, Get, Headers, UseGuards } from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('green-office-data')
+@UseGuards(JwtAuthGuard)
 export class GreenOfficeDataController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 

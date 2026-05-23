@@ -11,9 +11,13 @@ import {
 } from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
 import { GreenCriteriaMaster } from './entities/green-criteria-master.entity';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('admin/green-criteria')
-// @UseGuards(AdminRoleGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('SYSTEM_ADMIN')
 export class GreenCriteriaController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 
