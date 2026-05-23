@@ -137,7 +137,6 @@ interface ChatMessage {
   </div>
     </div>
   </div>
-</div>
   `
 })
 export class ChatbotComponent implements OnInit {

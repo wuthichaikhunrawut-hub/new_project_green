@@ -3,6 +3,8 @@ import { GoogleGenAI } from '@google/genai';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ChatLog } from './entities/gemini.entity';
+import { ChatSession } from './entities/chat-session.entity';
+import { ChatMessage } from './entities/chat-message.entity';
 
 export interface BillScanResult {
   type: string;

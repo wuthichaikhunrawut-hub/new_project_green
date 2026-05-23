@@ -357,11 +357,16 @@
 
           <div class="mb-5">
             <label class="form-label small fw-black text-muted text-uppercase tracking-wider">หลักฐานการใช้งาน (รูปภาพ/PDF)</label>
-            <input type="file" class="form-control custom-input-formal" (change)="onEvidenceFileSelected($event)" accept="image/*,application/pdf">
+            <div class="d-flex gap-2 align-items-center">
+              <input type="file" class="form-control custom-input-formal" (change)="onEvidenceFileSelected($event)" accept="image/*,application/pdf" #evidenceFile>
+              <button type="button" class="btn btn-outline-danger shadow-sm px-3" *ngIf="newEntry.evidence_url && !isUploading" (click)="removeEvidenceFile(evidenceFile)">
+                <i class="fa-solid fa-trash-can"></i> ลบ
+              </button>
+            </div>
             <p class="text-xs text-muted mt-2" *ngIf="isUploading">
               <i class="fa-solid fa-spinner animate-spin mr-1"></i> กำลังอัพโหลดไฟล์ไปยัง Cloud...
             </p>
-            <p class="text-xs text-green-600 mt-2" *ngIf="newEntry.evidence_url">
+            <p class="text-xs text-green-600 mt-2" *ngIf="newEntry.evidence_url && !isUploading">
               <i class="fa-solid fa-circle-check mr-1"></i> อัพโหลดเรียบร้อยแล้ว
             </p>
           </div>

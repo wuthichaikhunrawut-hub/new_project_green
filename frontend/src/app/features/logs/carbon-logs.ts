@@ -242,6 +242,14 @@ export class CarbonLogsComponent implements OnInit {
     }
   }
 
+  removeEvidenceFile(fileInput: HTMLInputElement) {
+    this.newEntry.evidence_url = '';
+    this.newEntry.evidence_file = null;
+    if (fileInput) {
+      fileInput.value = '';
+    }
+  }
+
   saveLog() {
     if (!this.newEntry.activity_type || !this.newEntry.usage_amount) {
       this.toast.warning('กรุณากรอกข้อมูลให้ครบถ้วน');
