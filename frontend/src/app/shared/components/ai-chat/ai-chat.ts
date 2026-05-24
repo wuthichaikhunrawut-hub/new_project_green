@@ -29,6 +29,53 @@ export class AiChatComponent implements OnInit {
   sessions: { id: number; title: string; messages: ChatMessage[] }[] = [];
   activeSessionId: number | null = null;
 
+  // Resizing states
+  chatWidth = 360;
+  chatHeight = 480;
+  isResizing = false;
+  resizeDirection = '';
+  startX = 0;
+  startY = 0;
+  startWidth = 0;
+  startHeight = 0;
+
+  onResizeStart(event: MouseEvent, direction: string) {
+    event.preventDefault();
+    this.isResizing = true;
+    this.resizeDirection = direction;
+    this.startX = event.clientX;
+    this.startY = event.clientY;
+    this.startWidth = this.chatWidth;
+    this.startHeight = this.chatHeight;
+
+    const mouseMoveHandler = (e: MouseEvent) => this.onMouseMove(e);
+    const mouseUpHandler = () => {
+      this.isResizing = false;
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
+      this.cdr.markForCheck();
+    };
+
+    document.addEventListener('mousemove', mouseMoveHandler);
+    document.addEventListener('mouseup', mouseUpHandler);
+  }
+
+  onMouseMove(event: MouseEvent) {
+    if (!this.isResizing) return;
+    
+    if (this.resizeDirection.includes('left')) {
+      const dx = this.startX - event.clientX;
+      this.chatWidth = Math.max(300, Math.min(800, this.startWidth + dx));
+    }
+    
+    if (this.resizeDirection.includes('top')) {
+      const dy = this.startY - event.clientY;
+      this.chatHeight = Math.max(400, Math.min(800, this.startHeight + dy));
+    }
+    
+    this.cdr.markForCheck();
+  }
+
   ngOnInit() {
     this.setDefaultMessage();
     this.loadHistory();
