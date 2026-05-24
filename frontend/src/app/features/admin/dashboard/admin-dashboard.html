@@ -89,7 +89,7 @@
     <div class="col-12">
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-primary bg-opacity-10 border border-primary border-opacity-25">
         <div class="card-body p-4 d-flex gap-4 align-items-start">
-          <div class="ai-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 w-[50px]">
+          <div class="ai-avatar rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 w-[50px] h-[50px]">
             <i class="fa-solid fa-robot"></i>
           </div>
           <div class="flex-grow-1">
@@ -122,14 +122,14 @@
               <div *ngIf="!isGeneratingRecommendations" class="d-flex flex-column gap-2">
                 <div *ngFor="let rec of aiRecommendations" class="p-3 rounded bg-white border border-primary border-opacity-10 d-flex align-items-start gap-3">
                   <div class="mt-1">
-                    <div class="rounded-circle bg-emerald-100 text-emerald-600 d-flex align-items-center justify-content-center w-[32px]">
+                    <div class="rounded-circle bg-emerald-100 text-emerald-600 d-flex align-items-center justify-content-center flex-shrink-0 w-[32px] h-[32px]">
                       <i class="fa-solid fa-lightbulb"></i>
                     </div>
                   </div>
                   <div>
                     <h6 class="fw-bold mb-1 text-dark">{{ rec.title }}</h6>
                     <p class="small text-muted mb-1">{{ rec.action }}</p>
-                    <span class="badge bg-emerald-100 text-emerald-700 uppercase tracking-wider text-[10px]">
+                    <span class="badge bg-success text-white uppercase tracking-wider text-[10px]">
                       ผลกระทบ: {{ rec.expectedImpact }}
                     </span>
                   </div>
