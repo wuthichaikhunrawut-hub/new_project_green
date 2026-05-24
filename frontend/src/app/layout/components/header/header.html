@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt text-amber-500 me-1"></i> AI Usage: 12/50
       </span>
     </div>
-    <button
+    <button *ngIf="role !== 'SYSTEM_ADMIN' && role !== 'ADMIN' && role !== 'System Admin'"
       class="btn-icon position-relative border-0 bg-transparent text-secondary p-2 rounded-circle hover-bg-light transition-all"
       [routerLink]="['/notifications']">
       <i class="fa-solid fa-bell fs-5"></i>

@@ -47,6 +47,12 @@ export class AdminUsersComponent implements OnInit {
   selectedUser: Partial<User> | null = null;
   isSaving = false;
 
+  // For Confirm Modals
+  userToSuspend: User | null = null;
+  userToDelete: User | null = null;
+  userToResetPass: User | null = null;
+  newPasswordInput: string = '';
+
   roles: Role[] = [];
   organizations: any[] = [];
   selectedOrgId: number | null = null;
@@ -179,21 +185,28 @@ export class AdminUsersComponent implements OnInit {
     const payload: any = {
       email: this.selectedUser.email,
       role: this.selectedUser.role,
-      is_active: this.selectedUser.is_active,
-      user_profile: this.selectedUser.user_profile
+      is_active: this.selectedUser.is_active
     };
+
+    if (this.selectedUser.user_profile) {
+      payload.user_profile = { ...this.selectedUser.user_profile };
+      delete payload.user_profile.userId;
+      delete payload.user_profile.created_at;
+      delete payload.user_profile.updated_at;
+      delete payload.user_profile.id;
+    }
 
     if (this.selectedUser.password) {
       payload.password = this.selectedUser.password;
     }
 
     if (this.selectedOrgId) {
-      payload.organization = { id: this.selectedOrgId };
-    } else {
-      payload.organization = null;
+      payload.organization = { id: Number(this.selectedOrgId) };
     }
 
-    payload.org_unit_id = this.selectedBranchId || undefined;
+    if (this.selectedBranchId) {
+      payload.org_unit_id = Number(this.selectedBranchId);
+    }
 
     if (this.selectedUser.id) {
       // Update existing
@@ -234,49 +247,71 @@ export class AdminUsersComponent implements OnInit {
 
 
   suspendUser(user: User) {
+    this.userToSuspend = user;
+  }
+
+  confirmSuspend() {
+    if (!this.userToSuspend) return;
+    const user = this.userToSuspend;
     const action = user.is_active ? 'ระงับ' : 'เปิดใช้งาน';
-    if (!confirm(`ยืนยันการ${action}บัญชีผู้ใช้นี้ใช่หรือไม่?`)) return;
+    this.isSaving = true;
 
     this.usersService.updateUser(user.id, { is_active: !user.is_active }).subscribe({
       next: () => {
         this.toast.success(`${action}บัญชีเรียบร้อยแล้ว`);
+        this.userToSuspend = null;
+        this.isSaving = false;
         this.loadUsers();
       },
       error: (err) => {
         console.error('Failed to toggle active status:', err);
         this.toast.error('เกิดข้อผิดพลาดในการดำเนินการ');
+        this.isSaving = false;
       }
     });
   }
 
   deleteUser(user: User) {
-    if (!confirm(`คุณแน่ใจหรือไม่ที่จะ "ลบ" บัญชีผู้ใช้นี้? (การกระทำนี้ไม่สามารถย้อนกลับได้)`)) return;
+    this.userToDelete = user;
+  }
 
-    // Ideally, call usersService.deleteUser(user.id), simulating it here if not implemented in service yet.
-    // For now assuming the service has it or will have it:
-    this.usersService.deleteUser(user.id).subscribe({
+  confirmDelete() {
+    if (!this.userToDelete) return;
+    this.isSaving = true;
+    this.usersService.deleteUser(this.userToDelete.id).subscribe({
       next: () => {
         this.toast.success('ลบบัญชีผู้ใช้งานเรียบร้อยแล้ว');
+        this.userToDelete = null;
+        this.isSaving = false;
         this.loadUsers();
       },
       error: (err) => {
         console.error('Failed to delete user:', err);
         this.toast.error('เกิดข้อผิดพลาดในการลบผู้ใช้งาน');
+        this.isSaving = false;
       }
     });
   }
 
   resetPassword(user: User) {
-    const newPassword = prompt(`กรุณากรอกรหัสผ่านใหม่สำหรับ ${user.email} (ทิ้งว่างเพื่อยกเลิก):`);
-    if (!newPassword || newPassword.trim() === '') return;
+    this.userToResetPass = user;
+    this.newPasswordInput = '';
+  }
 
-    this.usersService.updateUser(user.id, { password: newPassword }).subscribe({
+  confirmResetPassword() {
+    if (!this.userToResetPass || !this.newPasswordInput.trim()) return;
+    this.isSaving = true;
+
+    this.usersService.updateUser(this.userToResetPass.id, { password: this.newPasswordInput }).subscribe({
       next: () => {
         this.toast.success('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว สำรองรหัสผ่านใหม่ให้ผู้ใช้งานด้วยครับ');
+        this.userToResetPass = null;
+        this.isSaving = false;
       },
       error: (err) => {
         console.error('Failed to reset password:', err);
         this.toast.error('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
+        this.isSaving = false;
       }
     });
   }

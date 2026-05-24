@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { NotificationService, NotificationType } from '../../../core/services/notification.service';
 import { OrgService } from '../../../core/services/org.service';
 import { UsersService } from '../../../core/services/users.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 type TargetType = 'ALL_SYSTEM' | 'ALL_ORG' | 'SPECIFIC_USER';
 
@@ -19,12 +20,15 @@ export class NotificationsAdminComponent implements OnInit {
   private orgService = inject(OrgService);
   private usersService = inject(UsersService);
   private cdr = inject(ChangeDetectorRef);
+  private toast = inject(ToastService);
 
   organizations: any[] = [];
   allUsers: any[] = [];
   filteredUsers: any[] = [];
   history: any[] = [];
   isLoadingHistory = false;
+  
+  notificationToDelete: any | null = null;
   
   targetType: TargetType = 'ALL_SYSTEM';
   selectedOrgId: number | null = null;
@@ -62,8 +66,21 @@ export class NotificationsAdminComponent implements OnInit {
   loadHistory() {
     this.isLoadingHistory = true;
     this.notificationService.getAllSystemNotifications().subscribe({
-      next: (data) => {
-        this.history = data;
+      next: (data: any[]) => {
+        // Group by title, message, and approximate time
+        const groups = new Map<string, any>();
+        data.forEach(item => {
+          const date = new Date(item.created_at).toISOString().substring(0, 16); // group by minute
+          const key = `${item.title}_${item.message}_${date}`;
+          if (!groups.has(key)) {
+            groups.set(key, { ...item, recipient_count: 1, grouped_ids: [item.id] });
+          } else {
+            const g = groups.get(key);
+            g.recipient_count++;
+            g.grouped_ids.push(item.id);
+          }
+        });
+        this.history = Array.from(groups.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
         this.isLoadingHistory = false;
         this.cdr.markForCheck();
       },
@@ -79,7 +96,7 @@ export class NotificationsAdminComponent implements OnInit {
     this.selectedOrgId = orgId ? Number(orgId) : null;
     this.selectedUserId = null;
     if (this.selectedOrgId) {
-      this.filteredUsers = this.allUsers.filter(u => u.org_id == this.selectedOrgId);
+      this.filteredUsers = this.allUsers.filter(u => u.organization && u.organization.id == this.selectedOrgId);
     } else {
       this.filteredUsers = [];
     }
@@ -88,7 +105,7 @@ export class NotificationsAdminComponent implements OnInit {
   getRecipientCount(): number {
     if (this.targetType === 'ALL_SYSTEM') return this.allUsers.length;
     if (this.targetType === 'ALL_ORG') {
-        return this.allUsers.filter(u => u.org_id == this.selectedOrgId).length;
+        return this.allUsers.filter(u => u.organization && u.organization.id == this.selectedOrgId).length;
     }
     if (this.targetType === 'SPECIFIC_USER') return this.selectedUserId ? 1 : 0;
     return 0;
@@ -131,7 +148,7 @@ export class NotificationsAdminComponent implements OnInit {
   private getRecipientIds(): number[] {
     if (this.targetType === 'ALL_SYSTEM') return this.allUsers.map(u => u.id);
     if (this.targetType === 'ALL_ORG') {
-      return this.allUsers.filter(u => u.org_id == this.selectedOrgId).map(u => u.id);
+      return this.allUsers.filter(u => u.organization && u.organization.id == this.selectedOrgId).map(u => u.id);
     }
     if (this.targetType === 'SPECIFIC_USER' && this.selectedUserId) {
       return [Number(this.selectedUserId)];
@@ -139,14 +156,36 @@ export class NotificationsAdminComponent implements OnInit {
     return [];
   }
 
-  deleteHistoryItem(id: number) {
-    this.notificationService.deleteNotification(id).subscribe({
-      next: () => {
-        this.loadHistory();
-      },
-      error: (err) => {
-        console.error('Failed to delete notification:', err);
-      }
+  deleteHistoryItem(item: any) {
+    this.notificationToDelete = item;
+  }
+
+  confirmDeleteNotification() {
+    if (!this.notificationToDelete) return;
+    
+    // We could delete them one by one or if there's a bulk delete, but let's do loop for now
+    const ids: number[] = this.notificationToDelete.grouped_ids;
+    let completed = 0;
+    
+    ids.forEach(id => {
+      this.notificationService.deleteNotification(id).subscribe({
+        next: () => {
+          completed++;
+          if (completed === ids.length) {
+            this.toast.success('ลบประวัติการแจ้งเตือนสำเร็จ');
+            this.notificationToDelete = null;
+            this.loadHistory();
+          }
+        },
+        error: (err) => {
+          console.error('Failed to delete notification:', err);
+          completed++;
+          if (completed === ids.length) {
+            this.notificationToDelete = null;
+            this.loadHistory();
+          }
+        }
+      });
     });
   }
   

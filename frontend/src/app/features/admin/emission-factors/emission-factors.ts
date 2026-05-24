@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EmissionFactorsService, EmissionFactor } from '../../../core/services/emission-factors.service';
@@ -11,17 +11,22 @@ import { EmissionFactorsService, EmissionFactor } from '../../../core/services/e
   templateUrl: './emission-factors.html',
   styleUrls: ['./emission-factors.css']
 })
-export class AdminEmissionFactorsComponent implements OnInit {
+export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
 
   private factorsService = inject(EmissionFactorsService);
   private cdr = inject(ChangeDetectorRef);
+  private renderer = inject(Renderer2);
+
+  @ViewChild('modalRef') modalRef!: ElementRef;
+  @ViewChild('deleteModalRef') deleteModalRef!: ElementRef;
 
   factors: EmissionFactor[] = [];
   isLoading = true;
   isSaving = false;
   
   selectedFactor: Partial<EmissionFactor> | null = null;
+  factorToDelete: string | null = null;
   searchText = '';
   activeTab: 'ALL' | 1 | 2 | 3 = 'ALL';
 
@@ -29,6 +34,29 @@ export class AdminEmissionFactorsComponent implements OnInit {
 
   ngOnInit() {
     this.loadFactors();
+  }
+
+  ngAfterViewInit() {
+    // ย้าย Modal ออกไปนอกสุดที่ระดับ body
+    if (this.modalRef) {
+      this.renderer.appendChild(document.body, this.modalRef.nativeElement);
+    }
+    if (this.deleteModalRef) {
+      this.renderer.appendChild(document.body, this.deleteModalRef.nativeElement);
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.modalRef) {
+      try {
+        this.renderer.removeChild(document.body, this.modalRef.nativeElement);
+      } catch (e) {}
+    }
+    if (this.deleteModalRef) {
+      try {
+        this.renderer.removeChild(document.body, this.deleteModalRef.nativeElement);
+      } catch (e) {}
+    }
   }
 
   loadFactors() {
@@ -125,16 +153,21 @@ export class AdminEmissionFactorsComponent implements OnInit {
   }
 
   deleteFactor(id: string) {
-    if (confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้? ถ้ายังใช้งานอยู่ให้ปรับสถานะเป็น "ระงับ" แทนการลบเพื่อป้องกันข้อมูลเก่าผิดพลาด')) {
-      this.factorsService.deleteFactor(id).subscribe({
-        next: () => {
-          this.loadFactors();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.error('เกิดข้อผิดพลาดในการลบ');
-        }
-      });
-    }
+    this.factorToDelete = id;
+  }
+
+  confirmDelete() {
+    if (!this.factorToDelete) return;
+    this.factorsService.deleteFactor(this.factorToDelete).subscribe({
+      next: () => {
+        this.toast.success('ลบรายการสำเร็จ');
+        this.factorToDelete = null;
+        this.loadFactors();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.error('เกิดข้อผิดพลาดในการลบ');
+      }
+    });
   }
 }

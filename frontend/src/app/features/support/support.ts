@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-support',
@@ -8,14 +9,37 @@ import { FormsModule } from '@angular/forms';
   imports: [CommonModule, FormsModule],
   templateUrl: './support.html',
 })
-export class SupportComponent {
+export class SupportComponent implements OnInit {
+  private authService = inject(AuthService);
+  isAdmin = false;
+  
+  mockTickets = [
+    { id: 'TKT-001', subject: 'ปัญหาการเข้าสู่ระบบ', sender: 'user1@example.com', status: 'Pending', date: new Date().toISOString() },
+    { id: 'TKT-002', subject: 'เสนอแนะฟีเจอร์เพิ่ม', sender: 'admin@org.com', status: 'In Progress', date: new Date().toISOString() }
+  ];
   ticket = {
     subject: '',
     message: ''
   };
   
+  selectedTicket: any = null;
   isSubmitting = false;
   submitted = false;
+
+  viewTicket(ticket: any) {
+    this.selectedTicket = ticket;
+  }
+
+  closeTicketModal() {
+    this.selectedTicket = null;
+  }
+
+  updateTicketStatus(status: string) {
+    if (this.selectedTicket) {
+      this.selectedTicket.status = status;
+      // In a real app, you would call an API here
+    }
+  }
 
   onSubmit() {
     this.isSubmitting = true;
@@ -31,5 +55,18 @@ export class SupportComponent {
         this.submitted = false;
       }, 5000);
     }, 1500);
+  }
+
+  ngOnInit() {
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        const role = String(user.role).toUpperCase().trim().replace(' ', '_');
+        if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') {
+          this.isAdmin = true;
+        } else {
+          this.isAdmin = false;
+        }
+      }
+    });
   }
 }

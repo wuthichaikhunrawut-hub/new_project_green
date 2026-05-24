@@ -113,10 +113,11 @@
     </div>
   </div>
 </div>
+</div>
 
 <!-- Edit Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedFactor" class="bg-black/50">
-  <div class="modal-dialog modal-dialog-centered">
+<div id="emission-factor-modal" #modalRef class="modal bg-black/50 backdrop-blur-sm" tabindex="-1" [class.d-block]="selectedFactor" [class.d-none]="!selectedFactor" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important;">
+  <div class="modal-dialog modal-dialog-centered" *ngIf="selectedFactor">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom-0 pb-0">
         <h5 class="modal-title fw-bold">{{ selectedFactor.id ? 'แก้ไขค่าสัมประสิทธิ์' : 'เพิ่มตัวคูณใหม่' }}</h5>
@@ -165,6 +166,29 @@
           </button>
         </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div #deleteModalRef class="modal bg-black/60 backdrop-blur-sm" tabindex="-1" [class.d-block]="factorToDelete !== null" [class.d-none]="factorToDelete === null" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important;">
+  <div class="modal-dialog modal-dialog-centered" *ngIf="factorToDelete !== null">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-danger">ยืนยันการลบข้อมูล</h5>
+        <button type="button" class="btn-close" (click)="factorToDelete = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบรายการนี้?</p>
+        <p class="text-danger small mt-2">ถ้ายังใช้งานอยู่ให้ปรับสถานะเป็น "ระงับ" แทนการลบเพื่อป้องกันข้อมูลเก่าผิดพลาด</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="factorToDelete = null">ยกเลิก</button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDelete()">
+          <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
+        </button>
       </div>
     </div>
   </div>

@@ -415,3 +415,44 @@ div[data-testid="stripe-assistant-widget"] {
   height: 0 !important;
   overflow: hidden !important;
 }
+
+/* ==========================================
+   GLOBAL FIX FOR MODAL OVERLAPPING
+   ========================================== */
+@media (min-width: 992px) {
+  /* Lower the sidebar z-index on desktop */
+  .sidebar, app-sidebar .sidebar, app-sidebar {
+    z-index: 40 !important;
+  }
+  
+  /* Elevate main-wrapper to overlap sidebar if needed */
+  .main-wrapper {
+    z-index: 50 !important;
+  }
+}
+
+/* 
+   PREVENT any layout elements from acting as a containing block 
+   so position: fixed modals can escape to the viewport!
+*/
+.app-layout, .main-wrapper, .content-view, 
+app-admin-criteria, app-admin-emission-factors,
+router-outlet {
+  transform: none !important;
+  filter: none !important;
+  perspective: none !important;
+  contain: none !important;
+  /* Do not use backdrop-filter here if not needed */
+}
+
+/* Ensure all modals with fixed positioning stay on top globally */
+.modal[style*="position: fixed"], .modal.d-block {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 99999 !important;
+}
+
+

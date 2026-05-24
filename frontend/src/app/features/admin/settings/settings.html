@@ -1,7 +1,7 @@
 <div class="container-fluid p-4 animate-in">
     <div class="page-header mb-4">
       <div class="page-header-left">
-        <h2 class="page-title">ตั้งค่าสถานะระบบ (System Settings)</h2>
+        <h2 class="page-title">ตั้งค่าสถานะระบบ </h2>
         <p class="page-subtitle mb-0">ปรับแต่งค่ากำหนดหลัก กฎการคำนวณคาร์บอน และเทมเพลตอีเมล</p>
       </div>
     </div>
@@ -12,7 +12,7 @@
             <div class="card border-0 shadow-sm rounded-4 h-100">
                 <div class="card-body p-4">
                     <h5 class="fw-bold mb-4 border-bottom pb-2"><i
-                            class="fa-solid fa-gears me-2 text-primary"></i>การตั้งค่าทั่วไป (General)</h5>
+                            class="fa-solid fa-gears me-2 text-primary"></i>การตั้งค่าทั่วไป </h5>
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">ปีฐานเริ่มต้น (Default Base Year)</label>
@@ -147,8 +147,9 @@
     </div>
 
     <div class="d-flex justify-content-end mt-4">
-        <button class="btn btn-primary rounded-pill px-5 shadow" (click)="saveSettings()">
-            <i class="fa-solid fa-floppy-disk me-2"></i>บันทึกการตั้งค่าทั้งหมด
+        <button class="btn btn-primary rounded-pill px-5 shadow d-flex align-items-center" (click)="saveSettings()" [disabled]="isSaving">
+            <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+            <i *ngIf="!isSaving" class="fa-solid fa-floppy-disk me-2"></i> บันทึกการตั้งค่าทั้งหมด
         </button>
     </div>
 </div>

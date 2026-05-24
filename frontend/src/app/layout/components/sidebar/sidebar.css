@@ -7,7 +7,7 @@
   border-right: 1px solid #E2E8F0; /* Light border */
   display: flex;
   flex-direction: column;
-  z-index: 1050;
+  z-index: 40;
   transition: all 0.3s ease;
   flex-shrink: 0;
   overflow-y: auto;
@@ -344,6 +344,7 @@
     transform: translateX(-100%);
     width: 280px;
     box-shadow: 4px 0 20px rgba(0,0,0,0.15);
+    z-index: 1050;
   }
   
   .sidebar.mobile-open {

@@ -46,9 +46,9 @@
                     <div class="row g-3 animate-in" *ngIf="targetType === 'ALL_ORG' || targetType === 'SPECIFIC_USER'">
                         <div class="col-md-6">
                             <label class="form-label">เลือกองค์กรเป้าหมาย</label>
-                            <select class="form-select shadow-none" name="org" [(ngModel)]="selectedOrgId" (change)="onOrgChange($any($event.target).value)" required>
-                                <option [value]="null">ระบุองค์กร...</option>
-                                <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
+                            <select class="form-select shadow-none" name="org" [(ngModel)]="selectedOrgId" (ngModelChange)="onOrgChange($event)" required>
+                                <option [ngValue]="null">ระบุองค์กร...</option>
+                                <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.name }}</option>
                             </select>
                         </div>
                         <div class="col-md-6 animate-in" *ngIf="targetType === 'SPECIFIC_USER'">
@@ -219,8 +219,7 @@
               {{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
             </td>
             <td>
-              <div class="fw-bold small">{{ item.recipient?.email || 'N/A' }}</div>
-              <div class="text-muted text-[0.7rem]">ID: {{ item.recipient_id }}</div>
+              <div class="fw-bold small text-primary">{{ item.recipient_count }} ผู้รับ</div>
             </td>
             <td>
               <div class="fw-bold text-dark">{{ item.title }}</div>
@@ -243,7 +242,7 @@
               </span>
             </td>
             <td class="pe-4 text-end">
-                <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" (click)="deleteHistoryItem(item.id)">
+                <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" (click)="deleteHistoryItem(item)">
                   <i class="fa-solid fa-trash"></i>
                 </button>
             </td>
@@ -258,6 +257,30 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Notification Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="notificationToDelete !== null" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-danger">ยืนยันการลบประวัติการแจ้งเตือน</h5>
+        <button type="button" class="btn-close" (click)="notificationToDelete = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบประวัติการส่งการแจ้งเตือนนี้?</p>
+        <p class="text-muted mt-2">"{{ notificationToDelete.title }}"</p>
+        <p class="text-danger small mt-2">การลบจะลบข้อมูลออกจากกล่องข้อความของผู้รับทั้งหมด การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="notificationToDelete = null">ยกเลิก</button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDeleteNotification()">
+          <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
+        </button>
+      </div>
     </div>
   </div>
 </div>

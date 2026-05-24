@@ -7,7 +7,7 @@
     </div>
   </div>
 
-  <div class="row g-4">
+  <div class="row g-4" *ngIf="!isAdmin">
     <!-- FAQ Section -->
     <div class="col-lg-7">
       <div class="card border-0 shadow-sm rounded-4 h-100">
@@ -109,6 +109,86 @@
               <span class="d-block text-white-50 small">ส่งอีเมลโดยตรงหาเราที่</span>
               <span class="fw-medium">support@greensync.com</span>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin View -->
+  <div class="row g-4" *ngIf="isAdmin">
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4 p-md-5">
+          <h4 class="fw-bold mb-4">ตั๋วแจ้งปัญหาที่ได้รับ (Received Tickets)</h4>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="bg-light">
+                <tr>
+                  <th class="py-3 px-4">Ticket ID</th>
+                  <th class="py-3 px-4">หัวข้อ</th>
+                  <th class="py-3 px-4">ผู้ส่ง</th>
+                  <th class="py-3 px-4">สถานะ</th>
+                  <th class="py-3 px-4">วันที่</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ticket of mockTickets" (click)="viewTicket(ticket)" style="cursor: pointer;">
+                  <td class="px-4 py-3 fw-bold">{{ ticket.id }}</td>
+                  <td class="px-4 py-3 text-dark">{{ ticket.subject }}</td>
+                  <td class="px-4 py-3 text-muted">{{ ticket.sender }}</td>
+                  <td class="px-4 py-3">
+                    <span class="badge" [ngClass]="ticket.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'">{{ ticket.status }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-muted small">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Details Modal (Admin) -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedTicket" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-primary">
+          <i class="fa-solid fa-ticket me-2"></i> รายละเอียดตั๋ว {{ selectedTicket.id }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeTicketModal()"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <p class="text-muted small fw-bold mb-1">ผู้ส่ง</p>
+            <p class="mb-0">{{ selectedTicket.sender }}</p>
+          </div>
+          <div class="col-md-6">
+            <p class="text-muted small fw-bold mb-1">วันที่ส่ง</p>
+            <p class="mb-0">{{ selectedTicket.date | date:'dd/MM/yyyy HH:mm' }}</p>
+          </div>
+        </div>
+        <div class="mb-4">
+          <p class="text-muted small fw-bold mb-1">หัวข้อปัญหา</p>
+          <p class="fs-5 fw-medium">{{ selectedTicket.subject }}</p>
+        </div>
+        <div class="mb-4">
+          <p class="text-muted small fw-bold mb-1">รายละเอียด</p>
+          <div class="p-3 bg-light rounded-3">
+            <p class="mb-0">{{ selectedTicket.message || 'ไม่มีรายละเอียดเพิ่มเติม' }}</p>
+          </div>
+        </div>
+        
+        <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mt-4">
+          <div class="d-flex align-items-center gap-3">
+            <span class="fw-bold small text-muted">อัปเดตสถานะ:</span>
+            <button class="btn btn-sm" [ngClass]="selectedTicket.status === 'Pending' ? 'btn-warning' : 'btn-outline-warning'" (click)="updateTicketStatus('Pending')">รอตรวจสอบ</button>
+            <button class="btn btn-sm" [ngClass]="selectedTicket.status === 'In Progress' ? 'btn-info' : 'btn-outline-info'" (click)="updateTicketStatus('In Progress')">กำลังดำเนินการ</button>
+            <button class="btn btn-sm" [ngClass]="selectedTicket.status === 'Resolved' ? 'btn-success' : 'btn-outline-success'" (click)="updateTicketStatus('Resolved')">แก้ไขแล้ว</button>
           </div>
         </div>
       </div>

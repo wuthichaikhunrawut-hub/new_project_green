@@ -12,7 +12,7 @@ import { Organization, OrgType } from '../../../core/models/organization.model';
   templateUrl: './organizations.html'
 })
 export class AdminOrganizationsComponent implements OnInit {
-  private toast = inject(ToastService);
+  toast = inject(ToastService);
 
   private orgService = inject(OrgService);
   private cdr = inject(ChangeDetectorRef);
@@ -34,6 +34,9 @@ export class AdminOrganizationsComponent implements OnInit {
 
   selectedOrg: Partial<Organization> | null = null;
   isSaving = false;
+
+  // For Confirm Modal
+  orgToSuspend: any = null;
 
   ngOnInit() {
     this.loadOrganizations();
@@ -111,8 +114,21 @@ export class AdminOrganizationsComponent implements OnInit {
     if (!this.selectedOrg) return;
     this.isSaving = true;
 
+    // Create a clean payload with only allowed fields
+    const payload: any = {
+      name: this.selectedOrg.name,
+      tax_id: this.selectedOrg.tax_id,
+      industry_type: this.selectedOrg.industry_type,
+      number_of_employees: this.selectedOrg.number_of_employees,
+      total_floor_area: this.selectedOrg.total_floor_area,
+      base_year: this.selectedOrg.base_year,
+      target_reduction_percent: this.selectedOrg.target_reduction_percent,
+      current_green_status: this.selectedOrg.current_green_status,
+      is_active: this.selectedOrg.is_active
+    };
+
     if (this.selectedOrg.id) {
-       this.orgService.updateOrganization(this.selectedOrg.id, this.selectedOrg).subscribe({
+       this.orgService.updateOrganization(this.selectedOrg.id, payload).subscribe({
          next: () => {
            this.toast.success('บันทึกข้อมูลสำเร็จ');
            this.isSaving = false;
@@ -126,7 +142,7 @@ export class AdminOrganizationsComponent implements OnInit {
          }
        });
     } else {
-       this.orgService.create(this.selectedOrg).subscribe({
+       this.orgService.create(payload).subscribe({
          next: () => {
            this.toast.success('สร้างองค์กรใหม่สำเร็จ');
            this.isSaving = false;
@@ -143,17 +159,26 @@ export class AdminOrganizationsComponent implements OnInit {
   }
 
   suspendOrganization(org: any) {
+    this.orgToSuspend = org;
+  }
+
+  confirmSuspend() {
+    if (!this.orgToSuspend) return;
+    const org = this.orgToSuspend;
     const action = org.is_active ? 'ระงับ' : 'เปิดใช้งาน';
-    if (!confirm(`ยืนยันการ${action}องค์กรนี้ใช่หรือไม่?`)) return;
+    this.isSaving = true;
     
     this.orgService.updateOrganization(org.id, { is_active: !org.is_active }).subscribe({
       next: () => {
         this.toast.success(`${action}องค์กรเรียบร้อยแล้ว`);
+        this.orgToSuspend = null;
+        this.isSaving = false;
         this.loadOrganizations();
       },
       error: (err: any) => {
         console.error('Failed to toggle active status:', err);
         this.toast.error('เกิดข้อผิดพลาดในการดำเนินการ');
+        this.isSaving = false;
       }
     });
   }

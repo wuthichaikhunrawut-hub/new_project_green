@@ -23,6 +23,11 @@ export class AdminAssessorsComponent implements OnInit {
   searchText = '';
   filterStatus = 'ALL';
 
+  // For Confirm Modals
+  assessorToVerify: AssessorUser | null = null;
+  verifyActionTargetState: boolean = false;
+  assessorToSuspend: AssessorUser | null = null;
+
   ngOnInit() { this.loadAssessors(); }
 
   loadAssessors() {
@@ -64,18 +69,36 @@ export class AdminAssessorsComponent implements OnInit {
   }
 
   verify(user: AssessorUser) {
-    const action = user.assessor_verified ? 'เพิกถอนการอนุมัติ' : 'อนุมัติ';
-    if (!confirm(`ต้องการ${action}สถานะผู้ตรวจประเมิน ${user.username} หรือไม่?`)) return;
-    this.svc.verifyAssessor(user.id, !user.assessor_verified).subscribe({ next: () => this.loadAssessors() });
+    this.assessorToVerify = user;
+    this.verifyActionTargetState = !user.assessor_verified;
+  }
+
+  confirmVerify() {
+    if (!this.assessorToVerify) return;
+    this.svc.verifyAssessor(this.assessorToVerify.id, this.verifyActionTargetState).subscribe({
+      next: () => {
+        this.toast.success(`ดำเนินการเรียบร้อยแล้ว`);
+        this.assessorToVerify = null;
+        this.loadAssessors();
+      },
+      error: () => {
+        this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถดำเนินการได้`);
+      }
+    });
   }
 
   suspend(user: AssessorUser) {
-    const action = user.is_active ? 'ระงับการใช้งาน' : 'เปิดใช้งาน';
-    if (!confirm(`ต้องการ${action}บัญชีผู้ตรวจประเมิน ${user.username} หรือไม่?`)) return;
+    this.assessorToSuspend = user;
+  }
+
+  confirmSuspend() {
+    if (!this.assessorToSuspend) return;
+    const action = this.assessorToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน';
     
-    this.svc.suspendAssessor(user.id, !user.is_active).subscribe({
+    this.svc.suspendAssessor(this.assessorToSuspend.id, !this.assessorToSuspend.is_active).subscribe({
       next: () => {
-        this.toast.success(`${action} บัญชี ${user.username} เรียบร้อยแล้ว`);
+        this.toast.success(`${action}บัญชี ${this.assessorToSuspend!.username} เรียบร้อยแล้ว`);
+        this.assessorToSuspend = null;
         this.loadAssessors();
       },
       error: () => {
@@ -97,18 +120,8 @@ export class AdminAssessorsComponent implements OnInit {
 
   verifyFromModal(verified: boolean) {
     if (!this.selectedAssessor) return;
-    const action = verified ? 'อนุมัติ' : 'ปฏิเสธ';
-    if (!confirm(`ยืนยันการ${action}ผู้ตรวจประเมิน ${this.selectedAssessor.username} หรือไม่?`)) return;
-    
-    this.svc.verifyAssessor(this.selectedAssessor.id, verified).subscribe({
-      next: () => {
-        this.toast.success(`ดำเนินการ${action}เรียบร้อยแล้ว`);
-        this.loadAssessors();
-        this.closeModal();
-      },
-      error: () => {
-        this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถดำเนินการได้`);
-      }
-    });
+    this.assessorToVerify = this.selectedAssessor;
+    this.verifyActionTargetState = verified;
+    this.closeModal(); // Close details modal and open confirm modal
   }
 }

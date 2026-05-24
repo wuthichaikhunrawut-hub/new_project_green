@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
@@ -17,11 +17,15 @@ interface GroupedCriteria {
   templateUrl: './criteria.html',
   styleUrls: ['./criteria.css']
 })
-export class AdminCriteriaComponent implements OnInit {
+export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
 
   private criteriaService = inject(GreenCriteriaService);
   private cdr = inject(ChangeDetectorRef);
+  private renderer = inject(Renderer2);
+
+  @ViewChild('modalRef') modalRef!: ElementRef;
+  @ViewChild('deleteModalRef') deleteModalRef!: ElementRef;
 
   criteriaList: GreenCriteria[] = [];
   groupedCriteria: GroupedCriteria[] = [];
@@ -29,9 +33,36 @@ export class AdminCriteriaComponent implements OnInit {
   isSaving = false;
   
   selectedCriteria: Partial<GreenCriteria> | null = null;
+  
+  // For Confirm Modal
+  criteriaToDelete: number | null = null;
 
   ngOnInit() {
     this.loadCriteria();
+  }
+
+  ngAfterViewInit() {
+    // ย้าย Modal ออกไปนอกสุดที่ระดับ body เพื่อแก้ปัญหา CSS ซ้อนทับแบบ 100%
+    if (this.modalRef) {
+      this.renderer.appendChild(document.body, this.modalRef.nativeElement);
+    }
+    if (this.deleteModalRef) {
+      this.renderer.appendChild(document.body, this.deleteModalRef.nativeElement);
+    }
+  }
+
+  ngOnDestroy() {
+    // คืนค่ากลับหรือลบออกเมื่อถูก destroy
+    if (this.modalRef) {
+      try {
+        this.renderer.removeChild(document.body, this.modalRef.nativeElement);
+      } catch (e) {}
+    }
+    if (this.deleteModalRef) {
+      try {
+        this.renderer.removeChild(document.body, this.deleteModalRef.nativeElement);
+      } catch (e) {}
+    }
   }
 
   loadCriteria() {
@@ -136,16 +167,21 @@ export class AdminCriteriaComponent implements OnInit {
   }
 
   deleteCriteria(id: number) {
-    if (confirm('คุณแน่ใจหรือไม่ที่จะลบเกณฑ์นี้? ข้อมูลการประเมินที่ผูกไว้อาจได้รับผลกระทบ')) {
-      this.criteriaService.deleteCriteria(id).subscribe({
-        next: () => {
-          this.loadCriteria();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.error('เกิดข้อผิดพลาดในการลบ');
-        }
-      });
-    }
+    this.criteriaToDelete = id;
+  }
+
+  confirmDelete() {
+    if (this.criteriaToDelete === null) return;
+    this.criteriaService.deleteCriteria(this.criteriaToDelete).subscribe({
+      next: () => {
+        this.toast.success('ลบเกณฑ์การประเมินสำเร็จ');
+        this.criteriaToDelete = null;
+        this.loadCriteria();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.error('เกิดข้อผิดพลาดในการลบ');
+      }
+    });
   }
 }

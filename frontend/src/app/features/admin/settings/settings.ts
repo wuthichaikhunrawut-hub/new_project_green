@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -33,6 +33,7 @@ export class AdminSettingsComponent implements OnInit {
   private toast = inject(ToastService);
 
   private settingsService = inject(SettingsService);
+  private cdr = inject(ChangeDetectorRef);
 
   settings = {
     defaultBaseYear: 2024,
@@ -47,6 +48,7 @@ export class AdminSettingsComponent implements OnInit {
   };
 
   isLoading = true;
+  isSaving = false;
 
   ngOnInit() {
     this.loadSettings();
@@ -71,19 +73,25 @@ export class AdminSettingsComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load settings:', err);
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }
 
   saveSettings() {
+    this.isSaving = true;
     this.settingsService.updateSettings(this.settings).subscribe({
       next: (data) => {
         this.settings = { ...this.settings, ...data };
         this.toast.success('บันทึกการตั้งค่าสำเร็จ!');
+        this.isSaving = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to update settings:', err);
         this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        this.isSaving = false;
+        this.cdr.markForCheck();
       }
     });
   }

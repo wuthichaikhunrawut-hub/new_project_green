@@ -89,7 +89,7 @@
 </div>
 
 <!-- Assessor Details Modal -->
-<div class="modal d-block" tabindex="-1" *ngIf="selectedAssessor" class="bg-black/60 backdrop-blur-sm" >
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedAssessor" style="z-index: 1055;">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -247,6 +247,52 @@
             <i class="fa-solid fa-ban me-2"></i>ระงับสิทธิ์ผู้ตรวจ
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Verify Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="assessorToVerify" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-dark">ยืนยันการดำเนินการ</h5>
+        <button type="button" class="btn-close" (click)="assessorToVerify = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณต้องการ<strong>{{ verifyActionTargetState ? 'อนุมัติ' : 'เพิกถอนหรือปฏิเสธ' }}</strong>สถานะผู้ตรวจประเมินของบุคคลนี้ใช่หรือไม่?</p>
+        <p class="text-muted small mt-2">{{ assessorToVerify.username }} ({{ assessorToVerify.email }})</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="assessorToVerify = null">ยกเลิก</button>
+        <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmVerify()">
+          <i class="fa-solid fa-check me-2"></i> ยืนยัน
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Suspend Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="assessorToSuspend" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-dark">ยืนยันการระงับบัญชี</h5>
+        <button type="button" class="btn-close" (click)="assessorToSuspend = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณต้องการ<strong>{{ assessorToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน' }}</strong>บัญชีผู้ใช้งานนี้ใช่หรือไม่?</p>
+        <p class="text-muted small mt-2">{{ assessorToSuspend.username }} ({{ assessorToSuspend.email }})</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="assessorToSuspend = null">ยกเลิก</button>
+        <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmSuspend()">
+          <i class="fa-solid fa-check me-2"></i> ยืนยัน
+        </button>
       </div>
     </div>
   </div>

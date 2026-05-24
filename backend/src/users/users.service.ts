@@ -158,6 +158,7 @@ export class UsersService {
       .leftJoinAndSelect('user.user_profile', 'profile')
       .leftJoinAndSelect('user.assessor_profile', 'assessor_profile')
       .leftJoinAndSelect('user.organization', 'organization')
+      .leftJoinAndSelect('user.organization_unit', 'organization_unit')
       .leftJoinAndSelect('user.bank_accounts', 'bank_accounts')
       .orderBy('user.created_at', 'DESC');
 

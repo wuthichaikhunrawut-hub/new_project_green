@@ -178,7 +178,7 @@
 </div>
 
 <!-- Modal: Package Configuration (Green Sync Edition) -->
-<div class="modal d-block premium-modal animate-in" *ngIf="selectedPlan" tabindex="-1" class="bg-black/60 backdrop-blur-sm">
+<div class="modal d-block premium-modal animate-in bg-black/60 backdrop-blur-sm" *ngIf="selectedPlan" tabindex="-1" style="z-index: 1055;">
   <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
     <div class="modal-content">
       <!-- Minimal Header -->
@@ -293,7 +293,7 @@
 </div>
 
 <!-- Modal: Feature Inventory -->
-<div class="modal d-block premium-modal animate-in" *ngIf="selectedFeature" tabindex="-1" class="bg-black/60 backdrop-blur-sm">
+<div class="modal d-block premium-modal animate-in bg-black/60 backdrop-blur-sm" *ngIf="selectedFeature" tabindex="-1" style="z-index: 1055;">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header-minimal border-0">
@@ -317,6 +317,52 @@
       <div class="modal-footer-clean">
         <button type="button" class="btn btn-light" (click)="closeFeatureModal()">ยกเลิก</button>
         <button type="button" class="btn btn-premium-green" (click)="saveFeature()">บันทึกข้อมูล</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Plan Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="planToDelete !== null" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-danger">ยืนยันการลบแพ็กเกจ</h5>
+        <button type="button" class="btn-close" (click)="planToDelete = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบแพ็กเกจนี้?</p>
+        <p class="text-danger small mt-2">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="planToDelete = null">ยกเลิก</button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDeletePlan()">
+          <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Feature Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="featureToDelete !== null" style="z-index: 1055;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-danger">ยืนยันการลบฟีเจอร์</h5>
+        <button type="button" class="btn-close" (click)="featureToDelete = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบฟีเจอร์นี้?</p>
+        <p class="text-danger small mt-2">การดำเนินการนี้ไม่สามารถย้อนกลับได้</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="featureToDelete = null">ยกเลิก</button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDeleteFeature()">
+          <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
+        </button>
       </div>
     </div>
   </div>

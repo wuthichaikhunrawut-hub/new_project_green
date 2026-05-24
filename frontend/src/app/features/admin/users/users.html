@@ -99,7 +99,10 @@
               </td>
               <td class="px-4 py-3 text-muted">{{ user.user_profile?.phone || '-' }}</td>
               <td class="px-4 py-3">
-                <div class="fw-medium text-primary">{{ user.organization?.name || '-' }}</div>
+                <div class="fw-medium text-primary">
+                  {{ user.organization?.name || '-' }}
+                  <span *ngIf="user.organization_unit" class="text-muted small">({{ user.organization_unit.unit_name }})</span>
+                </div>
                 <div class="text-muted smallest">ลงทะเบียน: {{ user.created_at | date:'dd/MM/yyyy' }}</div>
               </td>
               <td class="px-4 py-3 text-center">
@@ -165,7 +168,7 @@
 </div>
 
 <!-- Edit User Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedUser">
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedUser" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -243,6 +246,79 @@
           </button>
         </div>
 
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Suspend Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="userToSuspend" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-dark">ยืนยันการดำเนินการ</h5>
+        <button type="button" class="btn-close" (click)="userToSuspend = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณต้องการ<strong>{{ userToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน' }}</strong>บัญชีผู้ใช้นี้ใช่หรือไม่?</p>
+        <p class="text-muted small mt-2">{{ userToSuspend.email }}</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="userToSuspend = null" [disabled]="isSaving">ยกเลิก</button>
+        <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmSuspend()" [disabled]="isSaving">
+          <i class="fa-solid fa-check me-2"></i> ยืนยัน
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="userToDelete" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-danger">ยืนยันการลบข้อมูล</h5>
+        <button type="button" class="btn-close" (click)="userToDelete = null"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบบัญชีผู้ใช้ <strong>{{ userToDelete.email }}</strong>?</p>
+        <p class="text-danger small mt-2">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="userToDelete = null" [disabled]="isSaving">ยกเลิก</button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDelete()" [disabled]="isSaving">
+          <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Password Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="userToResetPass" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-primary">
+          <i class="fa-solid fa-key me-2"></i> รีเซ็ตรหัสผ่าน
+        </h5>
+        <button type="button" class="btn-close" (click)="userToResetPass = null"></button>
+      </div>
+      <div class="modal-body p-4">
+        <p class="text-muted small mb-3">กรุณากำหนดรหัสผ่านใหม่สำหรับ <strong>{{ userToResetPass.email }}</strong></p>
+        <div class="mb-3">
+          <label class="form-label text-dark small fw-bold">รหัสผ่านใหม่</label>
+          <input type="password" class="form-control rounded-3" [(ngModel)]="newPasswordInput" placeholder="กรอกรหัสผ่านอย่างน้อย 6 ตัวอักษร">
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="userToResetPass = null" [disabled]="isSaving">ยกเลิก</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmResetPassword()" [disabled]="isSaving || !newPasswordInput.trim()">
+          <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกรหัสผ่านใหม่
+        </button>
       </div>
     </div>
   </div>

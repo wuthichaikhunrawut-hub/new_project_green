@@ -20,6 +20,8 @@
   background: #f8fafc;
   height: 100vh; /* Match layout height */
   overflow: hidden; /* Hide overflow so content-view scrolls internally */
+  position: relative;
+  z-index: 50;
 }
 
 .content-view {

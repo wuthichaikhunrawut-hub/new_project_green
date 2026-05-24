@@ -60,6 +60,9 @@ export class AdminSubscriptionsComponent implements OnInit {
   selectedFeature: Partial<Feature> | null = null;
   selectedFeatureIds: number[] = [];
   selectedPlanQuotas: Record<string, number> = {}; // { feature_code: quota }
+  
+  planToDelete: number | null = null;
+  featureToDelete: number | null = null;
 
   private platformId = inject(PLATFORM_ID);
 
@@ -240,10 +243,15 @@ export class AdminSubscriptionsComponent implements OnInit {
   }
 
   deleteFeature(id: number) {
-    if (!confirm('ยืนยันการลบฟีเจอร์?')) return;
-    this.svc.deleteFeature(id).subscribe({
+    this.featureToDelete = id;
+  }
+
+  confirmDeleteFeature() {
+    if (this.featureToDelete === null) return;
+    this.svc.deleteFeature(this.featureToDelete).subscribe({
       next: () => {
         this.toast.success('ลบฟีเจอร์สำเร็จ');
+        this.featureToDelete = null;
         this.loadData();
       }
     });
@@ -304,10 +312,15 @@ export class AdminSubscriptionsComponent implements OnInit {
   }
 
   delete(id: number) {
-    if (!confirm('ยืนยันการลบแพ็กเกจ?')) return;
-    this.svc.deletePlan(id).subscribe({ 
+    this.planToDelete = id;
+  }
+
+  confirmDeletePlan() {
+    if (this.planToDelete === null) return;
+    this.svc.deletePlan(this.planToDelete).subscribe({ 
       next: () => {
         this.toast.success('ลบแพ็กเกจสำเร็จ');
+        this.planToDelete = null;
         this.loadData();
       }
     });
