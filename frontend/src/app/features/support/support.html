@@ -69,12 +69,15 @@
           <p class="text-white-50 mb-4 small">เราพร้อมช่วยเหลือคุณในเวลาทำการ จันทร์-ศุกร์ (09:00 - 18:00 น.)</p>
 
           <!-- Success Alert -->
-          <div *ngIf="submitted" class="alert alert-light text-success border-0 rounded-3 mb-4 d-flex align-items-center animate-in">
-            <i class="fa-solid fa-circle-check fs-4 me-2"></i>
-            <div>
-              <strong class="d-block">ส่งข้อความสำเร็จ!</strong>
-              <span class="small">ทีมงานได้รับเรื่องแล้วและจะติดต่อกลับทางอีเมลโดยเร็วที่สุด</span>
+          <div *ngIf="submitted" class="text-center py-4 animate-in">
+            <div class="bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 50px; height: 50px;">
+              <i class="fa-solid fa-circle-check fs-3"></i>
             </div>
+            <h5 class="fw-bold text-white mb-1">ส่งตั๋วแจ้งปัญหาสำเร็จ!</h5>
+            <p class="text-white-50 small mb-4">ทีมงานได้รับเรื่องเรียบร้อยแล้ว และจะติดต่อกลับโดยเร็วที่สุด</p>
+            <button type="button" class="btn btn-light text-success fw-bold px-4 py-2 rounded-pill shadow-sm" (click)="resetForm()">
+              <i class="fa-solid fa-plus me-2"></i>ส่งตั๋วใบใหม่
+            </button>
           </div>
 
           <form (ngSubmit)="onSubmit()" *ngIf="!submitted">

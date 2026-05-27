@@ -1,121 +1,108 @@
-  <div class="branches-container p-6 animate-fade-in w-full">
-  <div class="page-header mb-8 items-end">
+<div class="branches-container p-6 animate-fade-in w-full">
+  <div class="page-header mb-8 flex justify-between items-end">
     <div class="page-header-left">
-      <h1 class="page-title">จัดการสาขาและแผนก</h1>
-      <p class="page-subtitle">บริหารจัดการสาขาย่อยและกำหนดสังกัดของพนักงานในองค์กร</p>
+      <h1 class="page-title text-2xl font-bold text-slate-800">จัดการสาขาและแผนก</h1>
+      <p class="page-subtitle text-slate-500">บริหารจัดการสาขาย่อย กำหนดพื้นที่ และสังกัดของพนักงานในองค์กร</p>
     </div>
-    <button (click)="openModal()" class="btn-primary flex items-center gap-2">
-      <i class="fi fi-rr-plus"></i> เพิ่มสาขาใหม่
+    <button (click)="openModal()" class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors flex items-center gap-2 shadow-sm">
+      <i class="fa-solid fa-plus"></i> เพิ่มสาขาใหม่
     </button>
   </div>
 
   <!-- Loading State -->
   <div *ngIf="isLoading" class="flex justify-center items-center py-20">
-    <div class="loader"></div>
+    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12"></div>
   </div>
 
-  <div *ngIf="!isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <div *ngIf="!isLoading" class="w-full">
     
-    <!-- Branches List -->
-    <div class="lg:col-span-2 space-y-6">
-      
-      <div *ngIf="branches.length === 0" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center">
-        <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
-          <i class="fi fi-rr-building"></i>
-        </div>
-        <h3 class="text-lg font-semibold text-slate-800 mb-1">ยังไม่มีสาขาย่อย</h3>
-        <p class="text-slate-500 mb-6">องค์กรของคุณยังไม่ได้เพิ่มสาขาหรือแผนกใดๆ</p>
-        <button (click)="openModal()" class="text-emerald-600 font-medium hover:text-emerald-700">
-          + เพิ่มสาขาแรกของคุณ
-        </button>
+    <!-- Empty State -->
+    <div *ngIf="branches.length === 0" class="bg-white rounded-2xl shadow-sm border border-slate-100 p-12 text-center max-w-xl mx-auto">
+      <div class="w-16 h-16 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">
+        <i class="fa-solid fa-building"></i>
       </div>
+      <h3 class="text-lg font-semibold text-slate-800 mb-1">ยังไม่มีสาขาย่อย</h3>
+      <p class="text-slate-500 mb-6">องค์กรของคุณยังไม่ได้เพิ่มสาขาหรือแผนกใดๆ</p>
+      <button (click)="openModal()" class="text-emerald-600 font-medium hover:text-emerald-700">
+        + เพิ่มสาขาแรกของคุณ
+      </button>
+    </div>
 
-      <div *ngFor="let branch of branches" class="branch-card bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="p-6 border-b border-slate-50 flex justify-between items-start">
+    <!-- Branches Grid -->
+    <div *ngIf="branches.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div *ngFor="let branch of branches" class="branch-card bg-white rounded-2xl shadow-sm border border-slate-150 overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow">
+        
+        <!-- Card Header -->
+        <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-slate-50/30">
           <div class="flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white text-xl shadow-inner">
-              <i class="fi fi-rr-shop"></i>
+              <i class="fa-solid fa-hotel"></i>
             </div>
             <div>
               <div class="flex items-center gap-3">
                 <h3 class="text-lg font-bold text-slate-800">{{ branch.unit_name }}</h3>
                 <span class="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full">{{ branch.unit_type || 'Branch' }}</span>
               </div>
-              <p class="text-sm text-slate-500 mt-1">
-                พนักงานในสังกัด: <span class="font-medium text-slate-700">{{ getEmployeesInBranch(branch.id!).length }} คน</span>
-              </p>
+              <p class="text-xs text-slate-400 mt-1">สร้างเมื่อ {{ branch.created_at | date:'dd/MM/yyyy' }}</p>
             </div>
           </div>
+          
+          <!-- Actions -->
           <div class="flex gap-2">
-            <button (click)="openModal(branch)" class="w-8 h-8 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 flex items-center justify-center transition-colors">
-              <i class="fi fi-rr-edit"></i>
+            <button (click)="openModal(branch)" class="w-8 h-8 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 flex items-center justify-center transition-colors" title="แก้ไขสาขา">
+              <i class="fa-solid fa-pen-to-square"></i>
             </button>
-            <button (click)="deleteBranch(branch.id!)" class="w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors">
-              <i class="fi fi-rr-trash"></i>
+            <button (click)="deleteBranch(branch.id!)" class="w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors" title="ลบสาขา">
+              <i class="fa-solid fa-trash-can"></i>
             </button>
           </div>
         </div>
-        
-        <div class="p-6 bg-slate-50/50">
-          <h4 class="text-sm font-semibold text-slate-700 mb-3">พนักงานในสาขานี้</h4>
-          
-          <div *ngIf="getEmployeesInBranch(branch.id!).length === 0" class="text-sm text-slate-500 italic py-2">
-            ยังไม่มีพนักงานในสาขานี้
-          </div>
-          
-          <div class="flex flex-wrap gap-2">
-            <div *ngFor="let emp of getEmployeesInBranch(branch.id!)" class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-sm shadow-sm group">
-              <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">
-                {{ emp.user_profile?.first_name?.[0] || emp.username[0] || 'U' }}
-              </div>
-              <span class="text-slate-700">{{ emp.user_profile?.first_name || emp.username }}</span>
-              <button (click)="assignEmployee(emp.id, null)" class="text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity ml-1" title="ลบออกจากสาขา">
-                <i class="fi fi-rr-cross-small"></i>
-              </button>
+
+        <!-- Card Content -->
+        <div class="p-6 flex-grow space-y-4">
+          <!-- Details Section -->
+          <div class="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
+            <div>
+              <span class="block text-xs text-slate-400 uppercase tracking-wider">ขนาดพื้นที่</span>
+              <span class="text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-chart-area text-emerald-500 mr-1.5"></i>
+                {{ branch.area ? branch.area + ' ตร.ม.' : 'ไม่ได้ระบุพื้นที่' }}
+              </span>
+            </div>
+            <div>
+              <span class="block text-xs text-slate-400 uppercase tracking-wider">จำนวนพนักงาน</span>
+              <span class="text-sm font-semibold text-slate-700">
+                <i class="fa-solid fa-users text-emerald-500 mr-1.5"></i>
+                {{ getEmployeesInBranch(branch.id!).length }} คน
+              </span>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Unassigned Employees Sidebar -->
-    <div class="lg:col-span-1">
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sticky top-6">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-lg font-bold text-slate-800">พนักงานที่ยังไม่มีสังกัด</h3>
-          <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold">
-            {{ getUnassignedEmployees().length }}
-          </span>
-        </div>
-
-        <div *ngIf="getUnassignedEmployees().length === 0" class="text-center py-8 text-slate-500 text-sm">
-          พนักงานทุกคนมีสังกัดสาขาเรียบร้อยแล้ว
-        </div>
-
-        <div class="space-y-3">
-          <div *ngFor="let emp of getUnassignedEmployees()" class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-colors group">
-            <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs">
-                {{ emp.user_profile?.first_name?.[0] || emp.username[0] || 'U' }}
-              </div>
-              <div>
-                <p class="text-sm font-medium text-slate-800">{{ emp.user_profile?.first_name || emp.username }}</p>
-                <p class="text-xs text-slate-500">{{ emp.email }}</p>
-              </div>
+          <!-- Employee List in Branch -->
+          <div>
+            <h4 class="text-sm font-semibold text-slate-700 mb-2">รายชื่อพนักงาน</h4>
+            
+            <div *ngIf="getEmployeesInBranch(branch.id!).length === 0" class="text-sm text-slate-400 italic py-2 text-center bg-slate-50/20 rounded-lg">
+              ยังไม่มีพนักงานในสาขานี้
             </div>
             
-            <div class="relative opacity-0 group-hover:opacity-100 transition-opacity">
-              <select 
-                class="text-xs border-slate-200 rounded-lg pr-8 focus:ring-emerald-500 focus:border-emerald-500"
-                (change)="assignEmployee(emp.id, $any($event.target).value ? +$any($event.target).value : null)">
-                <option value="">เลือกสาขา...</option>
-                <option *ngFor="let b of branches" [value]="b.id">{{ b.unit_name }}</option>
-              </select>
+            <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-1">
+              <div *ngFor="let emp of getEmployeesInBranch(branch.id!)" class="inline-flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-slate-200 text-xs shadow-sm group">
+                <div class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-[10px] font-bold">
+                  {{ emp.user_profile?.first_name?.[0] || emp.username[0] || 'U' }}
+                </div>
+                <span class="text-slate-700 font-medium">{{ emp.user_profile?.first_name || emp.username }}</span>
+                <button (click)="assignEmployee(emp.id, null)" class="text-slate-400 hover:text-red-500 ml-1" title="ลบออกจากสาขา">
+                  <i class="fa-solid fa-xmark text-[10px]"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
+
   </div>
 </div>
 
@@ -124,28 +111,30 @@
   <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
     <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
       <h3 class="text-lg font-bold text-slate-800">
-        {{ editingBranch?.id ? 'แก้ไขสาขา' : 'เพิ่มสาขาใหม่' }}
+        {{ editingBranch?.id ? 'แก้ไขข้อมูลสาขา' : 'เพิ่มสาขาใหม่' }}
       </h3>
       <button (click)="closeModal()" class="text-slate-400 hover:text-slate-600">
-        <i class="fi fi-rr-cross"></i>
+        <i class="fa-solid fa-xmark text-lg"></i>
       </button>
     </div>
     
-    <div class="p-6">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อสาขา/แผนก <span class="text-red-500">*</span></label>
-          <input type="text" [(ngModel)]="editingBranch!.unit_name" class="w-full form-input rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500" placeholder="เช่น สาขาเชียงใหม่, แผนกจัดซื้อ">
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">ประเภท</label>
-          <select [(ngModel)]="editingBranch!.unit_type" class="w-full form-select rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500">
-            <option value="Branch">สาขา (Branch)</option>
-            <option value="Department">แผนก (Department)</option>
-            <option value="Building">อาคาร (Building)</option>
-            <option value="Zone">โซน (Zone)</option>
-          </select>
-        </div>
+    <div class="p-6 space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">ชื่อสาขา/แผนก <span class="text-red-500">*</span></label>
+        <input type="text" [(ngModel)]="editingBranch!.unit_name" class="w-full px-3 py-2 border rounded-xl border-slate-250 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="เช่น สาขาเชียงใหม่, แผนกจัดซื้อ">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">ประเภท</label>
+        <select [(ngModel)]="editingBranch!.unit_type" class="w-full px-3 py-2 border rounded-xl border-slate-250 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white">
+          <option value="Branch">สาขา (Branch)</option>
+          <option value="Department">แผนก (Department)</option>
+          <option value="Building">อาคาร (Building)</option>
+          <option value="Zone">โซน (Zone)</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1">ขนาดพื้นที่ (ตารางเมตร)</label>
+        <input type="number" [(ngModel)]="editingBranch!.area" class="w-full px-3 py-2 border rounded-xl border-slate-250 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 text-sm" placeholder="เช่น 250">
       </div>
     </div>
     
@@ -155,9 +144,19 @@
       </button>
       <button (click)="saveBranch()" [disabled]="isSaving || !editingBranch?.unit_name" 
               class="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2">
-        <i class="fi fi-rr-spinner animate-spin" *ngIf="isSaving"></i>
+        <i class="fa-solid fa-spinner animate-spin" *ngIf="isSaving"></i>
         บันทึกข้อมูล
       </button>
     </div>
   </div>
 </div>
+
+<app-confirm-dialog
+  [open]="showDeleteConfirm"
+  title="ยืนยันการลบสาขา"
+  message="ยืนยันการลบสาขานี้หรือไม่? พนักงานในสาขานี้จะถูกยกเลิกการผูกมัดสาขาทันที"
+  confirmLabel="ลบข้อมูล"
+  variant="danger"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-confirm-dialog>

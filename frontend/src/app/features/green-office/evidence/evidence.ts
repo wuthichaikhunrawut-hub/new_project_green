@@ -7,10 +7,12 @@ import { AuthService } from '../../../core/services/auth.service';
 import { GreenOfficeService } from '../../../core/services/green-office.service';
 import { GeminiService } from '../../../services/gemini';
 
+import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-dialog';
+
 @Component({
   selector: 'app-green-office-evidence',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ConfirmDialogComponent],
   templateUrl: './evidence.html',
   styleUrl: './evidence.css'
 })
@@ -34,6 +36,8 @@ export class GreenOfficeEvidenceComponent implements OnInit {
   selectedCategory = '';
   filterCategory = '';
   hasCategory7 = false;
+  showDeleteConfirm = false;
+  fileToDeleteId: number | null = null;
 
   ngOnInit() {
     this.loadFiles();
@@ -197,25 +201,37 @@ export class GreenOfficeEvidenceComponent implements OnInit {
       event.preventDefault();
       event.stopPropagation();
     }
+    this.fileToDeleteId = id;
+    this.showDeleteConfirm = true;
+  }
+
+  confirmDelete() {
+    if (this.fileToDeleteId === null) return;
+    const id = this.fileToDeleteId;
+    this.showDeleteConfirm = false;
+    this.fileToDeleteId = null;
+
+    this.isUploading = true;
+    this.cdr.markForCheck();
     
-    if (window.confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ถาวร?')) {
-      this.isUploading = true;
-      this.cdr.markForCheck();
-      
-      this.uploadService.deleteFile(id).subscribe({
-        next: () => {
-          this.files = this.files.filter(f => f.id !== id);
-          this.isUploading = false;
-          this.cdr.markForCheck(); // Force UI update
-          this.toast.success('ลบไฟล์เรียบร้อยแล้วครับ!');
-        },
-        error: (err) => {
-          console.error('Delete error:', err);
-          this.isUploading = false;
-          this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
-        }
-      });
-    }
+    this.uploadService.deleteFile(id).subscribe({
+      next: () => {
+        this.files = this.files.filter(f => f.id !== id);
+        this.isUploading = false;
+        this.cdr.markForCheck();
+        this.toast.success('ลบไฟล์เรียบร้อยแล้วครับ!');
+      },
+      error: (err) => {
+        console.error('Delete error:', err);
+        this.isUploading = false;
+        this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
+      }
+    });
+  }
+
+  cancelDelete() {
+    this.showDeleteConfirm = false;
+    this.fileToDeleteId = null;
   }
 
   openPreview(file: any) {

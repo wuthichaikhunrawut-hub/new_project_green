@@ -410,3 +410,13 @@
     </div>
   </div>
 </div>
+
+<app-confirm-dialog
+  [open]="showDeleteConfirm"
+  title="ยืนยันการลบไฟล์หลักฐาน"
+  message="คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์หลักฐานนี้ถาวร? การกระทำนี้ไม่สามารถย้อนกลับได้"
+  confirmLabel="ลบข้อมูล"
+  variant="danger"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-confirm-dialog>

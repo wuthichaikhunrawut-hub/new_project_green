@@ -2,6 +2,8 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { UsersService } from '../../core/services/users.service';
+import { NotificationService, NotificationType } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-support',
@@ -11,12 +13,13 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class SupportComponent implements OnInit {
   private authService = inject(AuthService);
+  private usersService = inject(UsersService);
+  private notificationService = inject(NotificationService);
+
   isAdmin = false;
+  mockTickets: any[] = [];
+  currentUserEmail = '';
   
-  mockTickets = [
-    { id: 'TKT-001', subject: 'ปัญหาการเข้าสู่ระบบ', sender: 'user1@example.com', status: 'Pending', date: new Date().toISOString() },
-    { id: 'TKT-002', subject: 'เสนอแนะฟีเจอร์เพิ่ม', sender: 'admin@org.com', status: 'In Progress', date: new Date().toISOString() }
-  ];
   ticket = {
     subject: '',
     message: ''
@@ -25,6 +28,52 @@ export class SupportComponent implements OnInit {
   selectedTicket: any = null;
   isSubmitting = false;
   submitted = false;
+
+  ngOnInit() {
+    this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        this.currentUserEmail = user.email || '';
+        const role = String(user.role).toUpperCase().trim().replace(' ', '_');
+        if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') {
+          this.isAdmin = true;
+          this.loadTicketsForAdmin();
+        } else {
+          this.isAdmin = false;
+        }
+      }
+    });
+  }
+
+  loadTicketsForAdmin() {
+    this.notificationService.getAllSystemNotifications().subscribe({
+      next: (notifications) => {
+        // Filter system notifications that are support tickets
+        this.mockTickets = notifications
+          .filter(n => n.title && n.title.startsWith('[ตั๋วความช่วยเหลือ]'))
+          .map(n => {
+            let status = 'Pending';
+            if (n.is_read) {
+              status = 'Resolved';
+            }
+            // Parse subject and sender
+            const subject = n.title.replace('[ตั๋วความช่วยเหลือ] - ', '');
+            
+            return {
+              id: `TKT-${String(n.id).padStart(3, '0')}`,
+              subject: subject,
+              sender: (n as any).sender?.email || 'ไม่ระบุอีเมล',
+              status: status,
+              date: n.created_at,
+              message: n.message.replace('รายละเอียด: ', ''),
+              rawId: n.id
+            };
+          });
+      },
+      error: (err) => {
+        console.error('Error loading support tickets:', err);
+      }
+    });
+  }
 
   viewTicket(ticket: any) {
     this.selectedTicket = ticket;
@@ -35,38 +84,93 @@ export class SupportComponent implements OnInit {
   }
 
   updateTicketStatus(status: string) {
-    if (this.selectedTicket) {
-      this.selectedTicket.status = status;
-      // In a real app, you would call an API here
+    if (this.selectedTicket && this.selectedTicket.rawId) {
+      if (status === 'Resolved') {
+        this.notificationService.markAsRead(this.selectedTicket.rawId).subscribe({
+          next: () => {
+            this.selectedTicket.status = status;
+            this.loadTicketsForAdmin();
+          },
+          error: (err) => {
+            console.error('Error updating ticket status:', err);
+          }
+        });
+      } else {
+        // If pending/in progress, keep as pending
+        this.selectedTicket.status = status;
+      }
     }
   }
 
   onSubmit() {
-    this.isSubmitting = true;
-    
-    // จำลองการส่งข้อมูล (ในระบบจริงควรเรียก API)
-    setTimeout(() => {
-      this.isSubmitting = false;
-      this.submitted = true;
-      this.ticket = { subject: '', message: '' };
-      
-      // ให้ข้อความ success หายไปหลังจาก 5 วินาที
-      setTimeout(() => {
-        this.submitted = false;
-      }, 5000);
-    }, 1500);
-  }
+    if (!this.ticket.subject || !this.ticket.message) return;
 
-  ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
-      if (user) {
-        const role = String(user.role).toUpperCase().trim().replace(' ', '_');
-        if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') {
-          this.isAdmin = true;
-        } else {
-          this.isAdmin = false;
-        }
+    this.isSubmitting = true;
+
+    // 1. Fetch users to find the System Admin
+    this.usersService.getUsers().subscribe({
+      next: (users) => {
+        const systemAdmin = users.find(u => {
+          const role = String(u.role).toUpperCase().trim().replace(' ', '_');
+          return role === 'SYSTEM_ADMIN' || role === 'ADMIN';
+        });
+
+        const recipientId = systemAdmin ? systemAdmin.id : 1; // Default to ID 1 if not found
+
+        // Map subject value to clean text
+        const subjectMap: Record<string, string> = {
+          technical: 'ปัญหาการใช้งานระบบ (Technical Issue)',
+          billing: 'ปัญหาการชำระเงิน (Billing/Invoice)',
+          feature: 'เสนอแนะฟีเจอร์ใหม่ (Feature Request)',
+          other: 'อื่นๆ (Other)'
+        };
+        const cleanSubject = subjectMap[this.ticket.subject] || this.ticket.subject;
+
+        // 2. Send the notification to the System Admin
+        this.notificationService.sendNotification({
+          title: `[ตั๋วความช่วยเหลือ] - ${cleanSubject}`,
+          message: `รายละเอียด: ${this.ticket.message}`,
+          type: NotificationType.SYSTEM,
+          recipient_id: recipientId,
+          link: '/support'
+        }).subscribe({
+          next: () => {
+            this.isSubmitting = false;
+            this.submitted = true;
+          },
+          error: (err) => {
+            console.error('Error submitting support ticket:', err);
+            this.isSubmitting = false;
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error fetching users for recipient target:', err);
+        
+        // Fallback: Post directly to recipient ID 1
+        const cleanSubject = this.ticket.subject;
+        this.notificationService.sendNotification({
+          title: `[ตั๋วความช่วยเหลือ] - ${cleanSubject}`,
+          message: `รายละเอียด: ${this.ticket.message}`,
+          type: NotificationType.SYSTEM,
+          recipient_id: 1,
+          link: '/support'
+        }).subscribe({
+          next: () => {
+            this.isSubmitting = false;
+            this.submitted = true;
+          },
+          error: (sendErr) => {
+            console.error('Fallback error submitting support ticket:', sendErr);
+            this.isSubmitting = false;
+          }
+        });
       }
     });
+  }
+
+  resetForm() {
+    this.submitted = false;
+    this.ticket = { subject: '', message: '' };
   }
 }

@@ -13,7 +13,7 @@
       <button class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 hover:-translate-y-0.5 transition-all" routerLink="/ai-scan">
         <i class="fa-solid fa-wand-magic-sparkles mr-2 text-green-600"></i> สแกนบิลด้วย AI
       </button>
-      <button class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 hover:-translate-y-0.5 transition-all" data-bs-toggle="modal" data-bs-target="#manualModal">
+      <button class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 hover:-translate-y-0.5 transition-all" (click)="openManualModal()">
         <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลด้วยมือ
       </button>
     </div>
@@ -173,10 +173,6 @@
           <input type="text" class="py-1.5 pl-2 pr-3 text-sm text-gray-700 bg-transparent border-0 outline-none w-48 placeholder:text-gray-400" placeholder="ค้นหา..." [(ngModel)]="searchQuery" (input)="onFilterChanged()">
         </div>
 
-        <!-- Add button -->
-        <button class="inline-flex items-center rounded-lg bg-green-600 px-3.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-700 transition-all" data-bs-toggle="modal" data-bs-target="#manualModal">
-          <i class="fa-solid fa-plus mr-1.5"></i> เพิ่มรายการ
-        </button>
       </div>
     </div>
 
@@ -260,7 +256,7 @@
                   <button class="inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 transition-all" routerLink="/ai-scan">
                     <i class="fa-solid fa-wand-magic-sparkles mr-2 text-green-600"></i> สแกนบิลด้วย AI
                   </button>
-                  <button class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 transition-all" data-bs-toggle="modal" data-bs-target="#manualModal">
+                  <button class="inline-flex items-center rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 transition-all" (click)="openManualModal()">
                     <i class="fa-solid fa-plus mr-2"></i> เพิ่มข้อมูลด้วยมือ
                   </button>
                 </div>
@@ -293,89 +289,90 @@
 </div>
 
 <!-- Manual Entry Modal -->
-<div class="modal fade" id="manualModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content premium-modal shadow-2xl p-4">
-      <div class="modal-header border-0 pb-3">
-        <div>
-          <h4 class="fw-black text-dark mb-1">เพิ่มข้อมูลกิจกรรม</h4>
-          <p class="text-muted small mb-0">บันทึกข้อมูลการใช้พลังงานรายเดือน</p>
+<div *ngIf="showManualModal" class="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm animate-fade-in" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-slide-up">
+    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+      <div>
+        <h4 class="text-lg font-bold text-slate-800 mb-0">เพิ่มข้อมูลกิจกรรม</h4>
+        <p class="text-xs text-slate-400 mb-0">บันทึกข้อมูลการใช้พลังงานรายเดือน</p>
+      </div>
+      <button type="button" (click)="closeManualModal()" class="text-slate-400 hover:text-slate-600">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <form (ngSubmit)="saveLog()">
+        <!-- สาขา/แผนก -->
+        <div class="mb-4" *ngIf="branches.length > 0">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">สาขา/แผนก</label>
+          <select class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm bg-white" [(ngModel)]="selectedUnitId" name="unitId">
+            <option [ngValue]="null">-- ไม่ระบุสาขา --</option>
+            <option *ngFor="let b of branches" [ngValue]="b.id">{{ b.unit_name }}</option>
+          </select>
         </div>
-        <button type="button" id="closeModalBtn" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body pt-0">
-        <form (ngSubmit)="saveLog()">
-          <!-- สาขา/แผนก -->
-          <div class="mb-4" *ngIf="branches.length > 0">
-            <label class="form-label small fw-black text-muted text-uppercase tracking-wider">สาขา/แผนก</label>
-            <select class="form-select custom-input-formal" [(ngModel)]="selectedUnitId" name="unitId">
-              <option [ngValue]="null">-- ไม่ระบุสาขา --</option>
-              <option *ngFor="let b of branches" [ngValue]="b.id">{{ b.unit_name }}</option>
+        
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ประเภทกิจกรรม</label>
+          <select class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm bg-white" [(ngModel)]="newEntry.activity_type" name="activityType" required>
+            <option value="" disabled>เลือกประเภทกิจกรรม</option>
+            <option value="Electricity">ไฟฟ้า (Electricity)</option>
+            <option value="Water">น้ำประปา (Water)</option>
+            <option value="Gasoline">น้ำมันเชื้อเพลิง (Gasoline)</option>
+          </select>
+        </div>
+        
+        <div class="grid grid-cols-12 gap-4 mb-4">
+          <div class="col-span-7">
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ประจำเดือน</label>
+            <select class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm bg-white" [(ngModel)]="newEntry.month" name="month">
+              <option [value]="1">มกราคม (January)</option>
+              <option [value]="2">กุมภาพันธ์ (February)</option>
+              <option [value]="3">มีนาคม (March)</option>
+              <option [value]="4">เมษายน (April)</option>
+              <option [value]="5">พฤษภาคม (May)</option>
+              <option [value]="6">มิถุนายน (June)</option>
+              <option [value]="7">กรกฎาคม (July)</option>
+              <option [value]="8">สิงหาคม (August)</option>
+              <option [value]="9">กันยายน (September)</option>
+              <option [value]="10">ตุลาคม (October)</option>
+              <option [value]="11">พฤศจิกายน (November)</option>
+              <option [value]="12">ธันวาคม (December)</option>
             </select>
           </div>
-          <div class="mb-4">
-            <label class="form-label small fw-black text-muted text-uppercase tracking-wider">ประเภทกิจกรรม</label>
-            <select class="form-select custom-input-formal" [(ngModel)]="newEntry.activity_type" name="activityType" required>
-              <option value="" disabled>เลือกประเภทกิจกรรม</option>
-              <option value="Electricity">ไฟฟ้า (Electricity)</option>
-              <option value="Water">น้ำประปา (Water)</option>
-              <option value="Gasoline">น้ำมันเชื้อเพลิง (Gasoline)</option>
-            </select>
+          <div class="col-span-5">
+            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ปี ค.ศ.</label>
+            <input type="number" class="w-full px-3 py-2 border rounded-xl border-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 text-sm" [(ngModel)]="newEntry.year" name="year" required>
           </div>
-          
-          <div class="row g-4 mb-4">
-            <div class="col-md-7">
-              <label class="form-label small fw-black text-muted text-uppercase tracking-wider">ประจำเดือน</label>
-              <select class="form-select custom-input-formal" [(ngModel)]="newEntry.month" name="month">
-                <option [value]="1">มกราคม (January)</option>
-                <option [value]="2">กุมภาพันธ์ (February)</option>
-                <option [value]="3">มีนาคม (March)</option>
-                <option [value]="4">เมษายน (April)</option>
-                <option [value]="5">พฤษภาคม (May)</option>
-                <option [value]="6">มิถุนายน (June)</option>
-                <option [value]="7">กรกฎาคม (July)</option>
-                <option [value]="8">สิงหาคม (August)</option>
-                <option [value]="9">กันยายน (September)</option>
-                <option [value]="10">ตุลาคม (October)</option>
-                <option [value]="11">พฤศจิกายน (November)</option>
-                <option [value]="12">ธันวาคม (December)</option>
-              </select>
-            </div>
-            <div class="col-md-5">
-              <label class="form-label small fw-black text-muted text-uppercase tracking-wider">ปี ค.ศ.</label>
-              <input type="number" class="form-control custom-input-formal" [(ngModel)]="newEntry.year" name="year" required>
-            </div>
-          </div>
+        </div>
 
-          <div class="mb-5">
-            <label class="form-label small fw-black text-muted text-uppercase tracking-wider">ปริมาณการใช้งาน</label>
-            <div class="input-group">
-              <input type="number" class="form-control custom-input-formal" [(ngModel)]="newEntry.usage_amount" name="amount" placeholder="เช่น 1250" required>
-              <span class="input-group-text bg-transparent border-0 fw-bold text-muted">หน่วย</span>
-            </div>
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">ปริมาณการใช้งาน</label>
+          <div class="relative rounded-xl border border-slate-200 flex items-center overflow-hidden">
+            <input type="number" class="w-full px-3 py-2 text-sm border-0 focus:outline-none" [(ngModel)]="newEntry.usage_amount" name="amount" placeholder="เช่น 1250" required>
+            <span class="px-3 py-2 text-xs text-slate-400 font-semibold border-l bg-slate-50">หน่วย</span>
           </div>
+        </div>
 
-          <div class="mb-5">
-            <label class="form-label small fw-black text-muted text-uppercase tracking-wider">หลักฐานการใช้งาน (รูปภาพ/PDF)</label>
-            <div class="d-flex gap-2 align-items-center">
-              <input type="file" class="form-control custom-input-formal" (change)="onEvidenceFileSelected($event)" accept="image/*,application/pdf" #evidenceFile>
-              <button type="button" class="btn btn-outline-danger shadow-sm px-3" *ngIf="newEntry.evidence_url && !isUploading" (click)="removeEvidenceFile(evidenceFile)">
-                <i class="fa-solid fa-trash-can"></i> ลบ
-              </button>
-            </div>
-            <p class="text-xs text-muted mt-2" *ngIf="isUploading">
-              <i class="fa-solid fa-spinner animate-spin mr-1"></i> กำลังอัพโหลดไฟล์ไปยัง Cloud...
-            </p>
-            <p class="text-xs text-green-600 mt-2" *ngIf="newEntry.evidence_url && !isUploading">
-              <i class="fa-solid fa-circle-check mr-1"></i> อัพโหลดเรียบร้อยแล้ว
-            </p>
+        <div class="mb-5">
+          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">หลักฐานการใช้งาน (รูปภาพ/PDF)</label>
+          <div class="flex gap-2 items-center">
+            <input type="file" class="w-full px-3 py-1.5 border rounded-xl border-slate-200 focus:outline-none text-xs" (change)="onEvidenceFileSelected($event)" accept="image/*,application/pdf" #evidenceFile>
+            <button type="button" class="px-3 py-1.5 border border-red-200 rounded-xl bg-red-50 text-red-600 text-xs font-semibold hover:bg-red-100 transition-colors" *ngIf="newEntry.evidence_url && !isUploading" (click)="removeEvidenceFile(evidenceFile)">
+              ลบ
+            </button>
           </div>
+          <p class="text-xs text-slate-400 mt-2" *ngIf="isUploading">
+            <i class="fa-solid fa-spinner animate-spin mr-1"></i> กำลังอัพโหลดไฟล์ไปยัง Cloud...
+          </p>
+          <p class="text-xs text-emerald-600 mt-2 font-semibold" *ngIf="newEntry.evidence_url && !isUploading">
+            <i class="fa-solid fa-circle-check mr-1"></i> อัพโหลดเรียบร้อยแล้ว
+          </p>
+        </div>
 
-          <button type="submit" class="btn btn-primary w-100 fw-black py-3 rounded-pill shadow-lg border-0 transition-all hover-translate">
-            <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกข้อมูล
-          </button>
-        </form>
-      </div>
+        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2">
+          <i class="fa-solid fa-floppy-disk"></i> บันทึกข้อมูล
+        </button>
+      </form>
     </div>
   </div>
 </div>

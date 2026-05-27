@@ -40,6 +40,11 @@ export class AuthService {
       ...registerDto.userData,
       password_hash: hashedPassword,
       organization: org,
+      user_profile: {
+        first_name: registerDto.userData.username || registerDto.userData.email.split('@')[0],
+        last_name: 'ผู้ดูแลระบบ',
+        phone: '-'
+      }
     });
 
     // The first user who registers a new organization becomes the ORG_ADMIN

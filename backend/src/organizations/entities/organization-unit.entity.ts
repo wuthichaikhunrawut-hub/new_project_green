@@ -25,6 +25,9 @@ export class OrganizationUnit {
   @Column({ type: 'varchar', length: 100, nullable: true })
   unit_type: string;
 
+  @Column({ type: 'double precision', nullable: true })
+  area: number;
+
   @CreateDateColumn({
     type: 'timestamp without time zone',
     default: () => 'CURRENT_TIMESTAMP',

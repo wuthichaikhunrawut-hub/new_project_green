@@ -172,17 +172,30 @@ export class UsersService {
 
     const users = await query.getMany();
 
-    // Map for backward compatibility
-    return users.map((user) => ({
-      ...user,
-      role:
-        user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
-      username: user.user_profile?.first_name || user.email.split('@')[0],
-      bio: user.assessor_profile?.education_background || '-',
-      assessor_verified:
-        user.assessor_profile?.verification_status === 'Verified' ||
-        user.assessor_profile?.verification_status === 'VERIFIED',
-    })) as any;
+    // Map for backward compatibility and fallback user_profile
+    return users.map((user) => {
+      const p = user.user_profile;
+      const first_name = p && p.first_name && p.first_name.trim() !== '' ? p.first_name.trim() : user.email.split('@')[0];
+      const last_name = p && p.last_name && p.last_name.trim() !== '' ? p.last_name.trim() : 'ผู้ใช้งาน';
+      const phone = p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
+      const profile = {
+        ...(p || {}),
+        first_name,
+        last_name,
+        phone,
+      };
+      return {
+        ...user,
+        user_profile: profile,
+        role:
+          user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
+        username: profile.first_name,
+        bio: user.assessor_profile?.education_background || '-',
+        assessor_verified:
+          user.assessor_profile?.verification_status === 'Verified' ||
+          user.assessor_profile?.verification_status === 'VERIFIED',
+      };
+    }) as any;
   }
 
   async findOne(id: number): Promise<User | null> {
@@ -202,11 +215,23 @@ export class UsersService {
     const primaryBank =
       user.bank_accounts?.find((b) => b.is_primary) || user.bank_accounts?.[0];
 
+    const p = user.user_profile;
+    const first_name = p && p.first_name && p.first_name.trim() !== '' ? p.first_name.trim() : user.email.split('@')[0];
+    const last_name = p && p.last_name && p.last_name.trim() !== '' ? p.last_name.trim() : 'ผู้ใช้งาน';
+    const phone = p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
+    const profile = {
+      ...(p || {}),
+      first_name,
+      last_name,
+      phone,
+    };
+
     const res = {
       ...user,
+      user_profile: profile,
       role:
         user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
-      username: user.user_profile?.first_name || user.email.split('@')[0],
+      username: profile.first_name,
     };
 
     if (res.assessor_profile) {
@@ -241,13 +266,26 @@ export class UsersService {
   }
 
   async create(userData: any): Promise<User> {
-    const dataToSave = { ...userData, is_active: true };
+    const { user_profile, ...userDataOnly } = userData;
+    const dataToSave = { ...userDataOnly, is_active: true };
     if (userData.password) {
       dataToSave.password_hash = await bcrypt.hash(userData.password, 10);
       delete dataToSave.password;
     }
     const user = this.usersRepository.create(dataToSave);
     const saved = (await this.usersRepository.save(user)) as unknown as User;
+
+    const profileData = user_profile || {
+      first_name: userData.username || userData.email?.split('@')[0] || 'ผู้ใช้งาน',
+      last_name: 'ใหม่',
+      phone: '-'
+    };
+    const profile = this.userProfileRepository.create({
+      ...profileData,
+      user: { id: saved.id },
+    });
+    await this.userProfileRepository.save(profile);
+
     await this.auditLogsService.logAction(
       undefined,
       'CREATE_USER',
@@ -256,7 +294,7 @@ export class UsersService {
 
     const desiredRole = userData?.role ? userData.role : UserRole.USER;
     await this.assignRoleToUser(saved.id, desiredRole);
-    return saved;
+    return (await this.findOne(saved.id)) as any;
   }
 
   async update(id: number, updateData: any): Promise<User | null> {

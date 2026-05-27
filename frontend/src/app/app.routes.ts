@@ -231,7 +231,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/executive/dashboard/dashboard').then(m => m.ExecutiveDashboardComponent),
         title: 'Executive Dashboard - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ORG_ADMIN'] }
+        data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN'] }
       },
 
       // GROUP 1: ORGANIZATION

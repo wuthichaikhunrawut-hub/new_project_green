@@ -6,13 +6,18 @@ export class GreenOfficeController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 
   @Get()
-  findAll(@Headers('x-org-id') orgId?: string) {
+  async findAll(@Headers('x-org-id') orgId?: string) {
     let numericOrgId = 0;
     if (orgId) {
       numericOrgId = parseInt(orgId, 10);
       if (isNaN(numericOrgId)) numericOrgId = 0;
     }
-    return this.greenCriteriaService.findAll(numericOrgId);
+    const results = await this.greenCriteriaService.findAllForFrontend(numericOrgId);
+    return results.map(r => ({
+      ...r,
+      max_score: r.maxScore,
+      current_score: r.currentScore
+    }));
   }
 
   @Put(':id/score')

@@ -14,17 +14,11 @@ export class GreenOfficeDataController {
       numericOrgId = parseInt(orgId, 10);
       if (isNaN(numericOrgId)) numericOrgId = 0;
     }
-    const criteria = await this.greenCriteriaService.findAll(numericOrgId);
-
-    // Transform data to match frontend model
-    return criteria.map((item) => ({
-      id: item.id,
-      category: item.category_number,
-      code: item.criteria_code,
-      name: item.criteria_name,
-      maxScore: item.max_score,
-      currentScore: 0, // Default to 0
-      status: 'Pending' as const,
+    const results = await this.greenCriteriaService.findAllForFrontend(numericOrgId);
+    return results.map(r => ({
+      ...r,
+      max_score: r.maxScore,
+      current_score: r.currentScore
     }));
   }
 }

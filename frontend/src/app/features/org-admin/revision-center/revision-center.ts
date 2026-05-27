@@ -5,7 +5,7 @@ import { OrgAdminService } from '../../../core/services/org-admin.service';
 import { CarbonService } from '../../../core/services/carbon.service';
 import { Assessment } from '../../../core/models/assessment.model';
 import { CarbonLog } from '../../../core/models/carbon-log.model';
-import { ToastService } from '../../../shared/services/toast.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-dialog';
 
 type ActionType = 'sendToUser' | 'resubmit' | null;
@@ -59,9 +59,10 @@ export class OrgAdminRevisionCenterComponent implements OnInit {
     });
   }
 
-  selectRevision(item: Assessment): void {
+  selectRevision(item: any) {
     this.activeRevision = item;
-    this.actionNote = item.notes ?? '';
+    this.actionNote = '';
+    this.cancelEditCarbon();
   }
 
   openSendToUser(): void {
@@ -120,7 +121,7 @@ export class OrgAdminRevisionCenterComponent implements OnInit {
   }
 
   startEditCarbon(log: CarbonLog): void {
-    this.editingLogId = log.id;
+    this.editingLogId = log.id || null;
     this.editingUsageAmount = Number(log.usage_amount);
   }
 

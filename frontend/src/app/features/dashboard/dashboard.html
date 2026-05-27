@@ -25,17 +25,15 @@
 <div *ngIf="!isLoading" id="dashboard-wrapper" class="p-6 md:p-8 animate-in fade-in-up">
   <!-- Header Match Reference -->
   <div class="flex justify-between items-center mb-6 border-b border-slate-200 pb-4">
-    <div class="dash-header-title">
-      <img src="assets/image/Green_office_imge.png" alt="Green Sync" class="h-8">
+    <div class="dash-header-title flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg shadow-sm">
+        <i class="fa-solid fa-leaf"></i>
+      </div>
       Green Sync <span class="dash-header-dot"></span> <span class="dash-header-subtitle">Green Office Platform</span>
     </div>
 
-    <div class="top-actions">
-      <button class="icon-btn"><i class="fa-solid fa-gear"></i></button>
-      <button class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></button>
-      <img src="https://ui-avatars.com/api/?name=Admin&background=10B981&color=fff" alt="User" class="profile-avatar">
-      <button class="icon-btn border-0 shadow-none bg-transparent hover:bg-slate-100"><i
-          class="fa-solid fa-ellipsis"></i></button>
+    <div class="flex items-center gap-3">
+      <img [src]="'https://ui-avatars.com/api/?name=' + (orgData?.org_name || 'Admin') + '&background=10B981&color=fff'" alt="User" class="profile-avatar">
     </div>
   </div>
 

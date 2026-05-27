@@ -17,7 +17,6 @@ import { Roles } from '../auth/roles.decorator';
 
 @Controller('admin/green-criteria')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SYSTEM_ADMIN')
 export class GreenCriteriaController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 

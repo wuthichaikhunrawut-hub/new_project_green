@@ -38,7 +38,7 @@ export class NotificationsController {
   }
 
   @Post()
-  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
+  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ORG_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER', 'ASSESSOR')
   create(
     @Body()
     body: {
@@ -57,7 +57,7 @@ export class NotificationsController {
   }
 
   @Post('bulk')
-  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
+  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ORG_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER', 'ASSESSOR')
   createBulk(
     @Body()
     body: {

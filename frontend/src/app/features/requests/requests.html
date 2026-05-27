@@ -5,10 +5,6 @@
       <h2 class="page-title">ติดตามผลประเมินจริง</h2>
       <p class="page-subtitle mb-0">จัดการประวัติการส่งคำขอและติดตามสถานะการประเมินโดยผู้เชี่ยวชาญ</p>
     </div>
-    <div class="page-actions">
-      <button *ngIf="isAllowedToSubmit" routerLink="/requests/create" class="btn btn-primary shadow-sm">
-      <i class="fa-solid fa-plus-circle me-2"></i>สร้างคำขอประเมิน
-    </button>
   </div>
 
   <!-- Filters -->
@@ -53,9 +49,6 @@
         </div>
         <h5 class="fw-bold text-dark">ไม่มีประวัติคำขอรับรอง</h5>
         <p class="text-muted mb-4">ระบบยังไม่พบข้อมูลคำขอ กรุณาสร้างคำขอประเมินใหม่เพื่อเริ่มขั้นตอนการตรวจประเมิน</p>
-        <button *ngIf="isAllowedToSubmit" routerLink="/requests/create" class="btn btn-primary">
-          <i class="fa-solid fa-plus-circle me-2"></i>สร้างคำขอประเมินทันที
-        </button>
       </div>
 
       <!-- Data Table -->
@@ -128,7 +121,7 @@
               
               <!-- Actions -->
               <td class="py-3 text-end pe-4">
-                <button *ngIf="['ADMIN', 'USER'].includes(user?.role || '')" class="btn btn-sm btn-light btn-icon me-2" title="รายละเอียด">
+                <button [routerLink]="['/assessor/report', req.id]" class="btn btn-sm btn-light btn-icon me-2" title="รายละเอียดรายงานการประเมิน">
                   <i class="fa-solid fa-eye text-primary"></i>
                 </button>
                 <button *ngIf="user?.role === 'ASSESSOR'" [routerLink]="['/requests/evaluate', req.id]" class="btn btn-sm btn-primary">

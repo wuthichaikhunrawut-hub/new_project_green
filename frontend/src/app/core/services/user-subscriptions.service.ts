@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
@@ -9,12 +10,17 @@ export class UserSubscriptionsService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3001/subscriptions';
 
+  private platformId = inject(PLATFORM_ID);
+
   private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('access_token');
-    return new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
+    let headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        headers = headers.set('Authorization', `Bearer ${token}`);
+      }
+    }
+    return headers;
   }
 
   getMySubscription(): Observable<any> {
@@ -23,6 +29,10 @@ export class UserSubscriptionsService {
 
   getMyUsage(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/my/usage`, { headers: this.getHeaders() });
+  }
+
+  getMyQuotas(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/my/quotas`, { headers: this.getHeaders() });
   }
 
   getMyPayments(): Observable<any[]> {

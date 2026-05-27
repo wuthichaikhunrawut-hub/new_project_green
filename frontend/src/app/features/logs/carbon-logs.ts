@@ -55,8 +55,19 @@ export class CarbonLogsComponent implements OnInit {
     evidence_url: ''
   };
 
+  showManualModal = false;
   isScanning = false;
   isUploading = false;
+
+  openManualModal() {
+    this.showManualModal = true;
+    this.cdr.markForCheck();
+  }
+
+  closeManualModal() {
+    this.showManualModal = false;
+    this.cdr.markForCheck();
+  }
 
   ngOnInit() {
     this.fetchLogs();
@@ -289,7 +300,7 @@ export class CarbonLogsComponent implements OnInit {
           evidence_url: ''
         };
         this.selectedUnitId = null;
-        document.getElementById('closeModalBtn')?.click();
+        this.closeManualModal();
       },
       error: () => {
         this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');

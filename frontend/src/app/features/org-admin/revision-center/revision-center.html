@@ -42,11 +42,18 @@
       <section class="rounded-2xl border border-slate-200 bg-white p-5 space-y-4">
         <h2 class="font-semibold text-slate-900">ขั้นตอนการดำเนินการ</h2>
         @if (activeRevision) {
+          <div class="mb-4">
+            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ข้อความจากผู้ตรวจประเมิน</h3>
+            <div class="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm border border-amber-100 whitespace-pre-line">
+              {{ activeRevision.notes || '-' }}
+            </div>
+          </div>
           <div>
-            <p class="text-xs text-slate-500 mb-1">หมายเหตุสำหรับ workflow</p>
+            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ระบุหมายเหตุใหม่ (สำหรับผู้รับสาร)</h3>
             <textarea
               [(ngModel)]="actionNote"
-              rows="5"
+              placeholder="พิมพ์ข้อความที่ต้องการแจ้งให้พนักงานหรือผู้ตรวจ..."
+              rows="4"
               class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30"
             ></textarea>
           </div>
@@ -54,7 +61,7 @@
             <button
               type="button"
               (click)="openSendToUser()"
-              [disabled]="isSaving"
+              [disabled]="isSaving || !actionNote?.trim()"
               class="px-4 py-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 font-semibold hover:bg-amber-100 disabled:opacity-50"
             >
               ส่งต่อให้ User แก้ไข

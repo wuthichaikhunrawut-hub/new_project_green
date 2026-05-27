@@ -1,24 +1,29 @@
 import { Injectable, PLATFORM_ID, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
-import { of, Observable, catchError, map, throwError } from 'rxjs';
+import { Observable, catchError, map, throwError } from 'rxjs';
 import { AssessmentCriteria as GreenCriteria } from '../models/assessment.model';
-import { MOCK_CRITERIA } from '../mock-data/mock-green-office';
 
 @Injectable({ providedIn: 'root' })
 export class GreenOfficeService {
-  private apiUrl = 'http://localhost:3001/admin/green-criteria';
+  private apiUrl = 'http://localhost:3001/green-office';
   private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient) {}
 
   private getHeaders(): { [header: string]: string } {
-    let orgId = '';
+    const headers: { [header: string]: string } = {};
     if (isPlatformBrowser(this.platformId)) {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
       const org = JSON.parse(localStorage.getItem('currentOrg') || '{}');
-      orgId = org.id ? org.id.toString() : '';
+      if (org.id) {
+        headers['x-org-id'] = org.id.toString();
+      }
     }
-    return { 'x-org-id': orgId };
+    return headers;
   }
 
   // ดึงเกณฑ์ทั้งหมด

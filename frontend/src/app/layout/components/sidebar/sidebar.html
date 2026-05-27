@@ -133,10 +133,6 @@
         <i class="fa-solid fa-plus-circle"></i>
         <span>สร้างคำขอประเมิน</span>
       </a>
-      <a routerLink="/executive/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-        <i class="fa-solid fa-chart-line"></i>
-        <span>แดชบอร์ดผู้บริหาร</span>
-      </a>
 
       <div class="nav-label">แพ็กเกจและบัญชี</div>
       <a routerLink="/subscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">
@@ -150,6 +146,10 @@
       <a routerLink="/subscription/billing" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-credit-card"></i>
         <span>จัดการการชำระเงิน</span>
+      </a>
+      <a routerLink="/chatbot" routerLinkActive="active" class="nav-item ai-feature" (click)="onNavItemClick()">
+        <i class="fa-solid fa-robot"></i>
+        <span>แชทบอท AI</span>
       </a>
       <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bell"></i>

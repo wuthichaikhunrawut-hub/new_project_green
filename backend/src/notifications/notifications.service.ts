@@ -14,6 +14,25 @@ export class NotificationsService {
     private usersService: UsersService,
   ) {}
 
+  async findSystemAdmin(): Promise<any> {
+    try {
+      const admins = await this.usersService.findAll('System Admin');
+      if (admins && admins.length > 0) return admins[0];
+      
+      const systemAdmins = await this.usersService.findAll('SYSTEM_ADMIN');
+      if (systemAdmins && systemAdmins.length > 0) return systemAdmins[0];
+
+      const legacyAdmins = await this.usersService.findAll('ADMIN');
+      if (legacyAdmins && legacyAdmins.length > 0) return legacyAdmins[0];
+
+      const allUsers = await this.usersService.findAll();
+      if (allUsers && allUsers.length > 0) return allUsers[0];
+    } catch (e) {
+      console.error('Error finding system admin in notifications service:', e);
+    }
+    return null;
+  }
+
   async create(data: {
     title: string;
     message: string;
@@ -22,12 +41,37 @@ export class NotificationsService {
     sender_id?: number;
     link?: string;
   }): Promise<Notification> {
-    const notification = this.notificationsRepository.create(data);
+    let finalRecipientId = data.recipient_id;
+    let recipientExists = false;
+
+    if (finalRecipientId) {
+      try {
+        const user = await this.usersService.findOne(finalRecipientId);
+        if (user) recipientExists = true;
+      } catch {
+        recipientExists = false;
+      }
+    }
+
+    if (!recipientExists) {
+      const admin = await this.findSystemAdmin();
+      if (admin) {
+        finalRecipientId = admin.id;
+      } else {
+        // Absolute fallback to current sender
+        finalRecipientId = data.sender_id || finalRecipientId;
+      }
+    }
+
+    const notification = this.notificationsRepository.create({
+      ...data,
+      recipient_id: finalRecipientId,
+    });
     const saved = await this.notificationsRepository.save(notification);
 
     // Trigger Email sending async
     this.usersService
-      .findOne(data.recipient_id)
+      .findOne(finalRecipientId)
       .then((user) => {
         if (user && user.email) {
           this.mailService.sendMail(

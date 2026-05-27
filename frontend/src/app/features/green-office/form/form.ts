@@ -369,8 +369,165 @@ export class GreenOfficeFormComponent implements OnInit {
     });
   }
 
-  downloadPDF() {
+  async downloadPDF() {
     this.toast.success('กำลังสร้างรายงานประเมินตนเอง (PDF)... กรุณารอสักครู่');
+    
+    try {
+      const { jsPDF } = await import('jspdf');
+      const { default: html2canvas } = await import('html2canvas');
+      
+      const printContainer = document.createElement('div');
+      printContainer.style.position = 'absolute';
+      printContainer.style.left = '-9999px';
+      printContainer.style.top = '-9999px';
+      printContainer.style.width = '800px';
+      printContainer.style.padding = '0';
+      printContainer.style.background = '#ffffff';
+      printContainer.style.color = '#1e293b';
+
+      let htmlContent = `
+        <div style="font-family: 'Sarabun', 'Inter', sans-serif; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+          <!-- Top Premium Banner -->
+          <div style="background: linear-gradient(135deg, #064e3b 0%, #022c22 100%); padding: 40px; color: #ffffff; border-bottom: 4px solid #10b981; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h4 style="color: #34d399; margin: 0 0 5px 0; font-size: 13px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">Green Sync Platform</h4>
+                <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; line-height: 1.2;">รายงานผลการประเมินตนเองอย่างเป็นทางการ</h1>
+                <p style="color: #a7f3d0; margin: 8px 0 0 0; font-size: 14px;">โครงการประเมินสำนักงานสีเขียวที่เป็นมิตรกับสิ่งแวดล้อม (Green Office)</p>
+              </div>
+              <div style="border: 2px double #34d399; padding: 12px; border-radius: 8px; text-align: center; background: rgba(255,255,255,0.05); min-width: 130px;">
+                <div style="color: #a7f3d0; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">ระดับผลการประเมิน</div>
+                <div style="color: #ffffff; font-size: 16px; font-weight: 800;">${this.assessmentLevel}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 40px;">
+            <!-- Document Meta Details Grid -->
+            <div style="display: flex; justify-content: space-between; margin-bottom: 35px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px;">
+              <div>
+                <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">ข้อมูลองค์กรและสิทธิ์</span>
+                <span style="display: block; font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">บัญชีผู้ดูแลระบบองค์กร (Organization Admin)</span>
+                
+                <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">รหัสการประเมิน</span>
+                <span style="display: block; font-size: 14px; font-family: monospace; font-weight: bold; color: #334155;">GS-SELF-${this.assessmentId || 'NEW-001'}</span>
+              </div>
+              <div style="text-align: right;">
+                <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">วันที่จัดทำรายงาน</span>
+                <span style="display: block; font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                
+                <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">มาตรฐานอ้างอิง</span>
+                <span style="display: block; font-size: 14px; font-weight: bold; color: #047857;">Green Office 2569</span>
+              </div>
+            </div>
+
+            <!-- Side-by-Side Premium Summary Cards -->
+            <div style="display: flex; justify-content: space-between; gap: 24px; margin-bottom: 40px;">
+              <!-- Score Showcase Card -->
+              <div style="flex: 1; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                <span style="display: block; font-size: 12px; font-weight: 700; color: #065f46; text-transform: uppercase; margin-bottom: 8px;">คะแนนรวมที่ได้</span>
+                <span style="font-size: 40px; font-weight: 900; color: #047857;">${this.totalScore}</span>
+                <span style="font-size: 16px; color: #065f46; font-weight: 700;">/ 100</span>
+                <span style="display: block; font-size: 11px; color: #065f46; margin-top: 8px; opacity: 0.8;">*คะแนนถ่วงน้ำหนักเฉลี่ยสมบูรณ์</span>
+              </div>
+
+              <!-- Status Grade Card -->
+              <div style="flex: 1; background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 1px solid #bfdbfe; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
+                <span style="display: block; font-size: 12px; font-weight: 700; color: #1e40af; text-transform: uppercase; margin-bottom: 8px;">เกณฑ์ประเมินเบื้องต้น</span>
+                <span style="display: block; font-size: 26px; font-weight: 900; color: #1d4ed8; margin: 10px 0 5px 0;">ผ่านเกณฑ์มาตรฐาน</span>
+                <span style="display: block; font-size: 12px; color: #1e40af; opacity: 0.8;">พร้อมสำหรับการยื่นขอรับตรวจประเมินจริง</span>
+              </div>
+            </div>
+
+            <!-- Table Section -->
+            <h5 style="font-size: 16px; color: #0f172a; font-weight: 800; border-left: 4px solid #10b981; padding-left: 12px; margin-bottom: 20px;">
+              รายละเอียดและผลคะแนนจำแนกตามหมวดหมู่
+            </h5>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 45px;">
+              <thead>
+                <tr style="background: #f1f5f9; text-align: left;">
+                  <th style="padding: 14px 16px; font-size: 12px; font-weight: bold; color: #475569; border-radius: 8px 0 0 8px;">หมวดหมู่การประเมิน (Green Office Criteria)</th>
+                  <th style="padding: 14px 16px; font-size: 12px; font-weight: bold; color: #475569; text-align: center; width: 100px;">สัดส่วน</th>
+                  <th style="padding: 14px 16px; font-size: 12px; font-weight: bold; color: #475569; text-align: left; width: 180px;">ความคืบหน้า</th>
+                  <th style="padding: 14px 16px; font-size: 12px; font-weight: bold; color: #475569; text-align: right; border-radius: 0 8px 8px 0; width: 110px;">คะแนนประเมิน</th>
+                </tr>
+              </thead>
+              <tbody>
+      `;
+
+      this.categories.forEach(cat => {
+        htmlContent += `
+          <tr style="border-bottom: 1px solid #e2e8f0;">
+            <td style="padding: 16px; font-size: 13px; font-weight: bold; color: #1e293b;">${cat.title}</td>
+            <td style="padding: 16px; font-size: 13px; text-align: center; color: #64748b;">${cat.totalWeight} คะแนน</td>
+            <td style="padding: 16px; vertical-align: middle;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 11px; font-weight: bold; color: ${cat.progress === 100 ? '#047857' : '#b45309'};">${cat.progress}%</span>
+                <div style="flex: 1; background-color: #f1f5f9; height: 6px; border-radius: 9999px; overflow: hidden; min-width: 100px; border: 1px solid #e2e8f0;">
+                  <div style="background-color: ${cat.progress === 100 ? '#10b981' : '#f59e0b'}; height: 6px; border-radius: 9999px; width: ${cat.progress}%;"></div>
+                </div>
+              </div>
+            </td>
+            <td style="padding: 16px; font-size: 13px; text-align: right; font-weight: bold; color: #047857;">${cat.currentScore} / ${cat.totalWeight}</td>
+          </tr>
+        `;
+      });
+
+      htmlContent += `
+              </tbody>
+            </table>
+
+            <!-- Signatures and Digital Stamp Seal Row -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 50px; border-top: 1px solid #f1f5f9; padding-top: 40px; margin-bottom: 15px;">
+              <!-- Official Stamp (Left) -->
+              <div style="text-align: left; flex: 1;">
+                <div style="border: 3px double #059669; padding: 12px 18px; color: #059669; font-weight: 900; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; border-radius: 8px; transform: rotate(-4deg); display: inline-block; background: #f0fdf4; border-style: double;">
+                  <i class="fa-solid fa-circle-check" style="margin-right: 4px;"></i> GREEN SYNC CERTIFIED
+                  <div style="font-size: 9px; font-weight: bold; margin-top: 4px; letter-spacing: 0px; text-align: center; color: #047857;">DIGITAL SUBMISSION SEAL</div>
+                </div>
+              </div>
+
+              <!-- Audited & Approved Line (Right) -->
+              <div style="text-align: right; min-width: 250px;">
+                <div style="margin-bottom: 45px; border-bottom: 1px dashed #94a3b8; width: 100%; height: 20px;"></div>
+                <div style="font-size: 13px; font-weight: bold; color: #334155;">ผู้รับผิดชอบการประเมินตนเอง</div>
+                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">แอดมินผู้ดูแลระบบความยั่งยืนขององค์กร</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Premium Corporate Footer -->
+          <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 10px; color: #94a3b8;">เอกสารรายงานประเมินอย่างเป็นทางการเลขที่: GS-REP-${this.assessmentId || '001'}</span>
+            <span style="font-size: 10px; color: #94a3b8;">ลิขสิทธิ์ © ${new Date().getFullYear()} Green Sync. All Rights Reserved.</span>
+          </div>
+        </div>
+      `;
+
+      printContainer.innerHTML = htmlContent;
+      document.body.appendChild(printContainer);
+
+      const canvas = await html2canvas(printContainer, {
+        scale: 2,
+        useCORS: true
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`GreenSync_Self_Assessment_${this.assessmentId || 'Report'}.pdf`);
+      
+      document.body.removeChild(printContainer);
+      this.toast.success('ดาวน์โหลดรายงาน PDF สำเร็จแล้ว!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      this.toast.error('ไม่สามารถดาวน์โหลด PDF ได้ในขณะนี้');
+    }
   }
 
   submitAssessment() {

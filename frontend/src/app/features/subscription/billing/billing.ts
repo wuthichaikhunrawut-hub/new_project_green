@@ -13,11 +13,12 @@ import {
   StripeElements,
   StripePaymentElement,
 } from '@stripe/stripe-js';
+import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-dialog';
 
 @Component({
   selector: 'app-billing',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ConfirmDialogComponent],
   templateUrl: './billing.html',
   styleUrl: './billing.css'
 })
@@ -41,6 +42,9 @@ export class BillingComponent implements OnInit {
   isStripeLoading = true;
   isSaving = false;
   errorMessage = '';
+  
+  showDeleteConfirm = false;
+  methodToDelete: string | null = null;
   
   selectedPlan: SubscriptionPlan | null = null;
   billingCycle = 'monthly';
@@ -69,40 +73,23 @@ export class BillingComponent implements OnInit {
   }
 
   async initStripe() {
-    console.log('Initializing Stripe...');
     this.settingsService.getSettings().subscribe({
       next: async (settings) => {
         const publicKey = settings['stripe.public_key'];
         if (!publicKey) {
-          console.error('Stripe Public Key not found');
           this.isStripeLoading = false;
           return;
         }
 
-        console.log('Loading Stripe with key:', publicKey.substring(0, 8) + '...');
         this.stripe = await loadStripe(publicKey);
         if (!this.stripe) {
-          console.error('Failed to load Stripe SDK');
           this.isStripeLoading = false;
           return;
         }
 
-        // Aggressive fallback: Force show after 5 seconds if Stripe is slow
-        setTimeout(() => {
-          if (this.isStripeLoading) {
-            console.warn('Stripe load too slow, forcing UI to show...');
-            this.isStripeLoading = false;
-            // Force another resize event just in case
-            setTimeout(() => window.dispatchEvent(new Event('resize')), 500);
-          }
-        }, 5000);
-
-        console.log('Creating SetupIntent...');
         this.billingService.createSetupIntent().subscribe({
           next: async (res) => {
-            console.log('SetupIntent received, initializing elements...');
             if (!res.clientSecret) {
-              console.error('No client secret received!');
               this.errorMessage = 'ระบบไม่ได้รับรหัสความปลอดภัยจากเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง';
               this.isStripeLoading = false;
               return;
@@ -144,11 +131,9 @@ export class BillingComponent implements OnInit {
               layout: 'tabs'
             });
             
-            console.log('Mounting PaymentElement...');
             this.paymentElement.mount(this.paymentElementRef.nativeElement);
             
             this.paymentElement.on('ready', () => {
-              console.log('PaymentElement is ready!');
               this.isStripeLoading = false;
               // Force a resize event to ensure Stripe recalculates height
               setTimeout(() => {
@@ -157,7 +142,6 @@ export class BillingComponent implements OnInit {
             });
 
             this.paymentElement.on('loaderror', (event: { error?: { message?: string } }) => {
-              console.error('Stripe Load Error:', event.error);
               this.isStripeLoading = false;
               this.errorMessage = 'ไม่สามารถโหลดฟอร์มชำระเงินได้ เนื่องจากปัญหาการเชื่อมต่อ กรุณารีเฟรชหน้าจอหรือตรวจสอบอินเทอร์เน็ตของคุณ';
             });
@@ -174,14 +158,12 @@ export class BillingComponent implements OnInit {
             });
           },
           error: (err) => {
-            console.error('SetupIntent Error', err);
             this.isStripeLoading = false;
             this.errorMessage = 'ไม่สามารถเชื่อมต่อกับระบบชำระเงินได้ในขณะนี้';
           }
         });
       },
       error: (err) => {
-        console.error('Settings Error', err);
         this.isStripeLoading = false;
       }
     });
@@ -195,7 +177,6 @@ export class BillingComponent implements OnInit {
         this.isLoading = false;
       },
       error: (err) => {
-        console.error('Failed to load methods', err);
         this.isLoading = false;
       }
     });
@@ -229,11 +210,22 @@ export class BillingComponent implements OnInit {
   }
 
   deleteMethod(id: string) {
-    if (confirm('ยืนยันการลบบัตรนี้?')) {
-      this.billingService.deletePaymentMethod(id).subscribe(() => {
+    this.methodToDelete = id;
+    this.showDeleteConfirm = true;
+  }
+
+  confirmDelete() {
+    if (this.methodToDelete) {
+      this.billingService.deletePaymentMethod(this.methodToDelete).subscribe(() => {
         this.loadPaymentMethods();
+        this.cancelDelete();
       });
     }
+  }
+
+  cancelDelete() {
+    this.showDeleteConfirm = false;
+    this.methodToDelete = null;
   }
 
   goBack() {

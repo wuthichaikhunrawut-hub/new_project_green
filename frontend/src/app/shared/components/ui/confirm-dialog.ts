@@ -8,7 +8,8 @@ import { CommonModule } from '@angular/common';
   template: `
     @if (open) {
       <div
-        class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm modal-backdrop"
+        class="fixed inset-0 z-[10000] flex items-center justify-center p-4 modal-backdrop"
+        style="background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);"
         (click)="onBackdropClick()"
         role="dialog"
         aria-modal="true"

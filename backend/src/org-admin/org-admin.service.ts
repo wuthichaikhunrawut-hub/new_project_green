@@ -66,6 +66,7 @@ export class OrgAdminService {
       }
 
       assessment.notes = dto.notes.trim();
+      assessment.status = 'DRAFT';
       return await this.assessmentRepo.save(assessment);
     } catch (error) {
       if (

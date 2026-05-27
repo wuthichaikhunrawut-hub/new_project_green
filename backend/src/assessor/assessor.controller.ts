@@ -27,7 +27,6 @@ interface JwtUser {
 
 @Controller('assessor')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
 export class AssessorController {
   constructor(private readonly assessorService: AssessorService) {}
 
@@ -36,31 +35,37 @@ export class AssessorController {
   }
 
   @Get('dashboard')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   getDashboard(@Request() req: { user: JwtUser }) {
     return this.assessorService.getDashboard(this.userId(req));
   }
 
   @Get('assignments')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   getAssignments(@Request() req: { user: JwtUser }) {
     return this.assessorService.getAssignments(this.userId(req));
   }
 
   @Get('history')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   getHistory(@Request() req: { user: JwtUser }) {
     return this.assessorService.getHistory(this.userId(req));
   }
 
   @Get('organizations/:orgId/carbon-summary')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER')
   getCarbonSummary(@Param('orgId', ParseIntPipe) orgId: number) {
     return this.assessorService.getOrgCarbonSummary(orgId);
   }
 
   @Get('assessments/:id')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER')
   getAssessment(@Param('id', ParseIntPipe) id: number) {
     return this.assessorService.getAssessmentDetail(id);
   }
 
   @Post('assessments/:id/evidence-review')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   saveEvidenceReview(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: SaveEvidenceReviewDto,
@@ -70,6 +75,7 @@ export class AssessorController {
   }
 
   @Patch('assessments/:id/approve')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: ApproveAssessmentDto,
@@ -79,6 +85,7 @@ export class AssessorController {
   }
 
   @Patch('assessments/:id/certificate')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   updateCertificate(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateCertificateDto,
@@ -88,6 +95,7 @@ export class AssessorController {
   }
 
   @Patch('assessments/:id/request-revision')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   requestRevision(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: RequestRevisionDto,

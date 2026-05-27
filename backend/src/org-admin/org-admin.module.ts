@@ -5,13 +5,11 @@ import { OrgAdminService } from './org-admin.service';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { AuthModule } from '../auth/auth.module';
-import { SettingsModule } from '../settings/settings.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Assessment, CarbonLog]),
     AuthModule,
-    SettingsModule,
   ],
   controllers: [OrgAdminController],
   providers: [OrgAdminService],

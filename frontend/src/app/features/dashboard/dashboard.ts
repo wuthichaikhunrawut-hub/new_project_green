@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { GreenOfficeService } from '../../core/services/green-office.service';
 import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import { OrgService } from '../../core/services/org.service';
@@ -45,8 +46,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   waterUsage = 0;
   wasteRecycled = 0;
   renewablePercentage = 0;
-  renewableEnergy = 0; 
-  gridEnergy = 0; 
 
   orgData: any = null;
   orgTarget = 0;
@@ -58,10 +57,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private chartsRendered = false;
 
   scoreIndicators: ScoreIndicatorInput[] = [];
-  recentActivities = [];
+  recentActivities: any[] = [];
   
   aiRecommendations: any[] = [];
   isGeneratingAI = true;
+
+  private http = inject(HttpClient);
 
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -72,6 +73,14 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.orgData = data;
         this.orgTarget = data.target_reduction_percent || 0;
         this.cdr.markForCheck();
+      });
+
+      this.http.get<any[]>(`http://localhost:3001/audit-logs?org_id=${orgId}&limit=5`).subscribe({
+        next: (logs: any[]) => {
+          this.recentActivities = logs || [];
+          this.cdr.markForCheck();
+        },
+        error: (err: any) => console.error('Failed to fetch recent activities', err)
       });
     }
 
@@ -122,8 +131,15 @@ export class DashboardComponent implements OnInit, AfterViewInit {
             .reduce((sum, l) => sum + (l.amount || 0), 0);
           
           const totalEnergy = this.energyUsage;
-          const renewable = 0; // In the future, logs might have a 'is_renewable' flag or similar
+          const renewable = this.carbonLogs
+            .filter(l => l.type === 'RenewableEnergy' || l.type === 'Solar')
+            .reduce((sum, l) => sum + (l.amount || 0), 0);
           this.renewablePercentage = totalEnergy > 0 ? Math.round((renewable / totalEnergy) * 100) : 0;
+
+          const wasteLogs = this.carbonLogs.filter(l => l.type === 'Waste');
+          this.wasteRecycled = wasteLogs.length > 0 
+            ? wasteLogs.reduce((sum, l) => sum + ((l as any).recycled_percent || 0), 0) / wasteLogs.length
+            : 0;
         }
         
         // Hide loader when main data is fetched
@@ -152,10 +168,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   private fetchAIRecommendations() {
+    const energyTarget = this.orgData?.target_energy || 1000;
+    const recycleTarget = this.orgData?.target_recycle || 50;
     const data = {
       weakPoints: [
-        { topic: 'พลังงาน', score: this.energyUsage > 1000 ? 'สูงเกินเกณฑ์' : 'ปกติ' },
-        { topic: 'รีไซเคิล', score: this.wasteRecycled < 50 ? 'ต้องปรับปรุง' : 'ผ่านเกณฑ์' }
+        { topic: 'พลังงาน', score: this.energyUsage > energyTarget ? 'สูงเกินเกณฑ์' : 'ปกติ' },
+        { topic: 'รีไซเคิล', score: this.wasteRecycled < recycleTarget ? 'ต้องปรับปรุง' : 'ผ่านเกณฑ์' }
       ]
     };
     this.insightsService.getRecommendations(data).subscribe({
@@ -370,7 +388,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     if (this.greenEnergyGauge) this.greenEnergyGauge.destroy();
     const options = {
       chart: { type: 'radialBar', height: 260, offsetY: -20, sparkline: { enabled: true } },
-      series: [0],
+      series: [this.renewablePercentage || 0],
       colors: ['#0ea5e9'], // Stripe Blue
       plotOptions: {
         radialBar: {
@@ -398,9 +416,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     const options = {
       chart: { type: 'donut', height: 250, fontFamily: 'Inter, sans-serif' },
-      series: [scope1, scope2, scope3, 0],
-      labels: ['Scope 1 (ตรง)', 'Scope 2 (พลังงาน)', 'Scope 3 (อื่นๆ)', 'ชดเชยแล้ว'],
-      colors: ['#0f766e', '#0d9488', '#14b8a6', '#5eead4'], // Teal spectrum
+      series: [scope1, scope2, scope3],
+      labels: ['Scope 1 (ตรง)', 'Scope 2 (พลังงาน)', 'Scope 3 (อื่นๆ)'],
+      colors: ['#0f766e', '#0d9488', '#14b8a6'], // Teal spectrum
       plotOptions: {
         pie: {
           donut: {
@@ -434,7 +452,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
       colors: ['#0ea5e9', '#93c5fd'], // Blue palette
       plotOptions: { bar: { columnWidth: '45%', borderRadius: 2 } },
       dataLabels: { enabled: false },
-      xaxis: { categories: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'], axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { colors: '#6b7280', fontSize: '11px', fontWeight: 500 } } },
+      xaxis: { categories: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'], axisBorder: { show: false }, axisTicks: { show: false }, labels: { style: { colors: '#6b7280', fontSize: '11px', fontWeight: 500 } } },
       yaxis: { min: 0, labels: { style: { colors: '#9ca3af', fontSize: '11px', fontWeight: 500 } } },
       grid: { 
         borderColor: '#f3f4f6', 

@@ -97,6 +97,12 @@ export class AdminUsersComponent implements OnInit {
     this.branchService.getBranches(orgId).subscribe({
       next: (data) => {
         this.branches = data;
+        if (!this.selectedBranchId && this.branches.length > 0) {
+          const central = this.branches.find(b => b.unit_name === 'หน่วยงานกลาง') || this.branches[0];
+          if (central) {
+            this.selectedBranchId = central.id!;
+          }
+        }
         this.cdr.markForCheck();
       },
       error: (err) => console.error('Failed to load branches:', err)
@@ -202,6 +208,13 @@ export class AdminUsersComponent implements OnInit {
 
     if (this.selectedOrgId) {
       payload.organization = { id: Number(this.selectedOrgId) };
+    }
+
+    if (!this.selectedBranchId && this.branches.length > 0) {
+      const central = this.branches.find(b => b.unit_name === 'หน่วยงานกลาง') || this.branches[0];
+      if (central) {
+        this.selectedBranchId = central.id!;
+      }
     }
 
     if (this.selectedBranchId) {
