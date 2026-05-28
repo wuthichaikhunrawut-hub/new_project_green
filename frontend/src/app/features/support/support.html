@@ -14,46 +14,37 @@
         <div class="card-body p-4 p-md-5">
           <h4 class="fw-bold mb-4">คำถามที่พบบ่อย (FAQ)</h4>
           
-          <div class="accordion" id="faqAccordion">
+          <div class="faq-list">
             <!-- FAQ 1 -->
-            <div class="accordion-item border-0 border-bottom mb-2 pb-2">
-              <h2 class="accordion-header">
-                <button class="accordion-button fw-medium bg-transparent px-0" [class.collapsed]="activeFaq !== 1" type="button" (click)="toggleFaq(1)">
-                  การประเมินคาร์บอนฟุตพริ้นท์ต้องใช้ข้อมูลอะไรบ้าง?
-                </button>
-              </h2>
-              <div class="accordion-collapse collapse" [class.show]="activeFaq === 1">
-                <div class="accordion-body px-0" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
-                  ระบบต้องการข้อมูลพื้นฐาน 3 ส่วนหลัก ได้แก่ (1) บิลค่าไฟฟ้า (2) บิลค่าน้ำประปา และ (3) ข้อมูลการใช้น้ำมันเชื้อเพลิงของยานพาหนะองค์กร โดยคุณสามารถอัปโหลดรูปถ่ายบิลให้ระบบ AI ช่วยดึงข้อมูลได้อัตโนมัติ
-                </div>
+            <div class="border-bottom py-3">
+              <div class="d-flex align-items-center justify-content-between py-2" (click)="toggleFaq(1)" style="cursor: pointer; user-select: none;">
+                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors">การประเมินคาร์บอนฟุตพริ้นท์ต้องใช้ข้อมูลอะไรบ้าง?</span>
+                <i class="fa-solid" [class.fa-chevron-up]="activeFaq === 1" [class.fa-chevron-down]="activeFaq !== 1" style="color: #059669; font-size: 0.95rem; transition: transform 0.2s;"></i>
+              </div>
+              <div *ngIf="activeFaq === 1" class="py-2" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
+                ระบบต้องการข้อมูลพื้นฐาน 3 ส่วนหลัก ได้แก่ (1) บิลค่าไฟฟ้า (2) บิลค่าน้ำประปา และ (3) ข้อมูลการใช้น้ำมันเชื้อเพลิงของยานพาหนะองค์กร โดยคุณสามารถอัปโหลดรูปถ่ายบิลให้ระบบ AI ช่วยดึงข้อมูลได้อัตโนมัติ
               </div>
             </div>
 
             <!-- FAQ 2 -->
-            <div class="accordion-item border-0 border-bottom mb-2 pb-2">
-              <h2 class="accordion-header">
-                <button class="accordion-button fw-medium bg-transparent px-0" [class.collapsed]="activeFaq !== 2" type="button" (click)="toggleFaq(2)">
-                  ข้อมูลที่อัปโหลดเข้าสู่ระบบมีความปลอดภัยแค่ไหน?
-                </button>
-              </h2>
-              <div class="accordion-collapse collapse" [class.show]="activeFaq === 2">
-                <div class="accordion-body px-0" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
-                  Green Sync ให้ความสำคัญกับความปลอดภัยระดับองค์กร (Enterprise-grade Security) ข้อมูลเอกสารทุกชิ้นจะถูกเข้ารหัส และการทำงานของระบบ AI ของเราจะไม่มีการนำข้อมูลของคุณไปใช้ฝึกฝนโมเดลสาธารณะ (No Public Training)
-                </div>
+            <div class="border-bottom py-3">
+              <div class="d-flex align-items-center justify-content-between py-2" (click)="toggleFaq(2)" style="cursor: pointer; user-select: none;">
+                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors">ข้อมูลที่อัปโหลดเข้าสู่ระบบมีความปลอดภัยแค่ไหน?</span>
+                <i class="fa-solid" [class.fa-chevron-up]="activeFaq === 2" [class.fa-chevron-down]="activeFaq !== 2" style="color: #059669; font-size: 0.95rem; transition: transform 0.2s;"></i>
+              </div>
+              <div *ngIf="activeFaq === 2" class="py-2" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
+                Green Sync ให้ความสำคัญกับความปลอดภัยระดับองค์กร (Enterprise-grade Security) ข้อมูลเอกสารทุกชิ้นจะถูกเข้ารหัส และการทำงานของระบบ AI ของเราจะไม่มีการนำข้อมูลของคุณไปใช้ฝึกฝนโมเดลสาธารณะ (No Public Training)
               </div>
             </div>
 
             <!-- FAQ 3 -->
-            <div class="accordion-item border-0 mb-2 pb-2">
-              <h2 class="accordion-header">
-                <button class="accordion-button fw-medium bg-transparent px-0" [class.collapsed]="activeFaq !== 3" type="button" (click)="toggleFaq(3)">
-                  ต้องการเพิ่มแอดมินหรือพนักงานเข้าสู่ระบบ ต้องทำอย่างไร?
-                </button>
-              </h2>
-              <div class="accordion-collapse collapse" [class.show]="activeFaq === 3">
-                <div class="accordion-body px-0" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
-                  หากคุณเป็น Organization Admin (ผู้ดูแลระดับองค์กร) คุณสามารถเข้าไปที่เมนู "จัดการผู้ใช้งาน" ที่แถบเมนูด้านซ้าย และกดปุ่ม "เพิ่มผู้ใช้งาน" เพื่อสร้างบัญชีให้พนักงานในองค์กรได้ทันที
-                </div>
+            <div class="py-3">
+              <div class="d-flex align-items-center justify-content-between py-2" (click)="toggleFaq(3)" style="cursor: pointer; user-select: none;">
+                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors">ต้องการเพิ่มแอดมินหรือพนักงานเข้าสู่ระบบ ต้องทำอย่างไร?</span>
+                <i class="fa-solid" [class.fa-chevron-up]="activeFaq === 3" [class.fa-chevron-down]="activeFaq !== 3" style="color: #059669; font-size: 0.95rem; transition: transform 0.2s;"></i>
+              </div>
+              <div *ngIf="activeFaq === 3" class="py-2" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
+                หากคุณเป็น Organization Admin (ผู้ดูแลระดับองค์กร) คุณสามารถเข้าไปที่เมนู "จัดการผู้ใช้งาน" ที่แถบเมนูด้านซ้าย และกดปุ่ม "เพิ่มผู้ใช้งาน" เพื่อสร้างบัญชีให้พนักงานในองค์กรได้ทันที
               </div>
             </div>
           </div>
