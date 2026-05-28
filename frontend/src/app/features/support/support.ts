@@ -21,6 +21,20 @@ export class SupportComponent implements OnInit {
   mockTickets: any[] = [];
   currentUserEmail = '';
   
+  // Native Angular Accordion State
+  activeFaq: number | null = null;
+
+  toggleFaq(index: number) {
+    if (this.activeFaq === index) {
+      this.activeFaq = null;
+    } else {
+      this.activeFaq = index;
+    }
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 0);
+  }
+  
   ticket = {
     subject: '',
     message: ''
