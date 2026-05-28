@@ -26,7 +26,10 @@
           <div class="skeleton skel-text short"></div>
         </div>
         <div *ngIf="!isLoadingSummary" class="ai-typing">
-          {{ executiveSummary || 'พบแนวโน้มการลดคาร์บอนที่ดีขึ้น คาดการณ์องค์กรมีแนวโน้มผ่าน Green Office ภายในปีนี้ พร้อมประหยัดค่าพลังงานสะสม 15%' }}
+          {{ executiveSummary || 'กำลังรวบรวมข้อมูลเพื่อวิเคราะห์...' }}
+          <span *ngIf="isUpdatingSummary" class="ml-2 inline-flex items-center text-sm text-emerald-500 font-medium whitespace-nowrap animate-pulse">
+             <i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังอัพเดทผลวิเคราะห์...
+          </span>
         </div>
       </div>
       
@@ -135,7 +138,12 @@
   <div class="panel fade-in-up" >
     <div class="panel-header">
       <div>
-        <h3 class="panel-title"><i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-2"></i> Smart Interventions</h3>
+        <h3 class="panel-title">
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-2"></i> Smart Interventions
+          <span *ngIf="isUpdatingRecommendations" class="ml-2 text-xs text-amber-500 font-medium animate-pulse inline-block">
+            <i class="fa-solid fa-spinner fa-spin mr-1"></i>
+          </span>
+        </h3>
         <p class="panel-subtitle">ข้อเสนอแนะเพื่อลดความเสี่ยงและเพิ่มประสิทธิภาพ</p>
       </div>
     </div>

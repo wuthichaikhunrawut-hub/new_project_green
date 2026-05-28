@@ -27,8 +27,10 @@ export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
   orgTarget = 0;
   executiveSummary = '';
   isLoadingSummary = true;
+  isUpdatingSummary = false;
   recommendations: any[] = [];
   isLoadingRecommendations = true;
+  isUpdatingRecommendations = false;
 
   // Chart References
   private esgChart: any | null = null;
@@ -80,6 +82,7 @@ export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
             this.carbonTotal = (logs || []).reduce((sum: number, log: any) => sum + (log.emission || 0), 0);
             
             // Now call AI for Summary
+            this.isUpdatingSummary = true;
             this.insightsService.getExecutiveSummary({
               greenScore: this.greenScore,
               carbonTotal: this.carbonTotal,
@@ -89,27 +92,36 @@ export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
               next: (res: any) => {
                 this.executiveSummary = res.summary;
                 this.isLoadingSummary = false;
+                this.isUpdatingSummary = false;
                 this.cdr.markForCheck();
               },
               error: () => {
-                this.executiveSummary = 'ไม่สามารถสร้างบทวิเคราะห์จาก AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
+                if (!this.executiveSummary) {
+                  this.executiveSummary = 'ไม่สามารถสร้างบทวิเคราะห์จาก AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
+                }
                 this.isLoadingSummary = false;
+                this.isUpdatingSummary = false;
                 this.cdr.markForCheck();
               }
             });
 
             // Call AI for Recommendations
+            this.isUpdatingRecommendations = true;
             this.insightsService.getRecommendations({
               weakPoints: ['Energy Usage', 'Waste Separation']
             }).subscribe({
               next: (res: any) => {
                 this.recommendations = res.recommendations || [];
                 this.isLoadingRecommendations = false;
+                this.isUpdatingRecommendations = false;
                 this.cdr.markForCheck();
               },
               error: () => {
-                this.recommendations = [];
+                if (this.recommendations.length === 0) {
+                  this.recommendations = [];
+                }
                 this.isLoadingRecommendations = false;
+                this.isUpdatingRecommendations = false;
                 this.cdr.markForCheck();
               }
             });
