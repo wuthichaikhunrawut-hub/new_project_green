@@ -27,6 +27,24 @@ const MODEL = 'gemini-2.5-flash';
 @Injectable()
 export class GeminiService {
   private ai: GoogleGenAI | null = null;
+  private orgCooldowns = new Map<number, { until: Date; reason: string }>();
+
+  private isCooldownActive(orgId: number): boolean {
+    const cd = this.orgCooldowns.get(orgId);
+    if (!cd) return false;
+    if (new Date() < cd.until) {
+      console.warn(`[AI Cache] Circuit breaker active for Org ID ${orgId} until ${cd.until.toISOString()}. Reason: ${cd.reason}`);
+      return true;
+    }
+    this.orgCooldowns.delete(orgId);
+    return false;
+  }
+
+  private setCooldown(orgId: number, durationMinutes: number, reason: string) {
+    const until = new Date(Date.now() + durationMinutes * 60 * 1000);
+    this.orgCooldowns.set(orgId, { until, reason });
+    console.log(`[AI Cache] Set circuit breaker cooldown for Org ID ${orgId} for ${durationMinutes} minutes. Reason: ${reason}`);
+  }
 
   constructor(
     @InjectRepository(ChatLog)
@@ -268,6 +286,17 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     const currentDataString = `${data.greenScore || 0}-${data.carbonTotal || 0}-${data.orgTarget || 0}-${JSON.stringify(data.extra || {})}`;
     currentHash = crypto.createHash('sha256').update(currentDataString).digest('hex');
 
+    // 1. Check if Circuit Breaker Cooldown is active
+    if (org && this.isCooldownActive(org.id) && org.cached_executive_summary) {
+      console.log('[AI Cache] Circuit breaker active for Executive Summary. Serving cached summary.');
+      return { 
+        summary: org.cached_executive_summary, 
+        lastAnalyzedAt: org.last_summary_analyzed_at,
+        isFallback: true 
+      };
+    }
+
+    // 2. Check if Cache Hash matches
     if (org && org.last_summary_hash === currentHash && org.cached_executive_summary) {
       console.log('[AI Cache] Executive Summary cache hit for Org ID:', org.id);
       return { 
@@ -306,6 +335,24 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       return { summary: text };
     } catch (error) {
       console.error('Gemini Executive Summary error:', error);
+      
+      if (org) {
+        // Set cooldown for 5 minutes when API fails (like 429 quota exhaustion)
+        const errMsg = (error as Error).message || '';
+        const reason = errMsg.includes('429') || errMsg.includes('quota') ? 'Rate limit (429) exceeded' : 'API Connection Failure';
+        this.setCooldown(org.id, 5, reason);
+
+        // Fallback to previous cached summary if available
+        if (org.cached_executive_summary) {
+          console.warn('[AI Cache] Gemini API failed. Falling back to previous cached summary.');
+          return { 
+            summary: org.cached_executive_summary, 
+            lastAnalyzedAt: org.last_summary_analyzed_at,
+            isFallback: true 
+          };
+        }
+      }
+      
       throw new InternalServerErrorException('การสร้างข้อมูลสรุปล้มเหลว');
     }
   }
@@ -325,6 +372,22 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     const currentDataString = `${JSON.stringify(data.weakPoints || [])}`;
     currentHash = crypto.createHash('sha256').update(currentDataString).digest('hex');
 
+    // 1. Check if Circuit Breaker Cooldown is active
+    if (org && this.isCooldownActive(org.id) && org.cached_recommendations) {
+      console.log('[AI Cache] Circuit breaker active for Recommendations. Serving cached recommendations.');
+      try {
+        const parsed = JSON.parse(org.cached_recommendations);
+        return {
+          ...parsed,
+          isFallback: true,
+          lastAnalyzedAt: org.last_recommendations_analyzed_at
+        };
+      } catch (err) {
+        console.error('[AI Cache] Failed to parse cached recommendations during cooldown.', err);
+      }
+    }
+
+    // 2. Check if Cache Hash matches
     if (org && org.last_recommendations_hash === currentHash && org.cached_recommendations) {
       console.log('[AI Cache] Recommendations cache hit for Org ID:', org.id);
       try {
@@ -371,6 +434,29 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       return parsed;
     } catch (error) {
       console.error('Gemini Recommendations error:', error);
+
+      if (org) {
+        // Set cooldown for 5 minutes when API fails
+        const errMsg = (error as Error).message || '';
+        const reason = errMsg.includes('429') || errMsg.includes('quota') ? 'Rate limit (429) exceeded' : 'API Connection Failure';
+        this.setCooldown(org.id, 5, reason);
+
+        // Fallback to previous cached recommendations if available
+        if (org.cached_recommendations) {
+          console.warn('[AI Cache] Gemini API failed. Falling back to previous cached recommendations.');
+          try {
+            const parsed = JSON.parse(org.cached_recommendations);
+            return {
+              ...parsed,
+              isFallback: true,
+              lastAnalyzedAt: org.last_recommendations_analyzed_at
+            };
+          } catch (err) {
+            console.error('[AI Cache] Failed to parse fallback cached recommendations.', err);
+          }
+        }
+      }
+
       throw new InternalServerErrorException('การสร้างคำแนะนำล้มเหลว');
     }
   }
