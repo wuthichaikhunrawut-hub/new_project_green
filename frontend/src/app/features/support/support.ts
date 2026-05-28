@@ -37,11 +37,15 @@ export class SupportComponent implements OnInit {
         const role = String(user.role).toUpperCase().trim().replace(' ', '_');
         if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') {
           this.isAdmin = true;
-          this.loadTicketsForAdmin();
+          setTimeout(() => {
+            this.loadTicketsForAdmin();
+          }, 0);
         } else {
           this.isAdmin = false;
         }
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -50,7 +54,7 @@ export class SupportComponent implements OnInit {
     this.notificationService.getAllSystemNotifications().subscribe({
       next: (notifications) => {
         // Filter system notifications that are support tickets
-        this.mockTickets = notifications
+        const mappedTickets = notifications
           .filter(n => n.title && n.title.startsWith('[ตั๋วความช่วยเหลือ]'))
           .map(n => {
             let status = 'Pending';
@@ -70,10 +74,17 @@ export class SupportComponent implements OnInit {
               rawId: n.id
             };
           });
-        this.cdr.detectChanges();
+
+        setTimeout(() => {
+          this.mockTickets = mappedTickets;
+          this.cdr.detectChanges();
+        }, 0);
       },
       error: (err) => {
         console.error('Error loading support tickets:', err);
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -91,18 +102,25 @@ export class SupportComponent implements OnInit {
       if (status === 'Resolved') {
         this.notificationService.markAsRead(this.selectedTicket.rawId).subscribe({
           next: () => {
-            this.selectedTicket.status = status;
-            this.loadTicketsForAdmin();
-            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.selectedTicket.status = status;
+              this.loadTicketsForAdmin();
+              this.cdr.detectChanges();
+            }, 0);
           },
           error: (err) => {
             console.error('Error updating ticket status:', err);
+            setTimeout(() => {
+              this.cdr.detectChanges();
+            }, 0);
           }
         });
       } else {
         // If pending/in progress, keep as pending
-        this.selectedTicket.status = status;
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.selectedTicket.status = status;
+          this.cdr.detectChanges();
+        }, 0);
       }
     }
   }
@@ -138,16 +156,20 @@ export class SupportComponent implements OnInit {
       link: '/support'
     }).subscribe({
       next: () => {
-        this.isSubmitting = false;
-        this.submitted = true;
-        this.toast.success('ส่งตั๋วแจ้งปัญหาสำเร็จ!');
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.isSubmitting = false;
+          this.submitted = true;
+          this.toast.success('ส่งตั๋วแจ้งปัญหาสำเร็จ!');
+          this.cdr.detectChanges();
+        }, 0);
       },
       error: (err) => {
         console.error('Error submitting support ticket:', err);
-        this.isSubmitting = false;
-        this.toast.error('ไม่สามารถส่งตั๋วได้ กรุณาลองใหม่อีกครั้ง');
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.isSubmitting = false;
+          this.toast.error('ไม่สามารถส่งตั๋วได้ กรุณาลองใหม่อีกครั้ง');
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
