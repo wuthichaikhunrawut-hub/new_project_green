@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
@@ -15,6 +15,7 @@ export class SupportComponent implements OnInit {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   private toast = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
 
   isAdmin = false;
   mockTickets: any[] = [];
@@ -40,6 +41,7 @@ export class SupportComponent implements OnInit {
         } else {
           this.isAdmin = false;
         }
+        this.cdr.detectChanges();
       }
     });
   }
@@ -68,6 +70,7 @@ export class SupportComponent implements OnInit {
               rawId: n.id
             };
           });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error loading support tickets:', err);
@@ -90,6 +93,7 @@ export class SupportComponent implements OnInit {
           next: () => {
             this.selectedTicket.status = status;
             this.loadTicketsForAdmin();
+            this.cdr.detectChanges();
           },
           error: (err) => {
             console.error('Error updating ticket status:', err);
@@ -98,6 +102,7 @@ export class SupportComponent implements OnInit {
       } else {
         // If pending/in progress, keep as pending
         this.selectedTicket.status = status;
+        this.cdr.detectChanges();
       }
     }
   }
@@ -136,11 +141,13 @@ export class SupportComponent implements OnInit {
         this.isSubmitting = false;
         this.submitted = true;
         this.toast.success('ส่งตั๋วแจ้งปัญหาสำเร็จ!');
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Error submitting support ticket:', err);
         this.isSubmitting = false;
         this.toast.error('ไม่สามารถส่งตั๋วได้ กรุณาลองใหม่อีกครั้ง');
+        this.cdr.detectChanges();
       }
     });
   }
@@ -148,5 +155,6 @@ export class SupportComponent implements OnInit {
   resetForm() {
     this.submitted = false;
     this.ticket = { subject: '', message: '' };
+    this.cdr.detectChanges();
   }
 }
