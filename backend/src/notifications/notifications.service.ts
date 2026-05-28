@@ -164,7 +164,7 @@ export class NotificationsService {
 
   async findAllSystemWide(): Promise<Notification[]> {
     return this.notificationsRepository.find({
-      relations: ['recipient'],
+      relations: ['recipient', 'sender'],
       order: { created_at: 'DESC' },
       take: 200,
     });
