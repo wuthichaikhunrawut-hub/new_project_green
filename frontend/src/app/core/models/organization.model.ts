@@ -22,6 +22,12 @@ export interface Organization {
   target_reduction_percent?: number;
   current_green_status?: string;
   is_active: boolean;
+  cached_executive_summary?: string;
+  cached_recommendations?: string;
+  last_summary_hash?: string;
+  last_recommendations_hash?: string;
+  last_summary_analyzed_at?: string;
+  last_recommendations_analyzed_at?: string;
   created_at: string;
   updated_at: string;
 }

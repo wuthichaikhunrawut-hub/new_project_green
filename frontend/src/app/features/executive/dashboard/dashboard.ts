@@ -51,6 +51,24 @@ export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
       this.orgService.getOrganization(orgId).subscribe((data: any) => {
         this.orgTarget = data.target_reduction_percent || 20;
         
+        // Load cached values from database immediately to avoid skeleton flashes
+        if (data.cached_executive_summary) {
+          this.executiveSummary = data.cached_executive_summary;
+          this.isLoadingSummary = false;
+        }
+        if (data.cached_recommendations) {
+          try {
+            const parsed = typeof data.cached_recommendations === 'string' 
+              ? JSON.parse(data.cached_recommendations) 
+              : data.cached_recommendations;
+            this.recommendations = parsed.recommendations || [];
+            this.isLoadingRecommendations = false;
+          } catch (e) {
+            console.error('Failed to parse cached recommendations', e);
+          }
+        }
+        this.cdr.markForCheck();
+        
         // Fetch Green Score
         this.greenService.getCriteriaList().subscribe((criteria: any[]) => {
           const totalMax = criteria.reduce((sum: number, c: any) => sum + (c.max_score || 0), 0);
