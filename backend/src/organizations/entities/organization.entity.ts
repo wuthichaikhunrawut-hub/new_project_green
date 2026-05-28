@@ -48,6 +48,24 @@ export class Organization {
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
+  @Column({ type: 'text', nullable: true })
+  cached_executive_summary: string;
+
+  @Column({ type: 'text', nullable: true })
+  cached_recommendations: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  last_summary_hash: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  last_recommendations_hash: string;
+
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  last_summary_analyzed_at: Date;
+
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  last_recommendations_analyzed_at: Date;
+
   @CreateDateColumn({
     type: 'timestamp without time zone',
     default: () => 'CURRENT_TIMESTAMP',

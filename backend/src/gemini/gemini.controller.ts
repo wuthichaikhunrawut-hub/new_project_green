@@ -133,12 +133,14 @@ export class GeminiController {
   }
 
   @Post('executive-summary')
-  async getExecutiveSummary(@Body() body: any) {
-    return this.geminiService.generateExecutiveSummary(body);
+  async getExecutiveSummary(@Body() body: any, @Request() req: { user: JwtUser }) {
+    const userId = Number(req.user.sub);
+    return this.geminiService.generateExecutiveSummary(body, userId);
   }
 
   @Post('recommendations')
-  async getRecommendations(@Body() body: any) {
-    return this.geminiService.getRecommendations(body);
+  async getRecommendations(@Body() body: any, @Request() req: { user: JwtUser }) {
+    const userId = Number(req.user.sub);
+    return this.geminiService.getRecommendations(body, userId);
   }
 }

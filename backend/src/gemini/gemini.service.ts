@@ -5,6 +5,9 @@ import { Repository } from 'typeorm';
 import { ChatLog } from './entities/gemini.entity';
 import { ChatSession } from './entities/chat-session.entity';
 import { ChatMessage } from './entities/chat-message.entity';
+import { User } from '../users/entities/user.entity';
+import { Organization } from '../organizations/entities/organization.entity';
+import * as crypto from 'crypto';
 
 export interface BillScanResult {
   type: string;
@@ -32,6 +35,10 @@ export class GeminiService {
     private readonly chatSessionRepo: Repository<ChatSession>,
     @InjectRepository(ChatMessage)
     private readonly chatMessageRepo: Repository<ChatMessage>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    @InjectRepository(Organization)
+    private readonly orgRepo: Repository<Organization>,
   ) {}
 
   private getClient(): GoogleGenAI {
@@ -246,7 +253,29 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     await this.chatLogRepo.delete({ user_id: userId });
   }
 
-  async generateExecutiveSummary(data: any): Promise<any> {
+  async generateExecutiveSummary(data: any, userId?: number): Promise<any> {
+    let org: Organization | null = null;
+    let currentHash = '';
+
+    if (userId) {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: ['organization']
+      });
+      org = user?.organization || null;
+    }
+
+    const currentDataString = `${data.greenScore || 0}-${data.carbonTotal || 0}-${data.orgTarget || 0}-${JSON.stringify(data.extra || {})}`;
+    currentHash = crypto.createHash('sha256').update(currentDataString).digest('hex');
+
+    if (org && org.last_summary_hash === currentHash && org.cached_executive_summary) {
+      console.log('[AI Cache] Executive Summary cache hit for Org ID:', org.id);
+      return { 
+        summary: org.cached_executive_summary, 
+        lastAnalyzedAt: org.last_summary_analyzed_at 
+      };
+    }
+
     const ai = this.getClient();
 
     try {
@@ -259,12 +288,21 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 
 ตอบกลับเป็นภาษาไทยเชิงธุรกิจ ความยาวไม่เกิน 4-5 ประโยค ชี้ให้เห็นถึงความเสี่ยง แนวโน้ม หรือความสำเร็จที่โดดเด่นเท่านั้น`;
 
+      console.log('[AI Cache] Executive Summary cache mismatch. Fetching fresh summary from Gemini...');
       const response = await ai.models.generateContent({
         model: MODEL,
         contents: prompt,
       });
 
       const text = response.text?.trim() || '';
+      
+      if (org) {
+        org.cached_executive_summary = text;
+        org.last_summary_hash = currentHash;
+        org.last_summary_analyzed_at = new Date();
+        await this.orgRepo.save(org);
+      }
+
       return { summary: text };
     } catch (error) {
       console.error('Gemini Executive Summary error:', error);
@@ -272,7 +310,30 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     }
   }
 
-  async getRecommendations(data: any): Promise<any> {
+  async getRecommendations(data: any, userId?: number): Promise<any> {
+    let org: Organization | null = null;
+    let currentHash = '';
+
+    if (userId) {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: ['organization']
+      });
+      org = user?.organization || null;
+    }
+
+    const currentDataString = `${JSON.stringify(data.weakPoints || [])}`;
+    currentHash = crypto.createHash('sha256').update(currentDataString).digest('hex');
+
+    if (org && org.last_recommendations_hash === currentHash && org.cached_recommendations) {
+      console.log('[AI Cache] Recommendations cache hit for Org ID:', org.id);
+      try {
+        return JSON.parse(org.cached_recommendations);
+      } catch (err) {
+        console.error('[AI Cache] Failed to parse cached recommendations JSON, fetching fresh...', err);
+      }
+    }
+
     const ai = this.getClient();
 
     try {
@@ -290,6 +351,7 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
   "missingDocuments": ["เอกสาร ก.", "เอกสาร ข."]
 }`;
 
+      console.log('[AI Cache] Recommendations cache mismatch. Fetching fresh Action Plan from Gemini...');
       const response = await ai.models.generateContent({
         model: MODEL,
         contents: prompt,
@@ -297,7 +359,16 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 
       let text = response.text?.trim() || '';
       text = this.cleanJsonResponse(text);
-      return JSON.parse(text);
+      const parsed = JSON.parse(text);
+
+      if (org) {
+        org.cached_recommendations = text;
+        org.last_recommendations_hash = currentHash;
+        org.last_recommendations_analyzed_at = new Date();
+        await this.orgRepo.save(org);
+      }
+
+      return parsed;
     } catch (error) {
       console.error('Gemini Recommendations error:', error);
       throw new InternalServerErrorException('การสร้างคำแนะนำล้มเหลว');
