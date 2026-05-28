@@ -2,7 +2,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { UsersService } from '../../core/services/users.service';
 import { NotificationService, NotificationType } from '../../core/services/notification.service';
 import { ToastService } from '../../core/services/toast.service';
 
@@ -14,7 +13,6 @@ import { ToastService } from '../../core/services/toast.service';
 })
 export class SupportComponent implements OnInit {
   private authService = inject(AuthService);
-  private usersService = inject(UsersService);
   private notificationService = inject(NotificationService);
   private toast = inject(ToastService);
 
@@ -121,23 +119,9 @@ export class SupportComponent implements OnInit {
     };
     const cleanSubject = subjectMap[this.ticket.subject] || this.ticket.subject;
 
-    // 1. Fetch users to find the System Admin
-    this.usersService.getUsers().subscribe({
-      next: (users) => {
-        const systemAdmin = users.find(u => {
-          const role = String(u.role).toUpperCase().trim().replace(' ', '_');
-          return role === 'SYSTEM_ADMIN' || role === 'ADMIN';
-        });
-
-        const recipientId = systemAdmin ? systemAdmin.id : 1;
-        this.submitTicket(cleanSubject, recipientId);
-      },
-      error: (err) => {
-        console.error('Error fetching users for recipient target:', err);
-        // Fallback: Post directly to recipient ID 1
-        this.submitTicket(cleanSubject, 1);
-      }
-    });
+    // We pass recipient_id: 0 directly. The backend's NotificationsService
+    // will automatically find the System Admin and assign it.
+    this.submitTicket(cleanSubject, 0);
   }
 
   private submitTicket(cleanSubject: string, recipientId: number) {
