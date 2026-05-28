@@ -142,9 +142,10 @@ export class SupportComponent implements OnInit {
     };
     const cleanSubject = subjectMap[this.ticket.subject] || this.ticket.subject;
 
-    // We pass recipient_id: 0 directly. The backend's NotificationsService
-    // will automatically find the System Admin and assign it.
-    this.submitTicket(cleanSubject, 0);
+    // We pass recipient_id: 1 directly (the primary System Admin).
+    // This satisfies database foreign key constraints instantly and bypasses 
+    // any heavy sequential query bottlenecks in the backend.
+    this.submitTicket(cleanSubject, 1);
   }
 
   private submitTicket(cleanSubject: string, recipientId: number) {
