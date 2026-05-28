@@ -82,22 +82,23 @@
 
           <form (ngSubmit)="onSubmit()" *ngIf="!submitted">
             <div class="mb-3">
-              <label class="form-label text-white-50 small fw-medium">หัวข้อปัญหา (Subject)</label>
-              <select class="form-select bg-white bg-opacity-10 text-white border-0 shadow-none" [(ngModel)]="ticket.subject" name="subject" required>
-                <option value="" class="text-dark">-- เลือกหัวข้อ --</option>
-                <option value="technical" class="text-dark">ปัญหาการใช้งานระบบ (Technical Issue)</option>
-                <option value="billing" class="text-dark">ปัญหาการชำระเงิน (Billing/Invoice)</option>
-                <option value="feature" class="text-dark">เสนอแนะฟีเจอร์ใหม่ (Feature Request)</option>
-                <option value="other" class="text-dark">อื่นๆ (Other)</option>
+              <label class="form-label text-white small fw-bold mb-1">หัวข้อปัญหา (Subject)</label>
+              <select class="form-select rounded-3 border-0 shadow-sm" style="background-color: rgba(255,255,255,0.95); color: #333;" [(ngModel)]="ticket.subject" name="subject" required>
+                <option value="" disabled>-- เลือกหัวข้อ --</option>
+                <option value="technical">ปัญหาการใช้งานระบบ (Technical Issue)</option>
+                <option value="billing">ปัญหาการชำระเงิน (Billing/Invoice)</option>
+                <option value="feature">เสนอแนะฟีเจอร์ใหม่ (Feature Request)</option>
+                <option value="other">อื่นๆ (Other)</option>
               </select>
             </div>
             <div class="mb-4">
-              <label class="form-label text-white-50 small fw-medium">รายละเอียด (Message)</label>
-              <textarea class="form-control bg-white bg-opacity-10 text-white border-0 shadow-none" rows="5" 
+              <label class="form-label text-white small fw-bold mb-1">รายละเอียด (Message)</label>
+              <textarea class="form-control rounded-3 border-0 shadow-sm" rows="5" style="background-color: rgba(255,255,255,0.95); color: #333;"
                 [(ngModel)]="ticket.message" name="message" required placeholder="อธิบายปัญหาที่คุณพบ..."></textarea>
             </div>
-            <button type="submit" class="btn btn-light text-success w-100 fw-bold py-2 rounded-3 shadow-sm" [disabled]="isSubmitting">
+            <button type="submit" class="btn w-100 fw-bold py-2 rounded-3 shadow" style="background-color: #fff; color: #198754; font-size: 1rem;" [disabled]="isSubmitting || !ticket.subject || !ticket.message">
               <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+              <i *ngIf="!isSubmitting" class="fa-solid fa-paper-plane me-2"></i>
               {{ isSubmitting ? 'กำลังส่งข้อมูล...' : 'ส่งตั๋วแจ้งปัญหา' }}
             </button>
           </form>
