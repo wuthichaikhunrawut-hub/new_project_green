@@ -54,15 +54,15 @@ export class SupportComponent implements OnInit {
     this.notificationService.getAllSystemNotifications().subscribe({
       next: (notifications) => {
         // Filter system notifications that are support tickets
-        const mappedTickets = notifications
-          .filter(n => n.title && n.title.startsWith('[ตั๋วความช่วยเหลือ]'))
+        const mappedTickets = (notifications || [])
+          .filter(n => n && n.title && n.title.startsWith('[ตั๋วความช่วยเหลือ]'))
           .map(n => {
             let status = 'Pending';
             if (n.is_read) {
               status = 'Resolved';
             }
-            // Parse subject and sender
-            const subject = n.title.replace('[ตั๋วความช่วยเหลือ] - ', '');
+            // Parse subject and sender safely
+            const subject = n.title ? n.title.replace('[ตั๋วความช่วยเหลือ] - ', '') : 'ตั๋วความช่วยเหลือ';
             
             return {
               id: `TKT-${String(n.id).padStart(3, '0')}`,
@@ -70,7 +70,7 @@ export class SupportComponent implements OnInit {
               sender: (n as any).sender?.email || 'ไม่ระบุอีเมล',
               status: status,
               date: n.created_at,
-              message: n.message.replace('รายละเอียด: ', ''),
+              message: n.message ? n.message.replace('รายละเอียด: ', '') : '',
               rawId: n.id
             };
           });
@@ -82,6 +82,7 @@ export class SupportComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error loading support tickets:', err);
+        this.toast.error('ไม่สามารถดึงข้อมูลตั๋วแจ้งปัญหาได้ กรุณาลองใหม่อีกครั้ง');
         setTimeout(() => {
           this.cdr.detectChanges();
         }, 0);
