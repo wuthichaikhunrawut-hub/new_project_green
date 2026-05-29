@@ -83,9 +83,16 @@ export class AuthService {
       orgId: user.organization?.id,
       role,
     };
+    const fullUser = await this.usersService.findOne(user.id);
     const result = {
       access_token: await this.jwtService.signAsync(payload),
-      user: { id: user.id, email: user.email, role: payload.role },
+      user: { 
+        id: user.id, 
+        email: user.email, 
+        role: payload.role,
+        username: fullUser?.user_profile?.first_name || user.email.split('@')[0],
+        user_profile: fullUser?.user_profile
+      },
       organization: user.organization
         ? {
             id: user.organization.id,

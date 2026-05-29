@@ -1,0 +1,70 @@
+<div class="exec-container">
+
+  <!-- Header Banner -->
+  <header class="page-header mb-8 animate-in">
+    <div class="page-header-left">
+      <h1 class="page-title">สถานะประเมินสำนักงานสีเขียว</h1>
+      <p class="page-subtitle">
+        ติดตามและวิเคราะห์ความคืบหน้าของคะแนนประเมินตนเองตามข้อกำหนด Green Office ทั้ง 6 หมวดหมู่ของแต่ละสาขา/หน่วยงานย่อยอย่างรอบด้าน เพื่อช่วยค้นหาจุดอ่อนและพัฒนายกระดับสิ่งแวดล้อมอย่างมีระบบ
+      </p>
+    </div>
+    <div class="page-actions d-flex gap-2">
+      <div class="badge bg-primary bg-opacity-10 text-primary p-2 px-3 rounded-pill border border-primary border-opacity-25 font-bold d-flex align-items-center">
+        <i class="fa-solid fa-shield-halved text-emerald-600 me-2"></i>
+        องค์กร: {{ orgName || 'ดาวน์โหลดข้อมูล...' }}
+      </div>
+      <button class="btn btn-primary btn-sm rounded-pill" (click)="loadAuditSummary()"><i class="fa-solid fa-arrows-rotate me-1"></i> อัปเดตข้อมูล</button>
+    </div>
+  </header>
+
+  <div *ngIf="isLoading" class="panel flex justify-center items-center py-12">
+    <div class="text-center text-teal-600 font-bold">
+      <i class="fa-solid fa-spinner fa-spin text-4xl mb-3"></i>
+      <p>กำลังวิเคราะห์ผลคะแนนของแต่ละหน่วยงาน...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && auditData.length === 0" class="panel text-center py-12 text-gray-500">
+    ไม่พบข้อมูลประเมินในระบบ
+  </div>
+
+  <!-- Main Audit Grid when Loaded -->
+  <div class="audit-grid fade-in-up" *ngIf="!isLoading && auditData.length > 0">
+    
+    <!-- Loop through each branch/unit -->
+    <div class="panel branch-audit-card" *ngFor="let branch of auditData">
+      <div class="branch-card-header">
+        <div>
+          <h2>{{ branch.unitName }}</h2>
+          <span class="status-indicator-badge" [ngClass]="branch.statusClass">
+            {{ branch.overallStatus }}
+          </span>
+        </div>
+        <div class="overall-progress-circle">
+          <div class="progress-percent">{{ branch.overallProgress }}%</div>
+          <div class="progress-label">คะแนนเฉลี่ย</div>
+        </div>
+      </div>
+
+      <!-- Overall Progress Bar -->
+      <div class="overall-progress-bar-container">
+        <div class="overall-progress-bar" [style.width.%]="branch.overallProgress" [ngClass]="branch.statusClass"></div>
+      </div>
+
+      <!-- Detailed Categories Grid inside each Branch Card -->
+      <div class="categories-list">
+        <div class="category-item" *ngFor="let cat of branch.categories">
+          <div class="category-info">
+            <span class="cat-name">{{ cat.name }}</span>
+            <span class="cat-score font-bold text-teal-700">{{ cat.score }}%</span>
+          </div>
+          <div class="cat-bar-container">
+            <div class="cat-bar" [style.width.%]="cat.score"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

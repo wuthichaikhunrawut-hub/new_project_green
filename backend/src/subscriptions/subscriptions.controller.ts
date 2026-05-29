@@ -21,7 +21,7 @@ import { Roles } from '../auth/roles.decorator';
 
 @Controller('subscriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'USER')
+@Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EXECUTIVE')
 export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
@@ -101,7 +101,7 @@ export class SubscriptionsController {
 
   // Feature Usage Logs
   @Get('usage')
-  @Roles('ORGANIZATION_ADMIN')
+  @Roles('ORGANIZATION_ADMIN', 'EXECUTIVE')
   getUsageLogs(
     @Request() req: any,
     @Query('month') month?: string,
@@ -116,7 +116,7 @@ export class SubscriptionsController {
   }
 
   @Get('my/quotas')
-  @Roles('ORGANIZATION_ADMIN', 'SYSTEM_ADMIN')
+  @Roles('ORGANIZATION_ADMIN', 'SYSTEM_ADMIN', 'EXECUTIVE')
   @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
   @Header('Pragma', 'no-cache')
   @Header('Expires', '0')

@@ -377,3 +377,14 @@
   </div>
 </div>
 
+<app-confirm-dialog
+  [open]="confirmOpen"
+  title="ยืนยันการลบรายการ"
+  message="คุณแน่ใจหรือไม่ที่จะลบรายการบันทึกกิจกรรมคาร์บอนนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้"
+  confirmLabel="ยืนยันลบข้อมูล"
+  cancelLabel="ยกเลิก"
+  variant="danger"
+  (confirm)="onDeleteConfirm()"
+  (cancel)="onDeleteCancel()"
+/>
+

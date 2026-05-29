@@ -22,7 +22,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/assessor/report/report').then(m => m.AssessorReportComponent),
     title: 'รายงานการประเมิน - Green Sync',
     canActivate: [RoleGuard],
-    data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR'] }
+    data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'EXECUTIVE'] }
   },
 
   // 3. หน้าที่ต้องผ่านการ Login และใช้ Layout ร่วมกัน (Sidebar/Header)
@@ -224,12 +224,26 @@ export const routes: Routes = [
         loadComponent: () => import('./features/org-admin/quota-usage/quota-usage').then(m => m.QuotaUsageComponent),
         title: 'การใช้งานโควตา - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['ORG_ADMIN', 'ORGANIZATION_ADMIN', 'SYSTEM_ADMIN'] }
+        data: { roles: ['ORG_ADMIN', 'ORGANIZATION_ADMIN', 'SYSTEM_ADMIN', 'EXECUTIVE'] }
       },
       {
         path: 'executive/dashboard',
         loadComponent: () => import('./features/executive/dashboard/dashboard').then(m => m.ExecutiveDashboardComponent),
         title: 'Executive Dashboard - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN'] }
+      },
+      {
+        path: 'executive/leaderboard',
+        loadComponent: () => import('./features/executive/leaderboard/leaderboard').then(m => m.ExecutiveLeaderboardComponent),
+        title: 'ทำเนียบสาขารักษ์โลก - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN'] }
+      },
+      {
+        path: 'executive/audit-summary',
+        loadComponent: () => import('./features/executive/audit-summary/audit-summary').then(m => m.ExecutiveAuditSummaryComponent),
+        title: 'สถานะคะแนนประเมิน Green Office - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN'] }
       },
@@ -283,7 +297,7 @@ export const routes: Routes = [
         loadComponent: () => import('./features/subscription/billing/billing').then(m => m.BillingComponent),
         title: 'จัดการการชำระเงิน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE'] }
+        data: { roles: ['ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] }
       },
       {
         path: 'notifications',

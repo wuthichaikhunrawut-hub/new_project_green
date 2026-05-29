@@ -20,9 +20,6 @@
             <div class="text-primary fw-bold mb-1">
               แพ็กเกจปัจจุบัน: {{ currentPlan.plan_name }}
             </div>
-            <button class="btn btn-sm btn-outline-danger rounded-pill px-3" (click)="cancelSubscription()" *ngIf="currentPlan.price_per_month > 0">
-              <i class="fa-solid fa-xmark me-1"></i> ยกเลิกแพ็กเกจ
-            </button>
           </div>
         </div>
       </div>

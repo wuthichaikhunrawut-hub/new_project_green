@@ -10,7 +10,8 @@
             <ng-container *ngIf="roleKey === 'SYSTEM_ADMIN'">System Admin Portal</ng-container>
             <ng-container *ngIf="roleKey === 'ASSESSOR'">Assessor Portal</ng-container>
             <ng-container *ngIf="roleKey === 'ORG_ADMIN'">Organization Admin Portal</ng-container>
-            <ng-container *ngIf="!['SYSTEM_ADMIN', 'ASSESSOR', 'ORG_ADMIN'].includes(roleKey)">Applicant Portal</ng-container>
+            <ng-container *ngIf="roleKey === 'EXECUTIVE'">Executive Portal</ng-container>
+            <ng-container *ngIf="!['SYSTEM_ADMIN', 'ASSESSOR', 'ORG_ADMIN', 'EXECUTIVE'].includes(roleKey)">Applicant Portal</ng-container>
           </span>
         </li>
       </ol>

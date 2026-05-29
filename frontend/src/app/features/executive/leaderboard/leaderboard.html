@@ -1,0 +1,130 @@
+<div class="exec-container">
+  
+  <!-- Header Banner -->
+  <header class="page-header mb-8 animate-in">
+    <div class="page-header-left">
+      <h1 class="page-title">ทำเนียบผลงานด้านสิ่งแวดล้อมรายสาขา</h1>
+      <p class="page-subtitle">
+        วิเคราะห์และเปรียบเทียบการปล่อยก๊าซเรือนกระจก ร่วมกับระดับคะแนนสะสม Green Office ของแต่ละสาขา/หน่วยงานย่อยภายในองค์กร เพื่อสร้างแรงจูงใจในการขับเคลื่อนสู่เป้าหมาย Net Zero
+      </p>
+    </div>
+    <div class="page-actions d-flex gap-2">
+      <div class="badge bg-primary bg-opacity-10 text-primary p-2 px-3 rounded-pill border border-primary border-opacity-25 font-bold d-flex align-items-center">
+        <i class="fa-solid fa-trophy text-amber-500 me-2"></i>
+        องค์กร: {{ orgName || 'ดาวน์โหลดข้อมูล...' }}
+      </div>
+      <button class="btn btn-primary btn-sm rounded-pill" (click)="loadLeaderboard()"><i class="fa-solid fa-arrows-rotate me-1"></i> อัปเดตข้อมูล</button>
+    </div>
+  </header>
+
+  <div *ngIf="isLoading" class="panel flex justify-center items-center py-12">
+    <div class="text-center text-teal-600 font-bold">
+      <i class="fa-solid fa-spinner fa-spin text-4xl mb-3"></i>
+      <p>กำลังประมวลผลข้อมูลการเปรียบเทียบสาขา...</p>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading && leaderboardData.length === 0" class="panel text-center py-12 text-gray-500">
+    ไม่พบข้อมูลหน่วยงานในองค์กรนี้ กรุณาเพิ่มสาขา/แผนก และคีย์ข้อมูลติดตามคาร์บอนก่อน
+  </div>
+
+  <!-- Main Content When Loaded -->
+  <ng-container *ngIf="!isLoading && leaderboardData.length > 0">
+    
+    <!-- Top 3 Branch Podium Visual -->
+    <div class="podium-grid fade-in-up">
+      <!-- 2nd Place -->
+      <div class="podium-card silver" *ngIf="leaderboardData[1]">
+        <div class="podium-rank">2</div>
+        <div class="podium-details">
+          <h3>{{ leaderboardData[1].unitName }}</h3>
+          <p class="emission">{{ leaderboardData[1].totalEmission | number:'1.0-2' }} tCO₂e</p>
+          <span class="score-badge"><i class="fa-solid fa-star"></i> {{ leaderboardData[1].auditScore }} คะแนน</span>
+        </div>
+      </div>
+
+      <!-- 1st Place (Champion) -->
+      <div class="podium-card gold" *ngIf="leaderboardData[0]">
+        <div class="crown-icon"><i class="fa-solid fa-crown text-amber-400"></i></div>
+        <div class="podium-rank">1</div>
+        <div class="podium-details">
+          <h3>{{ leaderboardData[0].unitName }}</h3>
+          <p class="emission">{{ leaderboardData[0].totalEmission | number:'1.0-2' }} tCO₂e</p>
+          <span class="score-badge"><i class="fa-solid fa-star"></i> {{ leaderboardData[0].auditScore }} คะแนน</span>
+        </div>
+      </div>
+
+      <!-- 3rd Place -->
+      <div class="podium-card bronze" *ngIf="leaderboardData[2]">
+        <div class="podium-rank">3</div>
+        <div class="podium-details">
+          <h3>{{ leaderboardData[2].unitName }}</h3>
+          <p class="emission">{{ leaderboardData[2].totalEmission | number:'1.0-2' }} tCO₂e</p>
+          <span class="score-badge"><i class="fa-solid fa-star"></i> {{ leaderboardData[2].auditScore }} คะแนน</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chart Panel -->
+    <div class="panel fade-in-up" style="margin-top: 2rem;">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">กราฟเปรียบเทียบการปล่อยก๊าซเรือนกระจกสะสมรายสาขา</h3>
+          <p class="panel-subtitle">เปรียบเทียบปริมาณคาร์บอนที่ปล่อยออกมาทั้งหมดของแต่ละแผนกย่อย (tCO₂e)</p>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div id="rankChart"></div>
+      </div>
+    </div>
+
+    <!-- Detailed Leaderboard Table -->
+    <div class="panel fade-in-up" style="margin-top: 2rem;">
+      <div class="panel-header">
+        <div>
+          <h3 class="panel-title">ตารางเปรียบเทียบผลงานและคะแนนประเมินรายหน่วยงาน</h3>
+          <p class="panel-subtitle">สรุปอันดับด้านความยั่งยืนของทุกสาขาในระบบอย่างละเอียด</p>
+        </div>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm" style="border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600;">
+              <th class="py-3 px-4 text-center">อันดับ</th>
+              <th class="py-3 px-4">ชื่อหน่วยงาน / สาขา</th>
+              <th class="py-3 px-4">ปริมาณการปล่อยคาร์บอน</th>
+              <th class="py-3 px-4">คะแนนประเมินสะสม</th>
+              <th class="py-3 px-4">เกณฑ์ Green Office คาดการณ์</th>
+              <th class="py-3 px-4 text-center">แนวโน้มการลด</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of leaderboardData" style="border-bottom: 1px solid #e2e8f0; font-weight: 500;" class="hover:bg-slate-50 transition-colors">
+              <td class="py-3 px-4 text-center">
+                <span class="rank-number" [ngClass]="{'rank-1': item.rank === 1, 'rank-2': item.rank === 2, 'rank-3': item.rank === 3}">
+                  {{ item.rank }}
+                </span>
+              </td>
+              <td class="py-3 px-4 font-bold text-slate-800">{{ item.unitName }}</td>
+              <td class="py-3 px-4 font-bold text-teal-700">{{ item.totalEmission | number:'1.0-2' }} tCO₂e</td>
+              <td class="py-3 px-4">{{ item.auditScore }} คะแนน / 100</td>
+              <td class="py-3 px-4">
+                <span class="impact-badge" [ngClass]="{'low': item.badgeClass === 'gold', 'medium': item.badgeClass === 'silver', 'high': item.badgeClass === 'bronze'}">
+                  {{ item.certifiedLevel }}
+                </span>
+              </td>
+              <td class="py-3 px-4 text-center">
+                <span *ngIf="item.trend === 'up'" class="text-emerald-600 font-bold" title="ปรับปรุงดีขึ้น"><i class="fa-solid fa-circle-arrow-up"></i> ดีขึ้น</span>
+                <span *ngIf="item.trend === 'down'" class="text-rose-500 font-bold" title="การปล่อยเพิ่มขึ้น"><i class="fa-solid fa-circle-arrow-down"></i> เพิ่มขึ้น</span>
+                <span *ngIf="item.trend === 'neutral'" class="text-slate-500 font-bold" title="คงที่"><i class="fa-solid fa-circle"></i> คงที่</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+
+</div>

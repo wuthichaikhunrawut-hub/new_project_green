@@ -8,10 +8,12 @@ import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 import { OrgBranchesService, OrgBranch } from '../../core/services/org-branches.service';
 import { AuthService } from '../../core/services/auth.service';
 
+import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog';
+
 @Component({
   selector: 'app-carbon-logs',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ThaiDatePipe],
+  imports: [CommonModule, FormsModule, RouterLink, ThaiDatePipe, ConfirmDialogComponent],
   templateUrl: './carbon-logs.html',
   styleUrl: './carbon-logs.css'
 })
@@ -308,17 +310,34 @@ export class CarbonLogsComponent implements OnInit {
     });
   }
 
+  confirmOpen = false;
+  logIdToDelete: string | null = null;
+
   deleteLog(id: string | undefined) {
     if (!id) return;
-    if (confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้?')) {
-      this.carbonService.deleteLog(id).subscribe({
-        next: () => {
-          this.fetchLogs();
-        },
-        error: () => {
-          this.toast.error('เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้');
-        }
-      });
-    }
+    this.logIdToDelete = id;
+    this.confirmOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  onDeleteCancel(): void {
+    this.confirmOpen = false;
+    this.logIdToDelete = null;
+    this.cdr.markForCheck();
+  }
+
+  onDeleteConfirm(): void {
+    if (!this.logIdToDelete) return;
+    this.confirmOpen = false;
+    this.carbonService.deleteLog(this.logIdToDelete).subscribe({
+      next: () => {
+        this.toast.success('ลบรายการคาร์บอนเรียบร้อยแล้ว');
+        this.fetchLogs();
+      },
+      error: () => {
+        this.toast.error('เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้');
+      }
+    });
+    this.logIdToDelete = null;
   }
 }

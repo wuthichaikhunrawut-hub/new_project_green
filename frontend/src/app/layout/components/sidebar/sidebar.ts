@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { AssessorService } from '../../../core/services/assessor.service';
+import { UsersService } from '../../../core/services/users.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -15,6 +16,7 @@ import { Subscription } from 'rxjs';
 export class SidebarComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   private assessorService = inject(AssessorService);
+  private usersService = inject(UsersService);
   router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
@@ -27,12 +29,29 @@ export class SidebarComponent implements OnInit, OnDestroy {
   pendingCount = 0;
   private subscription: Subscription = new Subscription();
 
-
-
   ngOnInit() {
     this.subscription.add(
       this.authService.currentUser$.subscribe(user => {
         this.user = user;
+        
+        // Dynamic profile fetch: If user_profile name is not populated in the current session,
+        // fetch full user details from backend to retrieve the real name (e.g. วีระเดช)
+        if (user && user.id) {
+          this.usersService.getUser(user.id).subscribe({
+            next: (fullUser) => {
+              if (fullUser && fullUser.user_profile && fullUser.user_profile.first_name) {
+                this.user = {
+                  ...this.user,
+                  user_profile: fullUser.user_profile,
+                  username: fullUser.username
+                };
+                this.cdr.markForCheck();
+              }
+            },
+            error: (err) => console.warn('Sidebar failed to fetch full user profile dynamically', err)
+          });
+        }
+
         // Load pending count for assessor badge
         if (user && this.isAssessor) {
           this.loadPendingCount();
@@ -84,7 +103,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
       const last = this.user.user_profile.last_name || '';
       return `${first} ${last}`.trim();
     }
-    return this.user?.username || this.user?.email?.split('@')[0] || 'User';
+    
+    // Return username or email split handle as fallback name (e.g. user02)
+    return this.user?.username || this.user?.email?.split('@')[0] || 'ผู้ใช้งาน';
   }
 
   get isSystemAdmin(): boolean { return this.roleKey === 'SYSTEM_ADMIN'; }

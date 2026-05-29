@@ -147,10 +147,6 @@
         <i class="fa-solid fa-credit-card"></i>
         <span>จัดการการชำระเงิน</span>
       </a>
-      <a routerLink="/chatbot" routerLinkActive="active" class="nav-item ai-feature" (click)="onNavItemClick()">
-        <i class="fa-solid fa-robot"></i>
-        <span>แชทบอท AI</span>
-      </a>
       <a routerLink="/notifications" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bell"></i>
         <span>การแจ้งเตือน</span>
@@ -163,21 +159,35 @@
         <i class="fa-solid fa-chart-line"></i>
         <span>แดชบอร์ดผู้บริหาร</span>
       </a>
+ 
+      <div class="nav-label">วิเคราะห์เปรียบเทียบ</div>
+      <a routerLink="/executive/leaderboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-trophy text-amber-500"></i>
+        <span>ทำเนียบผลงานรายสาขา</span>
+      </a>
+      <a routerLink="/executive/audit-summary" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-clipboard-list text-emerald-600"></i>
+        <span>ประเมิน Green Office รายหมวด</span>
+      </a>
 
       <div class="nav-label">ข้อมูลองค์กร</div>
-      <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-        <i class="fa-solid fa-chart-area"></i>
-        <span>ข้อมูลคาร์บอน</span>
-      </a>
       <a routerLink="/requests" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-certificate"></i>
         <span>ผลการรับรอง Green Office</span>
       </a>
 
-      <div class="nav-label">เครื่องมือ</div>
-      <a routerLink="/chatbot" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-        <i class="fa-solid fa-comments"></i>
-        <span>แชทบอท AI</span>
+      <div class="nav-label">แพ็กเกจและบัญชี</div>
+      <a routerLink="/subscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-box-archive"></i>
+        <span>แพ็กเกจการใช้งาน</span>
+      </a>
+      <a routerLink="/org-admin/quota-usage" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-chart-pie"></i>
+        <span>การใช้งานโควตา</span>
+      </a>
+      <a routerLink="/subscription/billing" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-credit-card"></i>
+        <span>จัดการการชำระเงิน</span>
       </a>
     </ng-container>
 

@@ -1,10 +1,8 @@
 import { Component, OnInit, AfterViewInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { GreenOfficeService } from '../../../core/services/green-office.service';
-import { CarbonService } from '../../../core/services/carbon.service';
-import { OrgService } from '../../../core/services/org.service';
-import { AuthService } from '../../../core/services/auth.service';
+import { ExecutiveService } from '../../../core/services/executive.service';
 import { InsightsService } from '../../../core/services/insights.service';
+import { ExecutiveDashboardResponse } from '../../../core/models/executive.model';
 
 @Component({
   selector: 'app-executive-dashboard',
@@ -14,17 +12,21 @@ import { InsightsService } from '../../../core/services/insights.service';
   styleUrls: ['./dashboard.css']
 })
 export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
-  private greenService = inject(GreenOfficeService);
-  private carbonService = inject(CarbonService);
-  private orgService = inject(OrgService);
-  private authService = inject(AuthService);
+  private executiveService = inject(ExecutiveService);
   private insightsService = inject(InsightsService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
 
+  dashboardData: ExecutiveDashboardResponse | null = null;
+  isLoading = true;
+
   greenScore = 0;
   carbonTotal = 0;
   orgTarget = 0;
+  netZeroProgressPercent = 0;
+  approvedCount = 0;
+  latestCertifiedLevel = '';
+  
   executiveSummary = '';
   isLoadingSummary = true;
   isUpdatingSummary = false;
@@ -33,219 +35,293 @@ export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
   isUpdatingRecommendations = false;
 
   // Chart References
-  private esgChart: any | null = null;
-  private radarChart: any | null = null;
+  private unitChart: any | null = null;
+  private scopeChart: any | null = null;
   private spark1: any | null = null;
   private spark2: any | null = null;
   private spark3: any | null = null;
 
   ngOnInit() {
-    this.fetchDataAndGenerateInsights();
+    this.loadDashboardData();
   }
 
   ngAfterViewInit() {
-    this.renderCharts();
+    // Initial empty rendering or handled after data load
   }
 
-  private fetchDataAndGenerateInsights() {
-    const orgId = this.authService.getOrganizationId();
-    if (orgId) {
-      this.orgService.getOrganization(orgId).subscribe((data: any) => {
-        this.orgTarget = data.target_reduction_percent || 20;
-        
-        // Load cached values from database immediately to avoid skeleton flashes
-        if (data.cached_executive_summary) {
-          this.executiveSummary = data.cached_executive_summary;
-          this.isLoadingSummary = false;
-        }
-        if (data.cached_recommendations) {
-          try {
-            const parsed = typeof data.cached_recommendations === 'string' 
-              ? JSON.parse(data.cached_recommendations) 
-              : data.cached_recommendations;
-            this.recommendations = parsed.recommendations || [];
-            this.isLoadingRecommendations = false;
-          } catch (e) {
-            console.error('Failed to parse cached recommendations', e);
-          }
-        }
+  private loadDashboardData() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    this.isLoading = true;
+    this.executiveService.getDashboard().subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        this.greenScore = Math.round(data.avgApprovedScore || 0);
+        this.orgTarget = data.targetReductionPercent || 0;
+        this.netZeroProgressPercent = data.netZeroProgressPercent || 0;
+        this.approvedCount = data.approvedCount || 0;
+        this.latestCertifiedLevel = data.latestCertifiedLevel || 'ยังไม่ได้รับรอง';
+        this.carbonTotal = data.carbonByScope.reduce((sum, item) => sum + Number(item.totalEmission || 0), 0);
+        this.isLoading = false;
+
         this.cdr.markForCheck();
-        
-        // Fetch Green Score
-        this.greenService.getCriteriaList().subscribe((criteria: any[]) => {
-          const totalMax = criteria.reduce((sum: number, c: any) => sum + (c.max_score || 0), 0);
-          const totalGot = criteria.reduce((sum: number, c: any) => sum + (c.current_score || 0), 0);
-          this.greenScore = totalMax > 0 ? Math.round((totalGot / totalMax) * 100) : 0;
-          
-          // Fetch Carbon
-          this.carbonService.getLogs().subscribe((logs: any[]) => {
-            this.carbonTotal = (logs || []).reduce((sum: number, log: any) => sum + (log.emission || 0), 0);
-            
-            // Now call AI for Summary
-            this.isUpdatingSummary = true;
-            this.insightsService.getExecutiveSummary({
-              greenScore: this.greenScore,
-              carbonTotal: this.carbonTotal,
-              orgTarget: this.orgTarget,
-              extra: { industryAvg: 75, previousYear: this.carbonTotal * 1.12 }
-            }).subscribe({
-              next: (res: any) => {
-                this.executiveSummary = res.summary;
-                this.isLoadingSummary = false;
-                this.isUpdatingSummary = false;
-                this.cdr.markForCheck();
-              },
-              error: () => {
-                if (!this.executiveSummary) {
-                  this.executiveSummary = 'ไม่สามารถสร้างบทวิเคราะห์จาก AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
-                }
-                this.isLoadingSummary = false;
-                this.isUpdatingSummary = false;
-                this.cdr.markForCheck();
-              }
-            });
 
-            // Call AI for Recommendations
-            this.isUpdatingRecommendations = true;
-            this.insightsService.getRecommendations({
-              weakPoints: ['Energy Usage', 'Waste Separation']
-            }).subscribe({
-              next: (res: any) => {
-                this.recommendations = res.recommendations || [];
-                this.isLoadingRecommendations = false;
-                this.isUpdatingRecommendations = false;
-                this.cdr.markForCheck();
-              },
-              error: () => {
-                if (this.recommendations.length === 0) {
-                  this.recommendations = [];
-                }
-                this.isLoadingRecommendations = false;
-                this.isUpdatingRecommendations = false;
-                this.cdr.markForCheck();
-              }
-            });
-            
-            // Re-render charts when data is ready
-            this.updateChartsData();
-            this.cdr.markForCheck();
-          });
-        });
-      });
-    }
+        // Render charts once data is available
+        this.renderCharts();
+        
+        // Call AI insights after getting real data
+        this.fetchAiInsights();
+      },
+      error: (err) => {
+        console.error('Failed to load executive dashboard data', err);
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
-  private updateChartsData() {
-    if (this.esgChart) {
-      this.esgChart.updateSeries([{ data: [65, 68, 72, 75, 78, 85, this.greenScore > 0 ? this.greenScore : 88, 92, 95] }]);
-    }
+  private fetchAiInsights() {
+    if (!this.dashboardData) return;
+
+    this.isLoadingSummary = true;
+    this.isUpdatingSummary = true;
+    this.isLoadingRecommendations = true;
+    this.isUpdatingRecommendations = true;
+
+    // Fetch AI Summary
+    this.insightsService.getExecutiveSummary({
+      greenScore: this.greenScore,
+      carbonTotal: this.carbonTotal,
+      orgTarget: this.orgTarget,
+      extra: { 
+        industryAvg: 75, 
+        netZeroProgressPercent: this.netZeroProgressPercent,
+        unitCount: this.dashboardData.carbonByUnit.length
+      }
+    }).subscribe({
+      next: (res: any) => {
+        this.executiveSummary = res.summary;
+        this.isLoadingSummary = false;
+        this.isUpdatingSummary = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.executiveSummary = `ปัจจุบันองค์กร ${this.dashboardData?.orgName || ''} ปล่อยคาร์บอนรวมสะสม ${this.carbonTotal.toLocaleString()} tCO₂e โดยมีประสิทธิภาพเป้าหมายลดคาร์บอน ${this.orgTarget}% ซึ่งปัจจุบันมีความคืบหน้าโครงการ Net Zero อยู่ที่ ${this.netZeroProgressPercent}% และมีคะแนน Green Office เฉลี่ยอยู่ที่ ${this.greenScore}%`;
+        this.isLoadingSummary = false;
+        this.isUpdatingSummary = false;
+        this.cdr.markForCheck();
+      }
+    });
+
+    // Fetch AI Recommendations based on Weak Points
+    this.insightsService.getRecommendations({
+      weakPoints: ['Energy Consumption in Units', 'Scope 2 indirect emissions']
+    }).subscribe({
+      next: (res: any) => {
+        this.recommendations = res.recommendations || [];
+        this.isLoadingRecommendations = false;
+        this.isUpdatingRecommendations = false;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.recommendations = [
+          { title: 'ปรับปรุงประสิทธิภาพไฟฟ้าในหน่วยงาน', action: 'ควรตรวจสอบหน่วยงานที่มีอัตราการปล่อย Scope 2 สูงสุด และปรับเปลี่ยนไปใช้อุปกรณ์ประหยัดไฟ LED หรือติดตั้ง Solar Rooftop', expectedImpact: 'High' },
+          { title: 'รณรงค์การคัดแยกขยะเพื่อลดการปล่อยคาร์บอนทางอ้อม', action: 'ส่งเสริมการคัดแยกขยะอินทรีย์และขยะรีไซเคิลอย่างจริงจังในทุกแผนกย่อยเพื่อช่วยลด Scope 3', expectedImpact: 'Medium' }
+        ];
+        this.isLoadingRecommendations = false;
+        this.isUpdatingRecommendations = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   private renderCharts() {
-    if (!isPlatformBrowser(this.platformId)) return;
+    if (!isPlatformBrowser(this.platformId) || !this.dashboardData) return;
     import('apexcharts').then((module) => {
       const ApexCharts = module.default;
       
-      this.renderEsgTrend(ApexCharts);
-      this.renderRadar(ApexCharts);
+      this.renderUnitComparison(ApexCharts);
+      this.renderScopeBreakdown(ApexCharts);
       this.renderSparklines(ApexCharts);
     });
   }
 
-  private renderEsgTrend(ApexCharts: any) {
-    if (this.esgChart) this.esgChart.destroy();
-    
-    // ESG Performance and Forecast (Gradient Area Chart)
+  private renderUnitComparison(ApexCharts: any) {
+    if (this.unitChart) this.unitChart.destroy();
+    if (!this.dashboardData) return;
+
+    const unitData = this.dashboardData.carbonByUnit;
+    const categories = unitData.map(u => u.unitName || 'ไม่ระบุหน่วยงาน');
+    const seriesData = unitData.map(u => Math.round(u.totalEmission * 100) / 100);
+
     const options = {
-      chart: { type: 'area', height: 350, fontFamily: 'Inter, sans-serif', toolbar: { show: false }, zoom: { enabled: false } },
-      series: [
-        { name: 'ESG Score (Actual)', data: [65, 68, 72, 75, 78, 85, 88, null, null] },
-        { name: 'AI Forecast', data: [null, null, null, null, null, null, 88, 92, 95] }
-      ],
-      colors: ['#0f766e', '#10b981'],
-      stroke: { 
-        curve: 'smooth', 
-        width: [3, 3],
-        dashArray: [0, 5] // Dashed line for forecast
+      chart: { 
+        type: 'bar', 
+        height: 320, 
+        toolbar: { show: false }, 
+        fontFamily: 'Inter, Prompt, sans-serif',
+        dropShadow: {
+          enabled: true,
+          top: 3,
+          left: 3,
+          blur: 6,
+          opacity: 0.15,
+          color: '#0d9488'
+        }
+      },
+      series: [{ name: 'การปล่อยคาร์บอน (tCO₂e)', data: seriesData }],
+      colors: ['#0d9488'],
+      plotOptions: {
+        bar: {
+          horizontal: true,
+          barHeight: '60%',
+          borderRadius: 8,
+          dataLabels: { position: 'end' }
+        }
       },
       fill: {
         type: 'gradient',
-        gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 90, 100] }
+        gradient: {
+          shade: 'dark',
+          type: 'vertical', // specular highlight down the center of horizontal bar
+          shadeIntensity: 0.45,
+          gradientToColors: ['#14b8a6'],
+          inverseColors: false,
+          opacityFrom: 0.95,
+          opacityTo: 0.8,
+          stops: [0, 50, 100] // Creates a shiny 3D cylinder effect!
+        }
       },
-      xaxis: { 
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'], 
-        labels: { style: { colors: '#64748b', fontWeight: 500 } }, 
-        axisBorder: { show: false }, 
-        axisTicks: { show: false } 
+      dataLabels: {
+        enabled: true,
+        formatter: (val: any) => `${val.toLocaleString()} tCO₂e`,
+        style: { colors: ['#ffffff'], fontSize: '11px', fontWeight: 600 }
       },
-      yaxis: { min: 40, max: 100, labels: { style: { colors: '#64748b', fontWeight: 500 } } },
-      grid: { borderColor: 'rgba(203, 213, 225, 0.4)', strokeDashArray: 4, xaxis: { lines: { show: true } }, yaxis: { lines: { show: true } } },
-      dataLabels: { enabled: false },
-      legend: { position: 'top', horizontalAlign: 'right', fontWeight: 600, markers: { radius: 12 } },
-      tooltip: { theme: 'light', style: { fontSize: '13px' } }
+      xaxis: {
+        categories: categories,
+        labels: { style: { colors: '#64748b', fontWeight: 500 } }
+      },
+      yaxis: {
+        labels: { style: { colors: '#0f172a', fontWeight: 600, fontSize: '12px' } }
+      },
+      grid: { borderColor: 'rgba(203, 213, 225, 0.4)', strokeDashArray: 4 },
+      tooltip: {
+        theme: 'light',
+        y: { formatter: (val: any) => `${val.toLocaleString()} tCO₂e` }
+      }
     };
 
-    this.esgChart = new ApexCharts(document.querySelector('#apexEsgTrend'), options);
-    this.esgChart.render();
+    this.unitChart = new ApexCharts(document.querySelector('#apexUnitComparison'), options);
+    this.unitChart.render();
   }
 
-  private renderRadar(ApexCharts: any) {
-    if (this.radarChart) this.radarChart.destroy();
-    
+  private renderScopeBreakdown(ApexCharts: any) {
+    if (this.scopeChart) this.scopeChart.destroy();
+    if (!this.dashboardData) return;
+
+    const scopeSums = [0, 0, 0]; // scope 1, 2, 3
+    this.dashboardData.carbonByScope.forEach(item => {
+      if (item.scope >= 1 && item.scope <= 3) {
+        scopeSums[item.scope - 1] += Number(item.totalEmission || 0);
+      }
+    });
+
     const options = {
-      chart: { type: 'radar', height: 320, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-      series: [
-        { name: 'องค์กรของคุณ', data: [80, 50, 30, 40, 100, 20] },
-        { name: 'Industry Benchmark', data: [20, 30, 40, 80, 20, 80] },
-      ],
-      labels: ['Energy', 'Water', 'Waste', 'Paper', 'Fuel', 'Green Procurement'],
-      colors: ['#10b981', '#cbd5e1'],
-      stroke: { width: 2, colors: ['#10b981', '#94a3b8'] },
-      fill: { opacity: 0.2, colors: ['#10b981', '#f1f5f9'] },
-      markers: { size: 4, colors: ['#fff'], strokeColors: ['#10b981', '#94a3b8'], strokeWidth: 2 },
-      yaxis: { show: false },
-      xaxis: { labels: { style: { colors: '#475569', fontSize: '12px', fontWeight: 600 } } },
-      plotOptions: {
-        radar: { polygons: { strokeColors: '#e2e8f0', strokeWidth: 1, connectorColors: '#e2e8f0' } }
+      chart: { 
+        type: 'donut', 
+        height: 320, 
+        fontFamily: 'Inter, Prompt, sans-serif',
+        dropShadow: {
+          enabled: true,
+          top: 6,
+          left: 4,
+          blur: 10,
+          opacity: 0.18,
+          color: '#0f172a'
+        }
       },
-      legend: { position: 'bottom', markers: { radius: 12 }, fontWeight: 500 },
-      tooltip: { theme: 'light' }
+      series: scopeSums.map(v => Math.round(v * 100) / 100),
+      labels: ['Scope 1 (การปล่อยโดยตรง)', 'Scope 2 (พลังงานนำเข้า)', 'Scope 3 (การปล่อยทางอ้อมอื่นๆ)'],
+      colors: ['#10b981', '#0d9488', '#0891b2'],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'light',
+          type: 'diagonal2',
+          shadeIntensity: 0.25,
+          opacityFrom: 0.95,
+          opacityTo: 0.85,
+          stops: [0, 100]
+        }
+      },
+      legend: { position: 'bottom', fontWeight: 500, labels: { colors: '#475569' } },
+      dataLabels: { enabled: true, formatter: (val: any) => `${val.toFixed(1)}%` },
+      tooltip: { 
+        theme: 'light', 
+        y: { formatter: (val: any) => `${val.toLocaleString()} tCO₂e` } 
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '65%',
+            labels: {
+              show: true,
+              value: {
+                show: true,
+                fontSize: '20px',
+                fontWeight: 700,
+                color: '#0f172a',
+                formatter: (val: any) => `${Number(val).toLocaleString()} tCO₂e`
+              },
+              total: {
+                show: true,
+                showAlways: true, // Keep the total label completely static on hover!
+                label: 'ปล่อยรวมทั้งหมด',
+                color: '#64748b',
+                fontSize: '13px',
+                fontWeight: 600,
+                formatter: () => `${Math.round(this.carbonTotal).toLocaleString()} tCO₂e`
+              }
+            }
+          }
+        }
+      }
     };
 
-    this.radarChart = new ApexCharts(document.querySelector('#apexRadar'), options);
-    this.radarChart.render();
+    this.scopeChart = new ApexCharts(document.querySelector('#apexScopeBreakdown'), options);
+    this.scopeChart.render();
   }
 
   private renderSparklines(ApexCharts: any) {
     const commonOptions = {
       chart: { type: 'area', width: '100%', height: '100%', sparkline: { enabled: true } },
       stroke: { curve: 'smooth', width: 2 },
-      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0, stops: [0, 100] } },
-      tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: function (seriesName: string) { return '' } } }, marker: { show: false } }
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+      tooltip: { fixed: { enabled: false }, x: { show: false }, y: { title: { formatter: function () { return '' } } }, marker: { show: false } }
     };
 
     if (this.spark1) this.spark1.destroy();
     this.spark1 = new ApexCharts(document.querySelector('#apexSpark1'), {
       ...commonOptions,
-      series: [{ data: [47, 45, 54, 38, 56, 24, 65, 31, 37, 39, 62, 51, 35, 41, 35, 27, 93, 53, 61, 27, 54, 43, 19, 46] }],
-      colors: ['#10b981']
+      series: [{ data: [65, 68, 70, 72, 75, 78, this.greenScore > 0 ? this.greenScore : 78] }],
+      colors: ['#0d9488']
     });
     this.spark1.render();
 
     if (this.spark2) this.spark2.destroy();
     this.spark2 = new ApexCharts(document.querySelector('#apexSpark2'), {
       ...commonOptions,
-      series: [{ data: [60, 50, 40, 45, 30, 20, 15] }],
-      colors: ['#0d9488']
+      series: [{ data: [100, 95, 88, 85, 82, 80, 78] }],
+      colors: ['#2563eb']
     });
     this.spark2.render();
 
     if (this.spark3) this.spark3.destroy();
     this.spark3 = new ApexCharts(document.querySelector('#apexSpark3'), {
       ...commonOptions,
-      series: [{ data: [10, 20, 40, 50, 60, 80, 90] }],
-      colors: ['#0891b2']
+      series: [{ data: [0, 10, 25, 45, 60, 80, this.netZeroProgressPercent > 0 ? this.netZeroProgressPercent : 85] }],
+      colors: ['#7c3aed']
     });
     this.spark3.render();
   }
 }
+

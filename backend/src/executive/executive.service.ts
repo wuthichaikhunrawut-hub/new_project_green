@@ -113,25 +113,38 @@ export class ExecutiveService {
   }
 
   private async getCarbonByScope(orgId: number): Promise<CarbonScopePoint[]> {
-    const rows = await this.carbonRepo
-      .createQueryBuilder('log')
-      .leftJoin('log.emission_factor', 'factor')
-      .where('log.org_id = :orgId', { orgId })
-      .andWhere('factor.scope IN (:...scopes)', { scopes: [1, 2, 3] })
-      .select('factor.scope', 'scope')
-      .addSelect('log.year', 'year')
-      .addSelect('COALESCE(SUM(log.total_emission), 0)', 'totalEmission')
-      .groupBy('factor.scope')
-      .addGroupBy('log.year')
-      .orderBy('log.year', 'ASC')
-      .addOrderBy('factor.scope', 'ASC')
-      .getRawMany<{ scope: string; year: string; totalEmission: string }>();
+    const logs = await this.carbonRepo.find({
+      where: { org_id: orgId },
+      relations: ['emission_factor'],
+    });
 
-    return rows.map((row) => ({
-      scope: Number(row.scope),
-      year: Number(row.year),
-      totalEmission: Number(row.totalEmission),
-    }));
+    const scopeSums = new Map<string, number>(); // key: "scope-year"
+    for (const log of logs) {
+      let scope = log.emission_factor?.scope;
+      if (!scope && log.activity_type) {
+        const type = log.activity_type.toLowerCase();
+        if (type.includes('electricity') || type.includes('ไฟ')) {
+          scope = 2;
+        } else if (type.includes('water') || type.includes('น้ำ') || type.includes('ขยะ') || type.includes('กระดาษ')) {
+          scope = 3;
+        } else {
+          scope = 1;
+        }
+      }
+      if (!scope) scope = 1;
+
+      const year = log.year ?? new Date().getFullYear();
+      const key = `${scope}-${year}`;
+      scopeSums.set(key, (scopeSums.get(key) ?? 0) + Number(log.total_emission || 0));
+    }
+
+    const points: CarbonScopePoint[] = [];
+    scopeSums.forEach((totalEmission, key) => {
+      const [scope, year] = key.split('-').map(Number);
+      points.push({ scope, year, totalEmission });
+    });
+
+    return points.sort((a, b) => a.year - b.year || a.scope - b.scope);
   }
 
   private async getCarbonByUnit(orgId: number): Promise<CarbonUnitPoint[]> {
@@ -146,7 +159,7 @@ export class ExecutiveService {
       .getRawMany<{ unitName: string | null; totalEmission: string }>();
 
     return rows.map((row) => ({
-      unitName: row.unitName || 'ไม่ระบุสาขา',
+      unitName: row.unitName || 'หน่วยงานกลาง',
       totalEmission: Number(row.totalEmission),
     }));
   }
