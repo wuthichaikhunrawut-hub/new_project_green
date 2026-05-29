@@ -50,6 +50,40 @@ export class AiScanComponent {
     }
   }
 
+  private mapActivityType(aiType: string): string {
+    if (!aiType) return 'Electricity';
+    const typeLower = aiType.toLowerCase();
+    
+    if (typeLower.includes('ไฟ')) {
+      return 'Electricity';
+    }
+    if (typeLower.includes('น้ำประปา') || typeLower.includes('ประปา') || (typeLower.includes('น้ำ') && !typeLower.includes('น้ำมัน'))) {
+      return 'Water';
+    }
+    if (typeLower.includes('น้ำมัน') || typeLower.includes('เชื้อเพลิง') || typeLower.includes('ก๊าซ') || typeLower.includes('แก๊ส') || typeLower.includes('fuel')) {
+      return 'Fuel';
+    }
+    
+    return 'Electricity';
+  }
+
+  private mapUnit(aiUnit: string, type: string): string {
+    if (!aiUnit) {
+      return type === 'Electricity' ? 'kWh' : (type === 'Water' ? 'หน่วย' : 'ลิตร');
+    }
+    const unitLower = aiUnit.toLowerCase();
+    if (unitLower.includes('kwh') || unitLower.includes('กิโลวัตต์')) {
+      return 'kWh';
+    }
+    if (unitLower.includes('ลิตร') || unitLower.includes('litre') || unitLower.includes('l')) {
+      return 'ลิตร';
+    }
+    if (unitLower.includes('หน่วย') || unitLower.includes('ลบ.ม') || unitLower.includes('ม3') || unitLower.includes('m3')) {
+      return 'หน่วย';
+    }
+    return type === 'Electricity' ? 'kWh' : (type === 'Water' ? 'หน่วย' : 'ลิตร');
+  }
+
   processAi() {
     if (!this.selectedFile) return;
     this.isProcessing = true;
@@ -63,9 +97,10 @@ export class AiScanComponent {
         
         // Auto-fill form data from AI result
         if (result) {
-          this.formData.type = result.type || this.formData.type;
+          const mappedType = this.mapActivityType(result.type);
+          this.formData.type = mappedType;
           this.formData.amount = result.amount || this.formData.amount;
-          this.formData.unit = result.unit || this.formData.unit;
+          this.formData.unit = this.mapUnit(result.unit, mappedType);
           this.formData.date = result.date || this.formData.date;
         }
         this.cdr.markForCheck();
@@ -79,6 +114,108 @@ export class AiScanComponent {
     });
   }
 
+  parseThaiDate(dateStr: string): string {
+    if (!dateStr) return new Date().toISOString().substring(0, 10);
+    
+    const cleanStr = dateStr.trim().toLowerCase();
+    
+    // 1. Try to check if it's already in YYYY-MM-DD format
+    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanStr)) {
+      return cleanStr;
+    }
+    
+    // 2. Try to match slash formats like "MM/YY" or "MM/YYYY" or "MM-YYYY" or "MM/BE"
+    const slashMatch = cleanStr.match(/^(\d{1,2})[\/\-](\d{2,4})$/);
+    if (slashMatch) {
+      let month = parseInt(slashMatch[1], 10);
+      let year = parseInt(slashMatch[2], 10);
+      
+      if (year < 100) {
+        if (year >= 50) {
+          year = 2500 + year - 543;
+        } else {
+          year = 2000 + year;
+        }
+      } else if (year > 2400) {
+        year = year - 543;
+      }
+      
+      if (month >= 1 && month <= 12) {
+        const mm = String(month).padStart(2, '0');
+        return `${year}-${mm}-01`;
+      }
+    }
+
+    // 3. Thai month mapping
+    const thaiMonths = [
+      { name: 'มกราคม', abbr: 'ม.ค.', value: 1 },
+      { name: 'กุมภาพันธ์', abbr: 'ก.พ.', value: 2 },
+      { name: 'มีนาคม', abbr: 'มี.ค.', value: 3 },
+      { name: 'เมษายน', abbr: 'เม.ย.', value: 4 },
+      { name: 'พฤษภาคม', abbr: 'พ.ค.', value: 5 },
+      { name: 'มิถุนายน', abbr: 'มิ.ย.', value: 6 },
+      { name: 'กรกฎาคม', abbr: 'ก.ค.', value: 7 },
+      { name: 'สิงหาคม', abbr: 'ส.ค.', value: 8 },
+      { name: 'กันยายน', abbr: 'ก.ย.', value: 9 },
+      { name: 'ตุลาคม', abbr: 'ต.ค.', value: 10 },
+      { name: 'พฤศจิกายน', abbr: 'พ.ย.', value: 11 },
+      { name: 'ธันวาคม', abbr: 'ธ.ค.', value: 12 }
+    ];
+
+    let foundMonth = 0;
+    for (const m of thaiMonths) {
+      if (cleanStr.includes(m.name) || cleanStr.includes(m.abbr)) {
+        foundMonth = m.value;
+        break;
+      }
+    }
+    
+    if (foundMonth === 0) {
+      const engMonths = [
+        'january', 'february', 'march', 'april', 'may', 'june',
+        'july', 'august', 'september', 'october', 'november', 'december'
+      ];
+      const engAbbrs = [
+        'jan', 'feb', 'mar', 'apr', 'may', 'jun',
+        'jul', 'aug', 'sep', 'oct', 'nov', 'dec'
+      ];
+      for (let i = 0; i < 12; i++) {
+        if (cleanStr.includes(engMonths[i]) || cleanStr.includes(engAbbrs[i])) {
+          foundMonth = i + 1;
+          break;
+        }
+      }
+    }
+
+    if (foundMonth === 0) {
+      foundMonth = new Date().getMonth() + 1;
+    }
+
+    let foundYear = new Date().getFullYear();
+    const fourDigitMatch = cleanStr.match(/\b(25\d{2}|20\d{2})\b/);
+    if (fourDigitMatch) {
+      const yr = parseInt(fourDigitMatch[1], 10);
+      if (yr >= 2500) {
+        foundYear = yr - 543;
+      } else {
+        foundYear = yr;
+      }
+    } else {
+      const twoDigitMatch = cleanStr.match(/\b(\d{2})\b$/);
+      if (twoDigitMatch) {
+        let yr = parseInt(twoDigitMatch[1], 10);
+        if (yr >= 50) {
+          foundYear = 2500 + yr - 543;
+        } else {
+          foundYear = 2000 + yr;
+        }
+      }
+    }
+
+    const mm = String(foundMonth).padStart(2, '0');
+    return `${foundYear}-${mm}-01`;
+  }
+
   isSaving = false;
 
   confirmSave() {
@@ -86,7 +223,7 @@ export class AiScanComponent {
     this.cdr.markForCheck();
     
     if (this.selectedFile) {
-      this.carbonService.uploadFile(this.selectedFile, 'carbon').subscribe({
+      this.carbonService.uploadFile(this.selectedFile, 'carbon', 'หมวดที่ 3').subscribe({
         next: (res) => this.saveToBackend(res.url),
         error: (err) => {
           this.isSaving = false;
@@ -100,12 +237,25 @@ export class AiScanComponent {
   }
 
   private saveToBackend(evidenceUrl?: string) {
+    const formattedDate = this.parseThaiDate(this.formData.date);
+    
+    let factor = 0;
+    const type = this.formData.type;
+    if (type === 'Electricity') {
+      factor = 0.5;
+    } else if (type === 'Water') {
+      factor = 0.3;
+    } else if (type === 'Fuel') {
+      factor = 2.3;
+    }
+    const calculatedEmission = (this.formData.amount || 0) * factor;
+
     const log: CarbonLog = {
-      date: new Date().toISOString(), // In real app, parse this.formData.date
+      date: formattedDate,
       type: this.formData.type,
       amount: this.formData.amount || 0,
       unit: this.formData.unit,
-      emission: 0,
+      emission: calculatedEmission,
       source: 'AI Scan',
       evidence_url: evidenceUrl
     };

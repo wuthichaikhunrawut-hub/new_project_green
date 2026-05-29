@@ -7,10 +7,10 @@
       <ol class="breadcrumb mb-0">
         <li class="breadcrumb-item active" aria-current="page">
           <span class="text-muted fw-medium">
-            <ng-container *ngIf="role === 'SYSTEM_ADMIN' || role === 'ADMIN' || role === 'System Admin'">System Admin Portal</ng-container>
-            <ng-container *ngIf="role === 'ASSESSOR' || role === 'Assessor'">Assessor Portal</ng-container>
-            <ng-container *ngIf="role === 'ORG_ADMIN' || role === 'Organization Admin'">Organization Admin Portal</ng-container>
-            <ng-container *ngIf="!['SYSTEM_ADMIN', 'ADMIN', 'System Admin', 'ASSESSOR', 'Assessor', 'ORG_ADMIN', 'Organization Admin'].includes(role)">Applicant Portal</ng-container>
+            <ng-container *ngIf="roleKey === 'SYSTEM_ADMIN'">System Admin Portal</ng-container>
+            <ng-container *ngIf="roleKey === 'ASSESSOR'">Assessor Portal</ng-container>
+            <ng-container *ngIf="roleKey === 'ORG_ADMIN'">Organization Admin Portal</ng-container>
+            <ng-container *ngIf="!['SYSTEM_ADMIN', 'ASSESSOR', 'ORG_ADMIN'].includes(roleKey)">Applicant Portal</ng-container>
           </span>
         </li>
       </ol>
@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt text-amber-500 me-1"></i> AI Usage: 12/50
       </span>
     </div>
-    <button *ngIf="role !== 'SYSTEM_ADMIN' && role !== 'ADMIN' && role !== 'System Admin'"
+    <button *ngIf="roleKey !== 'SYSTEM_ADMIN'"
       class="btn-icon position-relative border-0 bg-transparent text-secondary p-2 rounded-circle hover-bg-light transition-all"
       [routerLink]="['/notifications']">
       <i class="fa-solid fa-bell fs-5"></i>

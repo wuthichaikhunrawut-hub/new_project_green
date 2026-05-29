@@ -66,6 +66,8 @@ export class GeminiController {
   }
 
   @Post('chat')
+  @FeatureCode('AI_ASSISTANCE')
+  @UseInterceptors(FeatureQuotaInterceptor)
   async chat(
     @Body() body: { message: string, sessionId?: number },
     @Request() req: { user: JwtUser },
@@ -129,6 +131,19 @@ export class GeminiController {
   async clearHistory(@Request() req: { user: JwtUser }) {
     const userId = Number(req.user.sub);
     await this.geminiService.clearChatHistory(userId);
+    return { success: true };
+  }
+
+  @Delete('history/:ids')
+  async deleteHistoryLogs(
+    @Request() req: { user: JwtUser },
+    @Param('ids') idsStr: string
+  ) {
+    const userId = Number(req.user.sub);
+    const ids = idsStr.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    if (ids.length > 0) {
+      await this.geminiService.deleteChatLogs(ids, userId);
+    }
     return { success: true };
   }
 

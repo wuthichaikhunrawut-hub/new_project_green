@@ -124,7 +124,7 @@
                 <button [routerLink]="['/assessor/report', req.id]" class="btn btn-sm btn-light btn-icon me-2" title="รายละเอียดรายงานการประเมิน">
                   <i class="fa-solid fa-eye text-primary"></i>
                 </button>
-                <button *ngIf="user?.role === 'ASSESSOR'" [routerLink]="['/requests/evaluate', req.id]" class="btn btn-sm btn-primary">
+                <button *ngIf="userRoleKey === 'ASSESSOR'" [routerLink]="['/requests/evaluate', req.id]" class="btn btn-sm btn-primary">
                   <i class="fa-solid fa-clipboard-check me-1"></i> ประเมิน
                 </button>
               </td>

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
@@ -14,6 +14,7 @@ import { User } from '../users/entities/user.entity';
 import { FeatureUsageLog } from './entities/feature-usage-log.entity';
 import { Payment } from './entities/payment.entity';
 import { StripeService } from './stripe.service';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class SubscriptionsService {
@@ -37,6 +38,7 @@ export class SubscriptionsService {
     private auditLogsService: AuditLogsService,
     private notificationsService: NotificationsService,
     private stripeService: StripeService,
+    private settingsService: SettingsService,
   ) {}
 
   // ... (previous methods)
@@ -306,14 +308,28 @@ export class SubscriptionsService {
     );
   }
 
-  getQuotaLimit(planName: string, featureCode: string): number {
-    if (featureCode === 'AI_SCAN') {
-      if (planName.toLowerCase().includes('free')) return 50;
-      if (planName.toLowerCase().includes('basic')) return 200;
-      if (planName.toLowerCase().includes('pro')) return 1000;
-      return 5; // ปรับค่า Default ให้เป็น 5 แทน 0 เพื่อป้องกัน Division by zero ใน Frontend
+  async getQuotaLimit(planId: number, featureCode: string): Promise<number> {
+    const key = `quota.plan:${planId}.feat:${featureCode.toLowerCase()}`;
+    const value = await this.settingsService.getSetting(key);
+    if (value !== null && value !== undefined && value !== '') {
+      const parsed = Number(value);
+      if (!isNaN(parsed)) {
+        return parsed; // return actual limit (0 = unlimited)
+      }
     }
-    return 999999; // Unlimited for other features
+    
+    // Default fallbacks if not defined:
+    if (featureCode.toUpperCase() === 'AI_SCAN') {
+      if (planId === 3) return 20;
+      if (planId === 36) return 50;
+      return 0; // Super/others unlimited
+    }
+    if (featureCode.toUpperCase() === 'AI_ASSISTANCE') {
+      if (planId === 3) return 5;
+      if (planId === 36) return 100;
+      return 0;
+    }
+    return 0;
   }
 
   async checkFeatureQuota(
@@ -323,7 +339,7 @@ export class SubscriptionsService {
     const sub = await this.findOrgSubscription(orgId);
     if (!sub || !sub.plan) return { allowed: false, used: 0, limit: 0 };
 
-    const limit = this.getQuotaLimit(sub.plan.plan_name, featureCode);
+    const limit = await this.getQuotaLimit(sub.plan.id, featureCode);
 
     const now = new Date();
     const month = now.getMonth() + 1;
@@ -332,7 +348,7 @@ export class SubscriptionsService {
     const log = await this.usageLogRepository.findOne({
       where: {
         org_id: orgId,
-        feature_code: featureCode,
+        feature_code: featureCode.toUpperCase(),
         usage_month: month,
         usage_year: year,
       },
@@ -341,7 +357,7 @@ export class SubscriptionsService {
     const used = log ? log.usage_count : 0;
 
     return {
-      allowed: used < limit,
+      allowed: (limit === 0 || limit >= 999999) ? true : used < limit,
       used,
       limit,
     };
@@ -359,7 +375,7 @@ export class SubscriptionsService {
     let log = await this.usageLogRepository.findOne({
       where: {
         org_id: orgId,
-        feature_code: featureCode,
+        feature_code: featureCode.toUpperCase(),
         usage_month: month,
         usage_year: year,
       },
@@ -371,7 +387,7 @@ export class SubscriptionsService {
     } else {
       log = this.usageLogRepository.create({
         org_id: orgId,
-        feature_code: featureCode,
+        feature_code: featureCode.toUpperCase(),
         usage_count: amount,
         usage_month: month,
         usage_year: year,
@@ -404,22 +420,24 @@ export class SubscriptionsService {
       where: { org_id: orgId, usage_month: month, usage_year: year },
     });
 
-    return sub.plan.features.map((feature) => {
-      const limit = this.getQuotaLimit(
-        sub.plan.plan_name,
+    const quotaPromises = sub.plan.features.map(async (feature) => {
+      const limit = await this.getQuotaLimit(
+        sub.plan.id,
         feature.feature_code,
       );
       const log = logs.find(
-        (entry) => entry.feature_code === feature.feature_code,
+        (entry) => entry.feature_code.toUpperCase() === feature.feature_code.toUpperCase(),
       );
       return {
-        feature_code: feature.feature_code,
+        feature_code: feature.feature_code.toUpperCase(),
         feature_name: feature.feature_name,
         used: log?.usage_count ?? 0,
         limit,
-        allowed: limit === 0 ? true : (log?.usage_count ?? 0) < limit,
+        allowed: (limit === 0 || limit >= 999999) ? true : (log?.usage_count ?? 0) < limit,
       };
     });
+
+    return Promise.all(quotaPromises);
   }
 
   async getOrganizationPayments(orgId: number) {
@@ -482,6 +500,49 @@ export class SubscriptionsService {
     }
 
     return this.createPaymentRecord(paymentData);
+  }
+
+  async subscribeToPlan(orgId: number, planId: number) {
+    const plan = await this.plansRepository.findOne({ where: { id: planId } });
+    if (!plan) {
+      throw new BadRequestException('Plan not found');
+    }
+
+    if (plan.price_per_month > 0) {
+      throw new BadRequestException('Cannot subscribe directly to a paid plan without payment info');
+    }
+
+    let existingSub = await this.orgSubRepository.findOne({
+      where: { org_id: orgId, status: 'ACTIVE' },
+    });
+
+    if (existingSub) {
+      existingSub.status = 'CANCELLED';
+      await this.orgSubRepository.save(existingSub);
+    }
+
+    const newSub = this.orgSubRepository.create({
+      org_id: orgId,
+      plan_id: planId,
+      status: 'ACTIVE',
+      start_date: new Date(),
+      end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 10)),
+      auto_renew: true,
+    });
+
+    const savedSub = await this.orgSubRepository.save(newSub);
+
+    await this.auditLogsService.logAction(
+      undefined,
+      'SUBSCRIBE_PLAN',
+      `Organization ${orgId} subscribed to free plan: ${plan.plan_name}`,
+    );
+
+    return {
+      success: true,
+      message: 'Subscribed to plan successfully',
+      subscription: savedSub,
+    };
   }
 
   async getUserSubscriptionStatusByUserId(userId: number) {

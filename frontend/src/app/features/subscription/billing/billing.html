@@ -78,18 +78,23 @@
           <div class="card-header bg-white border-bottom pt-4 px-4 px-lg-5 pb-3">
             <div class="d-flex align-items-center">
               <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0;">
-                <i class="fa-solid fa-credit-card text-primary fs-4"></i>
+                <i class="fa-solid fa-circle-check text-primary fs-4" *ngIf="selectedPlan && selectedPlan.price_per_month <= 0"></i>
+                <i class="fa-solid fa-credit-card text-primary fs-4" *ngIf="!selectedPlan || selectedPlan.price_per_month > 0"></i>
               </div>
               <div>
-                <h5 class="fw-bold m-0 text-dark">ข้อมูลบัตรเครดิต/เดบิต</h5>
-                <p class="text-muted small m-0">ระบบรองรับบัตรทุกประเภท ปลอดภัย 100%</p>
+                <h5 class="fw-bold m-0 text-dark">
+                  {{ selectedPlan && selectedPlan.price_per_month <= 0 ? 'เปิดใช้งานแพ็กเกจทันที' : 'ข้อมูลบัตรเครดิต/เดบิต' }}
+                </h5>
+                <p class="text-muted small m-0">
+                  {{ selectedPlan && selectedPlan.price_per_month <= 0 ? 'ยืนยันเพื่อเปิดใช้งานแพ็กเกจฟรี' : 'ระบบรองรับบัตรทุกประเภท ปลอดภัย 100%' }}
+                </p>
               </div>
             </div>
           </div>
 
           <div class="card-body p-4 p-lg-5 position-relative">
             <!-- Loading Overlay -->
-            <div *ngIf="isStripeLoading" class="text-center py-5">
+            <div *ngIf="isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)" class="text-center py-5">
               <div class="spinner-border text-primary mb-3" role="status"></div>
               <p class="text-muted small fw-bold">กำลังเชื่อมต่อระบบรักษาความปลอดภัย Stripe...</p>
             </div>
@@ -101,15 +106,15 @@
                 <div class="fw-bold">เกิดข้อผิดพลาด</div>
                 <div class="small">{{ errorMessage }}</div>
               </div>
-              <button (click)="initStripe()" class="btn btn-sm btn-outline-danger ms-3 rounded-pill px-3">
+              <button (click)="initStripe()" class="btn btn-sm btn-outline-danger ms-3 rounded-pill px-3" *ngIf="!selectedPlan || selectedPlan.price_per_month > 0">
                 ลองอีกครั้ง
               </button>
             </div>
 
             <!-- Stripe Payment Wrapper -->
-            <div [style.opacity]="isStripeLoading ? 0.01 : 1" 
-                 [style.height]="isStripeLoading ? '1px' : 'auto'"
-                 [style.overflow]="isStripeLoading ? 'hidden' : 'visible'"
+            <div [style.opacity]="(isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)) ? 0.01 : 1" 
+                 [style.height]="(isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)) ? '1px' : 'auto'"
+                 [style.overflow]="(isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)) ? 'hidden' : 'visible'"
                  class="stripe-payment-wrapper transition-all">
               
               <!-- Dynamic Badged Alerts -->
@@ -159,30 +164,38 @@
                 </div>
               </ng-container>
 
-              <!-- Free Plan Alert (0 Baht) -->
-              <div *ngIf="selectedPlan && selectedPlan.price_per_month == 0" class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
+              <!-- Free Plan Alert (<= 0 Baht) -->
+              <div *ngIf="selectedPlan && selectedPlan.price_per_month <= 0" class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
                 <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0;">
                   <i class="fa-solid fa-gift"></i>
                 </div>
                 <div>
-                  <div class="fw-bold text-success" style="font-size: 0.95rem;">ใช้งานฟรี 100%!</div>
-                  <div class="small text-success opacity-75">กรุณาผูกบัตรเพื่อยืนยันตัวตน (รับประกันไม่มีการเรียกเก็บเงินใดๆ ในแพ็กเกจนี้)</div>
+                  <div class="fw-bold text-success" style="font-size: 0.95rem;">แพ็กเกจฟรี 100%!</div>
+                  <div class="small text-success opacity-75">คุณสามารถใช้งานฟีเจอร์ที่กำหนดได้ทันที โดยไม่ต้องผูกบัตรเครดิต</div>
                 </div>
               </div>
 
-              <!-- Stripe Element Mount Point -->
-              <div #paymentElement id="payment-element" class="p-3 border rounded-3 bg-light mb-4 shadow-sm min-h-[250px] h-auto">
+              <!-- Stripe Element Mount Point (Only for paid plans) -->
+              <div #paymentElement id="payment-element" class="p-3 border rounded-3 bg-light mb-4 shadow-sm min-h-[250px] h-auto" *ngIf="!selectedPlan || selectedPlan.price_per_month > 0">
                 <!-- Stripe.js injects the Payment Element here -->
               </div>
 
+              <!-- Friendly Free Notice (Only for free plans) -->
+              <div class="p-4 border border-dashed rounded-4 bg-light text-center mb-4" *ngIf="selectedPlan && selectedPlan.price_per_month <= 0">
+                <i class="fa-solid fa-shield-heart text-primary fs-1 mb-3"></i>
+                <h6 class="fw-bold text-dark mb-2">ปลอดภัยและไม่มีค่าใช้จ่าย</h6>
+                <p class="text-muted small mb-0 px-3">Green Sync สนับสนุนแนวทางความยั่งยืน คุณสามารถเริ่มต้นทดลองใช้งานระบบบิลสแกน AI และตัวช่วยวิเคราะห์ได้ทันทีอย่างสมบูรณ์แบบโดยไม่ต้องระบุช่องทางชำระเงินใดๆ</p>
+              </div>
+
               <button 
-                [disabled]="isSaving || isStripeLoading" 
+                [disabled]="isSaving || (isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0))" 
                 (click)="handleSubmit()"
                 class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-3 text-white transition-all tracking-wide">
-                <i class="fa-solid fa-lock me-2" *ngIf="!isSaving"></i>
+                <i class="fa-solid fa-lock me-2" *ngIf="!isSaving && (!selectedPlan || selectedPlan.price_per_month > 0)"></i>
+                <i class="fa-solid fa-circle-play me-2" *ngIf="!isSaving && selectedPlan && selectedPlan.price_per_month <= 0"></i>
                 <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                 <span *ngIf="!isSaving">
-                  {{ selectedPlan?.price_per_month == 0 ? 'ยืนยันแพ็กเกจฟรี (ไม่ตัดเงิน)' : 'ยืนยันและชำระเงินอย่างปลอดภัย' }}
+                  {{ selectedPlan && selectedPlan.price_per_month <= 0 ? 'เปิดใช้งานแพ็กเกจฟรี' : 'ยืนยันและชำระเงินอย่างปลอดภัย' }}
                 </span>
               </button>
             </div> <!-- End stripe-payment-wrapper -->

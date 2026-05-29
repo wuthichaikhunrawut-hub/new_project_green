@@ -2,6 +2,7 @@ import { Component, inject, PLATFORM_ID, OnInit, ChangeDetectorRef } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
 
 interface ChatMessage {
   role: 'user' | 'bot';
@@ -20,14 +21,20 @@ export class AiChatComponent implements OnInit {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  private subscriptionService = inject(UserSubscriptionsService);
 
   isOpen = false;
   isLoading = false;
   showHistory = false;
   inputMessage = '';
   messages: ChatMessage[] = [];
-  sessions: { id: number; title: string; messages: ChatMessage[] }[] = [];
+  sessions: { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] = [];
   activeSessionId: number | null = null;
+  
+  // Custom Modal States
+  showDeleteConfirmModal = false;
+  showDeleteAllConfirmModal = false;
+  sessionToDelete: any = null;
 
   // Resizing states
   chatWidth = 360;
@@ -153,9 +160,9 @@ export class AiChatComponent implements OnInit {
     this.activeSessionId = null;
   }
 
-  groupMessagesIntoSessions(logs: any[]): { id: number; title: string; messages: ChatMessage[] }[] {
-    const sessionsList: { id: number; title: string; messages: ChatMessage[] }[] = [];
-    let currentSession: { id: number; title: string; messages: ChatMessage[] } | null = null;
+  groupMessagesIntoSessions(logs: any[]): { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] {
+    const sessionsList: { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] = [];
+    let currentSession: { id: number; title: string; messages: ChatMessage[]; logIds: number[] } | null = null;
     let lastTime = 0;
 
     logs.forEach((log, index) => {
@@ -176,13 +183,15 @@ export class AiChatComponent implements OnInit {
 
       if (isNewSession) {
         currentSession = {
-          id: index,
+          id: log.id || log.chat_log_id,
           title: log.question.substring(0, 24) + (log.question.length > 24 ? '...' : ''),
-          messages: [userMsg, botMsg]
+          messages: [userMsg, botMsg],
+          logIds: [log.id || log.chat_log_id]
         };
         sessionsList.push(currentSession);
       } else if (currentSession) {
         currentSession.messages.push(userMsg, botMsg);
+        currentSession.logIds.push(log.id || log.chat_log_id);
       }
       lastTime = logTime;
     });
@@ -235,6 +244,7 @@ export class AiChatComponent implements OnInit {
         this.cdr.markForCheck();
         this.scrollToBottom();
         this.loadHistoryAfterMessage();
+        this.subscriptionService.quotaUpdated$.next();
       },
       error: (err) => {
         const isApiKeyError = err?.error?.message?.includes('GEMINI_API_KEY');
@@ -258,9 +268,46 @@ export class AiChatComponent implements OnInit {
     }
   }
 
-  clearChat() {
+  openDeleteSessionModal(session: any, event: MouseEvent) {
+    event.stopPropagation();
+    this.sessionToDelete = session;
+    this.showDeleteConfirmModal = true;
+    this.cdr.markForCheck();
+  }
+
+  openDeleteAllModal() {
+    this.showDeleteAllConfirmModal = true;
+    this.cdr.markForCheck();
+  }
+
+  cancelDelete() {
+    this.showDeleteConfirmModal = false;
+    this.showDeleteAllConfirmModal = false;
+    this.sessionToDelete = null;
+    this.cdr.markForCheck();
+  }
+
+  confirmDelete() {
     if (!isPlatformBrowser(this.platformId)) return;
-    if (confirm('คุณต้องการลบประวัติการสนทนาทั้งหมดหรือไม่?')) {
+
+    if (this.showDeleteConfirmModal && this.sessionToDelete) {
+      const idsStr = this.sessionToDelete.logIds.join(',');
+      this.http.delete(`http://localhost:3001/gemini/history/${idsStr}`, {
+        headers: this.getHeaders()
+      }).subscribe({
+        next: () => {
+          this.loadHistory();
+          if (this.activeSessionId === this.sessionToDelete.id) {
+            this.setDefaultMessage();
+          }
+          this.cancelDelete();
+        },
+        error: (err) => {
+          console.error('Failed to delete session:', err);
+          this.cancelDelete();
+        }
+      });
+    } else if (this.showDeleteAllConfirmModal) {
       this.http.delete('http://localhost:3001/gemini/history', {
         headers: this.getHeaders()
       }).subscribe({
@@ -268,11 +315,11 @@ export class AiChatComponent implements OnInit {
           this.sessions = [];
           this.setDefaultMessage();
           this.showHistory = false;
-          this.cdr.markForCheck();
+          this.cancelDelete();
         },
         error: (err) => {
           console.error('Failed to clear chat history:', err);
-          this.cdr.markForCheck();
+          this.cancelDelete();
         }
       });
     }

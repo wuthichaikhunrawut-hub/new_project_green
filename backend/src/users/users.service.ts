@@ -99,7 +99,8 @@ export class UsersService {
       return UserRole.SYSTEM_ADMIN;
     }
     if (
-      normalizedRoleNames.includes(this.normalizeRoleName(UserRole.ORG_ADMIN))
+      normalizedRoleNames.includes(this.normalizeRoleName(UserRole.ORG_ADMIN)) ||
+      normalizedRoleNames.includes('ORG_ADMIN')
     ) {
       return UserRole.ORG_ADMIN;
     }

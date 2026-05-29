@@ -410,3 +410,76 @@
     bottom: 20px;
   }
 }
+
+/* Individual delete button for chat session */
+.btn-delete-session-item {
+  background: transparent;
+  border: none;
+  color: #ef4444;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.history-item:hover .btn-delete-session-item {
+  opacity: 0.7;
+}
+
+.btn-delete-session-item:hover {
+  opacity: 1 !important;
+  transform: scale(1.15);
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* Custom modal overlay centered on screen */
+.custom-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+.custom-modal-content {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 380px;
+  padding: 28px 24px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: scaleIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9) translateY(10px); }
+  to { transform: scale(1) translateY(0); }
+}
+
+.modal-alert-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}

@@ -25,6 +25,17 @@ export class HeaderComponent implements OnInit, OnDestroy {
   unreadNotifications = 0;
   private subscription: Subscription = new Subscription();
 
+  get roleKey(): string {
+    const r = String(this.role || '').trim().toUpperCase().split(' ').join('_');
+    if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
+    if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
+    if (r === 'ASSESSOR') return 'ASSESSOR';
+    if (r === 'EXECUTIVE') return 'EXECUTIVE';
+    if (r === 'EMPLOYEE') return 'EMPLOYEE';
+    if (r === 'USER') return 'USER';
+    return '';
+  }
+
   ngOnInit() {
     this.subscription.add(
       this.authService.currentUser$.subscribe(user => {

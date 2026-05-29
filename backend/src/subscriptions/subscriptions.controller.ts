@@ -9,6 +9,7 @@ import {
   Query,
   Request,
   UseGuards,
+  Header,
 } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
@@ -116,6 +117,9 @@ export class SubscriptionsController {
 
   @Get('my/quotas')
   @Roles('ORGANIZATION_ADMIN', 'SYSTEM_ADMIN')
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+  @Header('Pragma', 'no-cache')
+  @Header('Expires', '0')
   async getMyQuotas(@Request() req: any) {
     const orgId = Number(req.user.orgId);
     return this.subscriptionsService.getOrganizationFeatureQuotaSummary(orgId);

@@ -105,10 +105,13 @@ export class CarbonService {
   }
 
   // อัพโหลดไฟล์ไปที่ Supabase ผ่าน Backend
-  uploadFile(file: File, folder: string = 'evidence'): Observable<{ url: string }> {
+  uploadFile(file: File, folder: string = 'evidence', category?: string): Observable<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    const uploadUrl = 'http://localhost:3001/uploads';
-    return this.http.post<{ url: string }>(`${uploadUrl}?folder=${folder}`, formData, { headers: this.getHeaders() });
+    let uploadUrl = `http://localhost:3001/uploads?folder=${folder}`;
+    if (category) {
+      uploadUrl += `&category=${encodeURIComponent(category)}`;
+    }
+    return this.http.post<{ url: string }>(uploadUrl, formData, { headers: this.getHeaders() });
   }
 }

@@ -118,10 +118,10 @@
                 <div class="bg-emerald bg-opacity-10 text-emerald rounded-3 d-flex align-items-center justify-content-center" 
                      style="width: 44px; height: 44px;"
                      [ngClass]="{'bg-danger bg-opacity-10 text-danger': !log.allowed}">
-                  <i class="fa-solid fa-microchip fs-5" *ngIf="log.feature_code === 'AI_SCAN'"></i>
-                  <i class="fa-solid fa-cloud fs-5" *ngIf="log.feature_code === 'STORAGE'"></i>
-                  <i class="fa-solid fa-users fs-5" *ngIf="log.feature_code === 'USERS'"></i>
-                  <i class="fa-solid fa-cube fs-5" *ngIf="log.feature_code !== 'AI_SCAN' && log.feature_code !== 'STORAGE' && log.feature_code !== 'USERS'"></i>
+                  <i class="fa-solid fa-microchip fs-5" *ngIf="isFeature(log.feature_code, 'AI_SCAN')"></i>
+                  <i class="fa-solid fa-cloud fs-5" *ngIf="isFeature(log.feature_code, 'STORAGE')"></i>
+                  <i class="fa-solid fa-users fs-5" *ngIf="isFeature(log.feature_code, 'USERS')"></i>
+                  <i class="fa-solid fa-cube fs-5" *ngIf="!isFeature(log.feature_code, 'AI_SCAN') && !isFeature(log.feature_code, 'STORAGE') && !isFeature(log.feature_code, 'USERS')"></i>
                 </div>
                 <div>
                   <h6 class="fw-bold text-dark mb-0">{{ log.feature_name || log.feature_code }}</h6>
@@ -147,8 +147,8 @@
                   <span class="text-success text-xs ms-1 fw-bold" *ngIf="log.limit >= 999999 || log.limit === 0">ไม่จำกัด</span>
                   
                   <span class="text-muted text-xs ms-1 font-medium">
-                    <span *ngIf="log.feature_code === 'STORAGE'">MB</span>
-                    <span *ngIf="log.feature_code !== 'STORAGE'">ครั้ง</span>
+                    <span *ngIf="isFeature(log.feature_code, 'STORAGE')">MB</span>
+                    <span *ngIf="!isFeature(log.feature_code, 'STORAGE')">ครั้ง</span>
                   </span>
                 </div>
               </div>

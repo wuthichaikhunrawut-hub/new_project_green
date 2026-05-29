@@ -55,6 +55,7 @@ export class BillingComponent implements OnInit {
     if (state && state.selectedPlan) {
       this.selectedPlan = state.selectedPlan;
       this.billingCycle = state.billingCycle || 'monthly';
+      this.setupPaymentFlow();
     } else {
       // Auto-fetch current subscription if no state was passed (e.g. direct page refresh)
       this.userSubService.getMySubscription().subscribe({
@@ -63,12 +64,25 @@ export class BillingComponent implements OnInit {
             this.selectedPlan = sub.plan;
             this.billingCycle = 'monthly'; // Defaulting to monthly if not specified
           }
+          this.setupPaymentFlow();
         },
-        error: (err) => console.error('Auto-fetch plan error:', err)
+        error: (err) => {
+          console.error('Auto-fetch plan error:', err);
+          this.setupPaymentFlow();
+        }
       });
     }
 
     this.loadPaymentMethods();
+  }
+
+  async setupPaymentFlow() {
+    const price = this.selectedPlan?.price_per_month;
+    if (this.selectedPlan && (!price || price <= 0)) {
+      this.isStripeLoading = false;
+      this.isLoading = false;
+      return;
+    }
     await this.initStripe();
   }
 
@@ -183,6 +197,25 @@ export class BillingComponent implements OnInit {
   }
 
   async handleSubmit() {
+    const price = this.selectedPlan?.price_per_month;
+    if (this.selectedPlan && (!price || price <= 0)) {
+      this.isSaving = true;
+      this.errorMessage = '';
+      this.userSubService.subscribeToPlan(this.selectedPlan.id).subscribe({
+        next: (res) => {
+          this.isSaving = false;
+          this.toast.success('เปิดใช้งานแพ็กเกจฟรีเรียบร้อยแล้ว!');
+          this.router.navigate(['/subscription']);
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.errorMessage = err.error?.message || 'เกิดข้อผิดพลาดในการเปิดใช้งานแพ็กเกจฟรี';
+          this.toast.error(this.errorMessage);
+        }
+      });
+      return;
+    }
+
     if (!this.stripe || !this.elements) return;
 
     this.isSaving = true;

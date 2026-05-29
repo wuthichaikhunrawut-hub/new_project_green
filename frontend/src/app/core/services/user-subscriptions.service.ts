@@ -1,13 +1,14 @@
 import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserSubscriptionsService {
   private http = inject(HttpClient);
+  public quotaUpdated$ = new Subject<void>();
   private apiUrl = 'http://localhost:3001/subscriptions';
 
   private platformId = inject(PLATFORM_ID);
@@ -45,5 +46,9 @@ export class UserSubscriptionsService {
 
   cancelSubscription(): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/my/cancel`, { headers: this.getHeaders() });
+  }
+
+  subscribeToPlan(planId: number): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/my/subscribe`, { planId }, { headers: this.getHeaders() });
   }
 }

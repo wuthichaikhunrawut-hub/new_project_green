@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { ChatLog } from './entities/gemini.entity';
 import { ChatSession } from './entities/chat-session.entity';
 import { ChatMessage } from './entities/chat-message.entity';
@@ -73,6 +73,31 @@ export class GeminiService {
     return this.ai;
   }
 
+  private async executeWithFallback<T>(fn: (aiClient: GoogleGenAI) => Promise<T>): Promise<T> {
+    try {
+      const ai = this.getClient();
+      return await fn(ai);
+    } catch (error: any) {
+      console.warn('[GeminiService] Primary API key failed, checking backup key...', error.message || error);
+      
+      const backupKey = process.env.GEMINI_BACKUP_API_KEY || process.env.GEMINI_API_KEY_BACKUP;
+      if (backupKey && backupKey !== 'your_backup_api_key_here' && backupKey !== 'your_backup_gemini_api_key_here') {
+        try {
+          console.log('[GeminiService] Switching to backup API key:', backupKey.substring(0, 10) + '...');
+          const backupAi = new GoogleGenAI({ apiKey: backupKey });
+          const result = await fn(backupAi);
+          
+          this.ai = backupAi; 
+          return result;
+        } catch (backupError: any) {
+          console.error('[GeminiService] Both primary and backup API keys failed!', backupError.message || backupError);
+          throw error;
+        }
+      }
+      throw error;
+    }
+  }
+
   private cleanJsonResponse(text: string): string {
     return text
       .replace(/^```json\s*/i, '')
@@ -82,8 +107,6 @@ export class GeminiService {
   }
 
   async ocr(fileBuffer: Buffer, mimeType: string): Promise<BillScanResult> {
-    const ai = this.getClient();
-
     try {
       const prompt = `You are an expert at reading Thai utility bills (electricity, water, gas, fuel).
 Analyze this bill image and extract the following information. Respond ONLY with a valid JSON object, no markdown, no explanation.
@@ -99,22 +122,24 @@ Analyze this bill image and extract the following information. Respond ONLY with
 
 If you cannot determine a value, use a sensible default (0 for numbers, "ไม่ทราบ" for strings).`;
 
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  data: fileBuffer.toString('base64'),
-                  mimeType: mimeType,
+      const response = await this.executeWithFallback(async (ai) => {
+        return ai.models.generateContent({
+          model: MODEL,
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    data: fileBuffer.toString('base64'),
+                    mimeType: mimeType,
+                  },
                 },
-              },
-            ],
-          },
-        ],
+              ],
+            },
+          ],
+        });
       });
 
       const text = response.text?.trim() || '';
@@ -158,6 +183,53 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     const ai = this.getClient();
 
     try {
+      let orgContext = '';
+      if (userId) {
+        try {
+          const user = await this.userRepo.findOne({
+            where: { id: userId },
+            relations: ['organization']
+          });
+          const org = user?.organization;
+          if (org) {
+            const branches = await this.orgRepo.manager.query(
+              'SELECT name, location FROM organization_units WHERE org_id = $1',
+              [org.id]
+            ).catch(() => []);
+
+            const carbonSummary = await this.orgRepo.manager.query(
+              'SELECT type, SUM(amount) as total_amount, SUM(emission) as total_emission, unit FROM carbon_logs WHERE org_id = $1 GROUP BY type, unit',
+              [org.id]
+            ).catch(() => []);
+
+            const assessments = await this.orgRepo.manager.query(
+              'SELECT status, count(*) as count FROM assessments WHERE org_id = $1 GROUP BY status',
+              [org.id]
+            ).catch(() => []);
+
+            orgContext = `--- ข้อมูลสภาพแวดล้อมและพลังงานขององค์กรปัจจุบัน (${org.name}) ---
+อุตสาหกรรม: ${org.industry_type || '-'}
+จำนวนพนักงาน: ${org.number_of_employees || 0} คน
+พื้นที่ใช้สอยทั้งหมด: ${org.total_floor_area || 0} ตร.ม.
+ชั่วโมงการทำงาน/ปี: ${org.working_hours_per_year || 0} ชม.
+เป้าหมายการลดคาร์บอน: ${org.target_reduction_percent || 0}%
+
+สาขาขององค์กร (${branches.length} สาขา):
+${branches.length === 0 ? '- ยังไม่มีข้อมูลสาขา' : branches.map((b: any) => `- สาขา ${b.name} (ที่ตั้ง: ${b.location || 'ไม่ระบุ'})`).join('\n')}
+
+ข้อมูลการใช้พลังงานและการปล่อยคาร์บอนสะสม (Carbon Footprint Summary):
+${carbonSummary.length === 0 ? '- ยังไม่มีข้อมูลการใช้พลังงานใดๆ บันทึกในระบบ' : carbonSummary.map((c: any) => `- ${c.type}: ใช้ไปสะสมรวม ${Number(c.total_amount).toFixed(2)} ${c.unit} (คิดเป็นการปล่อยคาร์บอนสะสม ${Number(c.total_emission).toFixed(2)} kgCO2e)`).join('\n')}
+
+ความคืบหน้าแบบประเมินหลักเกณฑ์สำนักงานสีเขียว (Green Office Assessment Progress):
+${assessments.length === 0 ? '- ยังไม่มีความคืบหน้าแบบประเมิน' : assessments.map((a: any) => `- สถานะการประเมิน [${a.status}]: ${a.count} ข้อ`).join('\n')}
+------------------------------------------------------
+`;
+          }
+        } catch (ctxErr) {
+          console.error('[GeminiService] Failed to compile org context for AI prompt:', ctxErr);
+        }
+      }
+
       const systemContext = `คุณคือ GreenBot ผู้ช่วย AI ของระบบ Green Sync ที่เชี่ยวชาญด้าน:
 1. การประเมินสำนักงานสีเขียว (Green Office) ตามมาตรฐานกระทรวงทรัพยากรธรรมชาติและสิ่งแวดล้อม
 2. การคำนวณและลดการปล่อยก๊าซเรือนกระจก (Carbon Footprint)
@@ -166,9 +238,13 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 
 คำสั่งสำคัญ: 
 - ตอบเป็นภาษาไทยเสมอ ใช้ภาษาที่เป็นมิตรและชัดเจน
+- ตอบโดยวิเคราะห์อ้างอิงจาก "ข้อมูลสภาพแวดล้อมและพลังงานขององค์กรปัจจุบัน" ด้านล่างนี้เสมอ เพื่อตอบคำถามผู้ใช้เกี่ยวกับสถิติ ตัวเลข ปริมาณสาขา หรือปริมาณการใช้พลังงานขององค์กรปัจจุบันได้ถูกต้องแม่นยำที่สุด
+- หากผู้ใช้ถามเกี่ยวกับสถิติคาร์บอน ปริมาณการใช้พลังงาน หรือสาขาที่มี ให้ดึงจากข้อมูลสภาพแวดล้อมด้านล่างนี้ตอบผู้ใช้ทันที ห้ามบอกว่าไม่มีข้อมูลเด็ดขาด
 - หากผู้ใช้เริ่มบทสนทนาใหม่ คุณสามารถกล่าวทักทายได้
 - แต่ถ้าคุณมีประวัติการสนทนากับผู้ใช้อยู่แล้ว ห้ามกล่าว "สวัสดีครับ! GreenBot ยินดีให้บริการครับ" หรือคำทักทายซ้ำอีกเด็ดขาด ให้ตอบคำถามตรงๆ ได้เลย
-- ถ้าคำถามไม่เกี่ยวกับหัวข้อข้างต้น ให้แจ้งว่าคุณช่วยได้เฉพาะเรื่อง Green Office และ Carbon Footprint เท่านั้น`;
+- ถ้าคำถามไม่เกี่ยวกับหัวข้อข้างต้น ให้แจ้งว่าคุณช่วยได้เฉพาะเรื่อง Green Office และ Carbon Footprint เท่านั้น
+
+${orgContext}`;
 
       let historyContext = '';
       let session: ChatSession | null = null;
@@ -189,9 +265,11 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 
       const fullPrompt = `${systemContext}\n\n${historyContext}ผู้ใช้: ${message}\n\nGreenBot:`;
 
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: fullPrompt,
+      const response = await this.executeWithFallback(async (aiClient) => {
+        return aiClient.models.generateContent({
+          model: MODEL,
+          contents: fullPrompt,
+        });
       });
 
       const reply = response.text?.trim() || 'ขออภัย ไม่สามารถตอบกลับได้ในขณะนี้';
@@ -206,6 +284,19 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
             session.title = message.substring(0, 30) + (message.length > 30 ? '...' : '');
             await this.chatSessionRepo.save(session);
           }
+        }
+
+        // Always save to flat ChatLog history table so it instantly shows up in history drawer
+        if (userId) {
+          const flatLog = this.chatLogRepo.create({
+            user_id: userId,
+            question: message,
+            answer: reply,
+            intent: 'Chat',
+            related_module: 'gemini',
+            confidence_score: 1.0
+          });
+          await this.chatLogRepo.save(flatLog);
         }
       } catch (dbError) {
         console.error('Failed to save chat log:', dbError);
@@ -234,22 +325,24 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
   "missingItems": ["<สิ่งที่ยังขาดหายไป หรือควรเพิ่มเติมเพื่อให้สมบูรณ์>", ...]
 }`;
 
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: [
-          {
-            role: 'user',
-            parts: [
-              { text: prompt },
-              {
-                inlineData: {
-                  data: fileBuffer.toString('base64'),
-                  mimeType: mimeType,
+      const response = await this.executeWithFallback(async (aiClient) => {
+        return aiClient.models.generateContent({
+          model: MODEL,
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    data: fileBuffer.toString('base64'),
+                    mimeType: mimeType,
+                  },
                 },
-              },
-            ],
-          },
-        ],
+              ],
+            },
+          ],
+        });
       });
 
       const text = response.text?.trim() || '';
@@ -269,6 +362,10 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 
   async clearChatHistory(userId: number): Promise<void> {
     await this.chatLogRepo.delete({ user_id: userId });
+  }
+
+  async deleteChatLogs(ids: number[], userId: number): Promise<void> {
+    await this.chatLogRepo.delete({ id: In(ids), user_id: userId });
   }
 
   async generateExecutiveSummary(data: any, userId?: number): Promise<any> {
@@ -318,9 +415,11 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 ตอบกลับเป็นภาษาไทยเชิงธุรกิจ ความยาวไม่เกิน 4-5 ประโยค ชี้ให้เห็นถึงความเสี่ยง แนวโน้ม หรือความสำเร็จที่โดดเด่นเท่านั้น`;
 
       console.log('[AI Cache] Executive Summary cache mismatch. Fetching fresh summary from Gemini...');
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt,
+      const response = await this.executeWithFallback(async (aiClient) => {
+        return aiClient.models.generateContent({
+          model: MODEL,
+          contents: prompt,
+        });
       });
 
       const text = response.text?.trim() || '';
@@ -415,9 +514,11 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 }`;
 
       console.log('[AI Cache] Recommendations cache mismatch. Fetching fresh Action Plan from Gemini...');
-      const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt,
+      const response = await this.executeWithFallback(async (aiClient) => {
+        return aiClient.models.generateContent({
+          model: MODEL,
+          contents: prompt,
+        });
       });
 
       let text = response.text?.trim() || '';

@@ -3,7 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
 import { Title } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-quota-usage',
@@ -22,15 +22,21 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
   isLoading = true;
   aiChart: any;
   barChart: any;
+  private quotaSub: Subscription | null = null;
 
   ngOnInit() {
     this.titleService.setTitle('การใช้งานโควตา - Green Sync');
     this.loadDashboardData();
+
+    this.quotaSub = this.subscriptionService.quotaUpdated$.subscribe(() => {
+      this.loadDashboardData();
+    });
   }
 
   ngOnDestroy() {
     if (this.aiChart) this.aiChart.destroy();
     if (this.barChart) this.barChart.destroy();
+    if (this.quotaSub) this.quotaSub.unsubscribe();
   }
 
   loadDashboardData() {
@@ -68,7 +74,7 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
     import('apexcharts').then((module) => {
       const ApexCharts = module.default;
       
-      const aiQuota = this.logs.find(q => q.feature_code === 'AI_SCAN');
+      const aiQuota = this.logs.find(q => q.feature_code?.toUpperCase() === 'AI_SCAN');
       if (aiQuota) {
         const used = aiQuota.used || 0;
         const limit = aiQuota.limit || 50; // default to 50 if 0/undefined
@@ -251,5 +257,9 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
   getPercent(used: number, limit: number): number {
     if (!limit) return 0;
     return Math.min(Math.round((used / limit) * 100), 100);
+  }
+
+  isFeature(code: string, target: string): boolean {
+    return code?.toUpperCase() === target?.toUpperCase();
   }
 }

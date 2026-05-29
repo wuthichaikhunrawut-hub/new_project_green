@@ -24,6 +24,14 @@ export class RequestsComponent implements OnInit {
   isLoading = true;
   isSubmitting = false;
   user = this.authService.getUser();
+
+  get userRoleKey(): string {
+    const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
+    if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') return 'SYSTEM_ADMIN';
+    if (role === 'ORGANIZATION_ADMIN' || role === 'ORG_ADMIN') return 'ORG_ADMIN';
+    if (role === 'ASSESSOR') return 'ASSESSOR';
+    return role;
+  }
   
   searchTerm: string = '';
   statusFilter: string = '';
