@@ -175,6 +175,10 @@
         <i class="fa-solid fa-certificate"></i>
         <span>ผลการรับรอง Green Office</span>
       </a>
+      <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-id-card"></i>
+        <span>ข้อมูลองค์กร</span>
+      </a>
 
       <div class="nav-label">แพ็กเกจและบัญชี</div>
       <a routerLink="/subscription" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">

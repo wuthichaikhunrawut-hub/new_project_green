@@ -46,6 +46,7 @@ export class AdminUsersComponent implements OnInit {
   // For Edit Modal
   selectedUser: Partial<User> | null = null;
   isSaving = false;
+  generatedInviteUrl: string = '';
 
   // For Confirm Modals
   userToSuspend: User | null = null;
@@ -186,6 +187,17 @@ export class AdminUsersComponent implements OnInit {
 
   saveUser() {
     if (!this.selectedUser) return;
+    
+    // Validate phone number format (must be 10 digits Thai phone format if provided)
+    if (this.selectedUser.user_profile?.phone && this.selectedUser.user_profile.phone.trim() !== '' && this.selectedUser.user_profile.phone !== '-') {
+      const phoneClean = this.selectedUser.user_profile.phone.replace(/[-\s]/g, '');
+      const phoneRegex = /^0[0-9]{9}$/;
+      if (!phoneRegex.test(phoneClean)) {
+        this.toast.error('กรุณาระบุเบอร์โทรศัพท์ 10 หลักให้ถูกต้อง (เช่น 0812345678)');
+        return;
+      }
+    }
+
     this.isSaving = true;
 
     const payload: any = {
@@ -239,7 +251,7 @@ export class AdminUsersComponent implements OnInit {
         }
       });
     } else {
-      // Create new
+      // Create new (System Admin or Org Admin)
       this.usersService.createUser(payload).subscribe({
         next: () => {
           this.toast.success('เพิ่มผู้ใช้งานสำเร็จ');
@@ -403,5 +415,13 @@ export class AdminUsersComponent implements OnInit {
 
   getStatusLabel(active: boolean): string {
     return active ? 'เปิดใช้งาน' : 'ระงับการใช้งาน';
+  }
+
+  copyToClipboard(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      this.toast.success('คัดลอกลิงก์เชิญเรียบร้อยแล้ว!');
+    }).catch(err => {
+      console.error('Could not copy text: ', err);
+    });
   }
 }

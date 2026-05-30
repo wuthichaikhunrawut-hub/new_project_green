@@ -447,4 +447,89 @@ export class UsersService {
       );
     }
   }
+
+  async updateResetToken(userId: number, token: string, expires: Date) {
+    await this.usersRepository.update(userId, {
+      reset_password_token: token,
+      reset_password_expires: expires,
+    });
+  }
+
+  async findByResetToken(token: string) {
+    return this.usersRepository.findOne({
+      where: { reset_password_token: token },
+      relations: ['organization'],
+    });
+  }
+
+  async updatePasswordAndClearToken(userId: number, hashedPassword: string) {
+    await this.usersRepository.update(userId, {
+      password_hash: hashedPassword,
+      reset_password_token: null,
+      reset_password_expires: null,
+    });
+  }
+
+  async inviteUser(email: string, roleName: string, orgId: number, orgUnitId?: number): Promise<{ success: boolean; inviteUrl: string; user: User }> {
+    const existingUser = await this.findByEmail(email);
+    if (existingUser) {
+      throw new Error('อีเมลนี้ถูกใช้งานในระบบแล้ว');
+    }
+
+    const crypto = require('crypto');
+    const token = crypto.randomBytes(20).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 24 * 7); // 7 days expiration
+
+    // Create user with a random temp password
+    const tempPassword = crypto.randomBytes(10).toString('hex');
+    const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+    const user = this.usersRepository.create({
+      email,
+      password_hash: passwordHash,
+      is_active: true,
+      reset_password_token: token,
+      reset_password_expires: expires,
+      organization: { id: orgId },
+      org_unit_id: orgUnitId || null,
+    } as any);
+
+    const saved = await this.usersRepository.save(user) as any;
+
+    // Create user profile
+    const profile = this.userProfileRepository.create({
+      first_name: email.split('@')[0],
+      last_name: ' (รอยืนยัน)',
+      phone: '-',
+      user: { id: saved.id },
+    });
+    await this.userProfileRepository.save(profile);
+
+    // Assign role
+    const desiredRole = roleName ? roleName : UserRole.USER;
+    await this.assignRoleToUser(saved.id, desiredRole);
+
+    await this.auditLogsService.logAction(
+      orgId,
+      'INVITE_USER',
+      `Invited user ${email} as ${desiredRole}`,
+    );
+
+    const inviteUrl = `http://localhost:4000/auth/reset-password?token=${token}`;
+
+    // Mock SMTP: Log invitation email in the backend console
+    console.log('\n==================================================');
+    console.log('📧 MOCK EMAIL: User Invitation');
+    console.log(`To: ${email}`);
+    console.log('Subject: ยินดีต้อนรับสู่ Green Sync - คำเชิญเข้าร่วมองค์กร');
+    console.log('--------------------------------------------------');
+    console.log(`แอดมินองค์กรได้เชิญคุณเข้าร่วม Green Sync ในบทบาท: ${desiredRole}`);
+    console.log('กรุณาคลิกที่ลิงก์ด้านล่างเพื่อตั้งรหัสผ่านของคุณและเริ่มใช้งาน:');
+    console.log(inviteUrl);
+    console.log('==================================================\n');
+
+    const fullUser = await this.findOne(saved.id);
+    return { success: true, inviteUrl, user: fullUser! };
+  }
 }

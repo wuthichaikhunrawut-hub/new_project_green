@@ -15,6 +15,11 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent, title: 'ลงทะเบียนองค์กร - Green Sync' },
   { path: 'register/assessor', component: AssessorRegisterComponent, title: 'ลงทะเบียนผู้ตรวจประเมิน - Green Sync' },
+  {
+    path: 'auth/reset-password',
+    loadComponent: () => import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    title: 'ตั้งรหัสผ่านใหม่ - Green Sync'
+  },
   { path: 'privacy-policy', loadComponent: () => import('./features/legal/privacy-policy/privacy-policy').then(m => m.PrivacyPolicyComponent), title: 'นโยบายความเป็นส่วนตัว - Green Sync' },
   { path: 'terms', loadComponent: () => import('./features/legal/terms/terms').then(m => m.TermsComponent), title: 'ข้อตกลงการให้บริการ - Green Sync' },
   {

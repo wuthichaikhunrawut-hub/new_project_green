@@ -2,21 +2,30 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { UserRole } from '../users/entities/user.entity';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { MailService } from '../notifications/mail.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private usersService: UsersService,
     private orgService: OrganizationsService,
     private jwtService: JwtService,
     private auditLogsService: AuditLogsService,
+    private mailService: MailService,
+    private configService: ConfigService,
   ) {}
 
   async register(registerDto: any) {
@@ -165,5 +174,72 @@ export class AuthService {
       user: { id: user.id, email: user.email, role: UserRole.ASSESSOR },
       profile,
     };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.usersService.findByEmail(email);
+
+    // Always return success to prevent user enumeration
+    if (!user) {
+      this.logger.warn(`Forgot password requested for non-existing email: ${email}`);
+      return { message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ' };
+    }
+
+    // Generate secure token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date();
+    expires.setHours(expires.getHours() + 1); // 1 hour expiry
+
+    // Save token to user
+    await this.usersService.updateResetToken(user.id, token, expires);
+
+    // Build reset link
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+    const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
+
+    // Get user name for email
+    const fullUser = await this.usersService.findOne(user.id);
+    const userName = fullUser?.user_profile?.first_name || user.email.split('@')[0];
+
+    // Send email
+    try {
+      const html = this.mailService.getResetPasswordTemplate(userName, resetLink);
+      await this.mailService.sendMail(user.email, 'รีเซ็ตรหัสผ่าน Green Sync', html);
+      this.logger.log(`Reset password email sent to: ${user.email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send reset email to ${user.email}:`, error.message);
+    }
+
+    // Always log the link for development convenience
+    this.logger.log(`🔗 Password reset link for ${user.email}: ${resetLink}`);
+
+    return { message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    if (!token || !newPassword) {
+      throw new BadRequestException('กรุณาระบุ Token และรหัสผ่านใหม่');
+    }
+
+    if (newPassword.length < 6) {
+      throw new BadRequestException('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+    }
+
+    const user = await this.usersService.findByResetToken(token);
+    if (!user) {
+      throw new BadRequestException('ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว');
+    }
+
+    // Check expiry
+    if (user.reset_password_expires && user.reset_password_expires < new Date()) {
+      throw new BadRequestException('ลิงก์รีเซ็ตรหัสผ่านหมดอายุแล้ว กรุณาขอลิงก์ใหม่');
+    }
+
+    // Hash new password and clear token
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    await this.usersService.updatePasswordAndClearToken(user.id, hashedPassword);
+
+    this.logger.log(`Password reset successful for user: ${user.email}`);
+    return { message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้' };
   }
 }

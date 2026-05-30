@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { User, UserRole } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
 export interface Role {
   id: number;
@@ -17,7 +18,7 @@ export class UsersService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
-  private apiUrl = 'http://localhost:3001/users';
+  private apiUrl = `${environment.apiUrl}/users`;
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
@@ -56,5 +57,9 @@ export class UsersService {
 
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+  }
+
+  inviteUser(email: string, role: string, orgId: number, orgUnitId?: number): Observable<{ success: boolean; inviteUrl: string; user: User }> {
+    return this.http.post<any>(`${this.apiUrl}/invite`, { email, role, orgId, orgUnitId }, { headers: this.getHeaders() });
   }
 }

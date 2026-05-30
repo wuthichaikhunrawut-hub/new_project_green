@@ -61,6 +61,12 @@ export class User {
   })
   updated_at: Date;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  reset_password_token: string | null;
+
+  @Column({ type: 'timestamp without time zone', nullable: true })
+  reset_password_expires: Date | null;
+
   @ManyToOne(() => Organization, (org) => org.users, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'org_id' })
   organization: Organization;

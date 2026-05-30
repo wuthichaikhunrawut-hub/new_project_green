@@ -25,4 +25,16 @@ export class AuthController {
     this.logger.log(`Login request for: ${loginDto.email}`);
     return this.authService.login(loginDto);
   }
+
+  @Post('forgot-password')
+  forgotPassword(@Body() body: { email: string }) {
+    this.logger.log(`Forgot password request for: ${body.email}`);
+    return this.authService.forgotPassword(body.email);
+  }
+
+  @Post('reset-password')
+  resetPassword(@Body() body: { token: string; password: string }) {
+    this.logger.log('Reset password request received');
+    return this.authService.resetPassword(body.token, body.password);
+  }
 }

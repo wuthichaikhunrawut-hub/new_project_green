@@ -1,227 +1,234 @@
-<div class="max-w-7xl px-4 sm:px-6 lg:px-8 py-8 animate-in">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in">
   <!-- 1. Page Header -->
-  <div class="page-header mb-8">
-    <div class="page-header-left">
-      <h1 class="page-title">โปรไฟล์</h1>
-      <p class="page-subtitle">จัดการข้อมูลส่วนตัว สังกัดสาขา และข้อมูลองค์กรสำหรับระบบ Green Sync</p>
+  <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div>
+      <h1 class="text-2xl font-black text-emerald-600 tracking-tight">ข้อมูลองค์กร</h1>
+      <p class="text-sm text-slate-400">จัดการข้อมูลส่วนตัว สังกัดสาขา และข้อมูลองค์กรสำหรับระบบ Green Sync</p>
     </div>
   </div>
 
-  <!-- 2. Responsive Layout Grid -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="p-12 text-center text-slate-500 bg-white rounded-3xl border border-slate-100 shadow-sm">
+    <i class="fa-solid fa-circle-notch fa-spin text-2xl text-emerald-600 mb-3 block"></i>
+    กำลังโหลดข้อมูลองค์กร...
+  </div>
 
-    <!-- 3. Left Column: Organization Summary Card -->
-    <div class="lg:col-span-4 space-y-6">
-      <div class="bg-white rounded-2xl shadow-xl shadow-slate-200/50 border border-slate-200 overflow-hidden">
-        <!-- Premium Gradient Header -->
-        <div class="h-32 bg-gradient-to-br from-green-600 to-emerald-800 w-full relative">
-          <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
-        </div>
-        
-        <div class="px-6 pb-8 text-center relative">
-          <!-- Avatar overlaying header -->
-          <div class="relative inline-block -mt-16 mb-4">
-            <div class="w-32 h-32 bg-white rounded-3xl border-8 border-white shadow-xl flex items-center justify-center overflow-hidden">
-              <img src="assets/image/org_placeholder.png" alt="Organization Logo" class="w-full h-full object-cover">
-            </div>
-            <button *ngIf="isEditingOrg" class="absolute bottom-1 right-1 bg-slate-700 text-white w-10 h-10 rounded-2xl shadow-lg hover:bg-slate-800 flex items-center justify-center transition-all hover:scale-110 active:scale-95" (click)="onLogoUpload()" title="เปลี่ยนโลโก้">
-              <i class="fa-solid fa-camera text-sm"></i>
-            </button>
+  <div *ngIf="!isLoading" class="space-y-8">
+    <!-- 2. Premium Hero Banner Card -->
+    <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden relative">
+      <div class="h-40 bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 w-full relative">
+        <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+      </div>
+      <div class="px-8 pb-8 pt-4 flex flex-col md:flex-row items-center md:items-end gap-6 -mt-16 relative z-10">
+        <div class="relative">
+          <div class="w-32 h-32 bg-white rounded-3xl border-4 border-white shadow-xl overflow-hidden flex items-center justify-center">
+            <img src="assets/image/org_placeholder.png" alt="Organization Logo" class="w-full h-full object-cover">
           </div>
-
-          <h2 class="text-2xl font-black text-slate-900 mb-2 line-clamp-2 leading-tight">{{ orgForm.get('name')?.value || 'ชื่อองค์กร' }}</h2>
-          <div class="flex items-center justify-center gap-2 mb-8">
+          <button *ngIf="isEditingOrg" class="absolute -bottom-2 -right-2 bg-emerald-600 hover:bg-emerald-700 text-white w-10 h-10 rounded-2xl shadow-lg flex items-center justify-center transition-all hover:scale-110 active:scale-95" (click)="onLogoUpload()" title="เปลี่ยนโลโก้">
+            <i class="fa-solid fa-camera text-sm"></i>
+          </button>
+        </div>
+        <div class="text-center md:text-left flex-grow">
+          <h2 class="text-2xl font-black text-slate-900 leading-tight mb-2">
+            {{ orgForm.get('name')?.value || 'ชื่อองค์กร' }}
+          </h2>
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-2">
             <span class="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold text-slate-600 uppercase tracking-widest border border-slate-200">
               {{ orgForm.get('industry_type')?.value === 'office' ? 'สำนักงาน' : 
                  orgForm.get('industry_type')?.value === 'factory' ? 'โรงงานอุตสาหกรรม' : 
                  orgForm.get('industry_type')?.value === 'education' ? 'สถานศึกษา' : 'ประเภททั่วไป' }}
             </span>
+            <span class="inline-flex items-center rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-bold text-emerald-700 uppercase tracking-widest border border-emerald-200">
+              <i class="fa-solid fa-circle-check me-1"></i> ยืนยันตัวตนแล้ว
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 1: ข้อมูลส่วนตัว (Personal Information) -->
+    <div class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
+      <form [formGroup]="userForm" class="p-6 sm:p-8">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i class="fa-solid fa-user text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-slate-800">ข้อมูลส่วนตัว</h3>
+              <p class="text-xs text-slate-400">Personal Information</p>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button *ngIf="!isEditingUser" type="button" class="px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all flex items-center gap-1.5" (click)="toggleEditUser()">
+              <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลส่วนตัว
+            </button>
+            <ng-container *ngIf="isEditingUser">
+              <button type="button" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-50 rounded-xl transition-all" (click)="toggleEditUser()">ยกเลิก</button>
+              <button type="button" class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all" (click)="saveUserProfile()">บันทึก</button>
+            </ng-container>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ชื่อ (First Name)</label>
+            <input type="text" formControlName="first_name" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
           </div>
 
-          <div class="bg-slate-50 rounded-2xl p-5 text-left border border-slate-100">
-            <div class="flex items-center mb-2">
-              <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3">
-                <i class="fa-solid fa-check-double text-green-600 text-sm"></i>
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">นามสกุล (Last Name)</label>
+            <input type="text" formControlName="last_name" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">อีเมล (Email)</label>
+            <input type="text" formControlName="email" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 bg-slate-50 text-slate-400 transition-all cursor-not-allowed" readonly>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">สาขา / แผนก (Organization Unit)</label>
+            <select formControlName="org_unit_id" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer">
+              <option value="">-- สำนักงานใหญ่ (Headquarters) --</option>
+              <option *ngFor="let b of branches" [value]="b.id">{{ b.unit_name }} ({{ b.unit_type }})</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Organization Forms -->
+    <form [formGroup]="orgForm" class="space-y-8">
+      <!-- Card 2: ข้อมูลทั่วไปองค์กร (Organization Information) -->
+      <div class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
+        <div class="p-6 sm:p-8">
+          <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <i class="fa-solid fa-building text-lg"></i>
               </div>
               <div>
-                <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Account Status</p>
-                <span class="text-sm font-bold text-slate-900">ยืนยันตัวตนเรียบร้อยแล้ว</span>
+                <h3 class="text-lg font-bold text-slate-800">ข้อมูลองค์กร</h3>
+                <p class="text-xs text-slate-400">Organization Information</p>
               </div>
             </div>
-            <div class="mt-4 pt-4 border-t border-slate-200/60">
-              <p class="text-[10px] font-bold text-slate-400">สมาชิกตั้งแต่: 1 มกราคม 2567</p>
+            <div class="flex gap-2" *ngIf="isOrgAdmin">
+              <button *ngIf="!isEditingOrg" type="button" class="px-4 py-2 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl transition-all flex items-center gap-1.5" (click)="toggleEditOrg()">
+                <i class="fa-solid fa-pen-to-square"></i> แก้ไขข้อมูลองค์กร
+              </button>
+              <ng-container *ngIf="isEditingOrg">
+                <button type="button" class="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 bg-slate-50 rounded-xl transition-all" (click)="toggleEditOrg()">ยกเลิก</button>
+                <button type="button" class="px-4 py-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md shadow-emerald-600/20 transition-all" (click)="saveOrgProfile()">บันทึก</button>
+              </ng-container>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Column: Form Sections -->
-    <div class="lg:col-span-8">
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div class="divide-y divide-gray-100">
           
-          <!-- Loading State -->
-          <div *ngIf="isLoading" class="p-12 text-center text-gray-500">
-            <i class="fa-solid fa-circle-notch fa-spin text-2xl text-green-600 mb-3 block"></i>
-            กำลังโหลดข้อมูลองค์กร...
-          </div>
-
-          <div *ngIf="!isLoading" class="space-y-6">
-
-            <!-- Section 0: User Information -->
-            <form [formGroup]="userForm" class="p-6 sm:p-8 border-b border-gray-100">
-              <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold leading-6 text-gray-900">ข้อมูลส่วนตัว (Personal Information)</h3>
-                <div class="flex gap-2">
-                  <button *ngIf="!isEditingUser" type="button" class="text-sm font-medium text-green-600 hover:text-green-700" (click)="toggleEditUser()">
-                    <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลส่วนตัว
-                  </button>
-                  <ng-container *ngIf="isEditingUser">
-                    <button type="button" class="text-sm font-medium text-slate-500 hover:text-slate-700" (click)="toggleEditUser()">ยกเลิก</button>
-                    <button type="button" class="text-sm font-medium text-green-600 hover:text-green-700 bg-green-50 px-3 py-1 rounded-lg" (click)="saveUserProfile()">บันทึก</button>
-                  </ng-container>
-                </div>
-              </div>
-              
-              <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">ชื่อ (First Name)</label>
-                  <input type="text" formControlName="first_name" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">นามสกุล (Last Name)</label>
-                  <input type="text" formControlName="last_name" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">อีเมล (Email)</label>
-                  <input type="text" formControlName="email" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 bg-gray-50 disabled:text-gray-500 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">สาขา / แผนก (Organization Unit)</label>
-                  <select formControlName="org_unit_id" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all cursor-pointer">
-                    <option value="">-- สำนักงานใหญ่ (Headquarters) --</option>
-                    <option *ngFor="let b of branches" [value]="b.id">{{ b.unit_name }} ({{ b.unit_type }})</option>
-                  </select>
-                </div>
-              </div>
-            </form>
-            
-            <!-- Section 1: General Information -->
-            <form [formGroup]="orgForm" class="p-6 sm:p-8">
-              <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold leading-6 text-gray-900">ข้อมูลทั่วไป (Organization Information)</h3>
-                <div class="flex gap-2" *ngIf="isOrgAdmin">
-                  <button *ngIf="!isEditingOrg" type="button" class="text-sm font-medium text-green-600 hover:text-green-700" (click)="toggleEditOrg()">
-                    <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลองค์กร
-                  </button>
-                  <ng-container *ngIf="isEditingOrg">
-                    <button type="button" class="text-sm font-medium text-slate-500 hover:text-slate-700" (click)="toggleEditOrg()">ยกเลิก</button>
-                    <button type="button" class="text-sm font-medium text-green-600 hover:text-green-700 bg-green-50 px-3 py-1 rounded-lg" (click)="saveOrgProfile()">บันทึก</button>
-                  </ng-container>
-                </div>
-              </div>
-              
-              <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
-                <div class="sm:col-span-2">
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">ชื่อองค์กร / บริษัท</label>
-                  <input type="text" formControlName="name" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                  <p *ngIf="orgForm.get('name')?.invalid && orgForm.get('name')?.touched" class="mt-1.5 text-xs text-red-600"><i class="fa-solid fa-circle-exclamation mr-1"></i>กรุณาระบุชื่อองค์กร (อย่างน้อย 5 ตัวอักษร)</p>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">เลขประจำตัวผู้เสียภาษี (13 หลัก)</label>
-                  <input type="text" formControlName="tax_id" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                  <p *ngIf="orgForm.get('tax_id')?.invalid && orgForm.get('tax_id')?.touched" class="mt-1.5 text-xs text-red-600"><i class="fa-solid fa-circle-exclamation mr-1"></i>กรุณาระบุเลขประจำตัวผู้เสียภาษีให้ถูกต้อง</p>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">ประเภทอุตสาหกรรม</label>
-                  <select formControlName="industry_type" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all cursor-pointer">
-                    <option value="office">สำนักงาน (Office)</option>
-                    <option value="factory">โรงงานอุตสาหกรรม (Factory)</option>
-                    <option value="education">สถานศึกษา (Education)</option>
-                    <option value="healthcare">สถานพยาบาล (Healthcare)</option>
-                    <option value="other">อื่นๆ (Other)</option>
-                  </select>
-                </div>
-              </div>
-
-            <!-- Section 2: Environmental Data -->
-            <div class="p-6 sm:p-8 bg-gray-50/50 rounded-b-xl border-t border-gray-100">
-              <h3 class="text-lg font-semibold leading-6 text-gray-900 mb-6">ข้อมูลสิ่งแวดล้อม (Environmental Data)</h3>
-              
-              <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8 mb-6">
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">จำนวนพนักงาน (คน)</label>
-                  <div class="relative mt-2 rounded-lg shadow-sm">
-                    <input type="number" formControlName="number_of_employees" class="block w-full rounded-lg border-0 py-2.5 pl-3.5 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                      <span class="text-gray-500 sm:text-sm">คน</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">พื้นที่ใช้สอยรวม (ตร.ม.)</label>
-                  <div class="relative mt-2 rounded-lg shadow-sm">
-                    <input type="number" formControlName="total_floor_area" class="block w-full rounded-lg border-0 py-2.5 pl-3.5 pr-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                      <span class="text-gray-500 sm:text-sm">ตร.ม.</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">ชั่วโมงทำงาน (ชั่วโมง/ปี)</label>
-                  <div class="relative mt-2 rounded-lg shadow-sm">
-                    <input type="number" formControlName="working_hours_per_year" class="block w-full rounded-lg border-0 py-2.5 pl-3.5 pr-16 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                      <span class="text-gray-500 sm:text-sm">ชม./ปี</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">ปีฐาน (Base Year)</label>
-                  <input type="number" formControlName="base_year" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">เป้าหมายลดคาร์บอน (%)</label>
-                  <div class="relative mt-2 rounded-lg shadow-sm">
-                    <input type="number" formControlName="target_reduction_percent" class="block w-full rounded-lg border-0 py-2.5 pl-3.5 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all">
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
-                      <span class="text-gray-500 sm:text-sm">%</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-1.5 focus-within:text-green-600 transition-colors">สถานะ Green Office ปัจจุบัน</label>
-                  <select formControlName="current_green_status" class="block w-full rounded-lg border-0 py-2.5 px-3.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6 bg-white disabled:bg-gray-50 disabled:text-gray-500 transition-all cursor-pointer">
-                    <option value="none">ยังไม่ได้เข้าร่วม</option>
-                    <option value="gold">ระดับเหรียญทอง (Gold)</option>
-                    <option value="silver">ระดับเหรียญเงิน (Silver)</option>
-                    <option value="bronze">ระดับเหรียญทองแดง (Bronze)</option>
-                  </select>
-                </div>
-              </div>
-
-              <!-- Helper Info Box -->
-              <div class="bg-green-50 border border-green-200/60 rounded-lg p-4 flex gap-3 shadow-sm mt-8">
-                <i class="fa-solid fa-circle-info text-green-600 mt-0.5" aria-hidden="true"></i>
-                <p class="text-sm text-green-800 leading-snug">
-                  ข้อมูลเหล่านี้จะถูกนำไปใช้ในการคำนวณ Carbon Footprint และการประเมิน Green Office
-                </p>
-              </div>
+          <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ชื่อองค์กร / บริษัท</label>
+              <input type="text" formControlName="name" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+              <p *ngIf="orgForm.get('name')?.invalid && orgForm.get('name')?.touched" class="mt-1.5 text-xs text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i>กรุณาระบุชื่อองค์กร (อย่างน้อย 5 ตัวอักษร)</p>
             </div>
-          </form>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">เลขประจำตัวผู้เสียภาษี (13 หลัก)</label>
+              <input type="text" formControlName="tax_id" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+              <p *ngIf="orgForm.get('tax_id')?.invalid && orgForm.get('tax_id')?.touched" class="mt-1.5 text-xs text-red-600 flex items-center gap-1"><i class="fa-solid fa-circle-exclamation"></i>กรุณาระบุเลขประจำตัวผู้เสียภาษีให้ถูกต้อง</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ประเภทอุตสาหกรรม</label>
+              <select formControlName="industry_type" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer">
+                <option value="office">สำนักงาน (Office)</option>
+                <option value="factory">โรงงานอุตสาหกรรม (Factory)</option>
+                <option value="education">สถานศึกษา (Education)</option>
+                <option value="healthcare">สถานพยาบาล (Healthcare)</option>
+                <option value="other">อื่นๆ (Other)</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      <!-- Card 3: ข้อมูลสิ่งแวดล้อม (Environmental Data) -->
+      <div class="bg-white rounded-3xl shadow-md border border-slate-100 overflow-hidden">
+        <div class="p-6 sm:p-8">
+          <div class="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <i class="fa-solid fa-leaf text-lg"></i>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-slate-800">ข้อมูลสิ่งแวดล้อม</h3>
+              <p class="text-xs text-slate-400">Environmental Data</p>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-8">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">จำนวนพนักงาน (คน)</label>
+              <div class="relative rounded-xl">
+                <input type="number" formControlName="number_of_employees" class="block w-full rounded-xl border border-slate-200 py-3 pl-4 pr-12 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                  <span class="text-slate-400 text-xs font-bold">คน</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">พื้นที่ใช้สอยรวม (ตร.ม.)</label>
+              <div class="relative rounded-xl">
+                <input type="number" formControlName="total_floor_area" class="block w-full rounded-xl border border-slate-200 py-3 pl-4 pr-12 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                  <span class="text-slate-400 text-xs font-bold">ตร.ม.</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ชั่วโมงทำงาน (ชั่วโมง/ปี)</label>
+              <div class="relative rounded-xl">
+                <input type="number" formControlName="working_hours_per_year" class="block w-full rounded-xl border border-slate-200 py-3 pl-4 pr-16 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                  <span class="text-slate-400 text-xs font-bold">ชม./ปี</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">ปีฐาน (Base Year)</label>
+              <input type="number" formControlName="base_year" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">เป้าหมายลดคาร์บอน (%)</label>
+              <div class="relative rounded-xl">
+                <input type="number" formControlName="target_reduction_percent" class="block w-full rounded-xl border border-slate-200 py-3 pl-4 pr-10 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all">
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                  <span class="text-slate-400 text-xs font-bold">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">สถานะ Green Office ปัจจุบัน</label>
+              <select formControlName="current_green_status" class="block w-full rounded-xl border border-slate-200 py-3 px-4 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 bg-white disabled:bg-slate-50 disabled:text-slate-400 transition-all cursor-pointer">
+                <option value="none">ยังไม่ได้เข้าร่วม</option>
+                <option value="gold">ระดับเหรียญทอง (Gold)</option>
+                <option value="silver">ระดับเหรียญเงิน (Silver)</option>
+                <option value="bronze">ระดับเหรียญทองแดง (Bronze)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Helper Info Box -->
+          <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex gap-3 shadow-sm mt-8">
+            <i class="fa-solid fa-circle-info text-emerald-600 mt-0.5" aria-hidden="true"></i>
+            <p class="text-sm text-emerald-800 leading-snug">
+              ข้อมูลเหล่านี้จะถูกนำไปใช้ในการคำนวณ Carbon Footprint และการประเมิน Green Office
+            </p>
+          </div>
+        </div>
+      </div>
+    </form>
   </div>
 </div>

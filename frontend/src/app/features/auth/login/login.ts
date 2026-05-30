@@ -17,15 +17,52 @@ export class LoginComponent {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
-  // Using username as email field for simplicity in UI right now
   username = '';
   password = '';
   errorMessage = '';
   isLoading = false;
 
+  // Forgot Password Modal State
+  showForgotModal = false;
+  forgotEmail = '';
+  forgotLoading = false;
+  forgotSuccess = false;
+  forgotError = '';
+
   forgotPassword() {
-    this.errorMessage = 'ระบบรีเซ็ตรหัสผ่านกำลังอยู่ในระหว่างการพัฒนาครับ';
-    this.cdr.markForCheck();
+    this.showForgotModal = true;
+    this.forgotEmail = this.username; // pre-fill from login form
+    this.forgotSuccess = false;
+    this.forgotError = '';
+  }
+
+  closeForgotModal() {
+    this.showForgotModal = false;
+    this.forgotEmail = '';
+    this.forgotError = '';
+    this.forgotSuccess = false;
+    this.forgotLoading = false;
+  }
+
+  submitForgotPassword() {
+    if (!this.forgotEmail.trim()) {
+      this.forgotError = 'กรุณากรอกอีเมลของคุณ';
+      return;
+    }
+    this.forgotLoading = true;
+    this.forgotError = '';
+    this.authService.forgotPassword(this.forgotEmail).subscribe({
+      next: () => {
+        this.forgotLoading = false;
+        this.forgotSuccess = true;
+        this.cdr.markForCheck();
+      },
+      error: (err: any) => {
+        this.forgotLoading = false;
+        this.forgotError = err.error?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   onLogin() {

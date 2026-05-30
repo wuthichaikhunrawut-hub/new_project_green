@@ -82,6 +82,14 @@ export class AuthService {
     return null;
   }
 
+  forgotPassword(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/reset-password`, { token, password });
+  }
+
   private handleAuthResponse(response: AuthResponse) {
     if (response && response.access_token) {
       // Enrich user with organization name for sidebar display

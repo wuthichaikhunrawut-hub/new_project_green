@@ -8,6 +8,7 @@ import { OrganizationsModule } from '../organizations/organizations.module';
 import { SettingsModule } from '../settings/settings.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
     SettingsModule,
     SubscriptionsModule,
     AuditLogsModule,
+    NotificationsModule,
     JwtModule.registerAsync({
       global: true,
       imports: [ConfigModule],

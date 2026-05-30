@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
       <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">แนบหลักฐาน (PDF, รูปภาพ)</label>
       <div class="flex items-center gap-3">
         <label class="cursor-pointer">
-          <input type="file" (change)="onFileSelected($event)" multiple class="sr-only">
+          <input type="file" (change)="onFileSelected($event)" multiple accept=".pdf,.jpg,.jpeg,.png" class="sr-only">
           <span class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold transition-colors">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             เพิ่มไฟล์
@@ -41,6 +41,18 @@ export class EvidenceUploadComponent {
   onFileSelected(event: any) {
     const files: FileList = event.target.files;
     if (files.length > 0) {
+      const allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+      const invalidFiles = Array.from(files).filter(file => {
+        const ext = file.name.split('.').pop()?.toLowerCase() || '';
+        return !allowedExtensions.includes(ext);
+      });
+
+      if (invalidFiles.length > 0) {
+        alert('ระบบรองรับเฉพาะไฟล์ PDF, JPG, JPEG และ PNG เท่านั้นครับ');
+        event.target.value = ''; // Reset file input
+        return;
+      }
+
       this.filesSelected.emit(files);
     }
   }

@@ -89,4 +89,25 @@ export class MailService {
       </div>
     `;
   }
+
+  getResetPasswordTemplate(userName: string, resetLink: string) {
+    return `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+        <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 800;">🔑 รีเซ็ตรหัสผ่าน</h1>
+          <p style="color: rgba(255,255,255,0.85); margin: 8px 0 0; font-size: 13px;">Green Sync — ระบบจัดการสำนักงานสีเขียว</p>
+        </div>
+        <div style="padding: 32px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.7;">สวัสดีครับ <strong>${userName}</strong>,</p>
+          <p style="color: #64748b; font-size: 14px; line-height: 1.7;">เราได้รับคำขอรีเซ็ตรหัสผ่านสำหรับบัญชีของคุณ กรุณากดปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+          <div style="text-align: center; margin: 28px 0;">
+            <a href="${resetLink}" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #059669, #0d9488); color: white; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 15px; box-shadow: 0 4px 14px rgba(5,150,105,0.3);">ตั้งรหัสผ่านใหม่</a>
+          </div>
+          <p style="color: #94a3b8; font-size: 12px; line-height: 1.6;">ลิงก์นี้จะหมดอายุใน <strong>1 ชั่วโมง</strong> หากคุณไม่ได้ร้องขอ กรุณาเพิกเฉยอีเมลนี้</p>
+          <hr style="border: none; border-top: 1px solid #f1f5f9; margin: 24px 0;">
+          <p style="color: #cbd5e1; font-size: 11px; text-align: center;">© 2026 GreenSync Technology. All rights reserved.</p>
+        </div>
+      </div>
+    `;
+  }
 }

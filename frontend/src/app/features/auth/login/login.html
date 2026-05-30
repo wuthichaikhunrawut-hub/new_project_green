@@ -93,4 +93,53 @@
     </div>
   </div>
 
+  <!-- Forgot Password Premium Modal -->
+  <div *ngIf="showForgotModal" class="forgot-modal-overlay" (click)="closeForgotModal()">
+    <div class="forgot-modal-card animate-in" (click)="$event.stopPropagation()">
+      
+      <!-- Success State -->
+      <div *ngIf="forgotSuccess" class="forgot-success-state">
+        <div class="success-icon-wrap">
+          <i class="fa-solid fa-paper-plane"></i>
+        </div>
+        <h3>ส่งลิงก์เรียบร้อยแล้ว!</h3>
+        <p>หากอีเมล <strong>{{ forgotEmail }}</strong> มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ</p>
+        <p class="forgot-hint">กรุณาตรวจสอบกล่องจดหมายและโฟลเดอร์สแปมของคุณ</p>
+        <button type="button" class="btn-forgot-close" (click)="closeForgotModal()">กลับหน้าเข้าสู่ระบบ</button>
+      </div>
+
+      <!-- Form State -->
+      <div *ngIf="!forgotSuccess">
+        <div class="forgot-modal-header">
+          <div class="forgot-icon-wrap">
+            <i class="fa-solid fa-lock-open"></i>
+          </div>
+          <h3>ลืมรหัสผ่าน?</h3>
+          <p>กรอกอีเมลที่ลงทะเบียนไว้ เราจะส่งลิงก์สำหรับตั้งรหัสผ่านใหม่ให้คุณ</p>
+        </div>
+
+        <div class="forgot-modal-body">
+          <div class="input-wrapper">
+            <i class="fa-solid fa-envelope"></i>
+            <input type="email" [(ngModel)]="forgotEmail" placeholder="email@organization.com" (keyup.enter)="submitForgotPassword()">
+          </div>
+
+          <div *ngIf="forgotError" class="error-alert" style="margin-top: 12px;">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {{ forgotError }}
+          </div>
+        </div>
+
+        <div class="forgot-modal-footer">
+          <button type="button" class="btn-forgot-cancel" (click)="closeForgotModal()">ยกเลิก</button>
+          <button type="button" class="btn-forgot-submit" (click)="submitForgotPassword()" [disabled]="forgotLoading">
+            <span *ngIf="forgotLoading" class="spinner-border spinner-border-sm me-2"></span>
+            {{ forgotLoading ? 'กำลังส่ง...' : 'ส่งลิงก์รีเซ็ต' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
 </div>
