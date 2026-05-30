@@ -1,8 +1,10 @@
 <div class="container-fluid p-4 p-lg-5 animate-in">
     <!-- Header -->
-    <div class="mb-5">
-        <h1 class="page-title fw-bold mb-2">ส่งการแจ้งเตือน</h1>
-        <p class="text-muted fs-6">ระบบกระจายข้อมูลข่าวสารระดับองค์กรแบบ Real-time</p>
+    <div class="page-header mb-4">
+        <div class="page-header-left">
+            <h2 class="page-title">ส่งการแจ้งเตือน</h2>
+            <p class="page-subtitle mb-0">ระบบกระจายข้อมูลข่าวสารระดับองค์กรแบบ Real-time</p>
+        </div>
     </div>
 
     <div class="row g-4 g-xl-5">
@@ -223,7 +225,35 @@
             </td>
             <td>
               <div class="fw-bold text-dark">{{ item.title }}</div>
-              <div class="text-muted small text-truncate max-w-[300px]">{{ item.message }}</div>
+              <div *ngIf="isRequestProposal(item)" class="mt-2 bg-light p-3 rounded-3 border">
+                <div class="small fw-bold text-dark"><i class="fa-solid fa-flask me-1 text-primary"></i>รายละเอียดข้อเสนอ:</div>
+                <div class="small text-muted mt-1">เรื่อง: <b class="text-dark">{{ parseRequestProposal(item)?.name }}</b></div>
+                <div class="d-flex align-items-center gap-3 mt-2">
+                  <span class="badge bg-secondary">ค่าเดิม: {{ parseRequestProposal(item)?.oldValue }}</span>
+                  <i class="fa-solid fa-arrow-right text-muted"></i>
+                  <span class="badge bg-success">ค่าใหม่เสนอแก้: {{ parseRequestProposal(item)?.newValue }}</span>
+                </div>
+                <div class="small text-muted mt-2">
+                  <i class="fa-solid fa-circle-question me-1 text-info"></i>เหตุผล: "{{ parseRequestProposal(item)?.reason }}"
+                </div>
+                <div *ngIf="parseRequestProposal(item)?.rejectReason" class="small text-danger mt-2 fw-semibold">
+                  <i class="fa-solid fa-triangle-exclamation me-1"></i>ถูกปฏิเสธเนื่องจาก: "{{ parseRequestProposal(item)?.rejectReason }}"
+                </div>
+                <div class="d-flex gap-2 mt-3" *ngIf="parseRequestProposal(item)?.status === 'PENDING'">
+                  <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" (click)="approveProposal(item)">
+                    <i class="fa-solid fa-check-double me-1"></i>อนุมัติเปิดใช้งานจริง
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" (click)="openRejectModal(item)">
+                    <i class="fa-solid fa-xmark me-1"></i>ปฏิเสธข้อเสนอ
+                  </button>
+                </div>
+                <div class="mt-2" *ngIf="parseRequestProposal(item)?.status !== 'PENDING'">
+                  <span class="badge rounded-pill px-3 py-1" [ngClass]="parseRequestProposal(item)?.status === 'APPROVED' ? 'bg-success' : 'bg-danger'">
+                    {{ parseRequestProposal(item)?.status === 'APPROVED' ? 'อนุมัติเรียบร้อยแล้ว' : 'ปฏิเสธคำขอแล้ว' }}
+                  </span>
+                </div>
+              </div>
+              <div *ngIf="!isRequestProposal(item)" class="text-muted small text-truncate max-w-[300px]">{{ item.message }}</div>
             </td>
             <td>
               <span class="badge rounded-pill px-3 py-2" 
@@ -231,9 +261,10 @@
                   'bg-info text-dark': item.type === 'SYSTEM',
                   'bg-primary': item.type === 'ASSESSMENT',
                   'bg-warning text-dark': item.type === 'DEADLINE',
+                  'bg-secondary bg-purple-600 text-white': item.type === 'REQUEST',
                   'bg-danger': item.type === 'URGENT'
                 }">
-                {{ item.type }}
+                {{ item.type === 'REQUEST' ? 'คำร้องอนุมัติวิชาการ' : item.type }}
               </span>
             </td>
             <td>
@@ -279,6 +310,30 @@
         <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="notificationToDelete = null">ยกเลิก</button>
         <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDeleteNotification()">
           <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Proposal Reason Modal -->
+<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="rejectingItem !== null" style="z-index: 1056;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg">
+      <div class="modal-header border-bottom p-4">
+        <h5 class="modal-title fw-bold mb-0 text-danger">ระบุเหตุผลการปฏิเสธคำร้อง</h5>
+        <button type="button" class="btn-close" (click)="rejectingItem = null"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3 text-start">
+          <label class="form-label text-muted small fw-bold">เหตุผลที่ไม่สามารถอนุมัติได้</label>
+          <textarea class="form-control" rows="4" [(ngModel)]="rejectReason" placeholder="ระบุเหตุผลเชิงวิชาการหรือข้อกำหนดเพื่อให้ผู้เสนอแนะแก้ไข..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="rejectingItem = null">ยกเลิก</button>
+        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmRejectProposal()">
+          <i class="fa-solid fa-circle-xmark me-2"></i> ยืนยันการปฏิเสธ
         </button>
       </div>
     </div>

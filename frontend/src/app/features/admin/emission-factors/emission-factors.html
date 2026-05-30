@@ -96,7 +96,7 @@
                       <hr class="dropdown-divider">
                     </li>
                     <li>
-                      <button class="dropdown-item text-danger" (click)="deleteFactor(item.id!)">
+                      <button *ngIf="isSystemAdmin" class="dropdown-item text-danger" (click)="deleteFactor(item.id!)">
                         <i class="fa-solid fa-trash-can me-2"></i> ลบข้อมูล
                       </button>
                     </li>
@@ -120,7 +120,7 @@
   <div class="modal-dialog modal-dialog-centered" *ngIf="selectedFactor">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold">{{ selectedFactor.id ? 'แก้ไขค่าสัมประสิทธิ์' : 'เพิ่มตัวคูณใหม่' }}</h5>
+        <h5 class="modal-title fw-bold">{{ isSystemAdmin ? (selectedFactor.id ? 'แก้ไขค่าสัมประสิทธิ์' : 'เพิ่มตัวคูณใหม่') : 'ยื่นข้อเสนอคำร้องแก้ไขค่าสัมประสิทธิ์' }}</h5>
         <button type="button" class="btn-close" (click)="closeModal()"></button>
       </div>
       <div class="modal-body p-4">
@@ -162,7 +162,7 @@
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
           <button class="btn btn-light me-md-2" (click)="closeModal()" [disabled]="isSaving">ยกเลิก</button>
           <button class="btn btn-primary shadow-sm fw-bold px-4" (click)="saveFactor()" [disabled]="isSaving">
-            <i class="fa-solid fa-floppy-disk me-2"></i> {{ selectedFactor.id ? 'บันทึกการเปลี่ยนแปลง' : 'ยืนยันการเพิ่มข้อมูล' }}
+            <i class="fa-solid fa-floppy-disk me-2"></i> {{ isSystemAdmin ? (selectedFactor.id ? 'บันทึกการเปลี่ยนแปลง' : 'ยืนยันการเพิ่มข้อมูล') : 'ยื่นเสนอคำขออนุมัติ' }}
           </button>
         </div>
 

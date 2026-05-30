@@ -2,6 +2,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../core/services/auth.service';
 import { EmissionFactorsService, EmissionFactor } from '../../../core/services/emission-factors.service';
 
 @Component({
@@ -17,6 +19,8 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
   private factorsService = inject(EmissionFactorsService);
   private cdr = inject(ChangeDetectorRef);
   private renderer = inject(Renderer2);
+  private authService = inject(AuthService);
+  private http = inject(HttpClient);
 
   @ViewChild('modalRef') modalRef!: ElementRef;
   @ViewChild('deleteModalRef') deleteModalRef!: ElementRef;
@@ -24,15 +28,23 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
   factors: EmissionFactor[] = [];
   isLoading = true;
   isSaving = false;
-  
+  userRole = '';
+
   selectedFactor: Partial<EmissionFactor> | null = null;
   factorToDelete: string | null = null;
   searchText = '';
   activeTab: 'ALL' | 1 | 2 | 3 = 'ALL';
 
+  get isSystemAdmin(): boolean {
+    const role = String(this.userRole || '').trim().toUpperCase().replace(/[\s_]/g, '');
+    return role === 'SYSTEMADMIN' || role === 'ADMIN';
+  }
+
   scopes = [1, 2, 3];
 
   ngOnInit() {
+    const user = this.authService.getUser();
+    this.userRole = user?.role || '';
     this.loadFactors();
   }
 
@@ -120,6 +132,38 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
   saveFactor() {
     if (!this.selectedFactor) return;
     this.isSaving = true;
+
+    if (!this.isSystemAdmin) {
+      // ✅ Assessor Admin / Assessor -> Send Proposal Request instead of direct write
+      const originalValue = this.selectedFactor.id 
+        ? String(this.factors.find(f => f.id === this.selectedFactor?.id)?.factor_value || 0)
+        : '0';
+
+      const proposePayload = {
+        targetType: 'EMISSION_FACTOR',
+        targetId: this.selectedFactor.id || 0,
+        name: this.selectedFactor.name || 'เพิ่มปัจจัยการปล่อยก๊าซใหม่',
+        oldValue: originalValue,
+        newValue: String(this.selectedFactor.factor_value || 0),
+        reason: 'เสนอแก้ไขปรับปรุงตัวคูณคาร์บอนฟุตพริ้นท์โดยแอดมินผู้ประเมิน'
+      };
+
+      this.http.post('http://localhost:3001/notifications/propose-academic', proposePayload).subscribe({
+        next: () => {
+          this.toast.success('ยื่นข้อเสนอแก้ไขสูตรคาร์บอนต่อ System Admin เรียบร้อยแล้วครับ');
+          this.closeModal();
+          this.isSaving = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.error('เกิดข้อผิดพลาดในการยื่นส่งคำขออนุมัติ');
+          this.isSaving = false;
+          this.cdr.markForCheck();
+        }
+      });
+      return;
+    }
 
     if (this.selectedFactor.id) {
       this.factorsService.updateFactor(this.selectedFactor.id, this.selectedFactor).subscribe({

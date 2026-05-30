@@ -1,9 +1,12 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { RequestsService } from '../../core/services/requests.service';
 import { AuthService } from '../../core/services/auth.service';
+import { AssessorsAdminService } from '../../core/services/assessors-admin.service';
+import { ToastService } from '../../core/services/toast.service';
 import { Assessment, AssessmentStatus } from '../../core/models/assessment.model';
 import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 
@@ -15,26 +18,39 @@ import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
   templateUrl: './requests.html',
   styleUrl: './requests.css'
 })
-export class RequestsComponent implements OnInit {
+export class RequestsComponent implements OnInit, OnDestroy {
   private requestsService = inject(RequestsService);
   private authService = inject(AuthService);
+  private assessorsSvc = inject(AssessorsAdminService);
+  private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
+  private subscription = new Subscription();
 
   requests: Assessment[] = [];
   isLoading = true;
   isSubmitting = false;
-  user = this.authService.getUser();
+  user: any = null;
 
   get userRoleKey(): string {
     const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
     if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') return 'SYSTEM_ADMIN';
     if (role === 'ORGANIZATION_ADMIN' || role === 'ORG_ADMIN') return 'ORG_ADMIN';
-    if (role === 'ASSESSOR') return 'ASSESSOR';
+    if (role === 'ASSESSOR' || role === 'ASSESSOR_ADMIN') return 'ASSESSOR';
     return role;
   }
   
   searchTerm: string = '';
   statusFilter: string = '';
+  
+  assessorsList: any[] = [];
+  selectedReqForAssign: Assessment | null = null;
+  targetAssessorId: string = '';
+  isAssigning = false;
+
+  get isAssigner(): boolean {
+    const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
+    return ['SYSTEM_ADMIN', 'ADMIN', 'ASSESSOR_ADMIN'].includes(role);
+  }
 
   get isAllowedToSubmit(): boolean {
     const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
@@ -47,7 +63,65 @@ export class RequestsComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.loadRequests();
+    this.subscription.add(
+      this.authService.currentUser$.subscribe(user => {
+        this.user = user;
+        this.loadRequests();
+        if (this.isAssigner) {
+          this.loadAssessors();
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  loadAssessors() {
+    this.assessorsSvc.getAssessors().subscribe({
+      next: (data) => {
+        this.assessorsList = data || [];
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Failed to load assessors', err)
+    });
+  }
+
+  openAssignModal(req: Assessment) {
+    this.selectedReqForAssign = req;
+    this.targetAssessorId = req.assessor_user_id ? String(req.assessor_user_id) : '';
+    this.cdr.markForCheck();
+  }
+
+  closeAssignModal() {
+    this.selectedReqForAssign = null;
+    this.targetAssessorId = '';
+    this.cdr.markForCheck();
+  }
+
+  confirmAssign() {
+    if (!this.selectedReqForAssign) return;
+    this.isAssigning = true;
+    
+    const assessorId = this.targetAssessorId ? Number(this.targetAssessorId) : null;
+    
+    this.requestsService.updateRequest(this.selectedReqForAssign.id, {
+      assessor_user_id: assessorId as any
+    }).subscribe({
+      next: () => {
+        this.isAssigning = false;
+        this.toast.success('มอบหมายงานตรวจประเมินเรียบร้อยแล้ว');
+        this.closeAssignModal();
+        this.loadRequests();
+      },
+      error: (err) => {
+        console.error('Failed to assign assessor', err);
+        this.toast.error('เกิดข้อผิดพลาดในการมอบหมายงาน');
+        this.isAssigning = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   loadRequests() {

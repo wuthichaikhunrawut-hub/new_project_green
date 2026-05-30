@@ -78,12 +78,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  /** Normalise the role string from backend into a clean category */
   get roleKey(): string {
     const r = String(this.user?.role || '').trim().toUpperCase().split(' ').join('_');
     if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
     if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
     if (r === 'ASSESSOR') return 'ASSESSOR';
+    if (r === 'ASSESSOR_ADMIN') return 'ASSESSOR_ADMIN';
     if (r === 'EXECUTIVE') return 'EXECUTIVE';
     if (r === 'EMPLOYEE') return 'EMPLOYEE';
     if (r === 'USER') return 'USER';
@@ -111,7 +111,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
   get isSystemAdmin(): boolean { return this.roleKey === 'SYSTEM_ADMIN'; }
   get isOrgAdmin(): boolean { return this.roleKey === 'ORG_ADMIN'; }
   get isAnyAdmin(): boolean { return this.isSystemAdmin || this.isOrgAdmin; }
-  get isAssessor(): boolean { return this.roleKey === 'ASSESSOR'; }
+  get isAssessor(): boolean { return this.roleKey === 'ASSESSOR' || this.roleKey === 'ASSESSOR_ADMIN'; }
+  get isAssessorAdmin(): boolean { return this.roleKey === 'ASSESSOR_ADMIN'; }
   get isExecutive(): boolean { return this.roleKey === 'EXECUTIVE'; }
   get isEmployee(): boolean { return this.roleKey === 'EMPLOYEE'; }
   /** User or Employee or Executive — regular org members */

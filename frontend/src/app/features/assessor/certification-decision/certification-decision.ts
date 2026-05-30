@@ -6,6 +6,7 @@ import { AssessorService } from '../../../core/services/assessor.service';
 import { ScoreReviewItem } from '../../../core/models/assessor.model';
 import { ToastService } from '../../../shared/services/toast.service';
 import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-dialog';
+import { AuthService } from '../../../core/services/auth.service';
 
 type PendingAction = 'approve' | 'revision' | null;
 
@@ -21,6 +22,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
 
   requestId = 0;
   requestName = '';
@@ -34,6 +36,12 @@ export class AssessorCertificationDecisionComponent implements OnInit {
   confirmTitle = '';
   confirmMessage = '';
   confirmVariant: 'primary' | 'danger' = 'primary';
+
+  // Double Check Password States
+  passwordConfirmOpen = false;
+  passwordConfirmText = '';
+  passwordError = false;
+  isVerifyingPassword = false;
 
 
   get totalScore(): number {
@@ -112,8 +120,43 @@ export class AssessorCertificationDecisionComponent implements OnInit {
     const action = this.pendingAction;
     this.confirmOpen = false;
     this.pendingAction = null;
-    if (action === 'approve') this.executeApprove();
+    if (action === 'approve') {
+      this.passwordConfirmOpen = true;
+      this.passwordConfirmText = '';
+      this.passwordError = false;
+      this.cdr.markForCheck();
+    }
     if (action === 'revision') this.executeRevision();
+  }
+
+  verifyPasswordAndApprove(): void {
+    const user = this.authService.getUser();
+    if (!user || !user.email) {
+      this.toast.error('บัญชีผู้ใช้ไม่สมบูรณ์');
+      return;
+    }
+
+    this.isVerifyingPassword = true;
+    this.passwordError = false;
+
+    // Verify password via login api
+    this.authService.login({
+      email: user.email,
+      password: this.passwordConfirmText
+    }).subscribe({
+      next: () => {
+        this.passwordConfirmOpen = false;
+        this.isVerifyingPassword = false;
+        this.executeApprove();
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.isVerifyingPassword = false;
+        this.passwordError = true;
+        this.toast.error('ยืนยันรหัสผ่านไม่สำเร็จ');
+        this.cdr.markForCheck();
+      }
+    });
   }
 
 

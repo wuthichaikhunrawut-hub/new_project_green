@@ -2,6 +2,8 @@ import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../../core/services/auth.service';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
 
 interface GroupedCriteria {
@@ -23,6 +25,8 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
   private criteriaService = inject(GreenCriteriaService);
   private cdr = inject(ChangeDetectorRef);
   private renderer = inject(Renderer2);
+  private authService = inject(AuthService);
+  private http = inject(HttpClient);
 
   @ViewChild('modalRef') modalRef!: ElementRef;
   @ViewChild('deleteModalRef') deleteModalRef!: ElementRef;
@@ -31,13 +35,21 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
   groupedCriteria: GroupedCriteria[] = [];
   isLoading = true;
   isSaving = false;
+  userRole = '';
   
   selectedCriteria: Partial<GreenCriteria> | null = null;
   
   // For Confirm Modal
   criteriaToDelete: number | null = null;
 
+  get isSystemAdmin(): boolean {
+    const role = String(this.userRole || '').trim().toUpperCase().replace(/[\s_]/g, '');
+    return role === 'SYSTEMADMIN' || role === 'ADMIN';
+  }
+
   ngOnInit() {
+    const user = this.authService.getUser();
+    this.userRole = user?.role || '';
     this.loadCriteria();
   }
 
@@ -134,6 +146,38 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
   saveCriteria() {
     if (!this.selectedCriteria) return;
     this.isSaving = true;
+
+    if (!this.isSystemAdmin) {
+      // ✅ Assessor Admin / Assessor -> Send Proposal Request instead of direct write
+      const originalValue = this.selectedCriteria.id 
+        ? String(this.criteriaList.find(c => c.id === this.selectedCriteria?.id)?.max_score || 0)
+        : '0';
+
+      const proposePayload = {
+        targetType: 'CRITERIA',
+        targetId: this.selectedCriteria.id || 0,
+        name: this.selectedCriteria.criteria_name || 'เพิ่มเกณฑ์การประเมินใหม่',
+        oldValue: originalValue,
+        newValue: String(this.selectedCriteria.max_score || 0),
+        reason: 'เสนอแก้ไขปรับปรุงอัตราคะแนนสูงสุดของเกณฑ์ประเมินสำนักงานสีเขียว'
+      };
+
+      this.http.post('http://localhost:3001/notifications/propose-academic', proposePayload).subscribe({
+        next: () => {
+          this.toast.success('ยื่นข้อเสนอแก้ไขเกณฑ์สำนักงานสีเขียวต่อ System Admin เรียบร้อยแล้วครับ');
+          this.closeModal();
+          this.isSaving = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.error('เกิดข้อผิดพลาดในการยื่นส่งคำขออนุมัติ');
+          this.isSaving = false;
+          this.cdr.markForCheck();
+        }
+      });
+      return;
+    }
 
     if (this.selectedCriteria.id) {
       this.criteriaService.updateCriteria(this.selectedCriteria.id, this.selectedCriteria).subscribe({

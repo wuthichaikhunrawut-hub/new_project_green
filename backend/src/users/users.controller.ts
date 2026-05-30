@@ -25,7 +25,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
+  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ASSESSOR_ADMIN')
   findAll(@Query('role') role?: string, @Headers() headers?: any) {
     const orgIdStr = headers['x-org-id'];
     const userRole = headers['x-user-role'] || '';

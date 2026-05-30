@@ -4,6 +4,8 @@ import { Repository } from 'typeorm';
 import { Notification, NotificationType } from './entities/notification.entity';
 import { MailService } from './mail.service';
 import { UsersService } from '../users/users.service';
+import { EmissionFactorsService } from '../carbon-logs/emission-factors.service';
+import { GreenCriteriaService } from '../assessments/green-criteria.service';
 
 @Injectable()
 export class NotificationsService {
@@ -12,6 +14,8 @@ export class NotificationsService {
     private notificationsRepository: Repository<Notification>,
     private mailService: MailService,
     private usersService: UsersService,
+    private emissionFactorsService: EmissionFactorsService,
+    private greenCriteriaService: GreenCriteriaService,
   ) {}
 
   async findSystemAdmin(): Promise<any> {
@@ -168,5 +172,128 @@ export class NotificationsService {
       order: { created_at: 'DESC' },
       take: 200,
     });
+  }
+
+  async proposeAcademicChange(
+    userId: number,
+    data: {
+      targetType: 'CRITERIA' | 'EMISSION_FACTOR';
+      targetId: number;
+      name: string;
+      oldValue: string;
+      newValue: string;
+      reason: string;
+    },
+  ): Promise<Notification> {
+    const admin = await this.findSystemAdmin();
+    const adminId = admin ? admin.id : userId;
+
+    const title = `คำเสนอวิชาการ: ${
+      data.targetType === 'CRITERIA' ? 'เกณฑ์สำนักงานสีเขียว' : 'สูตรคำนวณคาร์บอน'
+    }`;
+
+    const messageObj = {
+      targetType: data.targetType,
+      targetId: data.targetId,
+      name: data.name,
+      oldValue: data.oldValue,
+      newValue: data.newValue,
+      reason: data.reason,
+      status: 'PENDING',
+    };
+
+    return this.create({
+      title,
+      message: JSON.stringify(messageObj),
+      type: NotificationType.REQUEST,
+      recipient_id: adminId,
+      sender_id: userId,
+      link: '/admin/approvals',
+    });
+  }
+
+  async approveAcademicChange(notificationId: number, adminId: number): Promise<any> {
+    const notification = await this.notificationsRepository.findOne({
+      where: { id: notificationId },
+    });
+    if (!notification) {
+      throw new NotFoundException('คำขอไม่พบในระบบ');
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(notification.message);
+    } catch (e) {
+      throw new NotFoundException('ข้อมูลคำขอชำรุดเสียหาย');
+    }
+
+    if (payload.status !== 'PENDING') {
+      return { success: false, message: 'คำขอนี้ได้รับการประมวลผลไปแล้ว' };
+    }
+
+    if (payload.targetType === 'CRITERIA') {
+      await this.greenCriteriaService.update(payload.targetId, {
+        max_score: parseFloat(payload.newValue),
+      });
+    } else if (payload.targetType === 'EMISSION_FACTOR') {
+      await this.emissionFactorsService.update(payload.targetId, {
+        factor_value: parseFloat(payload.newValue),
+      });
+    }
+
+    payload.status = 'APPROVED';
+    notification.message = JSON.stringify(payload);
+    notification.is_read = true;
+    await this.notificationsRepository.save(notification);
+
+    await this.create({
+      title: `ข้อเสนอวิชาการของคุณได้รับการอนุมัติแล้ว`,
+      message: `ข้อเสนอปรับปรุงสำหรับ "${payload.name}" ได้รับการอนุมัติและเปิดใช้งานจริงในระบบฐานข้อมูลเรียบร้อยครับ`,
+      type: NotificationType.SYSTEM,
+      recipient_id: notification.sender_id,
+      sender_id: adminId,
+    });
+
+    return { success: true, payload };
+  }
+
+  async rejectAcademicChange(
+    notificationId: number,
+    adminId: number,
+    rejectReason: string,
+  ): Promise<any> {
+    const notification = await this.notificationsRepository.findOne({
+      where: { id: notificationId },
+    });
+    if (!notification) {
+      throw new NotFoundException('คำขอไม่พบในระบบ');
+    }
+
+    let payload: any;
+    try {
+      payload = JSON.parse(notification.message);
+    } catch (e) {
+      throw new NotFoundException('ข้อมูลคำขอชำรุดเสียหาย');
+    }
+
+    if (payload.status !== 'PENDING') {
+      return { success: false, message: 'คำขอนี้ได้รับการประมวลผลไปแล้ว' };
+    }
+
+    payload.status = 'REJECTED';
+    payload.rejectReason = rejectReason;
+    notification.message = JSON.stringify(payload);
+    notification.is_read = true;
+    await this.notificationsRepository.save(notification);
+
+    await this.create({
+      title: `ข้อเสนอวิชาการของคุณไม่ได้รับการอนุมัติ`,
+      message: `ข้อเสนอปรับปรุงสำหรับ "${payload.name}" ไม่ผ่านการอนุมัติเนื่องจาก: "${rejectReason}"`,
+      type: NotificationType.SYSTEM,
+      recipient_id: notification.sender_id,
+      sender_id: adminId,
+    });
+
+    return { success: true, payload };
   }
 }

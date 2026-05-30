@@ -20,6 +20,7 @@
 
     <!-- ═══════════════ SYSTEM ADMIN ═══════════════ -->
     <ng-container *ngIf="isSystemAdmin">
+      <div class="nav-label">แดชบอร์ดภาพรวม</div>
       <a routerLink="/admin/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
         <span>ศูนย์ควบคุมหลัก</span>
@@ -38,6 +39,12 @@
         <i class="fa-solid fa-user-check"></i>
         <span>ยืนยันผู้ตรวจประเมิน</span>
       </a>
+      <a routerLink="/requests" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-user-gear"></i>
+        <span>มอบหมายงานตรวจ</span>
+      </a>
+
+      <div class="nav-label">ข้อมูลวิชาการ & เกณฑ์</div>
       <a routerLink="/admin/criteria" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-list-check"></i>
         <span>เกณฑ์ประเมิน Green Office</span>
@@ -56,6 +63,8 @@
         <i class="fa-solid fa-file-invoice-dollar"></i>
         <span>ประวัติการชำระเงิน</span>
       </a>
+
+      <div class="nav-label">ประวัติและการตั้งค่า</div>
       <a routerLink="/admin/audit-logs" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-clock-rotate-left"></i>
         <span>ประวัติการใช้งานระบบ</span>
@@ -72,6 +81,7 @@
 
     <!-- ═══════════════ ORGANIZATION ADMIN ═══════════════ -->
     <ng-container *ngIf="isOrgAdmin">
+      <div class="nav-label">แดชบอร์ดภาพรวม</div>
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-chart-pie"></i>
         <span>แดชบอร์ดองค์กร</span>
@@ -87,10 +97,10 @@
         <span>ศูนย์แก้ไขข้อมูล</span>
       </a>
 
-      <div class="nav-label">จัดการองค์กร</div>
+      <div class="nav-label">จัดการข้อมูลองค์กร</div>
       <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-id-card"></i>
-        <span>โปรไฟล์</span>
+        <span>โปรไฟล์องค์กร</span>
       </a>
       <a routerLink="/org/branches" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-sitemap"></i>
@@ -101,7 +111,7 @@
         <span>จัดการสมาชิก</span>
       </a>
 
-      <div class="nav-label">ระบบงานและคาร์บอน</div>
+      <div class="nav-label">ติดตามคาร์บอน & AI</div>
       <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bolt"></i>
         <span>ติดตามคาร์บอน</span>
@@ -110,6 +120,8 @@
         <i class="fa-solid fa-wand-magic-sparkles"></i>
         <span>เครื่องมือ AI</span>
       </a>
+
+      <div class="nav-label">การรับรอง Green Office</div>
       <a routerLink="/assessment" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-clipboard-list"></i>
         <span>แบบประเมินตนเอง</span>
@@ -118,7 +130,6 @@
         <i class="fa-solid fa-folder-open"></i>
         <span>จัดการไฟล์หลักฐาน</span>
       </a>
-      <div class="nav-label">การรับรอง Green Office</div>
       <a routerLink="/requests" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-certificate"></i>
         <span>ติดตามผลประเมิน</span>
@@ -155,6 +166,7 @@
 
     <!-- ═══════════════ EXECUTIVE ═══════════════ -->
     <ng-container *ngIf="isExecutive">
+      <div class="nav-label">แดชบอร์ดภาพรวม</div>
       <a routerLink="/executive/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-chart-line"></i>
         <span>แดชบอร์ดผู้บริหาร</span>
@@ -170,7 +182,7 @@
         <span>ประเมิน Green Office รายหมวด</span>
       </a>
 
-      <div class="nav-label">ข้อมูลองค์กร</div>
+      <div class="nav-label">ข้อมูลองค์กรและการรับรอง</div>
       <a routerLink="/requests" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-certificate"></i>
         <span>ผลการรับรอง Green Office</span>
@@ -197,13 +209,13 @@
 
     <!-- ═══════════════ USER / EMPLOYEE ═══════════════ -->
     <ng-container *ngIf="isOrgMember && !isOrgAdmin && !isExecutive">
-
+      <div class="nav-label">แดชบอร์ดภาพรวม</div>
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-chart-pie"></i>
         <span>แดชบอร์ด</span>
       </a>
 
-      <div class="nav-label">ระบบงาน</div>
+      <div class="nav-label">ระบบงานและคาร์บอน</div>
       <a routerLink="/carbon/logs" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bolt"></i>
         <span>ติดตามคาร์บอน</span>
@@ -227,7 +239,7 @@
         <span>ติดตามผลประเมิน</span>
       </a>
 
-      <div class="nav-label">บัญชี</div>
+      <div class="nav-label">บัญชีและการตั้งค่า</div>
       <a routerLink="/org/profile" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-id-card"></i>
         <span>โปรไฟล์</span>
@@ -236,21 +248,23 @@
         <i class="fa-solid fa-bell"></i>
         <span>การแจ้งเตือน</span>
       </a>
-
     </ng-container>
 
-    <!-- ═══════════════ ASSESSOR ═══════════════ -->
+    <!-- ═══════════════ ASSESSOR & ASSESSOR ADMIN ═══════════════ -->
     <ng-container *ngIf="isAssessor">
-
-      <!-- Main Dashboard -->
+      <div class="nav-label">แดชบอร์ดภาพรวม</div>
       <a routerLink="/assessor/dashboard" routerLinkActive="active"
         class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-gauge-high"></i>
         <span>คอนโซลผู้ตรวจ</span>
       </a>
 
-      <!-- งานตรวจประเมิน -->
       <div class="nav-label">งานตรวจประเมิน</div>
+      <a routerLink="/requests" routerLinkActive="active" *ngIf="isAssessorAdmin"
+        class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-user-gear"></i>
+        <span>มอบหมายงานตรวจ</span>
+      </a>
       <a routerLink="/assessor/assignments" routerLinkActive="active"
         class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-list-check"></i>
@@ -263,16 +277,26 @@
         <span>ประวัติการประเมิน</span>
       </a>
 
-      <!-- ทางลัด -->
-      <div class="nav-label">ทางลัด</div>
+      <div class="nav-label">ทางลัดด่วน</div>
       <a routerLink="/assessor/assignments" routerLinkActive="active"
         class="nav-item nav-item-featured" (click)="onNavItemClick()">
         <i class="fa-solid fa-bolt"></i>
         <span>เริ่มตรวจประเมิน (งานค้าง)</span>
       </a>
 
-      <!-- บัญชีและการแจ้งเตือน -->
-      <div class="nav-label">บัญชี</div>
+      <div class="nav-label">วิชาการ & เกณฑ์</div>
+      <a routerLink="/admin/criteria" routerLinkActive="active"
+        class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-list-check"></i>
+        <span>เสนอเกณฑ์ประเมิน</span>
+      </a>
+      <a routerLink="/admin/emission-factors" routerLinkActive="active"
+        class="nav-item" (click)="onNavItemClick()">
+        <i class="fa-solid fa-leaf"></i>
+        <span>เสนอค่าคาร์บอน</span>
+      </a>
+
+      <div class="nav-label">บัญชีผู้ตรวจ</div>
       <a routerLink="/notifications" routerLinkActive="active"
         class="nav-item" (click)="onNavItemClick()">
         <i class="fa-solid fa-bell"></i>
@@ -283,7 +307,6 @@
         <i class="fa-solid fa-user-shield"></i>
         <span>โปรไฟล์ผู้ตรวจ</span>
       </a>
-
     </ng-container>
 
     <!-- ═══════════════ COMMON (All Roles) ═══════════════ -->

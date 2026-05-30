@@ -108,6 +108,13 @@ export class UsersService {
       return UserRole.SYSTEM_ADMIN;
     }
     if (
+      normalizedRoleNames.includes(this.normalizeRoleName(UserRole.ASSESSOR_ADMIN)) ||
+      normalizedRoleNames.includes('ASSESSOR_ADMIN') ||
+      normalizedRoleNames.includes('ASSESSORADMIN')
+    ) {
+      return UserRole.ASSESSOR_ADMIN;
+    }
+    if (
       normalizedRoleNames.includes(this.normalizeRoleName(UserRole.ASSESSOR))
     ) {
       return UserRole.ASSESSOR;
@@ -164,7 +171,13 @@ export class UsersService {
       .orderBy('user.created_at', 'DESC');
 
     if (roleName) {
-      query.andWhere('UPPER(roles.role_name) = UPPER(:roleName)', { roleName });
+      if (roleName.toUpperCase() === 'ASSESSOR') {
+        query.andWhere('UPPER(roles.role_name) IN (:...roleNames)', {
+          roleNames: ['ASSESSOR', 'ASSESSOR ADMIN', 'ASSESSOR_ADMIN'],
+        });
+      } else {
+        query.andWhere('UPPER(roles.role_name) = UPPER(:roleName)', { roleName });
+      }
     }
 
     if (orgId) {

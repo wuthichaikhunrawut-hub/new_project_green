@@ -90,4 +90,37 @@ export class NotificationsController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.notificationsService.remove(id);
   }
+
+  @Post('propose-academic')
+  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ASSESSOR_ADMIN', 'ASSESSOR')
+  proposeAcademic(
+    @Body()
+    body: {
+      targetType: 'CRITERIA' | 'EMISSION_FACTOR';
+      targetId: number;
+      name: string;
+      oldValue: string;
+      newValue: string;
+      reason: string;
+    },
+    @Request() req,
+  ) {
+    return this.notificationsService.proposeAcademicChange(req.user.sub, body);
+  }
+
+  @Post(':id/approve-academic')
+  @Roles('ADMIN', 'SYSTEM_ADMIN')
+  approveAcademic(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.notificationsService.approveAcademicChange(id, req.user.sub);
+  }
+
+  @Post(':id/reject-academic')
+  @Roles('ADMIN', 'SYSTEM_ADMIN')
+  rejectAcademic(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('reason') reason: string,
+    @Request() req,
+  ) {
+    return this.notificationsService.rejectAcademicChange(id, req.user.sub, reason);
+  }
 }

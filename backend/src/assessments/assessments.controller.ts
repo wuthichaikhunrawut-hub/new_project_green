@@ -68,7 +68,7 @@ export class AssessmentsController {
     // Pass 0 as orgId for ASSESSOR/ADMIN to bypass org filter, otherwise enforce it
     const role = this.getUserRole(headers);
     const orgId =
-      role === 'ASSESSOR' || role === 'ADMIN' ? 0 : this.getOrgId(headers);
+      ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);
     return this.assessmentsService.findOne(+id, orgId);
   }
 
@@ -80,7 +80,7 @@ export class AssessmentsController {
   ) {
     const role = this.getUserRole(headers);
     const orgId =
-      role === 'ASSESSOR' || role === 'ADMIN' ? 0 : this.getOrgId(headers);
+      ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);
     return this.assessmentsService.update(+id, updateAssessmentDto, orgId);
   }
 
@@ -88,7 +88,7 @@ export class AssessmentsController {
   remove(@Param('id') id: string, @Headers() headers: any) {
     const role = this.getUserRole(headers);
     const orgId =
-      role === 'ASSESSOR' || role === 'ADMIN' ? 0 : this.getOrgId(headers);
+      ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);
     return this.assessmentsService.remove(+id, orgId);
   }
 }

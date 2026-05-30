@@ -188,6 +188,30 @@ export class AssessorHistoryComponent implements OnInit {
     this.certFileUrl = '';
     this.uploadedFileName = '';
     this.isCertModalOpen = true;
+
+    // Load existing certificate details
+    this.assessorService.getAssessment(item.id).subscribe({
+      next: (fullAssessment) => {
+        if (fullAssessment.certificates && fullAssessment.certificates.length > 0) {
+          const cert = fullAssessment.certificates[0];
+          this.certNo = cert.certificate_no || '';
+          this.certFileUrl = cert.certificate_url || '';
+          if (cert.certificate_url) {
+            const parts = cert.certificate_url.split('/');
+            this.uploadedFileName = parts[parts.length - 1];
+          }
+          
+          if (cert.issued_at) {
+            this.issuedAt = new Date(cert.issued_at).toISOString().split('T')[0];
+          }
+          if (cert.expired_at) {
+            this.expiredAt = new Date(cert.expired_at).toISOString().split('T')[0];
+          }
+          this.cdr.markForCheck();
+        }
+      },
+      error: (err) => console.error('Failed to load certificate details', err)
+    });
   }
 
   closeCertModal(): void {

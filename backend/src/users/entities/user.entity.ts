@@ -25,6 +25,7 @@ export enum UserRole {
   EXECUTIVE = 'Executive',
   EMPLOYEE = 'Employee',
   ASSESSOR = 'Assessor',
+  ASSESSOR_ADMIN = 'Assessor Admin',
   USER = 'User',
   ADMIN = 'ADMIN', // legacy alias
 }

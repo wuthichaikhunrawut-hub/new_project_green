@@ -54,7 +54,7 @@ services:
       - /app/node_modules
     command: npm run start:dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      test: ["CMD", "node", "-e", "const req = require('http').request('http://localhost:3001/', { method: 'GET', timeout: 2000 }, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -76,6 +76,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
       - /app/.angular
+      - /app/dist
     environment:
       - CHOKIDAR_USEPOLLING=true
       - CHOKIDAR_INTERVAL=250
@@ -84,7 +85,7 @@ services:
       - NODE_ENV=development
       - NG_BUILD_OPTIMIZER=false
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4200"]
+      test: ["CMD", "node", "-e", "const req = require('http').request('http://localhost:4200/', { method: 'GET', timeout: 2000 }, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
       interval: 30s
       timeout: 10s
       retries: 3

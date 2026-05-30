@@ -26,7 +26,7 @@ export class Assessment {
   organization: Organization;
 
   @Column({ name: 'assessor_user_id', nullable: true })
-  assessor_user_id: number;
+  assessor_user_id: number | null;
 
   @ManyToOne(() => User, (user) => user.assessments)
   @JoinColumn({ name: 'assessor_user_id' })

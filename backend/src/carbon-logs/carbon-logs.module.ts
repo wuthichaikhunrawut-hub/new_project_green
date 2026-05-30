@@ -15,5 +15,6 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
   ],
   providers: [CarbonLogsService, EmissionFactorsService],
   controllers: [CarbonLogsController, EmissionFactorsController],
+  exports: [CarbonLogsService, EmissionFactorsService],
 })
 export class CarbonLogsModule {}

@@ -55,6 +55,10 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
+    if (userRole === 'ASSESSORADMIN' && (allowed.includes('ASSESSOR') || allowed.includes('SYSTEMADMIN'))) {
+      return true;
+    }
+
     const legacyRole = String(role).toUpperCase().trim().split(' ').join('_');
     if (allowedRoles.map((r) => r.toUpperCase()).includes(legacyRole)) {
       return true;
@@ -72,6 +76,7 @@ export class RoleGuard implements CanActivate {
         this.router.navigate(['/dashboard']);
         break;
       case 'ASSESSOR':
+      case 'ASSESSOR_ADMIN':
         this.router.navigate(['/assessor/dashboard']);
         break;
       case 'EXECUTIVE':

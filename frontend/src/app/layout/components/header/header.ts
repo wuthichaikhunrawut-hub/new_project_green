@@ -29,7 +29,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const r = String(this.role || '').trim().toUpperCase().split(' ').join('_');
     if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
     if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
-    if (r === 'ASSESSOR') return 'ASSESSOR';
+    if (r === 'ASSESSOR' || r === 'ASSESSOR_ADMIN') return 'ASSESSOR';
     if (r === 'EXECUTIVE') return 'EXECUTIVE';
     if (r === 'EMPLOYEE') return 'EMPLOYEE';
     if (r === 'USER') return 'USER';

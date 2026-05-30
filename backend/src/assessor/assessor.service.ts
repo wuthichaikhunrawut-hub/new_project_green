@@ -116,6 +116,7 @@ export class AssessorService {
           'details',
           'details.criteria',
           'details.evidence_files',
+          'certificates',
         ],
       });
       if (!assessment) {

@@ -1,12 +1,14 @@
 <div class="container-fluid p-4 animate-in">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-      <h2 class="page-title fw-bold mb-1">ประวัติการทำรายการ </h2>
-      <p class="text-muted mb-0">ตรวจสอบกิจกรรมและการเปลี่ยนแปลงที่เกิดขึ้นในระบบ</p>
+  <div class="page-header mb-4">
+    <div class="page-header-left">
+      <h2 class="page-title">ประวัติการทำรายการ</h2>
+      <p class="page-subtitle mb-0">ตรวจสอบกิจกรรมและการเปลี่ยนแปลงที่เกิดขึ้นในระบบ</p>
     </div>
-    <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" (click)="loadLogs()">
-      <i class="fa-solid fa-rotate-right me-2"></i> รีเฟรชข้อมูล
-    </button>
+    <div class="page-actions">
+      <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" (click)="loadLogs()">
+        <i class="fa-solid fa-rotate-right me-2"></i> รีเฟรชข้อมูล
+      </button>
+    </div>
   </div>
 
   <div class="card border-0 shadow-sm rounded-4">

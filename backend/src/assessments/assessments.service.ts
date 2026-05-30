@@ -88,16 +88,16 @@ export class AssessmentsService {
 
     if (normalizedRole === 'ADMIN' || normalizedRole === 'SYSTEM_ADMIN') {
       return this.assessmentRepository.find({
-        relations: ['organization', 'assessor', 'certificates'],
+        relations: ['organization', 'assessor', 'assessor.user_profile', 'certificates'],
         order: { submitted_at: 'DESC' },
       });
     }
 
     // ASSESSOR: show all assessments so they can pick up any pending work
     // (assignment UI not yet implemented - this ensures assessors are not blocked)
-    if (normalizedRole === 'ASSESSOR') {
+    if (normalizedRole === 'ASSESSOR' || normalizedRole === 'ASSESSOR_ADMIN') {
       return this.assessmentRepository.find({
-        relations: ['organization', 'assessor', 'certificates'],
+        relations: ['organization', 'assessor', 'assessor.user_profile', 'certificates'],
         order: { submitted_at: 'DESC' },
       });
     }
@@ -141,6 +141,8 @@ export class AssessmentsService {
       assessment.total_score = updateAssessmentDto.total_score;
     if (updateAssessmentDto.certified_level)
       assessment.certified_level = updateAssessmentDto.certified_level;
+    if (updateAssessmentDto.assessor_user_id !== undefined)
+      assessment.assessor_user_id = updateAssessmentDto.assessor_user_id;
 
     await this.assessmentRepository.save(assessment);
 

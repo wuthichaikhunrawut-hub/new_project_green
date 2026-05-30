@@ -5,6 +5,7 @@ import { NotificationService, NotificationType } from '../../../core/services/no
 import { OrgService } from '../../../core/services/org.service';
 import { UsersService } from '../../../core/services/users.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { HttpClient } from '@angular/common/http';
 
 type TargetType = 'ALL_SYSTEM' | 'ALL_ORG' | 'SPECIFIC_USER';
 
@@ -21,6 +22,7 @@ export class NotificationsAdminComponent implements OnInit {
   private usersService = inject(UsersService);
   private cdr = inject(ChangeDetectorRef);
   private toast = inject(ToastService);
+  private http = inject(HttpClient);
 
   organizations: any[] = [];
   allUsers: any[] = [];
@@ -28,7 +30,10 @@ export class NotificationsAdminComponent implements OnInit {
   history: any[] = [];
   isLoadingHistory = false;
   
+  selectedFactor: any = null;
   notificationToDelete: any | null = null;
+  rejectingItem: any | null = null;
+  rejectReason = '';
   
   targetType: TargetType = 'ALL_SYSTEM';
   selectedOrgId: number | null = null;
@@ -45,7 +50,7 @@ export class NotificationsAdminComponent implements OnInit {
     { value: NotificationType.SYSTEM, label: 'ประกาศทั่วไป' },
     { value: NotificationType.ASSESSMENT, label: 'การประเมิน' },
     { value: NotificationType.DEADLINE, label: 'แจ้งเตือนกำหนดส่ง' },
-    { value: NotificationType.REQUEST, label: 'คำร้อง/คำขอ' },
+    { value: NotificationType.REQUEST, label: 'คำร้องอนุมัติวิชาการ' },
     { value: NotificationType.URGENT, label: 'แจ้งเตือนสำคัญ' }
   ];
 
@@ -245,5 +250,57 @@ export class NotificationsAdminComponent implements OnInit {
       return user ? user.username : 'เลือกผู้ใช้งาน';
     }
     return 'ไม่ได้เลือกผู้รับ';
+  }
+
+  isRequestProposal(item: any): boolean {
+    return item.type === 'REQUEST';
+  }
+
+  parseRequestProposal(item: any): any {
+    try {
+      return JSON.parse(item.message);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  approveProposal(item: any) {
+    this.toast.info('กำลังดำเนินการบันทึกข้อมูลและอนุมัติ...');
+    this.http.post(`http://localhost:3001/notifications/${item.id}/approve-academic`, {}).subscribe({
+      next: () => {
+        this.toast.success('อนุมัติเกณฑ์/สูตรคาร์บอนและบันทึกสู่ระบบสำเร็จเรียบร้อยแล้วครับ!');
+        this.loadHistory();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.error('เกิดข้อผิดพลาดในการทำรายการอนุมัติ');
+      }
+    });
+  }
+
+  openRejectModal(item: any) {
+    this.rejectingItem = item;
+    this.rejectReason = '';
+  }
+
+  confirmRejectProposal() {
+    if (!this.rejectingItem || !this.rejectReason.trim()) {
+      this.toast.warning('กรุณาระบุเหตุผลการปฏิเสธ');
+      return;
+    }
+
+    this.http.post(`http://localhost:3001/notifications/${this.rejectingItem.id}/reject-academic`, {
+      reason: this.rejectReason
+    }).subscribe({
+      next: () => {
+        this.toast.success('ปฏิเสธคำร้องข้อเสนอ และตอบกลับผู้ยื่นขอสำเร็จแล้ว');
+        this.rejectingItem = null;
+        this.loadHistory();
+      },
+      error: (err) => {
+        console.error(err);
+        this.toast.error('เกิดข้อผิดพลาดในการทำรายการปฏิเสธ');
+      }
+    });
   }
 }

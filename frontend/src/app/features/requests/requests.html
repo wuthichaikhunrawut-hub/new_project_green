@@ -57,7 +57,8 @@
           <thead>
             <tr>
               <th scope="col" class="ps-4">No. / วันที่ส่ง</th>
-              <th scope="col" *ngIf="['ADMIN', 'ASSESSOR'].includes(user?.role || '')">หน่วยงานผู้ขอ</th>
+              <th scope="col" *ngIf="userRoleKey === 'SYSTEM_ADMIN' || userRoleKey === 'ASSESSOR' || isAssigner">หน่วยงานผู้ขอ</th>
+              <th scope="col" *ngIf="isAssigner">ผู้ตรวจประเมิน</th>
               <th scope="col">สถานะ</th>
               <th scope="col" class="text-center">คะแนน</th>
               <th scope="col" class="text-center">ระดับที่ได้</th>
@@ -73,8 +74,23 @@
               </td>
               
               <!-- Organization -->
-              <td class="py-3" *ngIf="['ADMIN', 'ASSESSOR'].includes(user?.role || '')">
+              <td class="py-3" *ngIf="userRoleKey === 'SYSTEM_ADMIN' || userRoleKey === 'ASSESSOR' || isAssigner">
                 <div class="fw-semibold text-dark">{{ req['organization']?.name || 'ไม่พบข้อมูล' }}</div>
+              </td>
+              
+              <!-- Assessor assignment -->
+              <td class="py-3" *ngIf="isAssigner">
+                <div class="d-flex align-items-center gap-2">
+                  <span *ngIf="!req.assessor_user_id" class="badge bg-light text-muted border py-1 px-2 d-inline-flex align-items-center">
+                    <i class="fa-solid fa-user-slash me-1 small"></i>ยังไม่ระบุ
+                  </span>
+                  <span *ngIf="req.assessor_user_id" class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center">
+                    <i class="fa-solid fa-user-check me-1 small"></i>{{ req.assessor?.user_profile?.first_name || 'ผู้ตรวจ #' + req.assessor_user_id }}
+                  </span>
+                  <button class="btn btn-xs btn-outline-primary py-1 px-2" (click)="openAssignModal(req)" title="เปลี่ยนผู้ตรวจ">
+                    <i class="fa-solid fa-user-pen"></i>
+                  </button>
+                </div>
               </td>
               
               <!-- Status -->
@@ -135,3 +151,48 @@
     </div>
   </div>
 </div>
+
+<!-- มอบหมายงานตรวจประเมิน Modal -->
+<div class="modal bg-black/50 backdrop-blur-sm" tabindex="-1" [class.d-block]="selectedReqForAssign" [class.d-none]="!selectedReqForAssign" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important;">
+  <div class="modal-dialog modal-dialog-centered" *ngIf="selectedReqForAssign" style="width: 100%; max-width: 500px;">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <!-- Modal Header -->
+      <div class="modal-header border-0 pb-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+          <i class="fa-solid fa-user-gear text-primary me-2 fs-4"></i>
+          มอบหมายงานตรวจประเมิน
+        </h5>
+        <button type="button" class="btn-close shadow-none" (click)="closeAssignModal()"></button>
+      </div>
+      
+      <!-- Modal Body -->
+      <div class="modal-body px-4 py-3">
+        <div class="mb-3 bg-light p-3 rounded-3 border">
+          <div class="small text-muted mb-1">รายละเอียดคำขอ</div>
+          <div class="fw-bold text-dark mb-1">Req-{{ selectedReqForAssign.id }} - {{ selectedReqForAssign['organization']?.name || 'ไม่ระบุองค์กร' }}</div>
+          <div class="small text-secondary">ประจำปีประเมิน: {{ selectedReqForAssign.assessment_year }}</div>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label fw-semibold text-secondary small">เลือกผู้ตรวจประเมิน</label>
+          <select class="form-select border shadow-sm p-2.5" [(ngModel)]="targetAssessorId" style="border-radius: 8px;">
+            <option value="">-- ยังไม่มอบหมาย / ยกเลิกการมอบหมาย --</option>
+            <option *ngFor="let assessor of assessorsList" [value]="assessor.id">
+              {{ assessor.user_profile?.first_name }} {{ assessor.user_profile?.last_name }} ({{ assessor.email }})
+            </option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Modal Footer -->
+      <div class="modal-footer border-0 pt-0 pb-4 px-4 justify-content-end gap-2">
+        <button type="button" class="btn btn-light rounded-pill px-4" (click)="closeAssignModal()">ยกเลิก</button>
+        <button type="button" class="btn btn-primary rounded-pill px-4" [disabled]="isAssigning" (click)="confirmAssign()">
+          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" *ngIf="isAssigning"></span>
+          บันทึกการมอบหมาย
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
