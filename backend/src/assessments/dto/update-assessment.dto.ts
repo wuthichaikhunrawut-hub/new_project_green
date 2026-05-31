@@ -7,8 +7,10 @@ export class UpdateAssessmentDto extends PartialType(CreateAssessmentDto) {
   @IsArray()
   details?: {
     assessment_detail_id: number;
-    assessor_score: number;
-    auditor_comment: string;
+    self_score?: number;
+    applicant_comment?: string;
+    assessor_score?: number;
+    auditor_comment?: string;
   }[];
 }
 

@@ -129,7 +129,7 @@ export class GreenOfficeFormComponent implements OnInit {
         description: item.description || '',
         implementationStatus: detail.self_score > 0 ? 'implemented' : 'none',
         score: detail.self_score || null,
-        details: '',
+        details: detail.applicant_comment || '',
         fileCount: detail.evidence_files ? detail.evidence_files.length : 0,
         status: detail.self_score > 0 ? 'ดำเนินการแล้ว' : 'ยังไม่เริ่ม',
         max_score: item.max_score ?? 5,
@@ -352,7 +352,8 @@ export class GreenOfficeFormComponent implements OnInit {
       this.allQuestions[catId].forEach(q => {
         detailsToUpdate.push({
           assessment_detail_id: q.detailId,
-          self_score: q.score || 0
+          self_score: q.score || 0,
+          applicant_comment: q.details || ''
         });
       });
     }

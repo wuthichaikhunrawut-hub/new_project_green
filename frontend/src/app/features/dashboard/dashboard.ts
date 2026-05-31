@@ -51,7 +51,26 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   orgTarget = 0;
   certificate: any = null;
   waitingForCertificate = false;
+  certifiedLevel: string | null = null; // 'PLATINUM', 'PLUS', 'GOLD', 'SILVER', 'BRONZE' or null
+  assessmentFailed = false;
+  rejectionComment: string | null = null;
   isLoading = true;
+
+  get roleKey(): string {
+    const r = String(this.authService.getUser()?.role || '').trim().toUpperCase().split(' ').join('_');
+    if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
+    if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
+    if (r === 'EXECUTIVE') return 'EXECUTIVE';
+    return 'USER';
+  }
+
+  get isOrgAdminOrExecutive(): boolean {
+    return this.roleKey === 'ORG_ADMIN' || this.roleKey === 'SYSTEM_ADMIN' || this.roleKey === 'EXECUTIVE';
+  }
+
+  get isStandardUser(): boolean {
+    return !this.isOrgAdminOrExecutive;
+  }
 
   private carbonLogs: CarbonLog[] = [];
   private chartsRendered = false;
@@ -97,9 +116,43 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     this.requestsService.getRequests().subscribe({
       next: (requests) => {
+        // Sort requests to find the latest overall
+        const sorted = [...requests].sort((a, b) => new Date(b.updated_at || b.created_at || 0).getTime() - new Date(a.updated_at || a.created_at || 0).getTime());
+        const latest = sorted[0];
+
+        // Check if the latest request is REJECTED (Failed)
+        if (latest && latest.status === 'REJECTED') {
+          this.assessmentFailed = true;
+          this.rejectionComment = (latest as any).assessor_comment || (latest as any).comment || (latest as any).rejection_reason || 'ผลการประเมินรอบล่าสุดยังไม่เป็นไปตามเกณฑ์มาตรฐาน Green Office';
+        } else {
+          this.assessmentFailed = false;
+        }
+
         // Find the latest APPROVED assessment
         const approved = requests.find(r => r.status === 'APPROVED');
         if (approved) {
+          // Parse certified level safely (handling values like 'G Platinum', 'G Plus', '🥇 ทอง (Gold)', '🥈 เงิน (Silver)', '🥉 ทองแดง (Bronze)')
+          const rawLevel = approved.certified_level ? approved.certified_level.toUpperCase() : '';
+          if (rawLevel.includes('PLATINUM') || rawLevel.includes('แพลทินัม')) {
+            this.certifiedLevel = 'PLATINUM';
+          } else if (rawLevel.includes('PLUS') || rawLevel.includes('พลัส')) {
+            this.certifiedLevel = 'PLUS';
+          } else if (rawLevel.includes('GOLD') || rawLevel.includes('ทอง')) {
+            this.certifiedLevel = 'GOLD';
+          } else if (rawLevel.includes('SILVER') || rawLevel.includes('เงิน')) {
+            this.certifiedLevel = 'SILVER';
+          } else if (rawLevel.includes('BRONZE') || rawLevel.includes('ทองแดง')) {
+            this.certifiedLevel = 'BRONZE';
+          } else {
+            // Robust score fallback if certifiedLevel is missing or unrecognized in DB
+            const score = approved.total_score || 0;
+            if (score >= 95) this.certifiedLevel = 'PLATINUM';
+            else if (score >= 90) this.certifiedLevel = 'GOLD';
+            else if (score >= 80) this.certifiedLevel = 'SILVER';
+            else if (score >= 60) this.certifiedLevel = 'BRONZE';
+            else this.certifiedLevel = null;
+          }
+
           const cert = approved.certificates?.find((c: any) => c.certificate_url || c.certificate_no);
           if (cert) {
             this.certificate = cert;

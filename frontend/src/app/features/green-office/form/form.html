@@ -169,6 +169,7 @@
         <app-assessment-card
           *ngFor="let q of filteredQuestions; let i = index"
           [questionId]="q.id"
+          [detailId]="q.detailId"
           [title]="q.title"
           [description]="q.description"
           [implementationStatus]="q.implementationStatus"

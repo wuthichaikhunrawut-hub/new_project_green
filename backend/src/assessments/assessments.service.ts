@@ -146,7 +146,7 @@ export class AssessmentsService {
 
     await this.assessmentRepository.save(assessment);
 
-    // Update details if provided (e.g., scores from Assessor)
+    // Update details if provided (e.g., scores from self-assessment or Assessor)
     if (updateAssessmentDto.details && updateAssessmentDto.details.length > 0) {
       const detailsToSave: AssessmentDetail[] = [];
       for (const updateDetail of updateAssessmentDto.details) {
@@ -154,6 +154,14 @@ export class AssessmentsService {
           (d) => d.id === updateDetail.assessment_detail_id,
         );
         if (detailToUpdate) {
+          detailToUpdate.self_score =
+            updateDetail.self_score !== undefined
+              ? updateDetail.self_score
+              : detailToUpdate.self_score;
+          detailToUpdate.applicant_comment =
+            updateDetail.applicant_comment !== undefined
+              ? updateDetail.applicant_comment
+              : detailToUpdate.applicant_comment;
           detailToUpdate.assessor_score =
             updateDetail.assessor_score !== undefined
               ? updateDetail.assessor_score

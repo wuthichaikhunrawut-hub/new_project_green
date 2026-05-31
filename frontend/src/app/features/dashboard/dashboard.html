@@ -37,29 +37,307 @@
     </div>
   </div>
 
-  <!-- TGO Certificate Banner -->
+  <!-- TGO Certificate Banners -->
   <div class="mb-6 fade-in-up">
-    <!-- Certificate Banner (If has certificate) -->
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6" *ngIf="certificate && !waitingForCertificate">
+    <!-- DESIGN SHOWCASE (โหมดรีวิวหน้าจอการออกแบบระดับเหรียญรางวัล) -->
+    <div class="mb-8 p-6 bg-slate-50/80 border border-dashed border-slate-300 rounded-2xl animate-in fade-in-up">
+      <div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-200">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm">
+            <i class="fa-solid fa-palette"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-800 text-base leading-snug">โหมดรีวิวการออกแบบระบบเหรียญรางวัล (Green Office Medal Showcase)</h3>
+            <p class="text-xs text-slate-500">จำลองการแสดงผลแบนเนอร์ของรางวัลระดับต่าง ๆ (รวมระดับพิเศษเพิ่มเติม G Platinum, G Plus) และสถานะไม่ผ่านการประเมินเพื่อการตรวจสอบความสวยงาม</p>
+          </div>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold uppercase tracking-wider">
+          Demo Mode
+        </span>
+      </div>
+
+      <div class="flex flex-col gap-5">
+        <!-- 1. G Platinum Review Banner -->
+        <div class="celebration-banner celebration-banner-platinum border border-slate-300">
+          <div class="medal-container">
+            <div class="medal-shield p-0">
+              <img src="assets/image/green_g_platinum.png" alt="Platinum G" class="w-full h-full object-cover rounded-full">
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-200 mb-2.5">
+              <i class="fa-solid fa-crown text-amber-500 mr-1 animate-bounce"></i> รางวัลระดับพิเศษสูงสุด (G Platinum) - องค์กรต้นแบบดีเด่นสูงสุด (95 คะแนนขึ้นไป)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ยินดีด้วยอย่างยิ่ง! สำนักงานของเราบรรลุระดับสูงสุดขององค์กรต้นแบบ</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+              สุดยอดความสำเร็จอันเป็นที่สุดแห่งความภาคภูมิใจ! ด้วยความเพียรพยายาม ความใส่ใจ และมาตรฐานการดำเนินงานที่เป็นมิตรต่อสิ่งแวดล้อมขั้นสูงสุด ทำให้สำนักงานของเราได้รับความรับรองระดับองค์กรต้นแบบแห่งชาติ มาร่วมรักษามาตรฐานอันยอดเยี่ยมที่สุดนี้ไปด้วยกันครับ! 🌱👑💎
+            </p>
+          </div>
+        </div>
+
+        <!-- 2. G Plus Review Banner -->
+        <div class="celebration-banner celebration-banner-plus border border-amber-400">
+          <div class="medal-container">
+            <div class="medal-shield p-0">
+              <img src="assets/image/green_g_plus.png" alt="Plus G" class="w-full h-full object-cover rounded-full">
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-200 mb-2.5">
+              <i class="fa-solid fa-star text-amber-500 mr-1 animate-pulse"></i> รางวัลระดับพัฒนาต่อเนื่อง (G Plus) - สำหรับผู้รักษาและยกระดับมาตรฐานดีเด่น
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ยินดีด้วยอย่างยิ่ง! สำนักงานของเรายกระดับต่อเนื่องระดับ G Plus</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+              ความสำเร็จและมาตรฐานที่มีการพัฒนาอย่างยั่งยืนและไม่หยุดยั้ง! ทุกการรักษาระเบียบการใช้พลังงาน การลดปริมาณคาร์บอนอย่างโดดเด่น ได้ทำให้องค์กรของเรายกระดับขึ้นสู่มาตรฐานพิเศษนี้ ขอแสดงความยินดีกับทุกคนในสำนักงานครับ! 🌱⭐📈
+            </p>
+          </div>
+        </div>
+
+        <!-- 3. G Gold Review Banner -->
+        <div class="celebration-banner celebration-banner-gold border border-amber-300">
+          <div class="medal-container">
+            <div class="medal-shield p-0">
+              <img src="assets/image/green_g_gold.png" alt="Gold G" class="w-full h-full object-cover rounded-full">
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-200 mb-2.5">
+              <i class="fa-solid fa-medal animate-bounce mr-1"></i> รางวัลระดับทอง (G Gold) - ระดับดีเยี่ยม (90 คะแนนขึ้นไป)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ยินดีด้วย! สำนักงานของเราผ่านการรับรองสำนักงานสีเขียวระดับทอง</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+              ความสำเร็จอันยิ่งใหญ่นี้เกิดขึ้นจากความร่วมมือร่วมใจของพวกเราทุกคนในสำนักงาน ที่ร่วมกันประหยัดพลังงาน คัดแยกขยะ และลดปริมาณคาร์บอนอย่างยั่งยืน มาร่วมรักษามาตรฐานอันยอดเยี่ยมนี้ไปด้วยกันนะครับ! 🌱💚
+            </p>
+          </div>
+        </div>
+
+        <!-- 4. G Silver Review Banner -->
+        <div class="celebration-banner celebration-banner-silver border border-slate-300">
+          <div class="medal-container">
+            <div class="medal-shield p-0">
+              <img src="assets/image/green_g_silver.png" alt="Silver G" class="w-full h-full object-cover rounded-full">
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-slate-100 text-slate-800 border border-slate-200 mb-2.5">
+              <i class="fa-solid fa-medal animate-bounce mr-1"></i> รางวัลระดับเงิน (G Silver) - ระดับดีมาก (80 - 89 คะแนน)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ยินดีด้วย! สำนักงานของเราผ่านการรับรองสำนักงานสีเขียวระดับเงิน</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+              ความสำเร็จและแรงขับเคลื่อนที่ดีเยี่ยมนี้เกิดจากการที่พวกเราทุกคนร่วมใจกันเปลี่ยนแปลงและรักษาสิ่งแวดล้อมของสำนักงานอย่างตั้งใจ ร่วมมือก้าวต่อไปสู่เป้าหมายระดับทองด้วยกันนะครับ! 🌱🥈
+            </p>
+          </div>
+        </div>
+
+        <!-- 5. G Bronze Review Banner -->
+        <div class="celebration-banner celebration-banner-bronze border border-orange-200">
+          <div class="medal-container">
+            <div class="medal-shield p-0">
+              <img src="assets/image/green_g_bronze.png" alt="Bronze G" class="w-full h-full object-cover rounded-full">
+            </div>
+          </div>
+          <div class="flex-1">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-orange-100 text-orange-800 border border-orange-200 mb-2.5">
+              <i class="fa-solid fa-medal animate-bounce mr-1"></i> รางวัลระดับทองแดง (G Bronze) - ระดับดี (60 - 79 คะแนน)
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ยินดีด้วย! สำนักงานของเราผ่านการรับรองสำนักงานสีเขียวระดับทองแดง</h2>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+              ความสำเร็จและจุดเริ่มต้นที่งดงามในการก้าวสู่วิถีชีวิตที่เป็นมิตรต่อสิ่งแวดล้อม มาร่วมรักษามาตรฐานที่ดีเยี่ยมนี้และมุ่งมั่นยกระดับผลงานการประเมินให้ดียิ่งขึ้นไปอีกในรอบหน้านะครับ! 🌱🥉
+            </p>
+          </div>
+        </div>
+
+        <!-- 6. In Progress Review Banner -->
+        <div class="celebration-banner celebration-banner-in-progress flex flex-col sm:flex-row items-center justify-between gap-6 border border-emerald-300">
+          <div class="flex flex-col sm:flex-row items-center gap-5 flex-1">
+            <div class="medal-container">
+              <div class="medal-shield medal-in-progress p-0 flex items-center justify-center">
+                <span class="text-4xl animate-pulse">🌱</span>
+              </div>
+            </div>
+            <div class="text-center sm:text-left flex-1">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 mb-2.5">
+                <i class="fa-solid fa-hourglass-start animate-spin mr-1"></i> อยู่ระหว่างจัดเตรียมหลักฐานการประเมิน (Assessment In Progress)
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ร่วมใจกันเตรียมความพร้อม ก้าวสู่การรับรองสำนักงานสีเขียว!</h2>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+                สำนักงานของเรากำลังอยู่ในขั้นตอนการประเมินตนเองเพื่อยื่นรับรอง Green Office จาก อบก. มาร่วมกันกรอกแบบประเมิน บันทึกข้อมูลการใช้พลังงาน และลดการปล่อยคาร์บอน เพื่อช่วยยกระดับองค์กรของเราไปสู่วิถีชีวิตสีเขียวและก้าวสู่ระดับรางวัลเหรียญทองร่วมกันนะครับ! 📈💚
+              </p>
+            </div>
+          </div>
+          <div class="shrink-0 relative z-10 w-full sm:w-auto text-center">
+            <a href="/assessment" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 w-full sm:w-auto">
+              <i class="fa-solid fa-list-check"></i> ทำแบบประเมินตนเอง
+            </a>
+          </div>
+        </div>
+
+        <!-- 7. Failed / Re-assessment Required Review Banner -->
+        <div class="celebration-banner celebration-banner-failed flex flex-col sm:flex-row items-center justify-between gap-6 border border-rose-300">
+          <div class="flex flex-col sm:flex-row items-center gap-5 flex-1">
+            <div class="medal-container">
+              <div class="medal-shield medal-failed p-0 flex items-center justify-center">
+                <span class="text-4xl animate-pulse">⚠️</span>
+              </div>
+            </div>
+            <div class="text-center sm:text-left flex-1">
+              <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-200 mb-2.5">
+                <i class="fa-solid fa-circle-exclamation text-rose-600 mr-1 animate-pulse"></i> ผลการประเมินรอบล่าสุดยังไม่ผ่านเกณฑ์การรับรอง (Re-assessment Required)
+              </div>
+              <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ผลการประเมินรอบล่าสุดยังไม่ผ่านเกณฑ์การรับรอง</h2>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+                อย่าเพิ่งท้อถอยนะครับ! คะแนนและข้อเสนอแนะในการปรับปรุงคือโอกาสที่ดีเยี่ยมในการยกระดับองค์กรของเรา มาร่วมกันศึกษาข้อเสนอแนะจากผู้ตรวจประเมิน ปรับปรุงไฟล์หลักฐานในหมวดต่าง ๆ และยื่นขอรับการประเมินใหม่อีกครั้งเพื่อมุ่งสู่ความสำเร็จร่วมกันครับ! 🌱💪
+              </p>
+            </div>
+          </div>
+          <div class="shrink-0 relative z-10 w-full sm:w-auto text-center">
+            <a href="/assessment" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-700 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 w-full sm:w-auto">
+              <i class="fa-solid fa-arrows-rotate animate-spin mr-1"></i> แก้ไขแบบประเมินตนเอง
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Certificate Banner (If has certificate) - Admin/Executive Mode -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6" 
+         *ngIf="isOrgAdminOrExecutive && certificate && !waitingForCertificate">
       <div class="absolute -right-12 -top-12 text-emerald-100 opacity-50 rotate-12">
         <i class="fa-solid fa-certificate" class="text-[15rem]"></i>
       </div>
       
-      <div class="relative z-10">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
-          <i class="fa-solid fa-award"></i> TGO Certified
+      <div class="relative z-10 flex items-center gap-5">
+        <!-- Premium Medal -->
+        <div class="medal-container hidden sm:flex">
+          <div class="medal-shield p-0">
+            <img *ngIf="certifiedLevel === 'PLATINUM'" src="assets/image/green_g_platinum.png" alt="Platinum G" class="w-full h-full object-cover rounded-full">
+            <img *ngIf="certifiedLevel === 'PLUS'" src="assets/image/green_g_plus.png" alt="Plus G" class="w-full h-full object-cover rounded-full">
+            <img *ngIf="certifiedLevel === 'GOLD'" src="assets/image/green_g_gold.png" alt="Gold G" class="w-full h-full object-cover rounded-full">
+            <img *ngIf="certifiedLevel === 'SILVER'" src="assets/image/green_g_silver.png" alt="Silver G" class="w-full h-full object-cover rounded-full">
+            <img *ngIf="certifiedLevel === 'BRONZE'" src="assets/image/green_g_bronze.png" alt="Bronze G" class="w-full h-full object-cover rounded-full">
+          </div>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">ผ่านการรับรองสำนักงานสีเขียว</h2>
-        <p class="text-slate-600">
-          เลขที่ใบรับรอง: <strong class="text-slate-900">{{ certificate?.certificate_no || '-' }}</strong> 
-          (หมดอายุ {{ certificate?.expired_at | date:'d MMM yyyy' }})
-        </p>
+
+        <div>
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-3">
+            <i class="fa-solid fa-award"></i> TGO Certified - 
+            {{ certifiedLevel === 'PLATINUM' ? 'ระดับดีเด่นสูงสุด (G Platinum)' : 
+               certifiedLevel === 'PLUS' ? 'ระดับพัฒนาต่อเนื่อง (G Plus)' :
+               certifiedLevel === 'GOLD' ? 'ระดับดีเยี่ยม (G Gold)' : 
+               certifiedLevel === 'SILVER' ? 'ระดับดีมาก (G Silver)' : 'ระดับดี (G Bronze)' }}
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">ผ่านการรับรองสำนักงานสีเขียว</h2>
+          <p class="text-slate-600">
+            เลขที่ใบรับรอง: <strong class="text-slate-900">{{ certificate?.certificate_no || '-' }}</strong> 
+            (หมดอายุ {{ certificate?.expired_at | date:'d MMM yyyy' }})
+          </p>
+        </div>
       </div>
 
       <div class="relative z-10 shrink-0">
         <a [href]="certificate?.certificate_url" target="_blank" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5">
           <i class="fa-solid fa-download"></i>
           ดาวน์โหลดใบรับรองจาก อบก.
+        </a>
+      </div>
+    </div>
+
+    <!-- Celebration Banner for Standard Users (User/Employee Mode) -->
+    <div class="celebration-banner animate-in fade-in-up"
+         [class.celebration-banner-platinum]="certifiedLevel === 'PLATINUM'"
+         [class.celebration-banner-plus]="certifiedLevel === 'PLUS'"
+         [class.celebration-banner-gold]="certifiedLevel === 'GOLD'"
+         [class.celebration-banner-silver]="certifiedLevel === 'SILVER'"
+         [class.celebration-banner-bronze]="certifiedLevel === 'BRONZE'"
+         *ngIf="isStandardUser && certificate && !waitingForCertificate">
+      
+      <!-- Premium Medal Graphic -->
+      <div class="medal-container">
+        <div class="medal-shield p-0">
+          <img *ngIf="certifiedLevel === 'PLATINUM'" src="assets/image/green_g_platinum.png" alt="Platinum G" class="w-full h-full object-cover rounded-full">
+          <img *ngIf="certifiedLevel === 'PLUS'" src="assets/image/green_g_plus.png" alt="Plus G" class="w-full h-full object-cover rounded-full">
+          <img *ngIf="certifiedLevel === 'GOLD'" src="assets/image/green_g_gold.png" alt="Gold G" class="w-full h-full object-cover rounded-full">
+          <img *ngIf="certifiedLevel === 'SILVER'" src="assets/image/green_g_silver.png" alt="Silver G" class="w-full h-full object-cover rounded-full">
+          <img *ngIf="certifiedLevel === 'BRONZE'" src="assets/image/green_g_bronze.png" alt="Bronze G" class="w-full h-full object-cover rounded-full">
+        </div>
+      </div>
+
+      <!-- Celebration Text -->
+      <div class="flex-1">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black uppercase tracking-wider mb-2.5"
+             [ngClass]="{
+               'bg-slate-100 text-slate-800 border border-slate-200': certifiedLevel === 'PLATINUM' || certifiedLevel === 'SILVER',
+               'bg-amber-100 text-amber-800 border border-amber-200': certifiedLevel === 'PLUS' || certifiedLevel === 'GOLD',
+               'bg-orange-100 text-orange-800 border border-orange-200': certifiedLevel === 'BRONZE'
+             }">
+          <i class="fa-solid fa-medal animate-bounce mr-1"></i> 
+          {{ certifiedLevel === 'PLATINUM' ? 'รางวัลระดับพิเศษสูงสุด (G Platinum)' :
+             certifiedLevel === 'PLUS' ? 'รางวัลระดับพัฒนาต่อเนื่อง (G Plus)' :
+             certifiedLevel === 'GOLD' ? 'รางวัลระดับทอง (G Gold)' : 
+             certifiedLevel === 'SILVER' ? 'รางวัลระดับเงิน (G Silver)' : 'รางวัลระดับทองแดง (G Bronze)' }}
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">
+          {{ certifiedLevel === 'PLATINUM' ? 'ยินดีด้วยอย่างยิ่ง! สำนักงานของเราบรรลุระดับสูงสุดขององค์กรต้นแบบ' :
+             certifiedLevel === 'PLUS' ? 'ยินดีด้วยอย่างยิ่ง! สำนักงานของเรายกระดับต่อเนื่องระดับ G Plus' :
+             'ยินดีด้วย! สำนักงานของเราผ่านการรับรองสำนักงานสีเขียว' }}
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+          {{ certifiedLevel === 'PLATINUM' ? 'สุดยอดความสำเร็จอันเป็นที่สุดแห่งความภาคภูมิใจ! ด้วยความเพียรพยายาม ความใส่ใจ และมาตรฐานการดำเนินงานที่เป็นมิตรต่อสิ่งแวดล้อมขั้นสูงสุด ทำให้สำนักงานของเราได้รับความรับรองระดับองค์กรต้นแบบแห่งชาติ มาร่วมรักษามาตรฐานอันยอดเยี่ยมที่สุดนี้ไปด้วยกันครับ! 🌱👑💎' :
+             certifiedLevel === 'PLUS' ? 'ความสำเร็จและมาตรฐานที่มีการพัฒนาอย่างยั่งยืนและไม่หยุดยั้ง! ทุกการรักษาระเบียบการใช้พลังงาน การลดปริมาณคาร์บอนอย่างโดดเด่น ได้ทำให้องค์กรของเรายกระดับขึ้นสู่มาตรฐานพิเศษนี้ ขอแสดงความยินดีกับทุกคนในสำนักงานครับ! 🌱⭐📈' :
+             'ความสำเร็จอันยิ่งใหญันี้เกิดขึ้นจากความร่วมมือร่วมใจของพวกเราทุกคนในสำนักงาน ที่ร่วมกันประหยัดพลังงาน คัดแยกขยะ และลดปริมาณคาร์บอนอย่างยั่งยืน มาร่วมรักษามาตรฐานอันยอดเยี่ยมนี้ไปด้วยกันนะครับ! 🌱💚' }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Failed / Re-assessment Required Banner (Real state default if assessment failed) -->
+    <div class="celebration-banner celebration-banner-failed flex flex-col sm:flex-row items-center justify-between gap-6 border border-rose-300 animate-in fade-in-up"
+         *ngIf="!certificate && !waitingForCertificate && assessmentFailed">
+      <div class="flex flex-col sm:flex-row items-center gap-5 flex-1">
+        <div class="medal-container">
+          <div class="medal-shield medal-failed p-0 flex items-center justify-center">
+            <span class="text-4xl animate-pulse">⚠️</span>
+          </div>
+        </div>
+        <div class="text-center sm:text-left flex-1">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-200 mb-2.5">
+            <i class="fa-solid fa-circle-exclamation text-rose-600 mr-1 animate-pulse"></i> ผลการประเมินยังไม่ผ่านเกณฑ์การรับรอง (Re-assessment Required)
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ผลการประเมินรอบล่าสุดยังไม่ผ่านเกณฑ์การรับรอง</h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+            ข้อเสนอแนะในการปรับปรุง: <strong class="text-slate-900">"{{ rejectionComment }}"</strong><br>
+            อย่าเพิ่งท้อถอยนะครับ! คะแนนและข้อเสนอแนะในการปรับปรุงคือโอกาสที่ดีเยี่ยมในการยกระดับองค์กรของเรา มาร่วมกันศึกษาข้อเสนอแนะจากผู้ตรวจประเมิน ปรับปรุงไฟล์หลักฐานในหมวดต่าง ๆ และยื่นขอรับการประเมินใหม่อีกครั้งเพื่อมุ่งสู่ความสำเร็จร่วมกันครับ! 🌱💪
+          </p>
+        </div>
+      </div>
+      <div class="shrink-0 relative z-10 w-full sm:w-auto text-center">
+        <a href="/assessment" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-rose-600 text-white font-medium hover:bg-rose-700 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 w-full sm:w-auto">
+          <i class="fa-solid fa-arrows-rotate animate-spin mr-1"></i> แก้ไขแบบประเมินตนเอง
+        </a>
+      </div>
+    </div>
+
+    <!-- In Progress / Not Certified Banner (Real state default if no certificate and not failed) -->
+    <div class="celebration-banner celebration-banner-in-progress flex flex-col sm:flex-row items-center justify-between gap-6 border border-emerald-300 animate-in fade-in-up"
+         *ngIf="!certificate && !waitingForCertificate && !assessmentFailed">
+      <div class="flex flex-col sm:flex-row items-center gap-5 flex-1">
+        <div class="medal-container">
+          <div class="medal-shield medal-in-progress p-0 flex items-center justify-center">
+            <span class="text-4xl animate-pulse">🌱</span>
+          </div>
+        </div>
+        <div class="text-center sm:text-left flex-1">
+          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-200 mb-2.5">
+            <i class="fa-solid fa-hourglass-start animate-spin mr-1"></i> กำลังดำเนินการประเมิน (Assessment In Progress)
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 mb-1.5 leading-tight">ร่วมใจกันเตรียมความพร้อม ก้าวสู่การรับรองสำนักงานสีเขียว!</h2>
+          <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-4xl">
+            สำนักงานของเรากำลังอยู่ในขั้นตอนการประเมินตนเองเพื่อยื่นรับรอง Green Office จาก อบก. มาร่วมกันกรอกแบบประเมิน บันทึกข้อมูลการใช้พลังงาน และลดการปล่อยคาร์บอน เพื่อช่วยยกระดับองค์กรของเราไปสู่วิถีชีวิตสีเขียวและก้าวสู่ระดับรางวัลเหรียญทองร่วมกันนะครับ! 📈💚
+          </p>
+        </div>
+      </div>
+      <div class="shrink-0 relative z-10 w-full sm:w-auto text-center">
+        <a href="/assessment" class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 w-full sm:w-auto">
+          <i class="fa-solid fa-list-check"></i> ทำแบบประเมินตนเอง
         </a>
       </div>
     </div>

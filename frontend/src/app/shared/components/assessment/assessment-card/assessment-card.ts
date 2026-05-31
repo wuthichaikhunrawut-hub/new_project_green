@@ -1,7 +1,10 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScoreSelectorComponent } from '../score-selector/score-selector';
 import { EvidenceUploadComponent } from '../evidence-upload/evidence-upload';
+import { UploadService } from '../../../../core/services/upload.service';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-assessment-card',
@@ -70,12 +73,20 @@ import { EvidenceUploadComponent } from '../evidence-upload/evidence-upload';
           ></textarea>
         </div>
 
-        <!-- Evidence Upload -->
-        <app-evidence-upload
-          [fileCount]="fileCount"
-          (filesSelected)="onFilesSelected($event)"
-          (filesCleared)="onFilesCleared()"
-        ></app-evidence-upload>
+        <!-- Evidence Upload with loading spinner overlay -->
+        <div class="relative">
+          <app-evidence-upload
+            [fileCount]="fileCount"
+            (filesSelected)="onFilesSelected($event)"
+            (filesCleared)="onFilesCleared()"
+          ></app-evidence-upload>
+          
+          <!-- Glassmorphic loading spinner overlay -->
+          <div *ngIf="isUploading" class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center gap-3 px-4 rounded-xl border border-slate-100 animate-in fade-in duration-200">
+            <div class="w-5 h-5 rounded-full border-2 border-green-200 border-t-green-600 animate-spin shrink-0"></div>
+            <span class="text-xs font-bold text-slate-600">กำลังประมวลผลไฟล์หลักฐาน...</span>
+          </div>
+        </div>
       </div>
 
       <!-- Footer Info -->
@@ -90,7 +101,12 @@ import { EvidenceUploadComponent } from '../evidence-upload/evidence-upload';
   `]
 })
 export class AssessmentCardComponent {
+  private uploadService = inject(UploadService);
+  private authService = inject(AuthService);
+  private toast = inject(ToastService);
+
   @Input() questionId: string = '';
+  @Input() detailId: number | null = null;
   @Input() title: string = '';
   @Input() description: string = '';
   @Input() implementationStatus: string = 'none';
@@ -99,6 +115,8 @@ export class AssessmentCardComponent {
   @Input() fileCount: number = 0;
 
   @Output() changed = new EventEmitter<any>();
+
+  isUploading = false;
 
   implementationStates = [
     { value: 'none', label: 'ยังไม่มีการดำเนินการ', icon: 'fa-solid fa-circle-xmark', color: 'slate' },
@@ -135,13 +153,95 @@ export class AssessmentCardComponent {
   }
 
   onFilesSelected(files: FileList) {
-    this.fileCount += files.length;
-    this.emitChange();
+    if (!this.detailId) {
+      this.toast.error('ไม่พบ ID สำหรับแนบหลักฐาน กรุณาลองบันทึกฉบับร่างก่อนครับ');
+      return;
+    }
+
+    const userId = this.authService.getUser()?.id;
+    this.isUploading = true;
+    const fileArray = Array.from(files);
+    this.uploadSequential(fileArray, 0, userId);
+  }
+
+  private uploadSequential(files: File[], index: number, userId?: number) {
+    if (index >= files.length) {
+      this.isUploading = false;
+      this.toast.success('อัปโหลดไฟล์หลักฐานสำเร็จเรียบร้อยครับ! 🎉');
+      this.emitChange();
+      return;
+    }
+
+    const file = files[index];
+    this.uploadService.uploadFile(file, 'evidence', { 
+      assessmentDetailId: this.detailId!,
+      userId 
+    }).subscribe({
+      next: () => {
+        this.fileCount++;
+        this.uploadSequential(files, index + 1, userId);
+      },
+      error: (err) => {
+        console.error('❌ Upload error in card:', err);
+        this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
+        this.isUploading = false;
+      }
+    });
   }
 
   onFilesCleared() {
-    this.fileCount = 0;
-    this.emitChange();
+    if (!this.detailId) return;
+
+    if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์หลักฐานทั้งหมดในข้อนี้?')) {
+      this.isUploading = true;
+      this.uploadService.getFiles().subscribe({
+        next: (allFiles) => {
+          const filesToDelete = allFiles.filter(f => 
+            f.assessment_detail_id === this.detailId || 
+            f.assessmentDetailId === this.detailId
+          );
+
+          if (filesToDelete.length === 0) {
+            this.fileCount = 0;
+            this.isUploading = false;
+            this.emitChange();
+            this.toast.success('ลบหลักฐานเรียบร้อยครับ');
+            return;
+          }
+
+          this.deleteSequential(filesToDelete, 0);
+        },
+        error: (err) => {
+          console.error('❌ Failed to fetch files for deletion', err);
+          this.isUploading = false;
+          this.toast.error('ไม่สามารถดึงข้อมูลไฟล์หลักฐานเพื่อลบได้');
+        }
+      });
+    }
+  }
+
+  private deleteSequential(files: any[], index: number) {
+    if (index >= files.length) {
+      this.fileCount = 0;
+      this.isUploading = false;
+      this.emitChange();
+      this.toast.success('ลบไฟล์หลักฐานทั้งหมดเรียบร้อยแล้วครับ! 🗑️');
+      return;
+    }
+
+    const file = files[index];
+    const fileId = file.evidence_file_id || file.id;
+    if (fileId) {
+      this.uploadService.deleteFile(fileId).subscribe({
+        next: () => this.deleteSequential(files, index + 1),
+        error: (err) => {
+          console.error('❌ Failed to delete file:', fileId, err);
+          this.deleteSequential(files, index + 1); // skip error and continue
+        }
+      });
+    } else {
+      this.deleteSequential(files, index + 1);
+    }
   }
 
   private emitChange() {

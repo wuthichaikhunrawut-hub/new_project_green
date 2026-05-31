@@ -90,6 +90,20 @@ export class UploadsService {
 
     // Save to Database
     try {
+      // If it is a certificate upload, DO NOT save it in the evidence_files table.
+      // Certificates have their own dedicated table ('certificates') and are linked via certificate_url.
+      if (folder === 'certificates') {
+        console.log('📜 Certificate file uploaded successfully, skipping EvidenceFile DB record creation.');
+        return {
+          id: 0,
+          file_name: originalName,
+          file_url: publicUrl,
+          file_type: file.mimetype,
+          file_size: file.size,
+          uploaded_at: new Date(),
+        } as any;
+      }
+
       const evidenceFile = this.evidenceFileRepository.create({
         file_name: originalName,
         file_url: publicUrl,
@@ -142,9 +156,11 @@ export class UploadsService {
   }
 
   async findAll() {
-    return await this.evidenceFileRepository.find({
+    const all = await this.evidenceFileRepository.find({
       order: { uploaded_at: 'DESC' },
     });
+    // Filter out any certificate files to ensure they don't leak into evidence files list
+    return all.filter(f => !f.file_url || !f.file_url.includes('/certificates/'));
   }
 
   async update(id: number, data: { category: string }) {
