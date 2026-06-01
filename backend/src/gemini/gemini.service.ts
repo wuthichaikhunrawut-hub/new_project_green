@@ -73,11 +73,45 @@ export class GeminiService {
     return this.ai;
   }
 
+  private withTimeout<T>(
+    promise: Promise<T>,
+    timeoutMs: number,
+    errorMessage: string,
+  ): Promise<T> {
+    return Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(errorMessage)), timeoutMs),
+      ),
+    ]);
+  }
+
+  private translateAiError(error: any): string {
+    const msg = String(error?.message || '').toLowerCase();
+    if (msg.includes('timeout')) {
+      return 'ปัญญาประดิษฐ์ใช้เวลาตอบสนองนานเกินไป (Timeout) กรุณาลองใหม่อีกครั้ง';
+    }
+    if (msg.includes('429') || msg.includes('quota') || msg.includes('limit')) {
+      return 'โควตาการใช้งาน AI เต็มรูปแบบชั่วคราว กรุณารอ 1-2 นาทีแล้วลองใหม่อีกครั้ง';
+    }
+    if (msg.includes('api_key') || msg.includes('unauthorized') || msg.includes('key')) {
+      return 'ระบบเชื่อมต่อ AI ไม่ถูกต้อง (API Key มีปัญหา) กรุณาติดต่อผู้ดูแลระบบ';
+    }
+    return 'ไม่สามารถประมวลผลผ่าน AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
+  }
+
   private async executeWithFallback<T>(fn: (aiClient: GoogleGenAI) => Promise<T>): Promise<T> {
+    const timeoutMs = 15000;
+    const errMsg = 'Timeout';
+
     try {
       const ai = this.getClient();
-      return await fn(ai);
+      return await this.withTimeout(fn(ai), timeoutMs, errMsg);
     } catch (error: any) {
+      if (error.message === errMsg) {
+        throw error;
+      }
+
       console.warn('[GeminiService] Primary API key failed, checking backup key...', error.message || error);
       
       const backupKey = process.env.GEMINI_BACKUP_API_KEY || process.env.GEMINI_API_KEY_BACKUP;
@@ -85,12 +119,15 @@ export class GeminiService {
         try {
           console.log('[GeminiService] Switching to backup API key:', backupKey.substring(0, 10) + '...');
           const backupAi = new GoogleGenAI({ apiKey: backupKey });
-          const result = await fn(backupAi);
+          const result = await this.withTimeout(fn(backupAi), timeoutMs, errMsg);
           
           this.ai = backupAi; 
           return result;
         } catch (backupError: any) {
           console.error('[GeminiService] Both primary and backup API keys failed!', backupError.message || backupError);
+          if (backupError.message === errMsg) {
+            throw backupError;
+          }
           throw error;
         }
       }
@@ -147,9 +184,7 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
       return parsed;
     } catch (error) {
       console.error('Gemini API error:', error);
-      throw new InternalServerErrorException(
-        'AI scan failed: ' + (error as Error).message,
-      );
+      throw new InternalServerErrorException(this.translateAiError(error));
     }
   }
 
@@ -305,9 +340,7 @@ ${orgContext}`;
       return { reply };
     } catch (error) {
       console.error('Gemini chat error:', error);
-      throw new InternalServerErrorException(
-        'ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง',
-      );
+      throw new InternalServerErrorException(this.translateAiError(error));
     }
   }
 
@@ -349,7 +382,7 @@ ${orgContext}`;
       return JSON.parse(this.cleanJsonResponse(text));
     } catch (error) {
       console.error('Gemini Evidence Validation error:', error);
-      throw new InternalServerErrorException('การวิเคราะห์หลักฐานล้มเหลว: ' + (error as Error).message);
+      throw new InternalServerErrorException(this.translateAiError(error));
     }
   }
 
@@ -452,7 +485,7 @@ ${orgContext}`;
         }
       }
       
-      throw new InternalServerErrorException('การสร้างข้อมูลสรุปล้มเหลว');
+      throw new InternalServerErrorException(this.translateAiError(error));
     }
   }
 
@@ -558,7 +591,7 @@ ${orgContext}`;
         }
       }
 
-      throw new InternalServerErrorException('การสร้างคำแนะนำล้มเหลว');
+      throw new InternalServerErrorException(this.translateAiError(error));
     }
   }
 }

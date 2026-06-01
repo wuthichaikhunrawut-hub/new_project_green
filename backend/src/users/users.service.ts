@@ -286,29 +286,86 @@ export class UsersService {
       dataToSave.password_hash = await bcrypt.hash(userData.password, 10);
       delete dataToSave.password;
     }
-    const user = this.usersRepository.create(dataToSave);
-    const saved = (await this.usersRepository.save(user)) as unknown as User;
 
-    const profileData = user_profile || {
-      first_name: userData.username || userData.email?.split('@')[0] || 'ผู้ใช้งาน',
-      last_name: 'ใหม่',
-      phone: '-'
-    };
-    const profile = this.userProfileRepository.create({
-      ...profileData,
-      user: { id: saved.id },
+    return await this.usersRepository.manager.transaction(async (tem) => {
+      // 1. Save User
+      const user = tem.create(User, dataToSave);
+      const saved = await tem.save(user);
+
+      // 2. Save Profile
+      const profileData = user_profile || {
+        first_name: userData.username || userData.email?.split('@')[0] || 'ผู้ใช้งาน',
+        last_name: 'ใหม่',
+        phone: '-'
+      };
+      const profile = tem.create(UserProfile, {
+        ...profileData,
+        user: { id: saved.id },
+      });
+      await tem.save(profile);
+
+      // 3. Log Action
+      await this.auditLogsService.logAction(
+        undefined,
+        'CREATE_USER',
+        `Created user account: ${saved.email}`,
+      );
+
+      // 4. Assign Role
+      const desiredRole = userData?.role ? userData.role : UserRole.USER;
+      
+      const normalized = this.normalizeRoleName(desiredRole);
+      const allRoles = await tem.find(Role);
+      let role = allRoles.find(
+        (r) => this.normalizeRoleName(r.role_name) === normalized,
+      );
+      if (!role) {
+        role = tem.create(Role, { role_name: desiredRole });
+        role = await tem.save(role);
+      }
+
+      const exists = await tem.findOne(UserRoleLink, {
+        where: { user_id: saved.id, role_id: role.id },
+      });
+      if (!exists) {
+        await tem.save(UserRoleLink, {
+          user_id: saved.id,
+          role_id: role.id,
+        } as any);
+      }
+
+      const finalUser = await tem.findOne(User, {
+        where: { id: saved.id },
+        relations: [
+          'organization',
+          'user_profile',
+          'assessor_profile',
+          'roles',
+          'bank_accounts',
+        ],
+      });
+
+      if (!finalUser) throw new Error('Failed to load created user');
+
+      const p = finalUser.user_profile;
+      const first_name = p && p.first_name && p.first_name.trim() !== '' ? p.first_name.trim() : finalUser.email.split('@')[0];
+      const last_name = p && p.last_name && p.last_name.trim() !== '' ? p.last_name.trim() : 'ผู้ใช้งาน';
+      const phone = p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
+      const finalProfile = {
+        ...(p || {}),
+        first_name,
+        last_name,
+        phone,
+      };
+
+      return {
+        ...finalUser,
+        user_profile: finalProfile,
+        role:
+          finalUser.roles && finalUser.roles.length > 0 ? finalUser.roles[0].role_name : 'User',
+        username: finalProfile.first_name,
+      } as any;
     });
-    await this.userProfileRepository.save(profile);
-
-    await this.auditLogsService.logAction(
-      undefined,
-      'CREATE_USER',
-      `Created user account: ${saved.email}`,
-    );
-
-    const desiredRole = userData?.role ? userData.role : UserRole.USER;
-    await this.assignRoleToUser(saved.id, desiredRole);
-    return (await this.findOne(saved.id)) as any;
   }
 
   async update(id: number, updateData: any): Promise<User | null> {

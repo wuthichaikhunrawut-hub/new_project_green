@@ -125,53 +125,55 @@ export class GreenCriteriaService {
       return { success: false, message: 'Organization ID is required' };
     }
 
-    // Find the active (PENDING) assessment for this org
-    let assessment = await this.assessmentRepository.findOne({
-      where: { organization: { id: orgId }, status: 'PENDING' },
-    });
-
-    // If no pending assessment, create one
-    if (!assessment) {
-      assessment = this.assessmentRepository.create({
-        organization: { id: orgId },
-        status: 'PENDING',
-        total_score: 0,
+    return await this.assessmentRepository.manager.transaction(async (tem) => {
+      // Find the active (PENDING) assessment for this org
+      let assessment = await tem.findOne(Assessment, {
+        where: { organization: { id: orgId }, status: 'PENDING' },
       });
-      assessment = await this.assessmentRepository.save(assessment);
-    }
 
-    // Find or create assessment detail for this criteria
-    let detail = await this.assessmentDetailRepository.findOne({
-      where: { assessment: { id: assessment.id }, criteria: { id: criteriaId } },
-    });
+      // If no pending assessment, create one
+      if (!assessment) {
+        assessment = tem.create(Assessment, {
+          organization: { id: orgId },
+          status: 'PENDING',
+          total_score: 0,
+        });
+        assessment = await tem.save(assessment);
+      }
 
-    if (!detail) {
-      detail = this.assessmentDetailRepository.create({
-        assessment: { id: assessment.id },
-        criteria: { id: criteriaId },
-        self_score: score,
+      // Find or create assessment detail for this criteria
+      let detail = await tem.findOne(AssessmentDetail, {
+        where: { assessment: { id: assessment.id }, criteria: { id: criteriaId } },
       });
-    } else {
-      detail.self_score = score;
-    }
 
-    await this.assessmentDetailRepository.save(detail);
+      if (!detail) {
+        detail = tem.create(AssessmentDetail, {
+          assessment: { id: assessment.id },
+          criteria: { id: criteriaId },
+          self_score: score,
+        });
+      } else {
+        detail.self_score = score;
+      }
 
-    // Recalculate total score
-    const allDetails = await this.assessmentDetailRepository.find({
-      where: { assessment: { id: assessment.id } },
+      await tem.save(detail);
+
+      // Recalculate total score
+      const allDetails = await tem.find(AssessmentDetail, {
+        where: { assessment: { id: assessment.id } },
+      });
+      
+      const totalScore = allDetails.reduce((sum, d) => sum + (d.self_score || 0), 0);
+      assessment.total_score = totalScore;
+      await tem.save(assessment);
+
+      await this.auditLogsService.logAction(
+        orgId,
+        'UPDATE_SCORE',
+        `Updated score for criteria ${criteriaId} to ${score}`,
+      );
+
+      return { success: true, criteriaId, score, totalScore };
     });
-    
-    const totalScore = allDetails.reduce((sum, d) => sum + (d.self_score || 0), 0);
-    assessment.total_score = totalScore;
-    await this.assessmentRepository.save(assessment);
-
-    await this.auditLogsService.logAction(
-      orgId,
-      'UPDATE_SCORE',
-      `Updated score for criteria ${criteriaId} to ${score}`,
-    );
-
-    return { success: true, criteriaId, score, totalScore };
   }
 }

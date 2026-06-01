@@ -37,6 +37,16 @@ export class NotificationsService {
     return null;
   }
 
+  private sanitizeText(text: string): string {
+    if (!text) return '';
+    return text
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+      .replace(/on\w+\s*=\s*"[^"]*"/gi, '')
+      .replace(/on\w+\s*=\s*'[^']*'/gi, '')
+      .replace(/javascript\s*:\s*/gi, '');
+  }
+
   async create(data: {
     title: string;
     message: string;
@@ -67,8 +77,22 @@ export class NotificationsService {
       }
     }
 
+    const isJson = (str: string) => {
+      try {
+        JSON.parse(str);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const sanitizedTitle = this.sanitizeText(data.title);
+    const sanitizedMessage = isJson(data.message) ? data.message : this.sanitizeText(data.message);
+
     const notification = this.notificationsRepository.create({
       ...data,
+      title: sanitizedTitle,
+      message: sanitizedMessage,
       recipient_id: finalRecipientId,
     });
     const saved = await this.notificationsRepository.save(notification);
@@ -80,8 +104,8 @@ export class NotificationsService {
         if (user && user.email) {
           this.mailService.sendMail(
             user.email,
-            `แจ้งเตือนระบบ: ${data.title}`,
-            `<h3>${data.title}</h3><p>${data.message}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
+            `แจ้งเตือนระบบ: ${sanitizedTitle}`,
+            `<h3>${sanitizedTitle}</h3><p>${sanitizedMessage}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
           ).catch((mailErr) => {
             console.error('Error sending email notification:', mailErr.message || mailErr);
           });
@@ -102,9 +126,23 @@ export class NotificationsService {
     sender_id?: number;
     link?: string;
   }): Promise<Notification[]> {
+    const isJson = (str: string) => {
+      try {
+        JSON.parse(str);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const sanitizedTitle = this.sanitizeText(data.title);
+    const sanitizedMessage = isJson(data.message) ? data.message : this.sanitizeText(data.message);
+
     const notifications = data.recipient_ids.map((id) =>
       this.notificationsRepository.create({
         ...data,
+        title: sanitizedTitle,
+        message: sanitizedMessage,
         recipient_id: id,
       }),
     );
@@ -118,8 +156,8 @@ export class NotificationsService {
           if (user && user.email) {
             this.mailService.sendMail(
               user.email,
-              `แจ้งเตือนระบบ: ${data.title}`,
-              `<h3>${data.title}</h3><p>${data.message}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
+              `แจ้งเตือนระบบ: ${sanitizedTitle}`,
+              `<h3>${sanitizedTitle}</h3><p>${sanitizedMessage}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
             ).catch((mailErr) => {
               console.error(`Error sending bulk email to user ${id}:`, mailErr.message || mailErr);
             });

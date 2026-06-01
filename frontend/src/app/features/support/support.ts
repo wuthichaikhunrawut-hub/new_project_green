@@ -18,7 +18,7 @@ export class SupportComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
 
   isAdmin = false;
-  mockTickets: any[] = [];
+  tickets: any[] = [];
   currentUserEmail = '';
   
   // Native Angular Accordion State
@@ -90,7 +90,7 @@ export class SupportComponent implements OnInit {
           });
 
         setTimeout(() => {
-          this.mockTickets = mappedTickets;
+          this.tickets = mappedTickets;
           this.cdr.detectChanges();
         }, 0);
       },

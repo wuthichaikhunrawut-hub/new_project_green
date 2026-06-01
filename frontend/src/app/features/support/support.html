@@ -128,7 +128,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let ticket of mockTickets" (click)="viewTicket(ticket)" style="cursor: pointer;">
+                <tr *ngFor="let ticket of tickets" (click)="viewTicket(ticket)" style="cursor: pointer;">
                   <td class="px-4 py-3 fw-bold">{{ ticket.id }}</td>
                   <td class="px-4 py-3 text-dark">{{ ticket.subject }}</td>
                   <td class="px-4 py-3" style="color: #64748b !important;">{{ ticket.sender }}</td>

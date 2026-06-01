@@ -132,54 +132,78 @@ export class AssessmentsService {
     updateAssessmentDto: UpdateAssessmentDto,
     orgId: number,
   ) {
-    const assessment = await this.findOne(id, orgId);
+    return await this.assessmentRepository.manager.transaction(async (tem) => {
+      const assessment = await tem.findOne(Assessment, {
+        where: orgId ? { id, organization: { id: orgId } } : { id },
+        relations: [
+          'organization',
+          'details',
+          'details.criteria',
+          'details.evidence_files',
+          'certificates',
+        ],
+      });
 
-    // Update main assessment fields
-    if (updateAssessmentDto.status)
-      assessment.status = updateAssessmentDto.status;
-    if (updateAssessmentDto.total_score !== undefined)
-      assessment.total_score = updateAssessmentDto.total_score;
-    if (updateAssessmentDto.certified_level)
-      assessment.certified_level = updateAssessmentDto.certified_level;
-    if (updateAssessmentDto.assessor_user_id !== undefined)
-      assessment.assessor_user_id = updateAssessmentDto.assessor_user_id;
+      if (!assessment) {
+        throw new NotFoundException('Assessment not found');
+      }
 
-    await this.assessmentRepository.save(assessment);
+      // Update main assessment fields
+      if (updateAssessmentDto.status)
+        assessment.status = updateAssessmentDto.status;
+      if (updateAssessmentDto.total_score !== undefined)
+        assessment.total_score = updateAssessmentDto.total_score;
+      if (updateAssessmentDto.certified_level)
+        assessment.certified_level = updateAssessmentDto.certified_level;
+      if (updateAssessmentDto.assessor_user_id !== undefined)
+        assessment.assessor_user_id = updateAssessmentDto.assessor_user_id;
 
-    // Update details if provided (e.g., scores from self-assessment or Assessor)
-    if (updateAssessmentDto.details && updateAssessmentDto.details.length > 0) {
-      const detailsToSave: AssessmentDetail[] = [];
-      for (const updateDetail of updateAssessmentDto.details) {
-        const detailToUpdate = assessment.details.find(
-          (d) => d.id === updateDetail.assessment_detail_id,
-        );
-        if (detailToUpdate) {
-          detailToUpdate.self_score =
-            updateDetail.self_score !== undefined
-              ? updateDetail.self_score
-              : detailToUpdate.self_score;
-          detailToUpdate.applicant_comment =
-            updateDetail.applicant_comment !== undefined
-              ? updateDetail.applicant_comment
-              : detailToUpdate.applicant_comment;
-          detailToUpdate.assessor_score =
-            updateDetail.assessor_score !== undefined
-              ? updateDetail.assessor_score
-              : detailToUpdate.assessor_score;
-          detailToUpdate.auditor_comment =
-            updateDetail.auditor_comment !== undefined
-              ? updateDetail.auditor_comment
-              : detailToUpdate.auditor_comment;
-          detailsToSave.push(detailToUpdate);
+      await tem.save(assessment);
+
+      // Update details if provided (e.g., scores from self-assessment or Assessor)
+      if (updateAssessmentDto.details && updateAssessmentDto.details.length > 0) {
+        const detailsToSave: AssessmentDetail[] = [];
+        for (const updateDetail of updateAssessmentDto.details) {
+          const detailToUpdate = assessment.details.find(
+            (d) => d.id === updateDetail.assessment_detail_id,
+          );
+          if (detailToUpdate) {
+            detailToUpdate.self_score =
+              updateDetail.self_score !== undefined
+                ? updateDetail.self_score
+                : detailToUpdate.self_score;
+            detailToUpdate.applicant_comment =
+              updateDetail.applicant_comment !== undefined
+                ? updateDetail.applicant_comment
+                : detailToUpdate.applicant_comment;
+            detailToUpdate.assessor_score =
+              updateDetail.assessor_score !== undefined
+                ? updateDetail.assessor_score
+                : detailToUpdate.assessor_score;
+            detailToUpdate.auditor_comment =
+              updateDetail.auditor_comment !== undefined
+                ? updateDetail.auditor_comment
+                : detailToUpdate.auditor_comment;
+            detailsToSave.push(detailToUpdate);
+          }
+        }
+
+        if (detailsToSave.length > 0) {
+          await tem.save(detailsToSave);
         }
       }
 
-      if (detailsToSave.length > 0) {
-        await this.assessmentDetailRepository.save(detailsToSave);
-      }
-    }
-
-    return this.findOne(id, orgId);
+      return await tem.findOne(Assessment, {
+        where: orgId ? { id, organization: { id: orgId } } : { id },
+        relations: [
+          'organization',
+          'details',
+          'details.criteria',
+          'details.evidence_files',
+          'certificates',
+        ],
+      });
+    });
   }
 
   async remove(id: number, orgId: number): Promise<void> {

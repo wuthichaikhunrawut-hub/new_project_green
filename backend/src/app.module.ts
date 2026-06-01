@@ -14,7 +14,6 @@ import { AssessmentsModule } from './assessments/assessments.module';
 import { AuditLogsModule } from './audit-logs/audit-logs.module';
 import { SubscriptionsModule } from './subscriptions/subscriptions.module';
 import { UploadsModule } from './uploads/uploads.module';
-import { GreenOfficeModule } from './green-office/green-office.module';
 import { SettingsModule } from './settings/settings.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { NotificationsModule } from './notifications/notifications.module';
@@ -57,7 +56,6 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     AuditLogsModule,
     SubscriptionsModule,
     UploadsModule,
-    GreenOfficeModule,
     SettingsModule,
     AnalyticsModule,
     NotificationsModule,
