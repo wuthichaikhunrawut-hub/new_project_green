@@ -2,13 +2,17 @@
   <!-- Header -->
   <div class="page-header mb-4">
     <div class="page-header-left">
-      <h2 class="page-title">ผลการรับรอง Green Office</h2>
-      <p class="page-subtitle mb-0">จัดการประวัติการส่งคำขอและติดตามสถานะการรับรองเกณฑ์การประเมิน</p>
+      <h2 class="page-title">
+        {{ isAssigner ? 'มอบหมายงานตรวจประเมิน' : (userRoleKey === 'ASSESSOR' ? 'รายการตรวจประเมิน' : 'ผลการรับรอง Green Office') }}
+      </h2>
+      <p class="page-subtitle mb-0">
+        {{ isAssigner ? 'มอบหมายผู้ตรวจประเมินให้กับคำขอรับรอง Green Office ของแต่ละหน่วยงาน' : (userRoleKey === 'ASSESSOR' ? 'จัดการและบันทึกคะแนนการตรวจประเมินเกณฑ์ Green Office ของหน่วยงาน' : 'จัดการประวัติการส่งคำขอและติดตามสถานะการรับรองเกณฑ์การประเมิน') }}
+      </p>
     </div>
   </div>
 
   <!-- Filters -->
-  <div class="card mb-4 border-0 shadow-sm" *ngIf="['ADMIN', 'ASSESSOR'].includes(user?.role || '')">
+  <div class="card mb-4 border-0 shadow-sm" *ngIf="isAssigner || userRoleKey === 'ASSESSOR'">
     <div class="card-body">
       <div class="row g-3">
         <div class="col-md-8">

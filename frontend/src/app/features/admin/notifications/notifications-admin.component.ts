@@ -29,6 +29,23 @@ export class NotificationsAdminComponent implements OnInit {
   filteredUsers: any[] = [];
   history: any[] = [];
   isLoadingHistory = false;
+
+  activeAdminTab = 'APPROVALS'; // 'APPROVALS' | 'SEND' | 'HISTORY'
+
+  get announcementsHistory(): any[] {
+    return this.history.filter(item => !this.isRequestProposal(item));
+  }
+
+  get proposalsHistory(): any[] {
+    return this.history.filter(item => this.isRequestProposal(item));
+  }
+
+  getPendingProposalsCount(): number {
+    return this.history.filter(item => 
+      this.isRequestProposal(item) && 
+      this.parseRequestProposal(item)?.status === 'PENDING'
+    ).length;
+  }
   
   selectedFactor: any = null;
   notificationToDelete: any | null = null;
@@ -68,8 +85,10 @@ export class NotificationsAdminComponent implements OnInit {
     this.loadHistory();
   }
 
-  loadHistory() {
-    this.isLoadingHistory = true;
+  loadHistory(silent = false) {
+    if (!silent) {
+      this.isLoadingHistory = true;
+    }
     this.notificationService.getAllSystemNotifications().subscribe({
       next: (data: any[]) => {
         // Group by title, message, and approximate time
@@ -138,7 +157,7 @@ export class NotificationsAdminComponent implements OnInit {
         this.successMessage = `ส่งการแจ้งเตือนสำเร็จแล้ว (${recipientIds.length} ผู้รับ)`;
         this.resetForm();
         this.isSending = false;
-        this.loadHistory(); // Refresh history
+        this.loadHistory(true); // Refresh history silently
         this.cdr.markForCheck();
       },
       error: (err) => {
@@ -179,7 +198,7 @@ export class NotificationsAdminComponent implements OnInit {
           if (completed === ids.length) {
             this.toast.success('ลบประวัติการแจ้งเตือนสำเร็จ');
             this.notificationToDelete = null;
-            this.loadHistory();
+            this.loadHistory(true); // Refresh silently
           }
         },
         error: (err) => {
@@ -187,7 +206,7 @@ export class NotificationsAdminComponent implements OnInit {
           completed++;
           if (completed === ids.length) {
             this.notificationToDelete = null;
-            this.loadHistory();
+            this.loadHistory(true); // Refresh silently
           }
         }
       });
@@ -269,7 +288,7 @@ export class NotificationsAdminComponent implements OnInit {
     this.http.post(`http://localhost:3001/notifications/${item.id}/approve-academic`, {}).subscribe({
       next: () => {
         this.toast.success('อนุมัติเกณฑ์/สูตรคาร์บอนและบันทึกสู่ระบบสำเร็จเรียบร้อยแล้วครับ!');
-        this.loadHistory();
+        this.loadHistory(true); // Refresh silently
       },
       error: (err) => {
         console.error(err);
@@ -295,7 +314,7 @@ export class NotificationsAdminComponent implements OnInit {
       next: () => {
         this.toast.success('ปฏิเสธคำร้องข้อเสนอ และตอบกลับผู้ยื่นขอสำเร็จแล้ว');
         this.rejectingItem = null;
-        this.loadHistory();
+        this.loadHistory(true); // Refresh silently
       },
       error: (err) => {
         console.error(err);

@@ -153,13 +153,22 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
         ? String(this.criteriaList.find(c => c.id === this.selectedCriteria?.id)?.max_score || 0)
         : '0';
 
+      const isNew = !this.selectedCriteria.id;
       const proposePayload = {
         targetType: 'CRITERIA',
         targetId: this.selectedCriteria.id || 0,
         name: this.selectedCriteria.criteria_name || 'เพิ่มเกณฑ์การประเมินใหม่',
         oldValue: originalValue,
         newValue: String(this.selectedCriteria.max_score || 0),
-        reason: 'เสนอแก้ไขปรับปรุงอัตราคะแนนสูงสุดของเกณฑ์ประเมินสำนักงานสีเขียว'
+        reason: isNew 
+          ? 'เสนอเพิ่มเกณฑ์การประเมินข้อใหม่เข้าสู่ระบบ เพื่อปรับปรุงความครอบคลุมตามมาตรฐานสำนักงานสีเขียว'
+          : 'เสนอแก้ไขปรับปรุงคะแนนเต็มของเกณฑ์ประเมินเดิม',
+        details: isNew ? {
+          category_number: Number(this.selectedCriteria.category_number || 1),
+          criteria_code: this.selectedCriteria.criteria_code || '',
+          year_version: Number(this.selectedCriteria.year_version || new Date().getFullYear()),
+          description: this.selectedCriteria.description || ''
+        } : null
       };
 
       this.http.post('http://localhost:3001/notifications/propose-academic', proposePayload).subscribe({

@@ -102,6 +102,7 @@ export class NotificationsController {
       oldValue: string;
       newValue: string;
       reason: string;
+      details?: any;
     },
     @Request() req,
   ) {

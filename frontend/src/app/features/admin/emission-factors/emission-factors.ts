@@ -139,13 +139,22 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
         ? String(this.factors.find(f => f.id === this.selectedFactor?.id)?.factor_value || 0)
         : '0';
 
+      const isNew = !this.selectedFactor.id;
       const proposePayload = {
         targetType: 'EMISSION_FACTOR',
         targetId: this.selectedFactor.id || 0,
         name: this.selectedFactor.name || 'เพิ่มปัจจัยการปล่อยก๊าซใหม่',
         oldValue: originalValue,
         newValue: String(this.selectedFactor.factor_value || 0),
-        reason: 'เสนอแก้ไขปรับปรุงตัวคูณคาร์บอนฟุตพริ้นท์โดยแอดมินผู้ประเมิน'
+        reason: isNew
+          ? 'เสนอเพิ่มค่าสัมประสิทธิ์ตัวคูณคาร์บอนฟุตพริ้นท์ใหม่ เพื่อเพิ่มขีดความสามารถการคำนวณการใช้ทรัพยากร'
+          : 'เสนอแก้ไขปรับปรุงตัวคูณคาร์บอนฟุตพริ้นท์เดิม',
+        details: isNew ? {
+          scope: Number(this.selectedFactor.scope || 1),
+          unit: this.selectedFactor.unit || 'kWh',
+          source: this.selectedFactor.source || 'TGO',
+          year: Number(this.selectedFactor.year || new Date().getFullYear())
+        } : null
       };
 
       this.http.post('http://localhost:3001/notifications/propose-academic', proposePayload).subscribe({

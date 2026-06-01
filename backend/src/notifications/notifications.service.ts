@@ -82,7 +82,9 @@ export class NotificationsService {
             user.email,
             `แจ้งเตือนระบบ: ${data.title}`,
             `<h3>${data.title}</h3><p>${data.message}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
-          );
+          ).catch((mailErr) => {
+            console.error('Error sending email notification:', mailErr.message || mailErr);
+          });
         }
       })
       .catch((err) =>
@@ -118,7 +120,9 @@ export class NotificationsService {
               user.email,
               `แจ้งเตือนระบบ: ${data.title}`,
               `<h3>${data.title}</h3><p>${data.message}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
-            );
+            ).catch((mailErr) => {
+              console.error(`Error sending bulk email to user ${id}:`, mailErr.message || mailErr);
+            });
           }
         })
         .catch((err) =>
@@ -183,6 +187,7 @@ export class NotificationsService {
       oldValue: string;
       newValue: string;
       reason: string;
+      details?: any;
     },
   ): Promise<Notification> {
     const admin = await this.findSystemAdmin();
@@ -200,6 +205,7 @@ export class NotificationsService {
       newValue: data.newValue,
       reason: data.reason,
       status: 'PENDING',
+      details: data.details,
     };
 
     return this.create({
@@ -232,13 +238,37 @@ export class NotificationsService {
     }
 
     if (payload.targetType === 'CRITERIA') {
-      await this.greenCriteriaService.update(payload.targetId, {
-        max_score: parseFloat(payload.newValue),
-      });
+      if (!payload.targetId || payload.targetId === 0 || payload.targetId === '0') {
+        const details = payload.details || {};
+        await this.greenCriteriaService.create({
+          category_number: Number(details.category_number || 1),
+          criteria_code: String(details.criteria_code || ''),
+          criteria_name: String(payload.name || ''),
+          max_score: parseFloat(payload.newValue || '0'),
+          description: String(details.description || ''),
+          year_version: Number(details.year_version || new Date().getFullYear()),
+        });
+      } else {
+        await this.greenCriteriaService.update(payload.targetId, {
+          max_score: parseFloat(payload.newValue),
+        });
+      }
     } else if (payload.targetType === 'EMISSION_FACTOR') {
-      await this.emissionFactorsService.update(payload.targetId, {
-        factor_value: parseFloat(payload.newValue),
-      });
+      if (!payload.targetId || payload.targetId === 0 || payload.targetId === '0') {
+        const details = payload.details || {};
+        await this.emissionFactorsService.create({
+          scope: Number(details.scope || 1),
+          name: String(payload.name || ''),
+          unit: String(details.unit || 'kWh'),
+          factor_value: parseFloat(payload.newValue || '0'),
+          source: String(details.source || 'TGO'),
+          year: Number(details.year || new Date().getFullYear()),
+        });
+      } else {
+        await this.emissionFactorsService.update(payload.targetId, {
+          factor_value: parseFloat(payload.newValue),
+        });
+      }
     }
 
     payload.status = 'APPROVED';

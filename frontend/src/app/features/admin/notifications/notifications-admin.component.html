@@ -1,341 +1,579 @@
 <div class="container-fluid p-4 p-lg-5 animate-in">
     <!-- Header -->
-    <div class="page-header mb-4">
+    <div class="page-header mb-4 d-flex justify-content-between align-items-center">
         <div class="page-header-left">
-            <h2 class="page-title">ส่งการแจ้งเตือน</h2>
-            <p class="page-subtitle mb-0">ระบบกระจายข้อมูลข่าวสารระดับองค์กรแบบ Real-time</p>
+            <h2 class="page-title fw-bold text-dark">ศูนย์ควบคุมวิชาการ & ข่าวสารระบบ</h2>
+            <p class="page-subtitle mb-0 text-secondary">ศูนย์กลางอนุมัติข้อเสนอวิชาการและระบบกระจายข่าวสารแจ้งเตือน</p>
         </div>
+        <button class="btn btn-light rounded-pill px-4 shadow-sm" (click)="loadHistory()" [disabled]="isLoadingHistory">
+            <i class="fa-solid fa-rotate-right me-2" [class.fa-spin]="isLoadingHistory"></i> รีเฟรชข้อมูล
+        </button>
     </div>
 
-    <div class="row g-4 g-xl-5">
-        <!-- Main Form Area -->
-        <div class="col-lg-8">
-            <form (ngSubmit)="send()" #notifyForm="ngForm">
-                
-                <!-- Section 1: Recipient Selection -->
-                <div class="premium-card mb-4">
-                    <h5 class="fw-bold mb-4 d-flex align-items-center">
-                        <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
-                            <i class="fa-solid fa-users fs-5"></i>
-                        </span>
-                        ผู้รับการแจ้งเตือน
-                    </h5>
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs-premium mb-5 d-flex gap-2 p-1.5 bg-slate-100 rounded-pill border w-fit">
+        <button type="button" class="tab-pill btn" [class.active]="activeAdminTab === 'APPROVALS'" (click)="activeAdminTab = 'APPROVALS'">
+            <i class="fa-solid fa-scale-balanced me-2"></i>
+            คำร้องข้อเสนออนุมัติวิชาการ
+            <span class="badge bg-danger rounded-pill ms-2" *ngIf="getPendingProposalsCount() > 0">
+                {{ getPendingProposalsCount() }}
+            </span>
+        </button>
+        <button type="button" class="tab-pill btn" [class.active]="activeAdminTab === 'SEND'" (click)="activeAdminTab = 'SEND'">
+            <i class="fa-solid fa-paper-plane me-2"></i>
+            ส่งการแจ้งเตือนระบบ
+        </button>
+        <button type="button" class="tab-pill btn" [class.active]="activeAdminTab === 'HISTORY'" (click)="activeAdminTab = 'HISTORY'">
+            <i class="fa-solid fa-clock-rotate-left me-2"></i>
+            ประวัติการส่งข่าวสาร
+        </button>
+    </div>
 
-                    <div class="target-selector d-flex flex-wrap gap-2 mb-4">
-                        <input type="radio" class="btn-check" name="targetType" id="targetAll" value="ALL_SYSTEM" [(ngModel)]="targetType">
-                        <label class="btn btn-outline-primary rounded-pill px-4" for="targetAll">ทุกคนในระบบ</label>
+    <!-- Loading State -->
+    <div *ngIf="isLoadingHistory" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">กำลังโหลดข้อมูลระบบ...</p>
+    </div>
 
-                        <input type="radio" class="btn-check" name="targetType" id="targetOrg" value="ALL_ORG" [(ngModel)]="targetType">
-                        <label class="btn btn-outline-primary rounded-pill px-4" for="targetOrg">ทั้งองค์กร</label>
-
-                        <input type="radio" class="btn-check" name="targetType" id="targetUser" value="SPECIFIC_USER" [(ngModel)]="targetType">
-                        <label class="btn btn-outline-primary rounded-pill px-4" for="targetUser">เลือกรายคน</label>
-                    </div>
-
-                    <!-- Dynamic Fields based on Target -->
-                    <div class="row animate-in" *ngIf="targetType === 'ALL_SYSTEM'">
-                        <div class="col-12">
-                            <div class="alert alert-warning border-0 rounded-4 d-flex align-items-center mb-0">
-                                <i class="fa-solid fa-triangle-exclamation fs-4 me-3"></i>
-                                <div>
-                                    <div class="fw-bold">ประกาศถึงทุกคนในระบบ</div>
-                                    <div class="small text-muted">ข้อความนี้จะถูกส่งไปยังผู้ใช้งานทั้งหมด {{ allUsers.length }} คน</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row g-3 animate-in" *ngIf="targetType === 'ALL_ORG' || targetType === 'SPECIFIC_USER'">
-                        <div class="col-md-6">
-                            <label class="form-label">เลือกองค์กรเป้าหมาย</label>
-                            <select class="form-select shadow-none" name="org" [(ngModel)]="selectedOrgId" (ngModelChange)="onOrgChange($event)" required>
-                                <option [ngValue]="null">ระบุองค์กร...</option>
-                                <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.name }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6 animate-in" *ngIf="targetType === 'SPECIFIC_USER'">
-                            <label class="form-label">เลือกผู้ใช้งาน</label>
-                            <select class="form-select shadow-none" name="recipient" [(ngModel)]="selectedUserId" [disabled]="!selectedOrgId" required>
-                                <option [value]="null">{{ selectedOrgId ? 'ค้นหาผู้ใช้งาน...' : 'กรุณาเลือกองค์กรก่อน' }}</option>
-                                <option *ngFor="let user of filteredUsers" [value]="user.id">{{ user.username }} ({{ user.email }})</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-3 border-top" *ngIf="getRecipientCount() > 0">
-                        <span class="badge bg-light text-primary border px-3 py-2 rounded-pill">
-                            <i class="fa-solid fa-user-check me-1"></i>
-                            เตรียมส่งถึงผู้รับ {{ getRecipientCount() }} คน
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Section 2: Message Content -->
-                <div class="premium-card">
-                    <h5 class="fw-bold mb-4 d-flex align-items-center">
-                        <span class="bg-primary bg-opacity-10 text-primary p-2 rounded-3 me-3">
-                            <i class="fa-solid fa-message fs-5"></i>
-                        </span>
-                        เนื้อหาการแจ้งเตือน
-                    </h5>
-
-                    <div class="row">
-                        <div class="col-md-6 form-group">
-                            <label class="form-label">ประเภทการแจ้งเตือน</label>
-                            <select class="form-select shadow-none" name="type" [(ngModel)]="notification.type">
-                                <option *ngFor="let t of notificationTypes" [value]="t.value">{{ t.label }}</option>
-                            </select>
-                        </div>
-
-                        <div class="col-md-6 form-group">
-                            <label class="form-label">ลิงก์เพิ่มเติม (Deep Link)</label>
-                            <input type="text" class="form-control shadow-none" name="link" [(ngModel)]="notification.link" placeholder="เช่น /requests/123">
-                        </div>
-
-                        <div class="col-12 form-group">
-                            <label class="form-label">หัวข้อแจ้งเตือน</label>
-                            <input type="text" class="form-control shadow-none" name="title" [(ngModel)]="notification.title" required placeholder="พิมพ์หัวข้อสั้นๆ ที่น่าสนใจ...">
-                        </div>
-
-                        <div class="col-12 form-group">
-                            <label class="form-label">ข้อความรายละเอียด</label>
-                            <textarea class="form-control shadow-none" name="message" [(ngModel)]="notification.message" rows="5" required placeholder="ระบุเนื้อหาที่คุณต้องการแจ้งให้ทราบ..."></textarea>
-                        </div>
-
-                        <!-- Status Messages -->
-                        <div class="col-12 mt-2">
-                            <div *ngIf="successMessage" class="alert alert-success border-0 rounded-4 shadow-sm py-3 mb-4 d-flex align-items-center">
-                                <i class="fa-solid fa-circle-check fs-4 me-3"></i>
-                                <div>
-                                    <div class="fw-bold">ส่งเรียบร้อย!</div>
-                                    <div class="small">{{ successMessage }}</div>
-                                </div>
-                            </div>
-                            <div *ngIf="errorMessage" class="alert alert-danger border-0 rounded-4 shadow-sm py-3 mb-4 d-flex align-items-center">
-                                <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
-                                <div>
-                                    <div class="fw-bold">เกิดข้อผิดพลาด</div>
-                                    <div class="small">{{ errorMessage }}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 d-flex align-items-center gap-3 mt-4">
-                            <button type="submit" class="btn btn-premium-primary d-flex align-items-center" [disabled]="!notifyForm.form.valid || isSending || getRecipientCount() === 0">
-                                <span *ngIf="isSending" class="spinner-border spinner-border-sm me-2"></span>
-                                <i class="fa-solid fa-paper-plane me-2" *ngIf="!isSending"></i>
-                                ส่งการแจ้งเตือนทันที
-                            </button>
-                            <button type="button" class="btn btn-premium-secondary" (click)="resetForm()">
-                                ล้างข้อมูล
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </form>
+    <!-- TAB 1: ACADEMIC APPROVALS -->
+    <div *ngIf="!isLoadingHistory && activeAdminTab === 'APPROVALS'" class="animate-in">
+        
+        <!-- Empty State -->
+        <div *ngIf="proposalsHistory.length === 0" class="text-center py-5 bg-white rounded-4 shadow-sm border p-5">
+            <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4 w-[100px] h-[100px]">
+                <i class="fa-solid fa-scale-balanced fs-1 text-muted opacity-50"></i>
+            </div>
+            <h4 class="fw-bold text-dark">ไม่มีคำร้องเสนอวิชาการ</h4>
+            <p class="text-muted max-w-[450px] mx-auto mb-0">ระบบยังไม่พบข้อมูลคำร้องขอเสนอปรับแก้เกณฑ์ หรือเพิ่มสัมประสิทธิ์ตัวคูณคาร์บอนฟุตพริ้นท์จากผู้ตรวจประเมิน</p>
         </div>
 
-        <!-- Right Sidebar: Preview & Insights -->
-        <div class="col-lg-4">
-            <div class="sticky-top" style="top: 2rem;">
-                <div class="preview-title">Live Production Preview</div>
-                <div class="notification-preview mb-4">
-                    <div class="preview-icon-wrapper" [ngClass]="getPreviewIconClass()">
-                        <i class="fa-solid fs-5" [ngClass]="getPreviewIcon()"></i>
-                    </div>
-                    <div class="preview-content">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <span class="preview-badge" [ngClass]="getPreviewBadgeClass()">{{ getCategoryLabel() }}</span>
-                            <span class="text-muted text-[0.6rem]">เมื่อสักครู่</span>
+        <div *ngIf="proposalsHistory.length > 0">
+            <!-- Pending Proposals Section -->
+            <div class="mb-4">
+                <h5 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                    <span class="badge bg-amber-500 rounded-pill me-2 w-2 h-2 p-0 d-inline-block"></span>
+                    คำร้องที่อยู่ระหว่างการพิจารณาอนุมัติ
+                </h5>
+                
+                <div class="row g-4">
+                    <ng-container *ngFor="let item of proposalsHistory">
+                        <div class="col-md-6 col-xl-4 animate-in" *ngIf="parseRequestProposal(item) && parseRequestProposal(item)?.status === 'PENDING'">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 premium-card-proposal">
+                                <div class="card-body p-4 d-flex flex-column h-100">
+                                    <!-- Proposal Header -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            <span class="badge px-3 py-2 rounded-pill d-inline-flex align-items-center text-xs" 
+                                                [ngClass]="parseRequestProposal(item)?.targetType === 'CRITERIA' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-sky-50 text-sky-700 border border-sky-200'">
+                                                <i class="fa-solid me-1.5" [ngClass]="parseRequestProposal(item)?.targetType === 'CRITERIA' ? 'fa-list-check' : 'fa-leaf'"></i>
+                                                {{ parseRequestProposal(item)?.targetType === 'CRITERIA' ? 'เกณฑ์สำนักงานสีเขียว' : 'ค่าสัมประสิทธิ์คาร์บอน' }}
+                                            </span>
+                                            <span *ngIf="parseRequestProposal(item)?.targetId === 0 || parseRequestProposal(item)?.targetId === '0'" class="badge bg-purple-50 text-purple-700 border border-purple-200 px-2 py-1 text-[0.65rem] fw-bold rounded-pill">
+                                                <i class="fa-solid fa-circle-plus me-1"></i>เพิ่มรายการใหม่
+                                            </span>
+                                        </div>
+                                        <span class="badge bg-warning bg-opacity-10 text-warning px-2 py-1 text-[0.7rem] fw-bold rounded-pill">รออนุมัติ</span>
+                                    </div>
+
+                                    <!-- Item Name -->
+                                    <h6 class="fw-bold text-dark mb-3 line-clamp-2" [title]="parseRequestProposal(item)?.name">
+                                        {{ parseRequestProposal(item)?.name }}
+                                    </h6>
+
+                                    <!-- Comparison Grid -->
+                                    <div class="d-flex align-items-center justify-content-between bg-slate-50 p-3 rounded-4 border mb-3">
+                                        <div class="text-center flex-grow-1">
+                                            <span class="text-[0.7rem] text-muted d-block uppercase fw-bold">ค่าเดิม</span>
+                                            <span class="fs-6 fw-bold text-slate-500" *ngIf="parseRequestProposal(item)?.targetId === 0 || parseRequestProposal(item)?.targetId === '0'">ไม่มี (เพิ่มใหม่)</span>
+                                            <span class="fs-5 fw-bold text-slate-700" *ngIf="parseRequestProposal(item)?.targetId !== 0 && parseRequestProposal(item)?.targetId !== '0'">{{ parseRequestProposal(item)?.oldValue || '0' }}</span>
+                                        </div>
+                                        <div class="px-2">
+                                            <i class="fa-solid fa-arrow-right-long text-secondary fs-5"></i>
+                                        </div>
+                                        <div class="text-center flex-grow-1">
+                                            <span class="text-[0.7rem] text-success d-block uppercase fw-bold" *ngIf="parseRequestProposal(item)?.targetType === 'CRITERIA'">เสนอตั้งคะแนน</span>
+                                            <span class="text-[0.7rem] text-success d-block uppercase fw-bold" *ngIf="parseRequestProposal(item)?.targetType !== 'CRITERIA'">เสนอตั้งค่าตัวคูณ</span>
+                                            <span class="fs-5 fw-bold text-success">{{ parseRequestProposal(item)?.newValue }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Metadata Details for New Items -->
+                                    <div class="bg-slate-50 border p-3 rounded-4 mb-3 animate-in" *ngIf="(parseRequestProposal(item)?.targetId === 0 || parseRequestProposal(item)?.targetId === '0') && parseRequestProposal(item)?.details">
+                                        <div class="text-xs text-muted mb-2 fw-bold"><i class="fa-solid fa-circle-info me-1 text-slate-500"></i>รายละเอียดข้อมูลเกณฑ์/ตัวคูณใหม่:</div>
+                                        
+                                        <!-- For CRITERIA -->
+                                        <div class="row g-2" *ngIf="parseRequestProposal(item)?.targetType === 'CRITERIA'">
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">หมวดหมู่</span>
+                                                    <span class="fw-bold text-dark">หมวดที่ {{ parseRequestProposal(item)?.details?.category_number || '-' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">รหัสเกณฑ์ (Code)</span>
+                                                    <span class="fw-bold text-primary">{{ parseRequestProposal(item)?.details?.criteria_code || '-' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">เวอร์ชั่นปี (Year)</span>
+                                                    <span class="fw-bold text-dark">{{ parseRequestProposal(item)?.details?.year_version || '-' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-12" *ngIf="parseRequestProposal(item)?.details?.description">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">คำอธิบายเกณฑ์</span>
+                                                    <span class="text-slate-600 line-clamp-3" [title]="parseRequestProposal(item)?.details?.description">{{ parseRequestProposal(item)?.details?.description }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- For EMISSION_FACTOR -->
+                                        <div class="row g-2" *ngIf="parseRequestProposal(item)?.targetType === 'EMISSION_FACTOR'">
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">ขอบเขต (Scope)</span>
+                                                    <span class="fw-bold text-dark">Scope {{ parseRequestProposal(item)?.details?.scope || '-' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">หน่วยนับ (Unit)</span>
+                                                    <span class="fw-bold text-dark">ต่อ 1 {{ parseRequestProposal(item)?.details?.unit || '-' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">แหล่งอ้างอิง (Source)</span>
+                                                    <span class="fw-bold text-dark">{{ parseRequestProposal(item)?.details?.source || '-' }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 bg-white rounded-3 border small">
+                                                    <span class="text-muted d-block text-[0.6rem]">ปีที่เผยแพร่ (Year)</span>
+                                                    <span class="fw-bold text-dark">{{ parseRequestProposal(item)?.details?.year || '-' }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Reason Speech Bubble -->
+                                    <div class="bg-light p-3 rounded-3 border-0 border-l-4 border-l-primary mb-4 flex-grow-1">
+                                        <div class="text-xs text-muted mb-1 fw-bold"><i class="fa-solid fa-comment-dots me-1 text-primary"></i>เหตุผลความจำเป็น:</div>
+                                        <p class="small text-slate-700 mb-0 italic">"{{ parseRequestProposal(item)?.reason }}"</p>
+                                    </div>
+
+                                    <!-- Proposer Info -->
+                                    <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto text-muted small">
+                                        <span>
+                                            <i class="fa-solid fa-user-shield me-1"></i>
+                                            ผู้เสนอ: ผู้ตรวจ #{{ item.sender_id }}
+                                        </span>
+                                        <span>
+                                            <i class="fa-solid fa-calendar-day me-1"></i>
+                                            {{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex gap-2 mt-4">
+                                        <button type="button" class="btn btn-success flex-grow-1 rounded-pill py-2.5 fw-bold text-sm shadow-sm" (click)="approveProposal(item)">
+                                            <i class="fa-solid fa-circle-check me-1.5"></i>อนุมัติใช้งาน
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger flex-grow-1 rounded-pill py-2.5 fw-bold text-sm" (click)="openRejectModal(item)">
+                                            <i class="fa-solid fa-circle-xmark me-1.5"></i>ปฏิเสธ
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="fw-bold text-dark mb-1">{{ notification.title || 'หัวข้อแจ้งเตือนจะแสดงที่นี่' }}</div>
-                        <div class="text-muted small mb-2">{{ notification.message || 'เนื้อหาข้อความจะแสดงตัวอย่างให้คุณตรวจสอบความถูกต้องก่อนกดส่ง...' }}</div>
-                        
-                        <div class="border-top pt-2 mt-2 d-flex align-items-center justify-content-between">
-                            <span class="text-muted text-[0.7rem]">
-                                <i class="fa-solid fa-user-tag me-1"></i>ถึง: {{ getRecipientLabel() }}
+                    </ng-container>
+                </div>
+            </div>
+
+            <!-- Handled Proposals Section -->
+            <div class="mt-5">
+                <h5 class="fw-bold text-dark mb-4 d-flex align-items-center">
+                    <span class="badge bg-slate-400 rounded-pill me-2 w-2 h-2 p-0 d-inline-block"></span>
+                    ประวัติคำร้องข้อเสนอที่ประมวลผลแล้ว
+                </h5>
+                
+                <div class="row g-4">
+                    <ng-container *ngFor="let item of proposalsHistory">
+                        <div class="col-md-6 col-xl-4 animate-in" *ngIf="parseRequestProposal(item) && parseRequestProposal(item)?.status !== 'PENDING'">
+                            <div class="card border-0 shadow-sm rounded-4 h-100 premium-card-proposal opacity-75">
+                                <div class="card-body p-4 d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                            <span class="badge px-3 py-2 rounded-pill d-inline-flex align-items-center text-xs" 
+                                                [ngClass]="parseRequestProposal(item)?.targetType === 'CRITERIA' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-sky-50 text-sky-700 border border-sky-200'">
+                                                <i class="fa-solid me-1.5" [ngClass]="parseRequestProposal(item)?.targetType === 'CRITERIA' ? 'fa-list-check' : 'fa-leaf'"></i>
+                                                {{ parseRequestProposal(item)?.targetType === 'CRITERIA' ? 'เกณฑ์สำนักงานสีเขียว' : 'ค่าสัมประสิทธิ์คาร์บอน' }}
+                                            </span>
+                                            <span *ngIf="parseRequestProposal(item)?.targetId === 0 || parseRequestProposal(item)?.targetId === '0'" class="badge bg-purple-50 text-purple-700 border border-purple-200 px-2 py-1 text-[0.65rem] fw-bold rounded-pill">
+                                                เพิ่มใหม่
+                                            </span>
+                                        </div>
+                                        <span class="badge px-3 py-1.5 rounded-pill text-[0.7rem] fw-bold" 
+                                            [ngClass]="parseRequestProposal(item)?.status === 'APPROVED' ? 'bg-success bg-opacity-10 text-success' : 'bg-danger bg-opacity-10 text-danger'">
+                                            {{ parseRequestProposal(item)?.status === 'APPROVED' ? 'อนุมัติแล้ว' : 'ปฏิเสธคำร้อง' }}
+                                        </span>
+                                    </div>
+
+                                    <h6 class="fw-bold text-dark mb-3 line-clamp-2" [title]="parseRequestProposal(item)?.name">
+                                        {{ parseRequestProposal(item)?.name }}
+                                    </h6>
+
+                                    <div class="d-flex align-items-center justify-content-between bg-slate-50 p-2.5 rounded-4 border mb-3 small" *ngIf="parseRequestProposal(item)?.targetId !== 0 && parseRequestProposal(item)?.targetId !== '0'">
+                                        <span class="text-muted">ค่าเดิม: {{ parseRequestProposal(item)?.oldValue || '0' }}</span>
+                                        <i class="fa-solid fa-right-long text-muted"></i>
+                                        <span class="fw-semibold text-success">ค่าเสนอปรับใหม่: {{ parseRequestProposal(item)?.newValue }}</span>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between bg-slate-50 p-2.5 rounded-4 border mb-3 small" *ngIf="parseRequestProposal(item)?.targetId === 0 || parseRequestProposal(item)?.targetId === '0'">
+                                        <span class="text-muted">รายการใหม่</span>
+                                        <i class="fa-solid fa-plus text-success"></i>
+                                        <span class="fw-semibold text-success" *ngIf="parseRequestProposal(item)?.targetType === 'CRITERIA'">เสนอคะแนนเต็ม: {{ parseRequestProposal(item)?.newValue }}</span>
+                                        <span class="fw-semibold text-success" *ngIf="parseRequestProposal(item)?.targetType !== 'CRITERIA'">เสนอตั้งค่าตัวคูณ: {{ parseRequestProposal(item)?.newValue }}</span>
+                                    </div>
+
+                                    <!-- Compact Details for Handled New Items -->
+                                    <div class="bg-slate-50 border p-2 rounded-3 mb-3 small text-muted text-[0.75rem]" *ngIf="(parseRequestProposal(item)?.targetId === 0 || parseRequestProposal(item)?.targetId === '0') && parseRequestProposal(item)?.details">
+                                        <div *ngIf="parseRequestProposal(item)?.targetType === 'CRITERIA'">
+                                            <i class="fa-solid fa-circle-info me-1"></i>หมวด {{ parseRequestProposal(item)?.details?.category_number }} | ข้อ {{ parseRequestProposal(item)?.details?.criteria_code }} | ปี {{ parseRequestProposal(item)?.details?.year_version }}
+                                        </div>
+                                        <div *ngIf="parseRequestProposal(item)?.targetType === 'EMISSION_FACTOR'">
+                                            <i class="fa-solid fa-circle-info me-1"></i>Scope {{ parseRequestProposal(item)?.details?.scope }} | 1 {{ parseRequestProposal(item)?.details?.unit }} | {{ parseRequestProposal(item)?.details?.source }} ({{ parseRequestProposal(item)?.details?.year }})
+                                        </div>
+                                    </div>
+
+                                    <!-- Reject reason fallback -->
+                                    <div *ngIf="parseRequestProposal(item)?.rejectReason" class="bg-red-50 text-danger p-2.5 rounded-3 mb-3 small border border-red-100">
+                                        <i class="fa-solid fa-circle-info me-1"></i>เหตุผลที่ปฏิเสธ: "{{ parseRequestProposal(item)?.rejectReason }}"
+                                    </div>
+
+                                    <div class="d-flex align-items-center justify-content-between pt-3 border-top mt-auto text-muted small">
+                                        <span>
+                                            <i class="fa-solid fa-user-shield me-1"></i>
+                                            ผู้เสนอ: ผู้ตรวจ #{{ item.sender_id }}
+                                        </span>
+                                        <span>
+                                            <i class="fa-solid fa-calendar-day me-1"></i>
+                                            {{ item.created_at | date:'dd/MM/yyyy' }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TAB 2: SEND ANNOUNCEMENT -->
+    <div *ngIf="!isLoadingHistory && activeAdminTab === 'SEND'" class="animate-in">
+        <div class="row g-4 g-xl-5">
+            <!-- Form Area -->
+            <div class="col-lg-8">
+                <form (ngSubmit)="send()" #notifyForm="ngForm">
+                    <!-- Recipient Selection -->
+                    <div class="premium-card mb-4 shadow-sm border-0">
+                        <h5 class="fw-bold mb-4 d-flex align-items-center text-dark">
+                            <span class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3 d-inline-flex">
+                                <i class="fa-solid fa-users fs-5"></i>
                             </span>
-                            <i *ngIf="notification.link" class="fa-solid fa-chevron-right text-primary fs-7"></i>
+                            ระบุกลุ่มผู้รับข่าวสาร
+                        </h5>
+
+                        <div class="target-selector d-flex flex-wrap gap-2 mb-4">
+                            <input type="radio" class="btn-check" name="targetType" id="targetAll" value="ALL_SYSTEM" [(ngModel)]="targetType">
+                            <label class="btn btn-outline-primary rounded-pill px-4" for="targetAll">ผู้ใช้งานทุกคนในระบบ</label>
+
+                            <input type="radio" class="btn-check" name="targetType" id="targetOrg" value="ALL_ORG" [(ngModel)]="targetType">
+                            <label class="btn btn-outline-primary rounded-pill px-4" for="targetOrg">เจาะจงเฉพาะทั้งองค์กร</label>
+
+                            <input type="radio" class="btn-check" name="targetType" id="targetUser" value="SPECIFIC_USER" [(ngModel)]="targetType">
+                            <label class="btn btn-outline-primary rounded-pill px-4" for="targetUser">เลือกรายบุคคล</label>
+                        </div>
+
+                        <!-- Dynamic Selection Fields -->
+                        <div class="animate-in" *ngIf="targetType === 'ALL_SYSTEM'">
+                            <div class="alert alert-success border-0 rounded-4 d-flex align-items-center mb-0">
+                                <i class="fa-solid fa-circle-info fs-4 me-3 text-success"></i>
+                                <div>
+                                    <div class="fw-bold text-dark">ส่งประกาศถึงผู้ใช้งานทุกคน</div>
+                                    <div class="small text-muted">ข้อความนี้จะถูกส่งกระจายไปยังกล่องแจ้งเตือนของทุกคนในฐานข้อมูล (ทั้งหมด {{ allUsers.length }} คน)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 animate-in" *ngIf="targetType === 'ALL_ORG' || targetType === 'SPECIFIC_USER'">
+                            <div class="col-md-6">
+                                <label class="form-label">เลือกองค์กรเป้าหมาย</label>
+                                <select class="form-select shadow-none" name="org" [(ngModel)]="selectedOrgId" (ngModelChange)="onOrgChange($event)" required>
+                                    <option [ngValue]="null">กรุณาระบุองค์กร...</option>
+                                    <option *ngFor="let org of organizations" [ngValue]="org.id">{{ org.name }}</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 animate-in" *ngIf="targetType === 'SPECIFIC_USER'">
+                                <label class="form-label">เลือกผู้ใช้งาน</label>
+                                <select class="form-select shadow-none" name="recipient" [(ngModel)]="selectedUserId" [disabled]="!selectedOrgId" required>
+                                    <option [ngValue]="null">{{ selectedOrgId ? 'ค้นหาบัญชีผู้ใช้...' : 'โปรดเลือกองค์กรด้านซ้ายก่อน' }}</option>
+                                    <option *ngFor="let user of filteredUsers" [ngValue]="user.id">{{ user.username }} ({{ user.email }})</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mt-4 pt-3 border-top" *ngIf="getRecipientCount() > 0">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-3 py-2 rounded-pill">
+                                <i class="fa-solid fa-user-check me-1.5"></i>
+                                ยืนยันเตรียมจัดส่งถึงผู้รับจำนวน {{ getRecipientCount() }} คน
+                            </span>
                         </div>
                     </div>
-                </div>
 
-                <div class="soft-blue-card mb-4">
-                    <h5 class="fs-6 d-flex align-items-center">
-                        <i class="fa-solid fa-rocket me-2 text-blue-600"></i>
-                        คำแนะนำสำหรับ Admin
-                    </h5>
-                    <ul class="list-unstyled mb-0 small">
-                        <li class="mb-3">
-                            <i class="fa-solid fa-circle-1 text-blue-500 me-2"></i>
-                            เลือก <b>"กลุ่มผู้รับ"</b> ด้านซ้ายก่อนเป็นอันดับแรก
-                        </li>
-                        <li class="mb-3">
-                            <i class="fa-solid fa-circle-2 text-blue-500 me-2"></i>
-                            ตรวจสอบ <b>"Live Preview"</b> เพื่อเช็คความสวยงาม
-                        </li>
-                        <li class="mb-0">
-                            <i class="fa-solid fa-circle-3 text-blue-500 me-2"></i>
-                            กดส่ง และรอระบบประมวลผลเพื่อกระจายข้อความ
-                        </li>
-                    </ul>
-                </div>
+                    <!-- Message Content -->
+                    <div class="premium-card shadow-sm border-0">
+                        <h5 class="fw-bold mb-4 d-flex align-items-center text-dark">
+                            <span class="bg-success bg-opacity-10 text-success p-2 rounded-3 me-3 d-inline-flex">
+                                <i class="fa-solid fa-message fs-5"></i>
+                            </span>
+                            กรอกเนื้อหาข่าวสารแจ้งเตือน
+                        </h5>
 
-                <div class="premium-card bg-light border-0 py-3 text-center">
-                    <div class="d-flex align-items-center justify-content-center gap-2 text-muted">
-                        <i class="fa-solid fa-shield-halved"></i>
-                        <span class="text-xs">Enterprise Secure Delivery</span>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">ประเภทข่าวสาร</label>
+                                <select class="form-select shadow-none" name="type" [(ngModel)]="notification.type">
+                                    <option *ngFor="let t of notificationTypes" [value]="t.value">{{ t.label }}</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">ลิงก์แนบเพิ่มเติม (Deep Link)</label>
+                                <input type="text" class="form-control shadow-none" name="link" [(ngModel)]="notification.link" placeholder="ตัวอย่าง: /requests/3">
+                            </div>
+
+                            <div class="col-12 form-group">
+                                <label class="form-label">หัวข้อข่าวสาร</label>
+                                <input type="text" class="form-control shadow-none" name="title" [(ngModel)]="notification.title" required placeholder="ระบุหัวข้อสั้น กระชับ ได้ใจความ...">
+                            </div>
+
+                            <div class="col-12 form-group">
+                                <label class="form-label">รายละเอียดประกาศ</label>
+                                <textarea class="form-control shadow-none" name="message" [(ngModel)]="notification.message" rows="5" required placeholder="ระบุรายละเอียดทั้งหมดที่คุณต้องการส่งประกาศออกไปในระบบ..."></textarea>
+                            </div>
+
+                            <div class="col-12 mt-2">
+                                <div *ngIf="successMessage" class="alert alert-success border-0 rounded-4 shadow-sm py-3 mb-4 d-flex align-items-center">
+                                    <i class="fa-solid fa-circle-check fs-4 me-3 text-success"></i>
+                                    <div>
+                                        <div class="fw-bold">จัดส่งประกาศสำเร็จเรียบร้อย!</div>
+                                        <div class="small">{{ successMessage }}</div>
+                                    </div>
+                                </div>
+                                <div *ngIf="errorMessage" class="alert alert-danger border-0 rounded-4 shadow-sm py-3 mb-4 d-flex align-items-center">
+                                    <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
+                                    <div>
+                                        <div class="fw-bold">ไม่สามารถส่งประกาศได้</div>
+                                        <div class="small">{{ errorMessage }}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 d-flex align-items-center gap-2 mt-4">
+                                <button type="submit" class="btn btn-premium-primary rounded-pill px-5 py-3 shadow" [disabled]="!notifyForm.form.valid || isSending || getRecipientCount() === 0">
+                                    <span *ngIf="isSending" class="spinner-border spinner-border-sm me-2"></span>
+                                    <i class="fa-solid fa-paper-plane me-2" *ngIf="!isSending"></i>
+                                    ส่งประกาศออกระบบเดี๋ยวนี้
+                                </button>
+                                <button type="button" class="btn btn-light rounded-pill px-4 py-3 border" (click)="resetForm()">
+                                    ล้างข้อมูลฟอร์ม
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Live Preview Sidebar -->
+            <div class="col-lg-4">
+                <div class="sticky-top" style="top: 2rem;">
+                    <div class="preview-title text-secondary fw-bold text-xs uppercase mb-3">Live System Preview</div>
+                    
+                    <div class="notification-preview mb-4 shadow-sm border-0">
+                        <div class="preview-icon-wrapper" [ngClass]="getPreviewIconClass()">
+                            <i class="fa-solid fs-5" [ngClass]="getPreviewIcon()"></i>
+                        </div>
+                        <div class="preview-content">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="preview-badge" [ngClass]="getPreviewBadgeClass()">{{ getCategoryLabel() }}</span>
+                                <span class="text-muted text-[0.6rem]">เมื่อสักครู่</span>
+                            </div>
+                            <div class="fw-bold text-dark mb-1">{{ notification.title || 'หัวเรื่องประกาศแสดงตรงนี้' }}</div>
+                            <div class="text-muted small mb-2 line-clamp-3">{{ notification.message || 'รายละเอียดที่คุณพิมพ์จะแสดงตัวอย่างสมจริงให้เห็นตรงนี้ทันที...' }}</div>
+                            
+                            <div class="border-top pt-2.5 mt-2 d-flex align-items-center justify-content-between text-[0.7rem] text-muted">
+                                <span>
+                                    <i class="fa-solid fa-user-tag me-1"></i>ส่งถึง: {{ getRecipientLabel() }}
+                                </span>
+                                <i *ngIf="notification.link" class="fa-solid fa-chevron-right text-success fs-7"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="soft-blue-card border-0 shadow-sm rounded-4">
+                        <h6 class="fw-bold text-blue-800 d-flex align-items-center mb-3">
+                            <i class="fa-solid fa-shield-halved me-2 text-blue-600"></i>
+                            คำแนะนำการส่งข่าวสารแจ้งเตือน
+                        </h6>
+                        <ul class="list-unstyled mb-0 small text-blue-700">
+                            <li class="mb-2.5 d-flex align-items-start">
+                                <span class="bg-blue-200 text-blue-800 w-[18px] h-[18px] rounded-circle d-inline-flex align-items-center justify-content-center text-xs me-2 flex-shrink-0 fw-bold">1</span>
+                                <span>เลือก **กลุ่มผู้รับ** ในฟอร์มด้านซ้ายให้ถูกต้อง</span>
+                            </li>
+                            <li class="mb-2.5 d-flex align-items-start">
+                                <span class="bg-blue-200 text-blue-800 w-[18px] h-[18px] rounded-circle d-inline-flex align-items-center justify-content-center text-xs me-2 flex-shrink-0 fw-bold">2</span>
+                                <span>ตรวจสอบรูปแบบการแสดงผลที่กล่อง **Live Preview**</span>
+                            </li>
+                            <li class="mb-0 d-flex align-items-start">
+                                <span class="bg-blue-200 text-blue-800 w-[18px] h-[18px] rounded-circle d-inline-flex align-items-center justify-content-center text-xs me-2 flex-shrink-0 fw-bold">3</span>
+                                <span>เมื่อสมบูรณ์แล้ว ให้คลิกปุ่ม **ส่งประกาศออกระบบเดี๋ยวนี้**</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-  <!-- History Section -->
-  <div class="card border-0 shadow-sm rounded-4 mt-4 overflow-hidden">
-    <div class="card-header bg-white border-0 py-4 px-4 d-flex justify-content-between align-items-center">
-      <div>
-        <h5 class="fw-bold mb-1"><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>ประวัติการส่งประกาศ</h5>
-        <p class="text-muted small mb-0">รายการแจ้งเตือนทั้งหมดที่ถูกส่งโดยระบบ</p>
-      </div>
-      <button class="btn btn-light btn-sm rounded-pill px-3" (click)="loadHistory()" [disabled]="isLoadingHistory">
-        <i class="fa-solid fa-rotate-right me-1" [class.fa-spin]="isLoadingHistory"></i> รีเฟรช
-      </button>
-    </div>
-    
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="bg-light">
-          <tr>
-            <th class="ps-4 py-3 w-[180px]">วัน-เวลา</th>
-            <th class="py-3 w-[200px]">ผู้รับ</th>
-            <th class="py-3">หัวข้อ / ข้อความ</th>
-            <th class="py-3 w-[150px]">ประเภท</th>
-            <th class="py-3 w-[120px]">สถานะ</th>
-            <th class="pe-4 py-3 text-end w-[100px]">จัดการ</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of history">
-            <td class="ps-4 text-muted small">
-              {{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
-            </td>
-            <td>
-              <div class="fw-bold small text-primary">{{ item.recipient_count }} ผู้รับ</div>
-            </td>
-            <td>
-              <div class="fw-bold text-dark">{{ item.title }}</div>
-              <div *ngIf="isRequestProposal(item)" class="mt-2 bg-light p-3 rounded-3 border">
-                <div class="small fw-bold text-dark"><i class="fa-solid fa-flask me-1 text-primary"></i>รายละเอียดข้อเสนอ:</div>
-                <div class="small text-muted mt-1">เรื่อง: <b class="text-dark">{{ parseRequestProposal(item)?.name }}</b></div>
-                <div class="d-flex align-items-center gap-3 mt-2">
-                  <span class="badge bg-secondary">ค่าเดิม: {{ parseRequestProposal(item)?.oldValue }}</span>
-                  <i class="fa-solid fa-arrow-right text-muted"></i>
-                  <span class="badge bg-success">ค่าใหม่เสนอแก้: {{ parseRequestProposal(item)?.newValue }}</span>
-                </div>
-                <div class="small text-muted mt-2">
-                  <i class="fa-solid fa-circle-question me-1 text-info"></i>เหตุผล: "{{ parseRequestProposal(item)?.reason }}"
-                </div>
-                <div *ngIf="parseRequestProposal(item)?.rejectReason" class="small text-danger mt-2 fw-semibold">
-                  <i class="fa-solid fa-triangle-exclamation me-1"></i>ถูกปฏิเสธเนื่องจาก: "{{ parseRequestProposal(item)?.rejectReason }}"
-                </div>
-                <div class="d-flex gap-2 mt-3" *ngIf="parseRequestProposal(item)?.status === 'PENDING'">
-                  <button class="btn btn-sm btn-success rounded-pill px-3 shadow-sm" (click)="approveProposal(item)">
-                    <i class="fa-solid fa-check-double me-1"></i>อนุมัติเปิดใช้งานจริง
-                  </button>
-                  <button class="btn btn-sm btn-outline-danger rounded-pill px-3 shadow-sm" (click)="openRejectModal(item)">
-                    <i class="fa-solid fa-xmark me-1"></i>ปฏิเสธข้อเสนอ
-                  </button>
-                </div>
-                <div class="mt-2" *ngIf="parseRequestProposal(item)?.status !== 'PENDING'">
-                  <span class="badge rounded-pill px-3 py-1" [ngClass]="parseRequestProposal(item)?.status === 'APPROVED' ? 'bg-success' : 'bg-danger'">
-                    {{ parseRequestProposal(item)?.status === 'APPROVED' ? 'อนุมัติเรียบร้อยแล้ว' : 'ปฏิเสธคำขอแล้ว' }}
-                  </span>
-                </div>
-              </div>
-              <div *ngIf="!isRequestProposal(item)" class="text-muted small text-truncate max-w-[300px]">{{ item.message }}</div>
-            </td>
-            <td>
-              <span class="badge rounded-pill px-3 py-2" 
-                [ngClass]="{
-                  'bg-info text-dark': item.type === 'SYSTEM',
-                  'bg-primary': item.type === 'ASSESSMENT',
-                  'bg-warning text-dark': item.type === 'DEADLINE',
-                  'bg-secondary bg-purple-600 text-white': item.type === 'REQUEST',
-                  'bg-danger': item.type === 'URGENT'
-                }">
-                {{ item.type === 'REQUEST' ? 'คำร้องอนุมัติวิชาการ' : item.type }}
-              </span>
-            </td>
-            <td>
-              <span class="badge" [ngClass]="item.is_read ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'">
-                {{ item.is_read ? 'อ่านแล้ว' : 'ยังไม่อ่าน' }}
-              </span>
-            </td>
-            <td class="pe-4 text-end">
-                <button class="btn btn-sm btn-outline-danger border-0 rounded-circle" (click)="deleteHistoryItem(item)">
-                  <i class="fa-solid fa-trash"></i>
-                </button>
-            </td>
-          </tr>
-          <tr *ngIf="history.length === 0">
-            <td colspan="5" class="text-center py-5">
-              <div class="py-4">
-                <i class="fa-solid fa-inbox fs-1 mb-3 text-muted opacity-25"></i>
-                <p class="mb-0 text-muted">ยังไม่มีประวัติการส่งแจ้งเตือน</p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Delete Notification Confirm Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="notificationToDelete !== null" style="z-index: 1055;">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow-lg">
-      <div class="modal-header border-bottom p-4">
-        <h5 class="modal-title fw-bold mb-0 text-danger">ยืนยันการลบประวัติการแจ้งเตือน</h5>
-        <button type="button" class="btn-close" (click)="notificationToDelete = null"></button>
-      </div>
-      <div class="modal-body p-4 text-center">
-        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
-        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบประวัติการส่งการแจ้งเตือนนี้?</p>
-        <p class="text-muted mt-2">"{{ notificationToDelete.title }}"</p>
-        <p class="text-danger small mt-2">การลบจะลบข้อมูลออกจากกล่องข้อความของผู้รับทั้งหมด การกระทำนี้ไม่สามารถย้อนกลับได้</p>
-      </div>
-      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="notificationToDelete = null">ยกเลิก</button>
-        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDeleteNotification()">
-          <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Reject Proposal Reason Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="rejectingItem !== null" style="z-index: 1056;">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 border-0 shadow-lg">
-      <div class="modal-header border-bottom p-4">
-        <h5 class="modal-title fw-bold mb-0 text-danger">ระบุเหตุผลการปฏิเสธคำร้อง</h5>
-        <button type="button" class="btn-close" (click)="rejectingItem = null"></button>
-      </div>
-      <div class="modal-body p-4">
-        <div class="mb-3 text-start">
-          <label class="form-label text-muted small fw-bold">เหตุผลที่ไม่สามารถอนุมัติได้</label>
-          <textarea class="form-control" rows="4" [(ngModel)]="rejectReason" placeholder="ระบุเหตุผลเชิงวิชาการหรือข้อกำหนดเพื่อให้ผู้เสนอแนะแก้ไข..."></textarea>
+    <!-- TAB 3: ANNOUNCEMENTS HISTORY -->
+    <div *ngIf="!isLoadingHistory && activeAdminTab === 'HISTORY'" class="animate-in">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
+            <div class="card-header bg-white border-0 py-4 px-4">
+                <h5 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-clock-rotate-left me-2 text-success"></i>ประวัติการประกาศข้อมูลแจ้งเตือน</h5>
+                <p class="text-muted small mb-0">รายการการแจ้งเตือนทั้งหมดที่แอดมินส่งประกาศกระจายข่าวเข้าสู่ระบบ</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-slate-50 border-bottom">
+                        <tr>
+                            <th class="ps-4 py-3 text-muted text-xs uppercase fw-bold">วัน-เวลา</th>
+                            <th class="py-3 text-muted text-xs uppercase fw-bold">จำนวนผู้รับ</th>
+                            <th class="py-3 text-muted text-xs uppercase fw-bold">ประเภทประกาศ</th>
+                            <th class="py-3 text-muted text-xs uppercase fw-bold">หัวเรื่อง</th>
+                            <th class="py-3 text-muted text-xs uppercase fw-bold">ข้อความที่ส่ง</th>
+                            <th class="pe-4 py-3 text-end text-muted text-xs uppercase fw-bold w-[100px]">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of announcementsHistory">
+                            <td class="ps-4 text-muted small">
+                                {{ item.created_at | date:'dd/MM/yyyy HH:mm' }}
+                            </td>
+                            <td>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill px-3 py-1">
+                                    {{ item.recipient_count }} ผู้ใช้งาน
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge rounded-pill px-3 py-1.5 text-xs fw-bold" 
+                                    [ngClass]="{
+                                        'bg-slate-100 text-slate-700': item.type === 'SYSTEM',
+                                        'bg-emerald-50 text-emerald-700 border border-emerald-200': item.type === 'ASSESSMENT',
+                                        'bg-amber-50 text-amber-700 border border-amber-200': item.type === 'DEADLINE',
+                                        'bg-danger bg-opacity-10 text-danger': item.type === 'URGENT'
+                                    }">
+                                    {{ item.type === 'SYSTEM' ? 'ประกาศทั่วไป' : (item.type === 'ASSESSMENT' ? 'การประเมิน' : (item.type === 'DEADLINE' ? 'แจ้งเตือนกำหนดส่ง' : 'แจ้งเตือนด่วนที่สุด')) }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark text-truncate max-w-[200px]" [title]="item.title">{{ item.title }}</div>
+                            </td>
+                            <td>
+                                <div class="text-muted small text-truncate max-w-[350px]" [title]="item.message">{{ item.message }}</div>
+                            </td>
+                            <td class="pe-4 text-end">
+                                <button class="btn btn-sm btn-outline-danger border-0 rounded-circle w-[32px] h-[32px] p-0 d-inline-flex align-items-center justify-content-center" (click)="deleteHistoryItem(item)" title="ลบรายการ">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr *ngIf="announcementsHistory.length === 0">
+                            <td colspan="6" class="text-center py-5">
+                                <div class="py-4 text-muted">
+                                    <i class="fa-solid fa-inbox fs-1 mb-3 opacity-25"></i>
+                                    <p class="mb-0 small">ยังไม่มีประวัติการส่งประกาศข่าวสารแจ้งเตือนในระบบ</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
-      <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="rejectingItem = null">ยกเลิก</button>
-        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmRejectProposal()">
-          <i class="fa-solid fa-circle-xmark me-2"></i> ยืนยันการปฏิเสธ
-        </button>
-      </div>
     </div>
-  </div>
+</div>
+
+<!-- Modal: Delete Announcement Confirmation -->
+<div class="modal d-block bg-black/50 backdrop-blur-sm" tabindex="-1" *ngIf="notificationToDelete !== null" style="z-index: 99999;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 450px;">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+                    <i class="fa-solid fa-triangle-exclamation text-danger me-2 fs-4"></i>
+                    ยืนยันลบประวัติการประกาศ
+                </h5>
+                <button type="button" class="btn-close shadow-none" (click)="notificationToDelete = null"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <p class="mb-3 text-muted text-sm">คุณต้องการลบประวัติการส่งการแจ้งเตือนหัวข้อนี้ออกอย่างถาวรใช่หรือไม่?</p>
+                <div class="bg-light p-3 rounded-3 mb-2 border text-start">
+                    <div class="small fw-bold text-dark mb-1">{{ notificationToDelete.title }}</div>
+                    <div class="text-muted text-xs line-clamp-3">{{ notificationToDelete.message }}</div>
+                </div>
+                <p class="text-danger text-xs mb-0"><i class="fa-solid fa-circle-exclamation me-1"></i>การลบนี้จะนำแจ้งเตือนออกจากการแจ้งเตือนของผู้รับทุกคนโดยไม่สามารถกู้คืนได้</p>
+            </div>
+            <div class="modal-footer border-top-0 pt-0 pb-4 px-4 d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" (click)="notificationToDelete = null">ยกเลิก</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" (click)="confirmDeleteNotification()">
+                    <i class="fa-solid fa-trash-can me-1.5"></i>ยืนยันการลบ
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Reject Proposal Reason -->
+<div class="modal d-block bg-black/50 backdrop-blur-sm" tabindex="-1" *ngIf="rejectingItem !== null" style="z-index: 99999;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-bottom-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+                    <i class="fa-solid fa-circle-xmark text-danger me-2 fs-4"></i>
+                    เหตุผลในการปฏิเสธข้อเสนอ
+                </h5>
+                <button type="button" class="btn-close shadow-none" (click)="rejectingItem = null"></button>
+            </div>
+            <div class="modal-body px-4 py-3">
+                <div class="bg-light p-3 rounded-3 mb-3 border">
+                    <div class="text-xs text-muted fw-bold">ข้อเสนอที่จะปฏิเสธ:</div>
+                    <div class="fw-bold text-dark text-sm mt-1 mb-1">{{ parseRequestProposal(rejectingItem)?.name }}</div>
+                    <div class="small text-secondary">เสนอเปลี่ยนเป็น: <span class="text-success fw-bold">{{ parseRequestProposal(rejectingItem)?.newValue }}</span></div>
+                </div>
+                <div class="mb-3 text-start">
+                    <label class="form-label text-secondary small fw-bold">กรุณากรอกเหตุผลเชิงวิชาการ</label>
+                    <textarea class="form-control border shadow-sm p-3" rows="4" [(ngModel)]="rejectReason" style="border-radius: 12px;" placeholder="ตัวอย่าง: ค่าตัวคูณคาร์บอนฟุตพริ้นท์นี้ขัดต่อข้อกำหนดปีล่าสุดของ TGO..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0 pb-4 px-4 d-flex gap-2 justify-content-end">
+                <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" (click)="rejectingItem = null">ยกเลิก</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold shadow-sm" (click)="confirmRejectProposal()">
+                    <i class="fa-solid fa-circle-xmark me-1.5"></i>ยืนยันปฏิเสธข้อเสนอ
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
