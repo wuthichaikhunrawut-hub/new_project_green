@@ -15,9 +15,7 @@
       <section class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-slate-800 text-sm">สรุปคาร์บอนตาม Scope</h2>
-          @if (carbonSummary.isMock) {
-            <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">ข้อมูลตัวอย่าง</span>
-          }
+
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           @for (s of carbonSummary.scopes; track s.scope) {

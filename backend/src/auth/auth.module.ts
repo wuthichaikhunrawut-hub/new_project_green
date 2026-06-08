@@ -22,10 +22,17 @@ import { NotificationsModule } from '../notifications/notifications.module';
       global: true,
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') || 'GREEN_SYNC_SUPER_SECRET_KEY_FOR_LOCAL_DEV',
-        signOptions: { expiresIn: '1d' },
-      }),
+      useFactory: async (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        const env = process.env.NODE_ENV || 'development';
+        if (!secret && env === 'production') {
+          throw new Error('JWT_SECRET must be defined in production environment');
+        }
+        return {
+          secret: secret || 'GREEN_SYNC_SUPER_SECRET_KEY_FOR_LOCAL_DEV',
+          signOptions: { expiresIn: '1d' },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

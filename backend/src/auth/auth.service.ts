@@ -50,9 +50,9 @@ export class AuthService {
       password_hash: hashedPassword,
       organization: org,
       user_profile: {
-        first_name: registerDto.userData.username || registerDto.userData.email.split('@')[0],
-        last_name: 'ผู้ดูแลระบบ',
-        phone: '-'
+        first_name: registerDto.userData.firstName || registerDto.userData.email.split('@')[0],
+        last_name: registerDto.userData.lastName || 'ผู้ดูแลระบบ',
+        phone: registerDto.userData.phone || '-'
       }
     });
 
@@ -67,11 +67,20 @@ export class AuthService {
       orgId: org.id,
       role: primaryRole,
     };
-    return {
+    const result = {
       access_token: await this.jwtService.signAsync(payload),
       user: { id: user.id, email: user.email, role: payload.role },
       organization: org,
     };
+
+    // Send Welcome Email (Non-blocking)
+    const userName = user.user_profile?.first_name || user.email.split('@')[0];
+    const emailHtml = this.mailService.getWelcomeTemplate(userName);
+    this.mailService.sendMail(user.email, 'ยินดีต้อนรับสู่ Green Sync', emailHtml).catch(e => {
+      this.logger.error(`Failed to send welcome email to ${user.email}`, e.stack);
+    });
+
+    return result;
   }
 
   async login(loginDto: any) {
@@ -169,11 +178,20 @@ export class AuthService {
       email: user.email,
       role: UserRole.ASSESSOR,
     };
-    return {
+    const result = {
       access_token: await this.jwtService.signAsync(payload),
       user: { id: user.id, email: user.email, role: UserRole.ASSESSOR },
       profile,
     };
+
+    // Send Welcome Email (Non-blocking)
+    const userName = registerDto.profileData.firstName || user.email.split('@')[0];
+    const emailHtml = this.mailService.getWelcomeTemplate(userName);
+    this.mailService.sendMail(user.email, 'ยินดีต้อนรับสู่ Green Sync (ผู้ประเมิน)', emailHtml).catch(e => {
+      this.logger.error(`Failed to send welcome email to ${user.email}`, e.stack);
+    });
+
+    return result;
   }
 
   async forgotPassword(email: string) {

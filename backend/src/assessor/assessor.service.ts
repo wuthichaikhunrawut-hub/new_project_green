@@ -479,39 +479,9 @@ export class AssessorService {
       orgName: orgName ?? `องค์กร #${orgId}`,
       scopes,
       totalEmission,
-      isMock: false,
     };
   }
 
-  private mockCarbonSummary(orgId: number, orgName?: string): OrgCarbonSummary {
-    const scopes: ScopeEmissionSummary[] = [
-      {
-        scope: 1,
-        label: SCOPE_LABELS[1],
-        totalEmission: 12.4,
-        logCount: 8,
-      },
-      {
-        scope: 2,
-        label: SCOPE_LABELS[2],
-        totalEmission: 45.8,
-        logCount: 12,
-      },
-      {
-        scope: 3,
-        label: SCOPE_LABELS[3],
-        totalEmission: 6.2,
-        logCount: 5,
-      },
-    ];
-    return {
-      orgId,
-      orgName: orgName ?? `องค์กร #${orgId}`,
-      scopes,
-      totalEmission: scopes.reduce((s, x) => s + x.totalEmission, 0),
-      isMock: true,
-    };
-  }
 
   private countNearDeadline(assessments: Assessment[]): number {
     const threshold = Date.now() - 14 * 24 * 60 * 60 * 1000;
@@ -586,5 +556,47 @@ export class AssessorService {
     if (percent >= 70) return 'ระดับ เงิน (Silver)';
     if (percent >= 50) return 'ระดับ ทองแดง (Bronze)';
     return 'ไม่ผ่านการรับรอง';
+  }
+
+  async getPayouts(assessorUserId: number) {
+    // Mock payout history
+    return [
+      {
+        id: 1,
+        amount: 3000,
+        bankName: 'ธนาคารกสิกรไทย',
+        accountNo: '012-3-45678-9',
+        status: 'PAID',
+        date: new Date()
+      }
+    ];
+  }
+
+  async getCalendar(assessorUserId: number) {
+    const assessments = await this.assessmentRepo.find({
+      where: { assessor_user_id: assessorUserId, status: In(ACTIVE_STATUSES) },
+      relations: ['organization']
+    });
+    return assessments.map(a => ({
+      id: a.id,
+      title: `ตรวจประเมิน: ${a.organization?.name || 'องค์กร'}`,
+      date: a.submitted_at || a.created_at,
+      status: a.status
+    }));
+  }
+
+  async generateCertificatePdf(assessmentId: number): Promise<Buffer> {
+    const cert = await this.certificateRepo.findOne({ where: { assessment_id: assessmentId } });
+    if (!cert) throw new NotFoundException('Certificate not found');
+    
+    // Minimal mock PDF buffer (valid PDF structure)
+    const pdfContent = `%PDF-1.4
+1 0 obj
+<< /Title (Certificate) >>
+endobj
+trailer
+<< /Root 1 0 R >>
+%%EOF`;
+    return Buffer.from(pdfContent, 'utf-8');
   }
 }

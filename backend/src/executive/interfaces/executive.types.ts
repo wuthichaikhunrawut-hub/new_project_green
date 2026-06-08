@@ -19,6 +19,8 @@ export interface CarbonScopePoint {
 export interface CarbonUnitPoint {
   unitName: string;
   totalEmission: number;
+  industryAverage?: number;
+  percentile?: number;
 }
 
 export interface ExecutiveDashboardResponse {

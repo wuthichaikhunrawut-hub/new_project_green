@@ -132,34 +132,57 @@
     </div>
   </div>
 
-  <div *ngIf="!isLoading" class="row justify-content-center mt-4">
+  <div *ngIf="!isLoading" class="row justify-content-center mt-5 mb-4">
     <div class="col-12">
-      <div class="card shadow-sm border-0">
+      <div class="card billing-history-card border-0">
         <div class="card-body p-4">
-          <h5 class="card-title mb-3">ประวัติการชำระเงิน</h5>
-          <div class="table-responsive">
-            <table class="table table-sm table-hover">
+          <h5 class="card-title mb-4 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-receipt text-primary"></i>
+            ประวัติการชำระเงินขององค์กร
+          </h5>
+          <div class="table-responsive border border-slate-100 rounded-3">
+            <table class="table premium-payment-table align-middle m-0">
               <thead>
                 <tr>
-                  <th>วันที่</th>
-                  <th>ยอดเงิน</th>
-                  <th>สถานะ</th>
-                  <th>ช่องทาง</th>
+                  <th>วันที่จ่ายเงิน</th>
+                  <th>เลขที่บิล / รายการ</th>
+                  <th>ยอดชำระ</th>
+                  <th class="text-center">สถานะ</th>
+                  <th>ช่องทางชำระเงิน</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let payment of payments">
-                  <td>{{ payment.paid_at ? (payment.paid_at | date:'dd MMM yyyy') : (payment.created_at | date:'dd MMM yyyy') }}</td>
-                  <td>฿{{ payment.amount | number:'1.0-0' }}</td>
-                  <td>
-                    <span class="badge" [ngClass]="payment.payment_status === 'PAID' ? 'bg-success' : payment.payment_status === 'PENDING' ? 'bg-warning text-dark' : 'bg-secondary'">
-                      {{ payment.payment_status || 'ไม่ระบุ' }}
+                  <td class="font-semibold text-slate-700">
+                    {{ payment.paid_at ? (payment.paid_at | date:'dd MMM yyyy') : (payment.created_at | date:'dd MMM yyyy') }}
+                  </td>
+                  <td class="fw-bold text-dark">
+                    {{ payment.invoice_no || ('INV-' + (payment.id || '000')) }}
+                  </td>
+                  <td class="fw-black text-slate-900">
+                    ฿{{ payment.amount | number:'1.0-0' }}
+                  </td>
+                  <td class="text-center">
+                    <span class="inline-block" 
+                          [ngClass]="payment.payment_status === 'PAID' || payment.payment_status === 'paid' ? 'badge-paid' : 
+                                     payment.payment_status === 'PENDING' || payment.payment_status === 'pending' ? 'badge-pending' : 'badge-failed'">
+                      {{ payment.payment_status === 'PAID' || payment.payment_status === 'paid' ? 'สำเร็จ (Paid)' : 
+                         payment.payment_status === 'PENDING' || payment.payment_status === 'pending' ? 'รอชำระ (Pending)' : 'ล้มเหลว (Failed)' }}
                     </span>
                   </td>
-                  <td>{{ payment.payment_method || 'ไม่ระบุ' }}</td>
+                  <td class="font-medium text-slate-500">
+                    <i class="fa-brands fa-stripe text-indigo-500 me-1" *ngIf="payment.payment_method?.toLowerCase() === 'stripe'"></i>
+                    <i class="fa-solid fa-credit-card text-slate-400 me-1" *ngIf="payment.payment_method?.toLowerCase() !== 'stripe'"></i>
+                    {{ payment.payment_method || 'บัตรเครดิต' }}
+                  </td>
                 </tr>
                 <tr *ngIf="payments.length === 0">
-                  <td colspan="4" class="text-center text-muted py-4">ยังไม่มีประวัติการชำระเงิน</td>
+                  <td colspan="5" class="text-center text-muted py-5">
+                    <div class="py-3">
+                      <i class="fa-solid fa-receipt text-slate-300 fs-1 mb-3"></i>
+                      <div class="fw-bold text-slate-400">ยังไม่มีประวัติการชำระเงินสำหรับบัญชีนี้</div>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>

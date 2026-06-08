@@ -7,12 +7,19 @@ import {
   Param,
   Delete,
   Headers,
+  ParseIntPipe,
+  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
 import { UpdateAssessmentDto } from './dto/update-assessment.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 
 @Controller('assessments')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class AssessmentsController {
   constructor(private readonly assessmentsService: AssessmentsService) {}
 
@@ -36,6 +43,7 @@ export class AssessmentsController {
   }
 
   @Post()
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
   create(
     @Body() createAssessmentDto: CreateAssessmentDto,
     @Headers() headers: any,
@@ -53,6 +61,7 @@ export class AssessmentsController {
   }
 
   @Get()
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN')
   findAll(@Headers() headers: any) {
     const role = this.getUserRole(headers);
     const assessorId = headers['x-user-id'];
@@ -64,7 +73,8 @@ export class AssessmentsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Headers() headers: any) {
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN')
+  findOne(@Param('id', ParseIntPipe) id: number, @Headers() headers: any) {
     // Pass 0 as orgId for ASSESSOR/ADMIN to bypass org filter, otherwise enforce it
     const role = this.getUserRole(headers);
     const orgId =
@@ -73,8 +83,9 @@ export class AssessmentsController {
   }
 
   @Patch(':id')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateAssessmentDto: UpdateAssessmentDto,
     @Headers() headers: any,
   ) {
@@ -85,7 +96,8 @@ export class AssessmentsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string, @Headers() headers: any) {
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
+  remove(@Param('id', ParseIntPipe) id: number, @Headers() headers: any) {
     const role = this.getUserRole(headers);
     const orgId =
       ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);

@@ -6,6 +6,8 @@ import { UpdateAssessmentDto } from './dto/update-assessment.dto';
 import { Assessment } from './entities/assessment.entity';
 import { AssessmentDetail } from './entities/assessment-detail.entity';
 import { GreenCriteriaMaster } from './entities/green-criteria-master.entity';
+import { MailService } from '../notifications/mail.service';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AssessmentsService {
@@ -16,6 +18,8 @@ export class AssessmentsService {
     private assessmentDetailRepository: Repository<AssessmentDetail>,
     @InjectRepository(GreenCriteriaMaster)
     private criteriaRepository: Repository<GreenCriteriaMaster>,
+    private mailService: MailService,
+    private usersService: UsersService,
   ) {}
 
   async create(createAssessmentDto: CreateAssessmentDto, orgId: number) {
@@ -93,10 +97,13 @@ export class AssessmentsService {
       });
     }
 
-    // ASSESSOR: show all assessments so they can pick up any pending work
-    // (assignment UI not yet implemented - this ensures assessors are not blocked)
     if (normalizedRole === 'ASSESSOR' || normalizedRole === 'ASSESSOR_ADMIN') {
+      const whereCondition = normalizedRole === 'ASSESSOR' && assessorId 
+        ? { assessor_user_id: Number(assessorId) } 
+        : {};
+
       return this.assessmentRepository.find({
+        where: whereCondition,
         relations: ['organization', 'assessor', 'assessor.user_profile', 'certificates'],
         order: { submitted_at: 'DESC' },
       });
@@ -135,18 +142,14 @@ export class AssessmentsService {
     return await this.assessmentRepository.manager.transaction(async (tem) => {
       const assessment = await tem.findOne(Assessment, {
         where: orgId ? { id, organization: { id: orgId } } : { id },
-        relations: [
-          'organization',
-          'details',
-          'details.criteria',
-          'details.evidence_files',
-          'certificates',
-        ],
+        relations: ['details', 'organization'],
       });
 
       if (!assessment) {
         throw new NotFoundException('Assessment not found');
       }
+
+      const oldStatus = assessment.status;
 
       // Update main assessment fields
       if (updateAssessmentDto.status)
@@ -190,6 +193,36 @@ export class AssessmentsService {
 
         if (detailsToSave.length > 0) {
           await tem.save(detailsToSave);
+        }
+      }
+
+      // Recalculate total_score dynamically based on the sum of all details
+      const freshDetails = await tem.find(AssessmentDetail, {
+        where: { assessment: { id: assessment.id } },
+      });
+      const newTotalScore = freshDetails.reduce((sum, d) => {
+        // Use assessor_score if set, otherwise fallback to self_score
+        const score = d.assessor_score !== null && d.assessor_score !== undefined
+          ? Number(d.assessor_score)
+          : Number(d.self_score || 0);
+        return sum + score;
+      }, 0);
+
+      assessment.total_score = newTotalScore;
+      await tem.save(assessment);
+
+      // Email notifications based on status change
+      if (updateAssessmentDto.status && oldStatus !== updateAssessmentDto.status) {
+        // Find org admin user
+        const adminUser = await this.usersService.findOrgAdmin(assessment.organization.id);
+        if (adminUser) {
+          if (updateAssessmentDto.status === 'SUBMITTED') {
+            const html = this.mailService.getAssessmentSubmittedTemplate(assessment.organization.name);
+            this.mailService.sendMail(adminUser.email, 'ระบบได้รับข้อมูลการประเมินแล้ว', html).catch(e => console.error(e));
+          } else if (['REVISION_REQUESTED', 'APPROVED', 'REJECTED'].includes(updateAssessmentDto.status)) {
+            const html = this.mailService.getAssessmentReviewedTemplate(assessment.organization.name, updateAssessmentDto.status);
+            this.mailService.sendMail(adminUser.email, 'แจ้งผลการประเมินเบื้องต้น', html).catch(e => console.error(e));
+          }
         }
       }
 

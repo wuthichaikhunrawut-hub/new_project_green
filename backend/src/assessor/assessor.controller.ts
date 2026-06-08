@@ -7,8 +7,10 @@ import {
   Patch,
   Post,
   Request,
+  Res,
   UseGuards,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AssessorService } from './assessor.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -50,6 +52,33 @@ export class AssessorController {
   @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN')
   getHistory(@Request() req: { user: JwtUser }) {
     return this.assessorService.getHistory(this.userId(req));
+  }
+
+  @Get('payouts')
+  @Roles('ASSESSOR')
+  getPayouts(@Request() req: { user: JwtUser }) {
+    return this.assessorService.getPayouts(this.userId(req));
+  }
+
+  @Get('calendar')
+  @Roles('ASSESSOR')
+  getCalendar(@Request() req: { user: JwtUser }) {
+    return this.assessorService.getCalendar(this.userId(req));
+  }
+
+  @Get('certificates/:id/pdf')
+  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN')
+  async getCertificatePdf(
+    @Param('id', ParseIntPipe) id: number,
+    @Res() res: Response
+  ) {
+    const pdfBuffer = await this.assessorService.generateCertificatePdf(id);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="certificate_${id}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.end(pdfBuffer);
   }
 
   @Get('organizations/:orgId/carbon-summary')

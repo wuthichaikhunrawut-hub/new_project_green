@@ -25,7 +25,7 @@ export class ExecutiveService {
     private readonly orgRepo: Repository<Organization>,
   ) {}
 
-  async getDashboard(orgId: number): Promise<ExecutiveDashboardResponse> {
+  async getDashboard(orgId: number, filters?: { startDate?: string; endDate?: string; branchId?: number }): Promise<ExecutiveDashboardResponse> {
     try {
       const organization = await this.orgRepo.findOne({ where: { id: orgId } });
       if (!organization) {
@@ -38,8 +38,8 @@ export class ExecutiveService {
         order: { updated_at: 'DESC' },
       });
 
-      const carbonByScope = await this.getCarbonByScope(orgId);
-      const carbonByUnit = await this.getCarbonByUnit(orgId);
+      const carbonByScope = await this.getCarbonByScope(orgId, filters);
+      const carbonByUnit = await this.getCarbonByUnit(orgId, filters);
       const approvedCount = approvedAssessments.length;
       const avgApprovedScore =
         approvedCount > 0
@@ -112,11 +112,22 @@ export class ExecutiveService {
     }
   }
 
-  private async getCarbonByScope(orgId: number): Promise<CarbonScopePoint[]> {
-    const logs = await this.carbonRepo.find({
-      where: { org_id: orgId },
-      relations: ['emission_factor'],
-    });
+  private async getCarbonByScope(orgId: number, filters?: { startDate?: string; endDate?: string; branchId?: number }): Promise<CarbonScopePoint[]> {
+    const query = this.carbonRepo.createQueryBuilder('log')
+      .leftJoinAndSelect('log.emission_factor', 'emission_factor')
+      .where('log.org_id = :orgId', { orgId });
+
+    if (filters?.startDate) {
+      query.andWhere('log.date >= :startDate', { startDate: filters.startDate });
+    }
+    if (filters?.endDate) {
+      query.andWhere('log.date <= :endDate', { endDate: filters.endDate });
+    }
+    if (filters?.branchId) {
+      query.andWhere('log.organization_unit_id = :branchId', { branchId: filters.branchId });
+    }
+
+    const logs = await query.getMany();
 
     const scopeSums = new Map<string, number>(); // key: "scope-year"
     for (const log of logs) {
@@ -147,21 +158,53 @@ export class ExecutiveService {
     return points.sort((a, b) => a.year - b.year || a.scope - b.scope);
   }
 
-  private async getCarbonByUnit(orgId: number): Promise<CarbonUnitPoint[]> {
-    const rows = await this.carbonRepo
+  private async getCarbonByUnit(orgId: number, filters?: { startDate?: string; endDate?: string; branchId?: number }): Promise<CarbonUnitPoint[]> {
+    const query = this.carbonRepo
       .createQueryBuilder('log')
       .leftJoin('log.organization_unit', 'unit')
-      .where('log.org_id = :orgId', { orgId })
+      .where('log.org_id = :orgId', { orgId });
+
+    if (filters?.startDate) {
+      query.andWhere('log.date >= :startDate', { startDate: filters.startDate });
+    }
+    if (filters?.endDate) {
+      query.andWhere('log.date <= :endDate', { endDate: filters.endDate });
+    }
+    if (filters?.branchId) {
+      query.andWhere('log.organization_unit_id = :branchId', { branchId: filters.branchId });
+    }
+
+    const rows = await query
       .select('unit.unit_name', 'unitName')
       .addSelect('COALESCE(SUM(log.total_emission), 0)', 'totalEmission')
       .groupBy('unit.unit_name')
-      .orderBy('SUM(log.total_emission)', 'DESC')
+      .orderBy('SUM(log.total_emission)', 'ASC')
       .getRawMany<{ unitName: string | null; totalEmission: string }>();
 
-    return rows.map((row) => ({
-      unitName: row.unitName || 'หน่วยงานกลาง',
-      totalEmission: Number(row.totalEmission),
-    }));
+    // Mock industry benchmark logic
+    const industryAverage = 12000;
+
+    return rows.map((row, index) => {
+      const emission = Number(row.totalEmission);
+      return {
+        unitName: row.unitName || 'หน่วยงานกลาง',
+        totalEmission: emission,
+        industryAverage,
+        percentile: Math.max(1, 100 - (index * 10)) // Just mock percentile based on rank
+      };
+    });
+  }
+
+  async setGoal(orgId: number, targetReductionPercent: number, year: number) {
+    const org = await this.orgRepo.findOne({ where: { id: orgId } });
+    if (!org) throw new NotFoundException('Organization not found');
+
+    org.target_reduction_percent = targetReductionPercent;
+    // Assuming base_year might be updated or a separate goals table exists. 
+    // Here we update the organization's current target.
+    await this.orgRepo.save(org);
+
+    return { success: true, targetReductionPercent, year };
   }
 
   private calculateNetZeroProgressPercent(

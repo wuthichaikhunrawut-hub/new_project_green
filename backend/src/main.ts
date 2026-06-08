@@ -47,9 +47,12 @@ async function bootstrap() {
   }
 
   // ✅ Security: ปรับ CORS ให้เหมาะสมกับ Production
-  const allowedOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',')
-    : '*';
+  let allowedOrigins: string | string[] = '*';
+  if (process.env.ALLOWED_ORIGINS) {
+    allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+  } else if (process.env.NODE_ENV === 'production') {
+    throw new Error('ALLOWED_ORIGINS must be defined in production environment');
+  }
 
   app.enableCors({
     origin: allowedOrigins,

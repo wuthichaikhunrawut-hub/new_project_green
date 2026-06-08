@@ -45,6 +45,9 @@ export class Organization {
   @Column({ type: 'varchar', length: 50, nullable: true })
   stripe_customer_id: string;
 
+  @Column({ type: 'varchar', length: 100, nullable: true })
+  stripe_subscription_id: string;
+
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 

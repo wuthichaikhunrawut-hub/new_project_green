@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Logger } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { RegisterDto, LoginDto, RegisterAssessorDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -7,13 +8,13 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
-  register(@Body() registerDto: any) {
+  register(@Body() registerDto: RegisterDto) {
     this.logger.log(`Register request for: ${registerDto.userData?.email}`);
     return this.authService.register(registerDto);
   }
 
   @Post('register/assessor')
-  registerAssessor(@Body() registerAssessorDto: any) {
+  registerAssessor(@Body() registerAssessorDto: RegisterAssessorDto) {
     this.logger.log(
       `Register Assessor request for: ${registerAssessorDto.userData?.email}`,
     );
@@ -21,19 +22,19 @@ export class AuthController {
   }
 
   @Post('login')
-  login(@Body() loginDto: any) {
+  login(@Body() loginDto: LoginDto) {
     this.logger.log(`Login request for: ${loginDto.email}`);
     return this.authService.login(loginDto);
   }
 
   @Post('forgot-password')
-  forgotPassword(@Body() body: { email: string }) {
+  forgotPassword(@Body() body: ForgotPasswordDto) {
     this.logger.log(`Forgot password request for: ${body.email}`);
     return this.authService.forgotPassword(body.email);
   }
 
   @Post('reset-password')
-  resetPassword(@Body() body: { token: string; password: string }) {
+  resetPassword(@Body() body: ResetPasswordDto) {
     this.logger.log('Reset password request received');
     return this.authService.resetPassword(body.token, body.password);
   }

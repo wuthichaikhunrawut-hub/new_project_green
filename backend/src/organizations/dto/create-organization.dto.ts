@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsBoolean, Matches } from 'class-validator';
 
 export class CreateOrganizationDto {
   @IsString()
@@ -6,6 +6,7 @@ export class CreateOrganizationDto {
 
   @IsString()
   @IsOptional()
+  @Matches(/^[0-9]{13}$/, { message: 'เลขประจำตัวผู้เสียภาษีต้องเป็นตัวเลข 13 หลัก' })
   tax_id?: string;
 
   @IsString()

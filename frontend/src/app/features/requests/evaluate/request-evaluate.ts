@@ -21,7 +21,6 @@ interface CarbonSummary {
   orgName: string;
   scopes: CarbonScope[];
   totalEmission: number;
-  isMock: boolean;
 }
 
 interface CategoryGroup {

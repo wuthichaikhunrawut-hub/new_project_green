@@ -10,7 +10,6 @@ export interface OrgCarbonSummary {
   orgName: string;
   scopes: ScopeEmissionSummary[];
   totalEmission: number;
-  isMock?: boolean;
 }
 
 export interface AssessorDashboardStats {

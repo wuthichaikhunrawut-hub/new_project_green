@@ -123,6 +123,10 @@ export class SubscriptionsService {
       activeSub.end_date = new Date(subscription.current_period_end * 1000);
       await this.orgSubRepository.save(activeSub);
     }
+    if (org.stripe_subscription_id !== subscription.id) {
+      org.stripe_subscription_id = subscription.id;
+      await this.orgRepository.save(org);
+    }
   }
 
   async handleCheckoutSessionCompleted(session: any) {
@@ -456,7 +460,11 @@ export class SubscriptionsService {
     const sub = await this.orgSubRepository.findOne({ where: { org_id: orgId, status: 'ACTIVE' } });
     if (!sub) throw new Error('No active subscription found');
     
-    // In a real production app, also cancel on Stripe via Stripe API
+    const org = await this.orgRepository.findOne({ where: { id: orgId } });
+    if (org && org.stripe_subscription_id) {
+      await this.stripeService.cancelSubscription(org.stripe_subscription_id);
+    }
+    
     sub.auto_renew = false;
     sub.status = 'CANCELLED';
     await this.orgSubRepository.save(sub);

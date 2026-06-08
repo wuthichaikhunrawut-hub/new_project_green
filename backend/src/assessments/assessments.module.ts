@@ -12,6 +12,9 @@ import { GreenOfficeController } from './green-office.controller';
 import { GreenOfficeDataController } from './green-office-data.controller';
 import { GreenCriteriaService } from './green-criteria.service';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { UsersModule } from '../users/users.module';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -23,6 +26,8 @@ import { AuditLogsModule } from '../audit-logs/audit-logs.module';
       Certificate,
     ]),
     AuditLogsModule,
+    forwardRef(() => NotificationsModule),
+    UsersModule,
   ],
   controllers: [
     AssessmentsController,

@@ -16,7 +16,6 @@ import { Roles } from '../auth/roles.decorator';
 
 @Controller('admin/emission-factors')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('SYSTEM_ADMIN')
 export class EmissionFactorsController {
   constructor(
     private readonly emissionFactorsService: EmissionFactorsService,
@@ -28,16 +27,19 @@ export class EmissionFactorsController {
   }
 
   @Post()
+  @Roles('SYSTEM_ADMIN')
   create(@Body() data: Partial<EmissionFactor>) {
     return this.emissionFactorsService.create(data);
   }
 
   @Put(':id')
+  @Roles('SYSTEM_ADMIN')
   update(@Param('id') id: string, @Body() data: Partial<EmissionFactor>) {
     return this.emissionFactorsService.update(parseInt(id, 10), data);
   }
 
   @Delete(':id')
+  @Roles('SYSTEM_ADMIN')
   remove(@Param('id') id: string) {
     return this.emissionFactorsService.remove(parseInt(id, 10));
   }

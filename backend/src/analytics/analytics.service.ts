@@ -130,4 +130,26 @@ export class AnalyticsService {
       version: '2.0.1-sys-admin',
     };
   }
+
+  async getRevenueStats() {
+    const invoices = await this.invoiceRepo.find({ where: { status: 'PAID' } });
+    
+    // Group by month
+    const monthlyRevenue: Record<string, number> = {};
+    
+    invoices.forEach((inv) => {
+      const date = new Date(inv.created_at);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthlyRevenue[monthYear] = (monthlyRevenue[monthYear] || 0) + Number(inv.amount || 0);
+    });
+
+    const trend = Object.entries(monthlyRevenue)
+      .map(([month, amount]) => ({ month, amount }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    return {
+      trend,
+      totalRevenue: invoices.reduce((sum, inv) => sum + Number(inv.amount || 0), 0)
+    };
+  }
 }

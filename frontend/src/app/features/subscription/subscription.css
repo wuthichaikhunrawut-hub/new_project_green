@@ -143,3 +143,85 @@ h2 {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Premium Glassmorphism Payment Table */
+.billing-history-card {
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+  border-radius: 1.5rem !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.015) !important;
+  overflow: hidden;
+}
+
+.billing-history-card .card-title {
+  color: var(--dark-navy);
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+.premium-payment-table th {
+  color: var(--slate-600) !important;
+  font-weight: 700 !important;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.5) !important;
+  padding: 1.1rem 1.5rem !important;
+  background: rgba(248, 250, 252, 0.4) !important;
+}
+
+.premium-payment-table td {
+  padding: 1.1rem 1.5rem !important;
+  font-size: 0.875rem !important;
+  color: var(--slate-600);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.3) !important;
+}
+
+.premium-payment-table tbody tr {
+  transition: all 0.25s ease;
+}
+
+.premium-payment-table tbody tr:hover {
+  background-color: rgba(248, 250, 252, 0.5) !important;
+  transform: translateY(-1px);
+}
+
+.badge-paid {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #059669 !important;
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  font-weight: 800;
+  font-size: 0.725rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-pending {
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #d97706 !important;
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  font-weight: 800;
+  font-size: 0.725rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-failed {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  font-weight: 800;
+  font-size: 0.725rem;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+

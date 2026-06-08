@@ -89,4 +89,15 @@ export class StripeService implements OnModuleInit {
       expand: ['latest_invoice.payment_intent'],
     });
   }
+
+  async cancelSubscription(subscriptionId: string) {
+    if (!this.stripe) await this.initStripe();
+    try {
+      console.log(`Canceling Stripe Subscription: ${subscriptionId}`);
+      return await this.stripe.subscriptions.cancel(subscriptionId);
+    } catch (error) {
+      console.error(`Stripe Cancel Subscription Error (${subscriptionId}):`, error);
+      throw error;
+    }
+  }
 }

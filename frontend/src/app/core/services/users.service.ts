@@ -59,7 +59,4 @@ export class UsersService {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
 
-  inviteUser(email: string, role: string, orgId: number, orgUnitId?: number): Observable<{ success: boolean; inviteUrl: string; user: User }> {
-    return this.http.post<any>(`${this.apiUrl}/invite`, { email, role, orgId, orgUnitId }, { headers: this.getHeaders() });
-  }
 }

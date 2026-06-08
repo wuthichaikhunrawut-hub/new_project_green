@@ -106,10 +106,17 @@
       <!-- Step 2: Admin Info -->
       <div *ngIf="currentStep === 2" class="step-content">
         <div class="row g-4 mb-4">
+          <div class="col-md-6">
+            <label class="form-label">ชื่อ (First Name)</label>
+            <input type="text" class="form-control" [(ngModel)]="userData.firstName" name="firstName" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">นามสกุล (Last Name)</label>
+            <input type="text" class="form-control" [(ngModel)]="userData.lastName" name="lastName" required>
+          </div>
           <div class="col-12">
-            <label class="form-label">ชื่อผู้ใช้งาน (Username)</label>
-            <input type="text" class="form-control" [(ngModel)]="userData.username" name="username"
-              placeholder="สำหรับเข้าสู่ระบบ" required>
+            <label class="form-label">เบอร์โทรศัพท์ (Phone)</label>
+            <input type="text" class="form-control" [(ngModel)]="userData.phone" name="phone" required>
           </div>
           <div class="col-12">
             <label class="form-label">อีเมลติดต่อ (Business Email)</label>

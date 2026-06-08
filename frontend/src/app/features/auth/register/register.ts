@@ -33,7 +33,9 @@ export class RegisterComponent {
 
   // ข้อมูลสำหรับ Table users
   userData = {
-    username: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -66,7 +68,9 @@ export class RegisterComponent {
     const payload = {
       orgData: this.orgData,
       userData: {
-        username: this.userData.username,
+        firstName: this.userData.firstName,
+        lastName: this.userData.lastName,
+        phone: this.userData.phone,
         email: this.userData.email,
         password: this.userData.password
       }

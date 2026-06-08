@@ -26,6 +26,9 @@ export class UserProfile {
   @Column({ type: 'text', nullable: true })
   profile_image: string;
 
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  personal_goal_percent: number;
+
   @CreateDateColumn({
     type: 'timestamp without time zone',
     default: () => 'CURRENT_TIMESTAMP',

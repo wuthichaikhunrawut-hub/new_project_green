@@ -9,12 +9,18 @@ import {
   Patch,
   Headers,
   Logger,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { CarbonLogsService } from './carbon-logs.service';
 import { CreateCarbonLogDto } from './dto/create-carbon-log.dto';
 import { UpdateCarbonLogDto } from './dto/update-carbon-log.dto';
 
 @Controller('carbon-logs')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class CarbonLogsController {
   private readonly logger = new Logger(CarbonLogsController.name);
 
@@ -33,6 +39,7 @@ export class CarbonLogsController {
   }
 
   @Post()
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER')
   create(
     @Body() createDto: CreateCarbonLogDto,
     @Headers() headers: Record<string, string | undefined>,
@@ -40,13 +47,28 @@ export class CarbonLogsController {
     return this.carbonLogsService.create(createDto, this.getOrgId(headers));
   }
 
+  @Get('trend')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
+  getTrend(@Headers() headers: Record<string, string | undefined>) {
+    return this.carbonLogsService.getCarbonTrend(this.getOrgId(headers));
+  }
+
+  @Get('personal-dashboard')
+  @Roles('USER')
+  getPersonalDashboard(@Request() req: any) {
+    const userId = Number(req.user.sub);
+    return this.carbonLogsService.getPersonalDashboard(userId);
+  }
+
   @Get()
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'ASSESSOR', 'ASSESSOR_ADMIN')
   findAll(@Headers() headers: Record<string, string | undefined>) {
     this.logger.log(`Executing findAll for orgId: ${this.getOrgId(headers)}`);
     return this.carbonLogsService.findAll(this.getOrgId(headers));
   }
 
   @Patch(':id')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER')
   update(
     @Param('id') id: string,
     @Body() updateDto: UpdateCarbonLogDto,
@@ -60,6 +82,7 @@ export class CarbonLogsController {
   }
 
   @Delete(':id')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER')
   remove(
     @Param('id') id: string,
     @Headers() headers: Record<string, string | undefined>,

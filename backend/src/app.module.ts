@@ -20,6 +20,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AssessorModule } from './assessor/assessor.module';
 import { OrgAdminModule } from './org-admin/org-admin.module';
 import { ExecutiveModule } from './executive/executive.module';
+import { AssessorAdminModule } from './assessor-admin/assessor-admin.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
@@ -43,7 +44,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'greenoffice'),
         autoLoadEntities: true,
-        synchronize: process.env.NODE_ENV !== 'production', // Prevent dropping DB in production
+        synchronize: false, // Use migrations instead of auto-sync
         logging: false,
       }),
     }),
@@ -62,6 +63,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     AssessorModule,
     OrgAdminModule,
     ExecutiveModule,
+    AssessorAdminModule,
   ],
   controllers: [AppController],
   providers: [

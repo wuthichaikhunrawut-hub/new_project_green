@@ -25,6 +25,9 @@ interface Question {
   description?: string;
   status: 'pending' | 'uploaded' | 'rejected' | 'approved';
   files: UploadedFile[];
+  selfScore: number;
+  applicantComment: string;
+  maxScore: number;
 }
 
 interface UploadedFile {
@@ -150,7 +153,10 @@ export class CategoryPageComponent implements OnInit {
         text: criteria.criteria_name,
         description: criteria.description,
         status: status,
-        files: files
+        files: files,
+        selfScore: detail?.self_score || 0,
+        applicantComment: detail?.applicant_comment || '',
+        maxScore: criteria.max_score || 0
       };
     });
 
@@ -286,13 +292,6 @@ export class CategoryPageComponent implements OnInit {
             this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
           }
         });
-      } else if (!fileToDelete.id) {
-        // Fallback for mock files
-        question.files.splice(fileIndex, 1);
-        if (question.files.length === 0) {
-          question.status = 'pending';
-        }
-        this.recalculateProgress();
       }
     }
   }
@@ -325,5 +324,24 @@ export class CategoryPageComponent implements OnInit {
     } else {
       this.toast.success('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
     }
+  }
+
+  saveDetail(q: Question) {
+    if (!this.activeAssessment || !q.detailId) return;
+    
+    this.requestsService.updateRequest(this.activeAssessment.id.toString(), {
+      details: [{
+        assessment_detail_id: q.detailId,
+        self_score: q.selfScore,
+        applicant_comment: q.applicantComment
+      }]
+    } as any).subscribe({
+      next: () => {
+        this.toast.success('บันทึกข้อมูลประเมินตนเองสำเร็จ');
+      },
+      error: () => {
+        this.toast.error('บันทึกข้อมูลไม่สำเร็จ');
+      }
+    });
   }
 }

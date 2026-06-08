@@ -266,6 +266,11 @@ export class UsersService {
     });
   }
 
+  async findOrgAdmin(orgId: number): Promise<User | undefined> {
+    const users = await this.findAll('ORG_ADMIN', orgId);
+    return users.length > 0 ? users[0] : undefined;
+  }
+
   async createAssessorProfile(
     userId: number,
     profileData: any,
@@ -540,66 +545,52 @@ export class UsersService {
     });
   }
 
-  async inviteUser(email: string, roleName: string, orgId: number, orgUnitId?: number): Promise<{ success: boolean; inviteUrl: string; user: User }> {
-    const existingUser = await this.findByEmail(email);
-    if (existingUser) {
-      throw new Error('อีเมลนี้ถูกใช้งานในระบบแล้ว');
+  async bulkImportUsers(orgId: number, csvContent: string): Promise<number> {
+    const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    if (lines.length <= 1) return 0; // Only header or empty
+    
+    // Skip header
+    const dataLines = lines.slice(1);
+    let count = 0;
+    
+    for (const line of dataLines) {
+      const [email, firstName, lastName, phone] = line.split(',');
+      if (!email) continue;
+      
+      const existingUser = await this.findByEmail(email);
+      if (existingUser) continue;
+      
+      await this.create({
+        email,
+        password: 'Password123!', // Default password
+        role: UserRole.EMPLOYEE,
+        organization: { id: orgId },
+        user_profile: {
+          first_name: firstName || email.split('@')[0],
+          last_name: lastName || 'Employee',
+          phone: phone || '-'
+        }
+      });
+      count++;
     }
+    
+    return count;
+  }
 
-    const crypto = require('crypto');
-    const token = crypto.randomBytes(20).toString('hex');
-    const expires = new Date();
-    expires.setHours(expires.getHours() + 24 * 7); // 7 days expiration
-
-    // Create user with a random temp password
-    const tempPassword = crypto.randomBytes(10).toString('hex');
-    const passwordHash = await bcrypt.hash(tempPassword, 10);
-
-    const user = this.usersRepository.create({
-      email,
-      password_hash: passwordHash,
-      is_active: true,
-      reset_password_token: token,
-      reset_password_expires: expires,
-      organization: { id: orgId },
-      org_unit_id: orgUnitId || null,
-    } as any);
-
-    const saved = await this.usersRepository.save(user) as any;
-
-    // Create user profile
-    const profile = this.userProfileRepository.create({
-      first_name: email.split('@')[0],
-      last_name: ' (รอยืนยัน)',
-      phone: '-',
-      user: { id: saved.id },
-    });
+  async setPersonalGoal(userId: number, targetReductionPercent: number) {
+    let profile = await this.userProfileRepository.findOne({ where: { user: { id: userId } } });
+    if (!profile) {
+      profile = this.userProfileRepository.create({
+        user: { id: userId } as User,
+        first_name: 'ผู้ใช้งาน',
+        last_name: 'ใหม่',
+        phone: '-',
+        personal_goal_percent: targetReductionPercent
+      });
+    } else {
+      profile.personal_goal_percent = targetReductionPercent;
+    }
     await this.userProfileRepository.save(profile);
-
-    // Assign role
-    const desiredRole = roleName ? roleName : UserRole.USER;
-    await this.assignRoleToUser(saved.id, desiredRole);
-
-    await this.auditLogsService.logAction(
-      orgId,
-      'INVITE_USER',
-      `Invited user ${email} as ${desiredRole}`,
-    );
-
-    const inviteUrl = `http://localhost:4000/auth/reset-password?token=${token}`;
-
-    // Mock SMTP: Log invitation email in the backend console
-    console.log('\n==================================================');
-    console.log('📧 MOCK EMAIL: User Invitation');
-    console.log(`To: ${email}`);
-    console.log('Subject: ยินดีต้อนรับสู่ Green Sync - คำเชิญเข้าร่วมองค์กร');
-    console.log('--------------------------------------------------');
-    console.log(`แอดมินองค์กรได้เชิญคุณเข้าร่วม Green Sync ในบทบาท: ${desiredRole}`);
-    console.log('กรุณาคลิกที่ลิงก์ด้านล่างเพื่อตั้งรหัสผ่านของคุณและเริ่มใช้งาน:');
-    console.log(inviteUrl);
-    console.log('==================================================\n');
-
-    const fullUser = await this.findOne(saved.id);
-    return { success: true, inviteUrl, user: fullUser! };
+    return { success: true, targetReductionPercent };
   }
 }

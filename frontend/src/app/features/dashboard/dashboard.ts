@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { RequestsService } from '../../core/services/requests.service';
 import { InsightsService } from '../../core/services/insights.service';
 import { ScoreIndicatorInput } from '../../core/services/audit-score.service';
+import { UserSubscriptionsService } from '../../core/services/user-subscriptions.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -27,6 +28,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   private authService = inject(AuthService);
   private requestsService = inject(RequestsService);
   private insightsService = inject(InsightsService);
+  private subscriptionService = inject(UserSubscriptionsService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
 
@@ -55,6 +57,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   assessmentFailed = false;
   rejectionComment: string | null = null;
   isLoading = true;
+  
+  quotaWarnings: string[] = [];
 
   get roleKey(): string {
     const r = String(this.authService.getUser()?.role || '').trim().toUpperCase().split(' ').join('_');
@@ -85,6 +89,27 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     if (!isPlatformBrowser(this.platformId)) return;
+
+    this.subscriptionService.getMyQuotas().subscribe({
+      next: (quotas) => {
+        this.quotaWarnings = [];
+        (quotas || []).forEach((q: any) => {
+          const used = q.used || 0;
+          const limit = q.limit || 0;
+          const featName = q.feature_name || q.feature_code || 'โควตา';
+          if (limit > 0) {
+            const usagePercent = (used / limit) * 100;
+            if (usagePercent >= 80) {
+              this.quotaWarnings.push(
+                `แจ้งเตือนสิทธิ์การใช้งาน: คุณใช้โควตาสำหรับ "${featName}" ไปแล้ว ${usagePercent.toFixed(0)}% (${used}/${limit})`
+              );
+            }
+          }
+        });
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Failed to load quotas for warning', err)
+    });
 
     const orgId = this.authService.getOrganizationId();
     if (orgId) {

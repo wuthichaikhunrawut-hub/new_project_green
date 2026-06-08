@@ -14,4 +14,10 @@ export class AnalyticsController {
   async getAdminStats() {
     return this.analyticsService.getAdminStats();
   }
+
+  @Get('revenue')
+  @Roles('SYSTEM_ADMIN')
+  async getRevenueStats() {
+    return this.analyticsService.getRevenueStats();
+  }
 }

@@ -1,0 +1,72 @@
+[
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
+    "line": 475,
+    "content": "// Fallback to mock removed, always return real calculation"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
+    "line": 482,
+    "content": "isMock: false,"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
+    "line": 486,
+    "content": "private mockCarbonSummary(orgId: number, orgName?: string): OrgCarbonSummary {"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
+    "line": 512,
+    "content": "isMock: true,"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\interfaces\\assessor.types.ts",
+    "line": 13,
+    "content": "isMock?: boolean;"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\gemini\\dto\\update-gemini.dto.ts",
+    "line": 4,
+    "content": "PartialType(CreateGeminiDto) {} (Empty Function)"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
+    "line": 57,
+    "content": "this.logger.log(`📧 [MOCK EMAIL] To: ${to} | Subject: ${subject}`);"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
+    "line": 58,
+    "content": "return { mock: true };"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\organizations\\dto\\update-organization.dto.ts",
+    "line": 4,
+    "content": "PartialType(CreateOrganizationDto) {} (Empty Function)"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\users\\users.service.ts",
+    "line": 591,
+    "content": "// Mock SMTP: Log invitation email in the backend console"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\users\\users.service.ts",
+    "line": 593,
+    "content": "console.log('📧 MOCK EMAIL: User Invitation');"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\core\\models\\assessor.model.ts",
+    "line": 15,
+    "content": "isMock?: boolean;"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\features\\assessment\\category\\category.ts",
+    "line": 290,
+    "content": "// Fallback for mock files"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\features\\requests\\evaluate\\request-evaluate.ts",
+    "line": 24,
+    "content": "isMock: boolean;"
+  }
+]

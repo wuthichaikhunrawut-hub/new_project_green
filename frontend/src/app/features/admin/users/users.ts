@@ -46,7 +46,7 @@ export class AdminUsersComponent implements OnInit {
   // For Edit Modal
   selectedUser: Partial<User> | null = null;
   isSaving = false;
-  generatedInviteUrl: string = '';
+
 
   // For Confirm Modals
   userToSuspend: User | null = null;
@@ -417,11 +417,5 @@ export class AdminUsersComponent implements OnInit {
     return active ? 'เปิดใช้งาน' : 'ระงับการใช้งาน';
   }
 
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text).then(() => {
-      this.toast.success('คัดลอกลิงก์เชิญเรียบร้อยแล้ว!');
-    }).catch(err => {
-      console.error('Could not copy text: ', err);
-    });
-  }
+
 }

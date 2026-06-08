@@ -1,51 +1,35 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: green_postgres_prod
-    restart: always
-    environment:
-      POSTGRES_USER: ${DB_USERNAME:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
-      POSTGRES_DB: ${DB_NAME:-greenoffice}
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data_prod:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.prod
-    container_name: green_backend_prod
+      dockerfile: Dockerfile
+    command: npm run start:prod
     restart: always
-    env_file:
-      - ./backend/.env
-    environment:
-      NODE_ENV: production
-      DB_HOST: postgres
     ports:
       - "3001:3001"
-    depends_on:
-      postgres:
-        condition: service_healthy
+    environment:
+      - NODE_ENV=production
+      # - JWT_SECRET=${JWT_SECRET}
+      # - DATABASE_URL=${DATABASE_URL}
+      # Make sure to inject all other required env variables here
+    # No volume mount for source code to ensure compiled code is used
+    networks:
+      - green_sync_network
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.prod
-    container_name: green_frontend_prod
+      dockerfile: Dockerfile
     restart: always
     ports:
-      - "80:80"
-    depends_on:
-      - backend
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - green_sync_network
 
-volumes:
-  postgres_data_prod:
+networks:
+  green_sync_network:
+    driver: bridge

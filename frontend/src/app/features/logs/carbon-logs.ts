@@ -7,6 +7,8 @@ import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 import { OrgBranchesService, OrgBranch } from '../../core/services/org-branches.service';
 import { AuthService } from '../../core/services/auth.service';
+import { EmissionFactorsService, EmissionFactor } from '../../core/services/emission-factors.service';
+import { UserSubscriptionsService } from '../../core/services/user-subscriptions.service';
 
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog';
 
@@ -23,12 +25,20 @@ export class CarbonLogsComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private branchService = inject(OrgBranchesService);
   private authService = inject(AuthService);
+  private factorsService = inject(EmissionFactorsService);
+  private subscriptionService = inject(UserSubscriptionsService);
 
   logs: CarbonLog[] = [];
   isLoading = false;
   lastUpdatedAt: Date | null = null;
   branches: OrgBranch[] = [];
   selectedUnitId: number | null = null;
+  
+  factors: EmissionFactor[] = [];
+  selectedFactorId: number | null = null;
+  filteredFactorsForForm: EmissionFactor[] = [];
+  
+  quotaWarnings: string[] = [];
 
   // Real Statistics
   monthlyElectricity = 0;
@@ -80,6 +90,55 @@ export class CarbonLogsComponent implements OnInit {
         error: () => { /* ไม่บังคับ */ }
       });
     }
+
+    this.factorsService.getFactors().subscribe({
+      next: (res) => {
+        this.factors = res || [];
+        this.onActivityTypeChanged();
+      },
+      error: (err) => console.error('Failed to load emission factors', err)
+    });
+
+    this.subscriptionService.getMyQuotas().subscribe({
+      next: (quotas) => {
+        this.quotaWarnings = [];
+        (quotas || []).forEach((q: any) => {
+          const used = q.used || 0;
+          const limit = q.limit || 0;
+          const featName = q.feature_name || q.feature_code || 'โควตา';
+          if (limit > 0) {
+            const usagePercent = (used / limit) * 100;
+            if (usagePercent >= 80) {
+              this.quotaWarnings.push(
+                `แจ้งเตือนสิทธิ์การใช้งาน: คุณใช้โควตาสำหรับ "${featName}" ไปแล้ว ${usagePercent.toFixed(0)}% (${used}/${limit})`
+              );
+            }
+          }
+        });
+        this.cdr.markForCheck();
+      },
+      error: (err) => console.error('Failed to load quotas for warning', err)
+    });
+  }
+
+  onActivityTypeChanged() {
+    const type = this.newEntry.activity_type;
+    this.selectedFactorId = null;
+    
+    if (type === 'Electricity') {
+      this.filteredFactorsForForm = this.factors.filter(f => f.scope === 2 || f.unit?.toLowerCase() === 'kwh' || f.name?.includes('ไฟฟ้า'));
+    } else if (type === 'Water') {
+      this.filteredFactorsForForm = this.factors.filter(f => f.unit?.toLowerCase().includes('m3') || f.unit?.includes('m³') || f.name?.includes('น้ำประปา'));
+    } else if (type === 'Gasoline') {
+      this.filteredFactorsForForm = this.factors.filter(f => f.scope === 1 || f.unit?.toLowerCase() === 'liter' || f.unit?.toLowerCase() === 'litre' || f.name?.includes('น้ำมัน'));
+    } else {
+      this.filteredFactorsForForm = [];
+    }
+
+    if (this.filteredFactorsForForm.length > 0) {
+      this.selectedFactorId = Number(this.filteredFactorsForForm[0].id);
+    }
+    this.cdr.markForCheck();
   }
 
   fetchLogs() {
@@ -269,16 +328,14 @@ export class CarbonLogsComponent implements OnInit {
       return;
     }
 
-    let unit = '';
-    let factor = 0;
+    // Find the chosen factor
+    const factorObj = this.factors.find(f => Number(f.id) === this.selectedFactorId);
+    const factorVal = factorObj ? factorObj.factor_value : 0.5; // fallback
+    const unit = factorObj ? factorObj.unit : 'kWh';
 
-    if (this.newEntry.activity_type === 'Electricity') { unit = 'kWh'; factor = 0.5; }
-    else if (this.newEntry.activity_type === 'Water') { unit = 'm3'; factor = 0.3; }
-    else if (this.newEntry.activity_type === 'Gasoline') { unit = 'Litre'; factor = 2.3; }
+    const calculatedEmission = this.newEntry.usage_amount * factorVal;
 
-    const calculatedEmission = this.newEntry.usage_amount * factor;
-
-    const payload: CarbonLog = {
+    const payload: any = {
       date: `${this.newEntry.year}-${String(this.newEntry.month).padStart(2, '0')}-01`,
       type: this.newEntry.activity_type,
       amount: this.newEntry.usage_amount,
@@ -286,7 +343,8 @@ export class CarbonLogsComponent implements OnInit {
       emission: calculatedEmission,
       source: 'MANUAL',
       evidence_url: this.newEntry.evidence_url,
-      org_unit_id: this.selectedUnitId ?? undefined
+      org_unit_id: this.selectedUnitId ?? undefined,
+      emission_factor_id: this.selectedFactorId ?? undefined
     };
 
     this.carbonService.addLog(payload).subscribe({
@@ -302,6 +360,7 @@ export class CarbonLogsComponent implements OnInit {
           evidence_url: ''
         };
         this.selectedUnitId = null;
+        this.selectedFactorId = null;
         this.closeManualModal();
       },
       error: () => {

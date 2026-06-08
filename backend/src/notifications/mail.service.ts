@@ -110,4 +110,46 @@ export class MailService {
       </div>
     `;
   }
+
+  getWelcomeTemplate(userName: string) {
+    return `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+        <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 800;">🎉 ยินดีต้อนรับสู่ Green Sync</h1>
+        </div>
+        <div style="padding: 32px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.7;">สวัสดีครับ <strong>${userName}</strong>,</p>
+          <p style="color: #64748b; font-size: 14px; line-height: 1.7;">ขอบคุณที่สมัครสมาชิกกับเรา ระบบพร้อมให้คุณเข้าใช้งานเพื่อจัดการสำนักงานสีเขียวได้อย่างเต็มรูปแบบแล้ว</p>
+        </div>
+      </div>
+    `;
+  }
+
+  getAssessmentSubmittedTemplate(orgName: string) {
+    return `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+        <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 800;">📄 ได้รับข้อมูลการประเมินแล้ว</h1>
+        </div>
+        <div style="padding: 32px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.7;">เรียน <strong>${orgName}</strong>,</p>
+          <p style="color: #64748b; font-size: 14px; line-height: 1.7;">ทางเราได้รับข้อมูลแบบประเมินและหลักฐานของคุณเรียบร้อยแล้ว ผู้ประเมินจะดำเนินการตรวจสอบในลำดับถัดไป</p>
+        </div>
+      </div>
+    `;
+  }
+
+  getAssessmentReviewedTemplate(orgName: string, status: string) {
+    return `
+      <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0;">
+        <div style="background: linear-gradient(135deg, #059669, #0d9488); padding: 32px; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 22px; font-weight: 800;">✅ ทราบผลการประเมินเบื้องต้น</h1>
+        </div>
+        <div style="padding: 32px;">
+          <p style="color: #334155; font-size: 15px; line-height: 1.7;">เรียน <strong>${orgName}</strong>,</p>
+          <p style="color: #64748b; font-size: 14px; line-height: 1.7;">ผลการประเมินล่าสุดของคุณได้รับการอัปเดตสถานะเป็น: <strong>${status}</strong> คุณสามารถเข้าสู่ระบบเพื่อตรวจสอบคะแนนเพิ่มเติมได้</p>
+        </div>
+      </div>
+    `;
+  }
 }

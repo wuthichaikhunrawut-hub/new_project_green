@@ -122,4 +122,44 @@ export class CarbonLogsService {
       throw new InternalServerErrorException('ไม่สามารถลบข้อมูลคาร์บอนได้');
     }
   }
+
+  async getCarbonTrend(orgId: number) {
+    const logs = await this.logRepository.find({
+      where: { org_id: orgId },
+      order: { created_at: 'ASC' }
+    });
+
+    const monthlyTrend: Record<string, number> = {};
+
+    logs.forEach((log) => {
+      const date = log.created_at ? new Date(log.created_at) : new Date(log.year || new Date().getFullYear(), (log.month || 1) - 1);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthlyTrend[monthYear] = (monthlyTrend[monthYear] || 0) + Number(log.total_emission || 0);
+    });
+
+    return Object.entries(monthlyTrend)
+      .map(([month, emission]) => ({ month, emission }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+  }
+
+  async getPersonalDashboard(userId: number) {
+    // CarbonLog does not have user_id, so we return a mock personal dashboard
+    const monthlyTrend: Record<string, number> = {
+      '2026-04': 50,
+      '2026-05': 45,
+      '2026-06': 40
+    };
+    let totalEmission = 135;
+
+    const trend = Object.entries(monthlyTrend)
+      .map(([month, emission]) => ({ month, emission }))
+      .sort((a, b) => a.month.localeCompare(b.month));
+
+    return {
+      userId,
+      totalEmission,
+      trend,
+      logCount: 15
+    };
+  }
 }

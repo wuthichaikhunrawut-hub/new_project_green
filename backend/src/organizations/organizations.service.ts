@@ -75,4 +75,23 @@ export class OrganizationsService {
   async removeUnit(unitId: number): Promise<void> {
     await this.orgUnitRepository.delete(unitId);
   }
+
+  async getAnnualReport(orgId: number) {
+    const org = await this.findOne(orgId);
+    if (!org) return null;
+
+    // TODO: Aggregate real data from assessments, carbon logs, etc.
+    // For now, return a basic report structure
+    return {
+      organization: {
+        id: org.id,
+        name: org.name,
+      },
+      year: new Date().getFullYear(),
+      total_carbon_reduction: 0,
+      assessments_completed: 0,
+      active_employees: org.users ? org.users.length : 0,
+      status: 'Preliminary'
+    };
+  }
 }

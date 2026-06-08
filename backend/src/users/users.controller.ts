@@ -12,7 +12,10 @@ import {
   Headers,
   Req,
   ForbiddenException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -63,10 +66,28 @@ export class UsersController {
     return this.usersService.update(+userId, updateData);
   }
 
+  @Post('profile/goals')
+  setPersonalGoal(@Headers('x-user-id') userId: string, @Body() body: { targetReductionPercent: number }) {
+    return this.usersService.setPersonalGoal(+userId, body.targetReductionPercent);
+  }
+
   @Post()
   @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
   create(@Body() createUserDto: any) {
     return this.usersService.create(createUserDto);
+  }
+
+  @Post('bulk-import')
+  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
+  @UseInterceptors(FileInterceptor('file'))
+  async bulkImport(@UploadedFile() file: any, @Req() req: any) {
+    if (!file) throw new ForbiddenException('No file uploaded');
+    const orgId = req.user?.orgId;
+    if (!orgId) throw new ForbiddenException('Organization not found for current user');
+    
+    const csvContent = file.buffer.toString('utf-8');
+    const importedCount = await this.usersService.bulkImportUsers(orgId, csvContent);
+    return { success: true, count: importedCount };
   }
 
   @Get(':id')
@@ -88,11 +109,6 @@ export class UsersController {
     return this.usersService.update(+id, updateUserDto);
   }
 
-  @Post('invite')
-  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
-  invite(@Body() body: { email: string; role: string; orgId: number; orgUnitId?: number }) {
-    return this.usersService.inviteUser(body.email, body.role, body.orgId, body.orgUnitId);
-  }
 
   @Delete(':id')
   @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
