@@ -12,6 +12,7 @@ import {
   VerificationStatus,
 } from '../users/entities/assessor-profile.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
+import { EvidenceFile } from '../assessments/entities/evidence-file.entity';
 
 @Injectable()
 export class AnalyticsService {
@@ -32,6 +33,8 @@ export class AnalyticsService {
     private assessorRepo: Repository<AssessorProfile>,
     @InjectRepository(CarbonLog)
     private carbonLogRepo: Repository<CarbonLog>,
+    @InjectRepository(EvidenceFile)
+    private evidenceFileRepo: Repository<EvidenceFile>,
   ) {}
 
   async getAdminStats() {
@@ -106,6 +109,12 @@ export class AnalyticsService {
         ? Math.round((approvedAssessments / finishedAssessments) * 100)
         : 0;
 
+    // Storage stats from database
+    const totalFiles = await this.evidenceFileRepo.count();
+    const files = await this.evidenceFileRepo.find({ select: ['file_size'] });
+    const totalSizeBytes = files.reduce((sum, f) => sum + Number(f.file_size || 0), 0);
+    const storageUsageGb = Number((totalSizeBytes / (1024 * 1024 * 1024)).toFixed(4));
+
     return {
       totalOrganizations,
       activeOrganizations,
@@ -124,9 +133,9 @@ export class AnalyticsService {
         pending: pendingAssessments,
         rejected: rejectedAssessments,
       },
-      storageUsageGb: 12.5,
-      totalFiles: 450,
-      successRate: successRate || 85,
+      storageUsageGb,
+      totalFiles,
+      successRate: successRate ?? 0,
       version: '2.0.1-sys-admin',
     };
   }

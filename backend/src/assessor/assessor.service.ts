@@ -5,8 +5,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+const PdfPrinter = require('pdfmake/js/Printer').default;
+import { getThaiPdfFonts, getGreenSyncPdfStyles } from '../common/pdf-fonts.config';
+import { StripeService } from '../subscriptions/stripe.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In } from 'typeorm';
+import { Repository, In, IsNull } from 'typeorm';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { AssessmentDetail } from '../assessments/entities/assessment-detail.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
@@ -50,6 +53,7 @@ export class AssessorService {
     private readonly carbonLogRepo: Repository<CarbonLog>,
     @InjectRepository(Certificate)
     private readonly certificateRepo: Repository<Certificate>,
+    private readonly stripeService: StripeService,
   ) {}
 
   async getDashboard(
@@ -559,13 +563,24 @@ export class AssessorService {
   }
 
   async getPayouts(assessorUserId: number) {
-    // Mock payout history
+    const transfers = await this.stripeService.listTransfersForUser(assessorUserId);
+    if (transfers && transfers.length > 0) {
+      return transfers.map((t: any) => ({
+        id: t.id,
+        amount: t.amount / 100,
+        bankName: 'Stripe Payout',
+        accountNo: t.destination || 'N/A',
+        status: t.status === 'successful' ? 'PAID' : 'PENDING',
+        date: new Date(t.created * 1000)
+      }));
+    }
+
     return [
       {
-        id: 1,
+        id: 'tr_mock_1',
         amount: 3000,
-        bankName: 'ธนาคารกสิกรไทย',
-        accountNo: '012-3-45678-9',
+        bankName: 'Stripe Payout (Simulated)',
+        accountNo: 'acct_mock_assessor',
         status: 'PAID',
         date: new Date()
       }
@@ -573,30 +588,156 @@ export class AssessorService {
   }
 
   async getCalendar(assessorUserId: number) {
-    const assessments = await this.assessmentRepo.find({
+    const assigned = await this.assessmentRepo.find({
       where: { assessor_user_id: assessorUserId, status: In(ACTIVE_STATUSES) },
       relations: ['organization']
     });
-    return assessments.map(a => ({
+
+    const unassigned = await this.assessmentRepo.find({
+      where: { assessor_user_id: IsNull(), status: In(['PENDING', 'SUBMITTED']) },
+      relations: ['organization']
+    });
+
+    const assignedMapped = assigned.map(a => ({
       id: a.id,
       title: `ตรวจประเมิน: ${a.organization?.name || 'องค์กร'}`,
       date: a.submitted_at || a.created_at,
-      status: a.status
+      status: a.status,
+      isAssigned: true,
     }));
+
+    const unassignedMapped = unassigned.map(a => ({
+      id: a.id,
+      title: `[ยังไม่รับงาน] ตรวจประเมิน: ${a.organization?.name || 'องค์กร'}`,
+      date: a.submitted_at || a.created_at,
+      status: a.status,
+      isAssigned: false,
+    }));
+
+    return [...assignedMapped, ...unassignedMapped];
   }
 
   async generateCertificatePdf(assessmentId: number): Promise<Buffer> {
     const cert = await this.certificateRepo.findOne({ where: { assessment_id: assessmentId } });
     if (!cert) throw new NotFoundException('Certificate not found');
-    
-    // Minimal mock PDF buffer (valid PDF structure)
-    const pdfContent = `%PDF-1.4
-1 0 obj
-<< /Title (Certificate) >>
-endobj
-trailer
-<< /Root 1 0 R >>
-%%EOF`;
-    return Buffer.from(pdfContent, 'utf-8');
+    const assessment = await this.getAssessmentDetail(assessmentId);
+
+    const printer = new PdfPrinter(getThaiPdfFonts());
+
+    const issuedDateStr = cert.issued_at
+      ? new Date(cert.issued_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
+      : new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const expiredDateStr = cert.expired_at
+      ? new Date(cert.expired_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
+      : '-';
+
+    const docDefinition: any = {
+      defaultStyle: { font: 'THSarabunNew', fontSize: 16 },
+      pageOrientation: 'landscape',
+      pageMargins: [60, 60, 60, 60],
+      background: [
+        {
+          canvas: [
+            {
+              type: 'rect',
+              x: 20, y: 20,
+              w: 772, h: 556,
+              lineWidth: 4,
+              lineColor: '#16a34a',
+              r: 8,
+            },
+            {
+              type: 'rect',
+              x: 28, y: 28,
+              w: 756, h: 540,
+              lineWidth: 1,
+              lineColor: '#bbf7d0',
+              r: 6,
+            },
+          ],
+        },
+      ],
+      content: [
+        { text: '\n' },
+        { text: '🌿 ใบรับรองสำนักงานสีเขียว', style: 'header', alignment: 'center', margin: [0, 20, 0, 8] },
+        { text: 'Green Office Certificate', style: 'subheaderEn', alignment: 'center', margin: [0, 0, 0, 30] },
+        {
+          canvas: [{ type: 'line', x1: 80, y1: 0, x2: 690, y2: 0, lineWidth: 1, lineColor: '#d1fae5' }],
+          margin: [0, 0, 0, 24],
+        },
+        { text: 'ใบรับรองฉบับนี้มอบให้แก่', style: 'label', alignment: 'center', margin: [0, 0, 0, 10] },
+        {
+          text: assessment?.organization?.name || 'ชื่อองค์กร',
+          style: 'orgName',
+          alignment: 'center',
+          margin: [0, 0, 0, 20],
+        },
+        { text: 'ผ่านการรับรองมาตรฐานสำนักงานสีเขียวในระดับ', style: 'label', alignment: 'center', margin: [0, 0, 0, 10] },
+        {
+          text: assessment?.certified_level || 'ระดับรับรอง',
+          style: 'level',
+          alignment: 'center',
+          margin: [0, 0, 0, 30],
+        },
+        {
+          canvas: [{ type: 'line', x1: 80, y1: 0, x2: 690, y2: 0, lineWidth: 1, lineColor: '#d1fae5' }],
+          margin: [0, 0, 0, 24],
+        },
+        {
+          columns: [
+            {
+              stack: [
+                { text: 'เลขที่ใบรับรอง', style: 'smallLabel' },
+                { text: cert.certificate_no || 'N/A', style: 'smallValue' },
+              ],
+              alignment: 'left',
+            },
+            {
+              stack: [
+                { text: 'วันที่ออกใบรับรอง', style: 'smallLabel' },
+                { text: issuedDateStr, style: 'smallValue' },
+              ],
+              alignment: 'center',
+            },
+            {
+              stack: [
+                { text: 'วันหมดอายุ', style: 'smallLabel' },
+                { text: expiredDateStr, style: 'smallValue' },
+              ],
+              alignment: 'right',
+            },
+          ],
+          margin: [20, 0, 20, 0],
+        },
+        { text: '\n' },
+        {
+          text: 'ออกโดย Green Sync Platform | ระบบรับรองสำนักงานสีเขียว',
+          style: 'footer',
+          alignment: 'center',
+        },
+      ],
+      styles: {
+        ...getGreenSyncPdfStyles(),
+        subheaderEn: { fontSize: 14, color: '#6b7280', alignment: 'center' },
+        label: { fontSize: 15, color: '#4b5563' },
+        smallLabel: { fontSize: 12, color: '#9ca3af' },
+        smallValue: { fontSize: 14, bold: true, color: '#111827' },
+        footer: { fontSize: 11, color: '#9ca3af', italics: true },
+      },
+    };
+
+    return new Promise((resolve, reject) => {
+      try {
+        const pdfDoc = printer.createPdfKitDocument(docDefinition);
+        const chunks: Buffer[] = [];
+        pdfDoc.on('data', chunk => chunks.push(chunk));
+        pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+        pdfDoc.on('error', reject);
+        pdfDoc.end();
+      } catch (error) {
+        reject(error);
+      }
+    });
   }
 }

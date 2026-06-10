@@ -49,15 +49,21 @@ export class CarbonLogsController {
 
   @Get('trend')
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
-  getTrend(@Headers() headers: Record<string, string | undefined>) {
-    return this.carbonLogsService.getCarbonTrend(this.getOrgId(headers));
+  getTrend(
+    @Headers() headers: Record<string, string | undefined>,
+    @Request() req: any,
+  ) {
+    const startDate = req.query?.startDate as string | undefined;
+    const endDate = req.query?.endDate as string | undefined;
+    return this.carbonLogsService.getCarbonTrend(this.getOrgId(headers), startDate, endDate);
   }
 
   @Get('personal-dashboard')
-  @Roles('USER')
+  @Roles('USER', 'ORG_ADMIN', 'EMPLOYEE')
   getPersonalDashboard(@Request() req: any) {
     const userId = Number(req.user.sub);
-    return this.carbonLogsService.getPersonalDashboard(userId);
+    const orgId = req.user.orgId ? Number(req.user.orgId) : undefined;
+    return this.carbonLogsService.getPersonalDashboard(userId, orgId);
   }
 
   @Get()

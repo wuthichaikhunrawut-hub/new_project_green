@@ -2,7 +2,7 @@ const http = require('http');
 
 const data = JSON.stringify({
   email: 'Admin@testmail.com',
-  password: 'password123'
+  password: 'admin123'
 });
 
 const options = {
@@ -34,7 +34,7 @@ const req = http.request(options, (res) => {
       const dashOptions = {
         hostname: 'localhost',
         port: 3001,
-        path: '/analytics/admin-dashboard',
+        path: '/admin-stats/dashboard',
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`

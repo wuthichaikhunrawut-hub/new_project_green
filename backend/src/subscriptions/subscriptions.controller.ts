@@ -40,7 +40,7 @@ export class SubscriptionsController {
   @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EXECUTIVE')
   async getStatus(@Request() req: any) {
     return this.subscriptionsService.getUserSubscriptionStatusByUserId(
-      req.user.id,
+      req.user.sub,
     );
   }
 

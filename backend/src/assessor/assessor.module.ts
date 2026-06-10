@@ -8,6 +8,7 @@ import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { Certificate } from '../assessments/entities/certificate.entity';
 import { AuthModule } from '../auth/auth.module';
 import { SettingsModule } from '../settings/settings.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SettingsModule } from '../settings/settings.module';
     ]),
     AuthModule,
     SettingsModule,
+    SubscriptionsModule,
   ],
   controllers: [AssessorController],
   providers: [AssessorService],

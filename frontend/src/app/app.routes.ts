@@ -121,6 +121,14 @@ export const routes: Routes = [
         data: { roles: ['SYSTEM_ADMIN'] }
       },
 
+      // GROUP: ASSESSOR ADMIN PAGES
+      {
+        path: 'assessor-admin/dashboard',
+        loadComponent: () => import('./features/assessor-admin/dashboard/dashboard').then(m => m.Dashboard),
+        title: 'Assessor Admin Dashboard - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ASSESSOR_ADMIN'] }
+      },
       // GROUP: ASSESSOR PAGES
       {
         path: 'assessor/dashboard',
@@ -177,6 +185,13 @@ export const routes: Routes = [
         title: 'การแจ้งเตือน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR'] }
+      },
+      {
+        path: 'assessor/calendar',
+        loadComponent: () => import('./features/assessor/calendar/calendar').then(m => m.Calendar),
+        title: 'ตารางงานผู้ตรวจประเมิน - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN'] }
       },
 
       // GROUP 3: CARBON FOOTPRINT
@@ -242,6 +257,13 @@ export const routes: Routes = [
         path: 'executive/leaderboard',
         loadComponent: () => import('./features/executive/leaderboard/leaderboard').then(m => m.ExecutiveLeaderboardComponent),
         title: 'ทำเนียบสาขารักษ์โลก - Green Sync',
+        canActivate: [RoleGuard],
+        data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN'] }
+      },
+      {
+        path: 'executive/goal-setting',
+        loadComponent: () => import('./features/executive/goal-setting/goal-setting').then(m => m.GoalSetting),
+        title: 'ตั้งเป้าหมาย - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['EXECUTIVE', 'SYSTEM_ADMIN'] }
       },

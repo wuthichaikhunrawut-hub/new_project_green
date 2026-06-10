@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  NotFoundException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -73,11 +74,10 @@ export class AuthService {
       organization: org,
     };
 
-    // Send Welcome Email (Non-blocking)
+    // Send Verification Email (Non-blocking)
     const userName = user.user_profile?.first_name || user.email.split('@')[0];
-    const emailHtml = this.mailService.getWelcomeTemplate(userName);
-    this.mailService.sendMail(user.email, 'ยินดีต้อนรับสู่ Green Sync', emailHtml).catch(e => {
-      this.logger.error(`Failed to send welcome email to ${user.email}`, e.stack);
+    this.sendVerificationEmail(user.id, user.email, userName).catch(e => {
+      this.logger.error(`Failed to send verification email to ${user.email}`, e.stack);
     });
 
     return result;
@@ -184,11 +184,10 @@ export class AuthService {
       profile,
     };
 
-    // Send Welcome Email (Non-blocking)
+    // Send Verification Email (Non-blocking)
     const userName = registerDto.profileData.firstName || user.email.split('@')[0];
-    const emailHtml = this.mailService.getWelcomeTemplate(userName);
-    this.mailService.sendMail(user.email, 'ยินดีต้อนรับสู่ Green Sync (ผู้ประเมิน)', emailHtml).catch(e => {
-      this.logger.error(`Failed to send welcome email to ${user.email}`, e.stack);
+    this.sendVerificationEmail(user.id, user.email, userName).catch(e => {
+      this.logger.error(`Failed to send verification email to ${user.email}`, e.stack);
     });
 
     return result;
@@ -259,5 +258,49 @@ export class AuthService {
 
     this.logger.log(`Password reset successful for user: ${user.email}`);
     return { message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้' };
+  }
+
+  async sendVerificationEmail(userId: number, email: string, userName: string) {
+    const token = await this.jwtService.signAsync(
+      { sub: userId, email, purpose: 'email-verification' },
+      { expiresIn: '1d' }
+    );
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+    const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}`;
+
+    const html = this.mailService.getVerificationEmailTemplate(userName, verifyLink);
+    await this.mailService.sendMail(email, 'ยืนยันอีเมลสำหรับ Green Sync', html);
+    
+    this.logger.log(`🔗 Verification link for ${email}: ${verifyLink}`);
+  }
+
+  async verifyEmail(token: string) {
+    if (!token) {
+      throw new BadRequestException('กรุณาระบุ Token สำหรับการยืนยันอีเมล');
+    }
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      if (payload.purpose !== 'email-verification') {
+        throw new BadRequestException('Token ไม่ถูกต้องสำหรับวัตถุประสงค์นี้');
+      }
+
+      const userId = payload.sub;
+      const user = await this.usersService.findOne(userId);
+      if (!user) {
+        throw new NotFoundException('ไม่พบผู้ใช้งานในระบบ');
+      }
+
+      if (user.email_verified_at) {
+        return { success: true, message: 'อีเมลได้รับการยืนยันอยู่แล้ว' };
+      }
+
+      await this.usersService.verifyEmail(userId);
+
+      this.logger.log(`Email verified successfully for user: ${user.email}`);
+      return { success: true, message: 'ยืนยันอีเมลสำเร็จแล้ว คุณสามารถเข้าสู่ระบบและเริ่มใช้งานได้' };
+    } catch (error) {
+      this.logger.error('Email verification failed:', error.message);
+      throw new BadRequestException('ลิงก์ยืนยันอีเมลหมดอายุหรือไม่ถูกต้อง');
+    }
   }
 }

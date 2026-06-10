@@ -27,6 +27,7 @@ export interface AssessmentDetail {
   criteria_id: number;
   self_score: number;
   assessor_score: number;
+  applicant_comment?: string;
   auditor_comment?: string;
   criteria?: AssessmentCriteria;
   evidence_files?: any[];

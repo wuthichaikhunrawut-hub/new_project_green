@@ -2,6 +2,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { GreenCriteriaService, GreenCriteria } from '../../../core/services/green-criteria.service';
 import { RequestsService } from '../../../core/services/requests.service';
 import { Assessment, AssessmentDetail } from '../../../core/models/assessment.model';
@@ -40,7 +41,7 @@ interface UploadedFile {
 @Component({
   selector: 'app-assessment-category',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './category.html',
   styleUrls: ['./category.css']
 })

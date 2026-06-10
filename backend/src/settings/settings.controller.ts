@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -16,7 +16,7 @@ export class SettingsController {
 
   @Put()
   @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN')
-  async updateSettings(@Req() req: any) {
-    return this.settingsService.updateSettings(req.body);
+  async updateSettings(@Body() body: Record<string, string>) {
+    return this.settingsService.updateSettings(body);
   }
 }

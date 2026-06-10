@@ -23,6 +23,12 @@ export class AssessorAdminController {
     private readonly assessorAdminService: AssessorAdminService,
   ) {}
 
+  @Get('dashboard')
+  @Roles('SYSTEM_ADMIN', 'ASSESSOR_ADMIN')
+  getDashboard() {
+    return this.assessorAdminService.getDashboardStats();
+  }
+
   @Get('assessors')
   @Roles('SYSTEM_ADMIN', 'ASSESSOR_ADMIN')
   findAllAssessors() {

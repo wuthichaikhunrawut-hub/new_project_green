@@ -1,0 +1,84 @@
+<div class="min-h-screen bg-gray-50/50 p-6">
+  <!-- Header -->
+  <header class="mb-8 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold tracking-tight text-gray-900">Assessment Calendar</h1>
+      <p class="text-sm text-gray-500 mt-1">Manage your schedule and on-site visits.</p>
+    </div>
+    <div class="flex items-center gap-4 bg-white p-1 rounded-lg ring-1 ring-gray-900/5 shadow-sm">
+      <button class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900">&larr;</button>
+      <span class="text-sm font-semibold text-gray-900 px-2">October 2026</span>
+      <button class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-gray-900">&rarr;</button>
+    </div>
+  </header>
+
+  <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5 overflow-hidden">
+    <!-- Calendar Grid Header -->
+    <div class="grid grid-cols-7 border-b border-gray-200 bg-gray-50 text-center text-xs font-semibold leading-6 text-gray-700">
+      <div class="py-2">Mon</div>
+      <div class="py-2">Tue</div>
+      <div class="py-2">Wed</div>
+      <div class="py-2">Thu</div>
+      <div class="py-2">Fri</div>
+      <div class="py-2">Sat</div>
+      <div class="py-2">Sun</div>
+    </div>
+    
+    <!-- Calendar Days (Mock layout) -->
+    <div class="grid grid-cols-7 grid-rows-5 gap-px bg-gray-200">
+      <!-- Empty previous month days -->
+      <div class="min-h-[120px] bg-white text-gray-400 p-2 text-sm">28</div>
+      <div class="min-h-[120px] bg-white text-gray-400 p-2 text-sm">29</div>
+      <div class="min-h-[120px] bg-white text-gray-400 p-2 text-sm">30</div>
+      
+      <!-- Current month days -->
+      <div class="min-h-[120px] bg-white p-2 text-sm">1</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">2</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm font-semibold text-green-600 bg-green-50/30">3
+        <div class="mt-2 rounded bg-green-100 px-2 py-1 text-xs font-medium text-green-700 shadow-sm cursor-pointer hover:bg-green-200">
+          EcoTech On-site (10:00)
+        </div>
+      </div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">4</div>
+      
+      <div class="min-h-[120px] bg-white p-2 text-sm">5</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">6</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">7</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm font-semibold text-green-600 bg-green-50/30">8
+        <div class="mt-2 rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 shadow-sm cursor-pointer hover:bg-blue-200">
+          GreenLeaf Review (14:00)
+        </div>
+      </div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">9</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">10</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">11</div>
+      
+      <!-- More empty days to fill the grid -->
+      <div class="min-h-[120px] bg-white p-2 text-sm">12</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">13</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">14</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">15</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">16</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">17</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">18</div>
+
+      <!-- Rest of month -->
+      <div class="min-h-[120px] bg-white p-2 text-sm">19</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">20</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">21</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">22</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">23</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">24</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">25</div>
+
+      <div class="min-h-[120px] bg-white p-2 text-sm">26</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">27</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">28</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">29</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">30</div>
+      <div class="min-h-[120px] bg-white p-2 text-sm">31</div>
+      <!-- Next month days -->
+      <div class="min-h-[120px] bg-white text-gray-400 p-2 text-sm">1</div>
+    </div>
+  </div>
+</div>

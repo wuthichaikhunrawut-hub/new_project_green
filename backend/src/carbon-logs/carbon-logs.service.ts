@@ -123,11 +123,19 @@ export class CarbonLogsService {
     }
   }
 
-  async getCarbonTrend(orgId: number) {
-    const logs = await this.logRepository.find({
-      where: { org_id: orgId },
-      order: { created_at: 'ASC' }
-    });
+  async getCarbonTrend(orgId: number, startDate?: string, endDate?: string) {
+    const qb = this.logRepository.createQueryBuilder('log')
+      .where('log.org_id = :orgId', { orgId })
+      .orderBy('log.created_at', 'ASC');
+
+    if (startDate) {
+      qb.andWhere('log.created_at >= :startDate', { startDate: new Date(startDate) });
+    }
+    if (endDate) {
+      qb.andWhere('log.created_at <= :endDate', { endDate: new Date(endDate) });
+    }
+
+    const logs = await qb.getMany();
 
     const monthlyTrend: Record<string, number> = {};
 
@@ -142,24 +150,52 @@ export class CarbonLogsService {
       .sort((a, b) => a.month.localeCompare(b.month));
   }
 
-  async getPersonalDashboard(userId: number) {
-    // CarbonLog does not have user_id, so we return a mock personal dashboard
-    const monthlyTrend: Record<string, number> = {
-      '2026-04': 50,
-      '2026-05': 45,
-      '2026-06': 40
-    };
-    let totalEmission = 135;
+  async getPersonalDashboard(userId: number, orgId?: number) {
+    // Option B: ใช้ข้อมูล carbon ของ org ที่ user สังกัด
+    // เนื่องจาก carbon_log ไม่มี user_id จึงแสดงภาพรวมขององค์กรใน context ของ user
+    if (!orgId) {
+      return {
+        userId,
+        totalEmission: 0,
+        trend: [],
+        logCount: 0,
+        note: 'ไม่พบข้อมูลองค์กรที่สังกัด',
+      };
+    }
+
+    const logs = await this.logRepository.find({
+      where: { org_id: orgId },
+      order: { created_at: 'ASC' },
+    });
+
+    const monthlyTrend: Record<string, number> = {};
+    logs.forEach((log) => {
+      const date = log.created_at
+        ? new Date(log.created_at)
+        : new Date(log.year || new Date().getFullYear(), (log.month || 1) - 1);
+      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      monthlyTrend[monthYear] = (monthlyTrend[monthYear] || 0) + Number(log.total_emission || 0);
+    });
 
     const trend = Object.entries(monthlyTrend)
       .map(([month, emission]) => ({ month, emission }))
       .sort((a, b) => a.month.localeCompare(b.month));
 
+    const totalEmission = logs.reduce((sum, l) => sum + Number(l.total_emission || 0), 0);
+
+    const profile = await this.logRepository.manager.findOne('UserProfile', {
+      where: { userId },
+    }) as any;
+    const personalGoalPercent = profile?.personal_goal_percent ? Number(profile.personal_goal_percent) : 0;
+
     return {
       userId,
-      totalEmission,
+      orgId,
+      totalEmission: Math.round(totalEmission * 100) / 100,
       trend,
-      logCount: 15
+      logCount: logs.length,
+      personalGoalPercent,
+      note: 'ข้อมูลรวมขององค์กรที่สังกัด',
     };
   }
 }

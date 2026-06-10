@@ -36,6 +36,7 @@ export class SettingsService implements OnModuleInit {
       'stripe.secret_key': '',
       'stripe.webhook_secret': '',
       'stripe.currency': 'thb',
+      'industry_benchmark': '12000',
     };
 
     for (const [key, value] of Object.entries(defaults)) {

@@ -57,7 +57,7 @@ describe('AuthService', () => {
       const result = await service.login({ email: 'test@test.com', password: 'password123' });
       expect(result.access_token).toBe('test_token');
       expect(result.user.email).toBe('test@test.com');
-      expect(result.organization.name).toBe('Test Org');
+      expect(result.organization?.name).toBe('Test Org');
     });
   });
 });

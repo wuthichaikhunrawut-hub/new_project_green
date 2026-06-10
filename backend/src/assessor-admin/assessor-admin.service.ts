@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { AssessorProfile } from '../users/entities/assessor-profile.entity';
+import { StripeService } from '../subscriptions/stripe.service';
 
 @Injectable()
 export class AssessorAdminService {
@@ -14,6 +15,7 @@ export class AssessorAdminService {
     private assessmentRepository: Repository<Assessment>,
     @InjectRepository(AssessorProfile)
     private assessorProfileRepository: Repository<AssessorProfile>,
+    private stripeService: StripeService,
   ) {}
 
   async assignAssessor(assessmentId: number, assessorId: number) {
@@ -46,6 +48,45 @@ export class AssessorAdminService {
     };
   }
 
+  async getDashboardStats() {
+    // Stats from assessors
+    const allAssessors = await this.usersRepository.find({
+      where: { is_active: true },
+      relations: ['roles'],
+    });
+    const assessors = allAssessors.filter(u =>
+      u.roles?.some(r => r.role_name === 'ASSESSOR' || r.role_name === 'ASSESSOR_ADMIN')
+    );
+    const totalAssessors = assessors.length;
+
+    // Stats from assessments
+    const allAssessments = await this.assessmentRepository.find();
+    const assigned = allAssessments.filter(a => a.assessor_user_id !== null && a.assessor_user_id !== undefined);
+    const unassigned = allAssessments.filter(a => !a.assessor_user_id && ['PENDING', 'SUBMITTED'].includes(a.status));
+    const inReview = allAssessments.filter(a => a.status === 'IN_REVIEW').length;
+    const completed = allAssessments.filter(a => ['APPROVED', 'REJECTED'].includes(a.status)).length;
+    const approved = allAssessments.filter(a => a.status === 'APPROVED').length;
+    const globalApprovalRate = completed > 0 ? Math.round((approved / completed) * 100 * 10) / 10 : 0;
+
+    // Recent assignments (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const recentAssignments = assigned.filter(a =>
+      a.updated_at && new Date(a.updated_at) >= thirtyDaysAgo
+    ).length;
+
+    return {
+      totalAssessors,
+      assigned: assigned.length,
+      unassigned: unassigned.length,
+      inReview,
+      completed,
+      approved,
+      globalApprovalRate,
+      recentAssignments,
+    };
+  }
+
   async processPayout(assessorId: number, amount: number) {
     const profile = await this.assessorProfileRepository.findOne({ 
       where: { user: { id: assessorId } },
@@ -60,16 +101,22 @@ export class AssessorAdminService {
       throw new Error('Assessor does not have a registered bank account');
     }
 
-    // Mock payout process
-    const payoutRecord = {
-      assessorId,
+    // Call Stripe to process the payout / transfer
+    const stripeTransfer = await this.stripeService.createPayoutOrTransfer(
       amount,
+      'thb',
+      undefined,
+      assessorId
+    );
+
+    return {
+      id: stripeTransfer.id,
+      amount: stripeTransfer.amount / 100,
+      currency: stripeTransfer.currency.toUpperCase(),
+      status: stripeTransfer.status === 'successful' ? 'PAID' : 'PENDING',
+      date: new Date(stripeTransfer.created * 1000),
       bankName: bankAccount.bank_name,
       accountNo: bankAccount.account_no,
-      status: 'PAID',
-      date: new Date()
     };
-
-    return payoutRecord;
   }
 }

@@ -10,6 +10,7 @@ import { OrganizationSubscription } from '../subscriptions/entities/organization
 import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { AssessorProfile } from '../users/entities/assessor-profile.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
+import { EvidenceFile } from '../assessments/entities/evidence-file.entity';
 
 import { SettingsModule } from '../settings/settings.module';
 
@@ -24,6 +25,7 @@ import { SettingsModule } from '../settings/settings.module';
       SubscriptionPlan,
       AssessorProfile,
       CarbonLog,
+      EvidenceFile,
     ]),
     SettingsModule,
   ],

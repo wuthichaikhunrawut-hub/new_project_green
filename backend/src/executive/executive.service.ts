@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { Organization } from '../organizations/entities/organization.entity';
+import { SettingsService } from '../settings/settings.service';
 import {
   CarbonScopePoint,
   CarbonUnitPoint,
@@ -23,6 +24,7 @@ export class ExecutiveService {
     private readonly carbonRepo: Repository<CarbonLog>,
     @InjectRepository(Organization)
     private readonly orgRepo: Repository<Organization>,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async getDashboard(orgId: number, filters?: { startDate?: string; endDate?: string; branchId?: number }): Promise<ExecutiveDashboardResponse> {
@@ -181,16 +183,35 @@ export class ExecutiveService {
       .orderBy('SUM(log.total_emission)', 'ASC')
       .getRawMany<{ unitName: string | null; totalEmission: string }>();
 
-    // Mock industry benchmark logic
-    const industryAverage = 12000;
+    // 1. Dynamic Industry Average from Settings
+    const dbAverage = await this.settingsService.getSetting('industry_benchmark');
+    const industryAverage = typeof dbAverage === 'number' ? dbAverage : 12000;
 
-    return rows.map((row, index) => {
+    // 2. Dynamic Percentile Calculation based on all branches in system
+    const allBranchesEmissions = await this.carbonRepo.createQueryBuilder('log')
+      .select('log.organization_unit_id', 'branchId')
+      .addSelect('SUM(log.total_emission)', 'totalEmission')
+      .groupBy('log.organization_unit_id')
+      .getRawMany<{ branchId: number; totalEmission: string }>();
+
+    const allEmissionsList = allBranchesEmissions
+      .map(b => Number(b.totalEmission || 0))
+      .sort((a, b) => a - b);
+
+    return rows.map((row) => {
       const emission = Number(row.totalEmission);
+      
+      let percentile = 100;
+      if (allEmissionsList.length > 1) {
+        const countHigher = allEmissionsList.filter(val => val > emission).length;
+        percentile = Math.max(1, Math.round((countHigher / (allEmissionsList.length - 1)) * 100));
+      }
+
       return {
         unitName: row.unitName || 'หน่วยงานกลาง',
         totalEmission: emission,
         industryAverage,
-        percentile: Math.max(1, 100 - (index * 10)) // Just mock percentile based on rank
+        percentile,
       };
     });
   }
@@ -205,6 +226,81 @@ export class ExecutiveService {
     await this.orgRepo.save(org);
 
     return { success: true, targetReductionPercent, year };
+  }
+
+  async getLeaderboard(orgId: number, year?: number): Promise<{
+    rank: number;
+    unitName: string;
+    totalEmission: number;
+    reductionPercent: number;
+    badge: string;
+    assessmentScore: number;
+  }[]> {
+    try {
+      const targetYear = year ?? new Date().getFullYear();
+      const prevYear = targetYear - 1;
+
+      // Query current year carbon by unit
+      const currentRows = await this.carbonRepo
+        .createQueryBuilder('log')
+        .leftJoin('log.organization_unit', 'unit')
+        .where('log.org_id = :orgId', { orgId })
+        .andWhere('log.year = :year', { year: targetYear })
+        .select('COALESCE(unit.unit_name, :fallback)', 'unitName')
+        .addSelect('COALESCE(SUM(log.total_emission), 0)', 'totalEmission')
+        .setParameter('fallback', 'หน่วยงานกลาง')
+        .groupBy('unit.unit_name')
+        .getRawMany<{ unitName: string; totalEmission: string }>();
+
+      // Query previous year carbon by unit (for reduction calculation)
+      const prevRows = await this.carbonRepo
+        .createQueryBuilder('log')
+        .leftJoin('log.organization_unit', 'unit')
+        .where('log.org_id = :orgId', { orgId })
+        .andWhere('log.year = :year', { year: prevYear })
+        .select('COALESCE(unit.unit_name, :fallback)', 'unitName')
+        .addSelect('COALESCE(SUM(log.total_emission), 0)', 'totalEmission')
+        .setParameter('fallback', 'หน่วยงานกลาง')
+        .groupBy('unit.unit_name')
+        .getRawMany<{ unitName: string; totalEmission: string }>();
+
+      // Build prev year map
+      const prevMap = new Map<string, number>();
+      prevRows.forEach(r => prevMap.set(r.unitName, Number(r.totalEmission)));
+
+      // Combine + calculate reduction
+      const items = currentRows.map(row => {
+        const current = Number(row.totalEmission);
+        const prev = prevMap.get(row.unitName) ?? 0;
+        const reductionPercent = prev > 0
+          ? Number((((prev - current) / prev) * 100).toFixed(2))
+          : 0;
+        return { unitName: row.unitName, totalEmission: current, reductionPercent };
+      });
+
+      // Sort by reductionPercent DESC, then by totalEmission ASC
+      items.sort((a, b) => b.reductionPercent - a.reductionPercent || a.totalEmission - b.totalEmission);
+
+      // Assign badge based on rank
+      const getBadge = (rank: number, reductionPercent: number): string => {
+        if (rank === 1 || reductionPercent >= 20) return '🥇 ทองคำ';
+        if (rank <= 3 || reductionPercent >= 10) return '🥈 เงิน';
+        if (rank <= 5 || reductionPercent >= 5) return '🥉 ทองแดง';
+        return '🌱 มุ่งมั่น';
+      };
+
+      return items.map((item, index) => ({
+        rank: index + 1,
+        unitName: item.unitName,
+        totalEmission: item.totalEmission,
+        reductionPercent: item.reductionPercent,
+        badge: getBadge(index + 1, item.reductionPercent),
+        assessmentScore: 0, // assessment score ไม่ได้แยกตาม unit ในปัจจุบัน
+      }));
+    } catch (error) {
+      console.error('getLeaderboard error:', error);
+      throw new InternalServerErrorException('ไม่สามารถโหลดข้อมูล Leaderboard ได้');
+    }
   }
 
   private calculateNetZeroProgressPercent(

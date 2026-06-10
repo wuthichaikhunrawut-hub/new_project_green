@@ -100,4 +100,67 @@ export class StripeService implements OnModuleInit {
       throw error;
     }
   }
+
+  async createPayoutOrTransfer(amount: number, currency: string = 'thb', destination?: string, userId?: number) {
+    if (!this.stripe) await this.initStripe();
+    const metadata = userId ? { user_id: userId.toString() } : undefined;
+    if (this.stripe) {
+      try {
+        if (destination && destination.startsWith('acct_')) {
+          return await this.stripe.transfers.create({
+            amount: Math.round(amount * 100),
+            currency: currency.toLowerCase(),
+            destination: destination,
+            description: `Assessor Payout for User ${userId}`,
+            metadata,
+          });
+        } else {
+          return {
+            id: 'tr_' + Math.random().toString(36).substring(2, 15),
+            object: 'transfer',
+            amount: Math.round(amount * 100),
+            currency: currency.toLowerCase(),
+            destination: destination || 'acct_mock_assessor',
+            livemode: false,
+            status: 'successful',
+            created: Math.floor(Date.now() / 1000),
+            description: `Assessor Payout for User ${userId} (Simulated)`,
+            metadata,
+          };
+        }
+      } catch (error) {
+        console.error('Stripe Transfer Error:', error);
+        throw error;
+      }
+    }
+    return {
+      id: 'tr_mock_' + Math.random().toString(36).substring(2, 15),
+      object: 'transfer',
+      amount: Math.round(amount * 100),
+      currency: currency.toLowerCase(),
+      destination: destination || 'acct_mock_assessor',
+      livemode: false,
+      status: 'successful',
+      created: Math.floor(Date.now() / 1000),
+      description: `Assessor Payout for User ${userId} (Mock)`,
+      metadata,
+    };
+  }
+
+  async listTransfersForUser(userId: number) {
+    if (!this.stripe) await this.initStripe();
+    if (this.stripe) {
+      try {
+        const transfers = await this.stripe.transfers.list({
+          limit: 100,
+        });
+        return transfers.data.filter(
+          (t: any) => t.metadata && t.metadata.user_id === userId.toString(),
+        );
+      } catch (error) {
+        console.error('Stripe List Transfers Error:', error);
+      }
+    }
+    return [];
+  }
 }

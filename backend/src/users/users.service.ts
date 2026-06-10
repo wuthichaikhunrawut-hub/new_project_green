@@ -545,6 +545,12 @@ export class UsersService {
     });
   }
 
+  async verifyEmail(userId: number) {
+    await this.usersRepository.update(userId, {
+      email_verified_at: new Date(),
+    });
+  }
+
   async bulkImportUsers(orgId: number, csvContent: string): Promise<number> {
     const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     if (lines.length <= 1) return 0; // Only header or empty
