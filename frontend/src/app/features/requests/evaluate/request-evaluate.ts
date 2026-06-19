@@ -218,9 +218,12 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
     const max = this.calculateTotalMaxScore();
     if (max === 0) return { level: 'ยังไม่มีข้อมูล', percent: 0, color: 'text-muted', bg: '#6b7280' };
     const percent = Math.round((total / max) * 100);
+    /*
+    if (percent >= 95) return { level: '🏆 แพลทินัม (Platinum)', percent, color: 'text-info', bg: '#a855f7' };
+    */
     if (percent >= 90) return { level: '🥇 ทอง (Gold)', percent, color: 'text-warning', bg: '#f59e0b' };
-    if (percent >= 70) return { level: '🥈 เงิน (Silver)', percent, color: 'text-secondary', bg: '#6b7280' };
-    if (percent >= 50) return { level: '🥉 ทองแดง (Bronze)', percent, color: 'text-danger', bg: '#b45309' };
+    if (percent >= 80) return { level: '🥈 เงิน (Silver)', percent, color: 'text-secondary', bg: '#6b7280' };
+    if (percent >= 60) return { level: '🥉 ทองแดง (Bronze)', percent, color: 'text-danger', bg: '#b45309' };
     return { level: '❌ ไม่ผ่านเกณฑ์', percent, color: 'text-dark', bg: '#ef4444' };
   }
 

@@ -85,9 +85,12 @@ export class AssessorCertificationDecisionComponent implements OnInit {
   }
 
   getCertificationLevel(): string {
+    /*
+    if (this.scorePercent >= 95) return 'ระดับ แพลทินัม (G Platinum)';
+    */
     if (this.scorePercent >= 90) return 'ระดับ ทอง (Gold)';
-    if (this.scorePercent >= 70) return 'ระดับ เงิน (Silver)';
-    if (this.scorePercent >= 50) return 'ระดับ ทองแดง (Bronze)';
+    if (this.scorePercent >= 80) return 'ระดับ เงิน (Silver)';
+    if (this.scorePercent >= 60) return 'ระดับ ทองแดง (Bronze)';
     return 'ไม่ผ่านการรับรอง';
   }
 

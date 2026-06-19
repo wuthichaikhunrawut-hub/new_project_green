@@ -559,9 +559,12 @@ export class AssessorService {
       ) ?? 0;
     const total = this.calculateTotalScore(assessment);
     const percent = max > 0 ? (total / max) * 100 : 0;
+    /*
+    if (percent >= 95) return 'ระดับ เกียรติยศสูงสุด (G Platinum)';
+    */
     if (percent >= 90) return 'ระดับ ทอง (Gold)';
-    if (percent >= 70) return 'ระดับ เงิน (Silver)';
-    if (percent >= 50) return 'ระดับ ทองแดง (Bronze)';
+    if (percent >= 80) return 'ระดับ เงิน (Silver)';
+    if (percent >= 60) return 'ระดับ ทองแดง (Bronze)';
     return 'ไม่ผ่านการรับรอง';
   }
 

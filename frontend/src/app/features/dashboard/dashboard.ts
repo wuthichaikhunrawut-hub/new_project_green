@@ -58,6 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   assessmentFailed = false;
   rejectionComment: string | null = null;
   isLoading = true;
+  showShowcase = false;
   
   quotaWarnings: string[] = [];
 
@@ -157,13 +158,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         // Find the latest APPROVED assessment
         const approved = requests.find(r => r.status === 'APPROVED');
         if (approved) {
-          // Parse certified level safely (handling values like 'G Platinum', 'G Plus', '🥇 ทอง (Gold)', '🥈 เงิน (Silver)', '🥉 ทองแดง (Bronze)')
+          // Parse certified level safely (handling values like '🥇 ทอง (Gold)', '🥈 เงิน (Silver)', '🥉 ทองแดง (Bronze)')
           const rawLevel = approved.certified_level ? approved.certified_level.toUpperCase() : '';
+          
+          // Bypassed: G Platinum and G Plus are kept in code but not mapped or displayed
+          /*
           if (rawLevel.includes('PLATINUM') || rawLevel.includes('แพลทินัม')) {
             this.certifiedLevel = 'PLATINUM';
           } else if (rawLevel.includes('PLUS') || rawLevel.includes('พลัส')) {
             this.certifiedLevel = 'PLUS';
-          } else if (rawLevel.includes('GOLD') || rawLevel.includes('ทอง')) {
+          } else
+          */
+          
+          if (rawLevel.includes('GOLD') || rawLevel.includes('ทอง')) {
             this.certifiedLevel = 'GOLD';
           } else if (rawLevel.includes('SILVER') || rawLevel.includes('เงิน')) {
             this.certifiedLevel = 'SILVER';
@@ -172,8 +179,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
           } else {
             // Robust score fallback if certifiedLevel is missing or unrecognized in DB
             const score = approved.total_score || 0;
-            if (score >= 95) this.certifiedLevel = 'PLATINUM';
-            else if (score >= 90) this.certifiedLevel = 'GOLD';
+            if (score >= 90) this.certifiedLevel = 'GOLD';
             else if (score >= 80) this.certifiedLevel = 'SILVER';
             else if (score >= 60) this.certifiedLevel = 'BRONZE';
             else this.certifiedLevel = null;
