@@ -11,7 +11,13 @@ import { Organization } from '../organizations/entities/organization.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ChatLog, ChatSession, ChatMessage, User, Organization]),
+    TypeOrmModule.forFeature([
+      ChatLog,
+      ChatSession,
+      ChatMessage,
+      User,
+      Organization,
+    ]),
     SubscriptionsModule,
   ],
   controllers: [GeminiController],

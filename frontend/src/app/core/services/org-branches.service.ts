@@ -2,6 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 export interface OrgBranch {
   id?: number;
@@ -17,7 +18,7 @@ export interface OrgBranch {
   providedIn: 'root'
 })
 export class OrgBranchesService {
-  private apiUrl = 'http://localhost:3001/organizations';
+  private apiUrl = `${environment.apiUrl}/organizations`;
   private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient) {}
@@ -27,7 +28,7 @@ export class OrgBranchesService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+
       }
     }
     return headers;

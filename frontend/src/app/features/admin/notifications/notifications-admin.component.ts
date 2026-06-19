@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { environment } from '../../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NotificationService, NotificationType } from '../../../core/services/notification.service';
@@ -285,7 +286,7 @@ export class NotificationsAdminComponent implements OnInit {
 
   approveProposal(item: any) {
     this.toast.info('กำลังดำเนินการบันทึกข้อมูลและอนุมัติ...');
-    this.http.post(`http://localhost:3001/notifications/${item.id}/approve-academic`, {}).subscribe({
+    this.http.post(`${environment.apiUrl}/notifications/${item.id}/approve-academic`, {}).subscribe({
       next: () => {
         this.toast.success('อนุมัติเกณฑ์/สูตรคาร์บอนและบันทึกสู่ระบบสำเร็จเรียบร้อยแล้วครับ!');
         this.loadHistory(true); // Refresh silently
@@ -308,7 +309,7 @@ export class NotificationsAdminComponent implements OnInit {
       return;
     }
 
-    this.http.post(`http://localhost:3001/notifications/${this.rejectingItem.id}/reject-academic`, {
+    this.http.post(`${environment.apiUrl}/notifications/${this.rejectingItem.id}/reject-academic`, {
       reason: this.rejectReason
     }).subscribe({
       next: () => {

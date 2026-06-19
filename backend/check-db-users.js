@@ -12,14 +12,13 @@ const client = new Client({
 async function run() {
   await client.connect();
   const sql = `
-    SELECT u.user_id, u.email, r.role_name 
+    SELECT u.user_id, u.email, u.password_hash, u.is_active, r.role_name 
     FROM users u 
     LEFT JOIN user_roles ur ON u.user_id = ur.user_id 
-    LEFT JOIN roles r ON ur.role_id = r.role_id 
-    WHERE UPPER(r.role_name) IN ('ASSESSOR', 'ASSESSOR ADMIN', 'ASSESSOR_ADMIN')
+    LEFT JOIN roles r ON ur.role_id = r.role_id
   `;
   const res = await client.query(sql);
-  console.log('--- JOIN QUERY RESULT ---');
+  console.log('--- ALL USERS ---');
   console.log(res.rows);
 
   await client.end();

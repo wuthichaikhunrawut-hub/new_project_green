@@ -213,6 +213,82 @@
     </div>
   </div>
 
+  <!-- AI Analysis Modal -->
+  <div *ngIf="showAIModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Modal Header -->
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-emerald-50">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-100">
+            <i class="fa-solid fa-robot text-white"></i>
+          </div>
+          <div>
+            <h3 class="text-slate-900 font-black text-base leading-tight">ผลการวิเคราะห์แนะนำโดย AI</h3>
+            <p class="text-xs text-slate-500 font-medium mt-0.5">วิเคราะห์ประเมินจากแบบร่างปัจจุบันของท่าน</p>
+          </div>
+        </div>
+        <button (click)="showAIModal = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-6">
+        <!-- Loading State -->
+        <div *ngIf="aiLoading" class="flex flex-col items-center justify-center py-12">
+          <div class="w-12 h-12 rounded-full border-4 border-slate-100 border-t-indigo-600 animate-spin mb-4"></div>
+          <p class="text-sm font-bold text-slate-600">GreenSync AI กำลังวิเคราะห์จุดอ่อน...</p>
+          <p class="text-xs text-slate-400 mt-1">กรุณารอสักครู่ (อาจใช้เวลาประมาณ 5-10 วินาที)</p>
+        </div>
+
+        <!-- Result Content -->
+        <ng-container *ngIf="!aiLoading && aiResult">
+          <!-- Recommendations Section -->
+          <div>
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i> แผนปฏิบัติการที่แนะนำ (Action Plan)
+            </h4>
+            <div class="space-y-3">
+              <div *ngFor="let rec of aiResult.recommendations" class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5">
+                <div class="flex items-start justify-between gap-3">
+                  <span class="font-bold text-slate-800 text-sm leading-tight">{{ rec.title }}</span>
+                  <span [class]="'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ' + 
+                                (rec.expectedImpact === 'High' ? 'bg-red-50 text-red-600 border border-red-100' : 
+                                 rec.expectedImpact === 'Medium' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
+                                 'bg-blue-50 text-blue-600 border border-blue-100')">
+                    Impact: {{ rec.expectedImpact }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed font-medium">{{ rec.action }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Missing Documents Section -->
+          <div *ngIf="aiResult.missingDocuments && aiResult.missingDocuments.length > 0">
+            <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+              <i class="fa-solid fa-file-circle-exclamation text-indigo-500"></i> เอกสารหลักฐานที่ยังขาดอยู่
+            </h4>
+            <div class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100/50">
+              <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 font-medium">
+                <li *ngFor="let doc of aiResult.missingDocuments">{{ doc }}</li>
+              </ul>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+        <button (click)="showAIModal = false" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition-colors">
+          เข้าใจแล้ว
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   </ng-container>
 </div>
 

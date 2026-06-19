@@ -4,10 +4,11 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Assessment } from '../models/assessment.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class RequestsService {
-  private apiUrl = 'http://localhost:3001/assessments';
+  private apiUrl = `${environment.apiUrl}/assessments`;
   private platformId = inject(PLATFORM_ID);
   private authService = inject(AuthService);
 
@@ -21,7 +22,7 @@ export class RequestsService {
       const currentUser = this.authService.getUser();
       const orgId = this.authService.getOrganizationId();
 
-      if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+
       if (orgId) headers = headers.set('x-org-id', String(orgId));
       if (currentUser?.role) headers = headers.set('x-user-role', String(currentUser.role));
       if (currentUser?.id) headers = headers.set('x-user-id', String(currentUser.id));

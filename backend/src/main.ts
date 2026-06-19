@@ -3,10 +3,12 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import compression from 'compression';
+import * as express from 'express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
 import { SentryInterceptor } from './common/interceptors/sentry.interceptor';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -15,25 +17,33 @@ async function bootstrap() {
   });
 
   // ✅ Security: HTTP headers
-  app.use(helmet({
-    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
-    crossOriginEmbedderPolicy: false,
-  }));
+  app.use(
+    helmet({
+      contentSecurityPolicy:
+        process.env.NODE_ENV === 'production' ? undefined : false,
+      crossOriginEmbedderPolicy: false,
+    }),
+  );
   app.getHttpAdapter().getInstance().disable('x-powered-by');
 
   // ✅ Performance: Compression (Gzip)
   app.use(compression());
 
   // ✅ Validation: Global Validation Pipe
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true, // strip out fields that are not in DTO
-    forbidNonWhitelisted: true, // throw error if extra fields are provided
-    transform: true, // automatically transform payloads to DTO instances
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true, // strip out fields that are not in DTO
+      forbidNonWhitelisted: true, // throw error if extra fields are provided
+      transform: true, // automatically transform payloads to DTO instances
+    }),
+  );
+
+  // ✅ Global Error Filter
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // ✅ Security: เพิ่ม body size limit ป้องกัน Payload ขนาดใหญ่ผิดปกติ
-  app.use(require('express').json({ limit: '5mb' }));
-  app.use(require('express').urlencoded({ extended: true, limit: '5mb' }));
+  app.use(express.json({ limit: '5mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '5mb' }));
 
   // ✅ Monitoring: Sentry Error Tracking (Only if DSN is provided)
   if (process.env.SENTRY_DSN) {
@@ -51,7 +61,9 @@ async function bootstrap() {
   if (process.env.ALLOWED_ORIGINS) {
     allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
   } else if (process.env.NODE_ENV === 'production') {
-    throw new Error('ALLOWED_ORIGINS must be defined in production environment');
+    throw new Error(
+      'ALLOWED_ORIGINS must be defined in production environment',
+    );
   }
 
   app.enableCors({

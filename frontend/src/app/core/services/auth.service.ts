@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable, tap, catchError, of } from 'rxjs';
 import { User } from '../models/user.model';
+import { environment } from '../../../environments/environment';
 
 export interface AuthResponse {
   access_token: string;
@@ -12,7 +13,7 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'http://localhost:3001/auth';
+  private apiUrl = `${environment.apiUrl}/auth`;
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private platformId = inject(PLATFORM_ID);
 

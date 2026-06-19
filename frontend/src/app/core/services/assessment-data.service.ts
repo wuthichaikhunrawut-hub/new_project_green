@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AssessmentDataService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/assessments';
+  private apiUrl = `${environment.apiUrl}/assessments`;
 
   private getHeaders(): HttpHeaders {
     if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
@@ -21,7 +22,7 @@ export class AssessmentDataService {
 
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
+        
         'x-org-id': orgId
       });
     }

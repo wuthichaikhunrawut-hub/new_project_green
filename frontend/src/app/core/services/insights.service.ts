@@ -2,13 +2,14 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class InsightsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/gemini';
+  private apiUrl = `${environment.apiUrl}/gemini`;
   private platformId = inject(PLATFORM_ID);
 
   private getHeaders(): HttpHeaders {
@@ -18,7 +19,7 @@ export class InsightsService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+
       }
     }
     return headers;

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export enum NotificationType {
   SYSTEM = 'SYSTEM',
@@ -28,7 +29,7 @@ export interface Notification {
   providedIn: 'root',
 })
 export class NotificationService {
-  private apiUrl = 'http://localhost:3001/notifications';
+  private apiUrl = `${environment.apiUrl}/notifications`;
   private unreadCountSubject = new BehaviorSubject<number>(0);
   unreadCount$ = this.unreadCountSubject.asObservable();
 

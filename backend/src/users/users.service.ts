@@ -99,7 +99,9 @@ export class UsersService {
       return UserRole.SYSTEM_ADMIN;
     }
     if (
-      normalizedRoleNames.includes(this.normalizeRoleName(UserRole.ORG_ADMIN)) ||
+      normalizedRoleNames.includes(
+        this.normalizeRoleName(UserRole.ORG_ADMIN),
+      ) ||
       normalizedRoleNames.includes('ORG_ADMIN')
     ) {
       return UserRole.ORG_ADMIN;
@@ -108,7 +110,9 @@ export class UsersService {
       return UserRole.SYSTEM_ADMIN;
     }
     if (
-      normalizedRoleNames.includes(this.normalizeRoleName(UserRole.ASSESSOR_ADMIN)) ||
+      normalizedRoleNames.includes(
+        this.normalizeRoleName(UserRole.ASSESSOR_ADMIN),
+      ) ||
       normalizedRoleNames.includes('ASSESSOR_ADMIN') ||
       normalizedRoleNames.includes('ASSESSORADMIN')
     ) {
@@ -176,7 +180,9 @@ export class UsersService {
           roleNames: ['ASSESSOR', 'ASSESSOR ADMIN', 'ASSESSOR_ADMIN'],
         });
       } else {
-        query.andWhere('UPPER(roles.role_name) = UPPER(:roleName)', { roleName });
+        query.andWhere('UPPER(roles.role_name) = UPPER(:roleName)', {
+          roleName,
+        });
       }
     }
 
@@ -189,9 +195,16 @@ export class UsersService {
     // Map for backward compatibility and fallback user_profile
     return users.map((user) => {
       const p = user.user_profile;
-      const first_name = p && p.first_name && p.first_name.trim() !== '' ? p.first_name.trim() : user.email.split('@')[0];
-      const last_name = p && p.last_name && p.last_name.trim() !== '' ? p.last_name.trim() : 'ผู้ใช้งาน';
-      const phone = p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
+      const first_name =
+        p && p.first_name && p.first_name.trim() !== ''
+          ? p.first_name.trim()
+          : user.email.split('@')[0];
+      const last_name =
+        p && p.last_name && p.last_name.trim() !== ''
+          ? p.last_name.trim()
+          : 'ผู้ใช้งาน';
+      const phone =
+        p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
       const profile = {
         ...(p || {}),
         first_name,
@@ -202,7 +215,9 @@ export class UsersService {
         ...user,
         user_profile: profile,
         role:
-          user.roles && user.roles.length > 0 ? user.roles[0].role_name : 'User',
+          user.roles && user.roles.length > 0
+            ? user.roles[0].role_name
+            : 'User',
         username: profile.first_name,
         bio: user.assessor_profile?.education_background || '-',
         assessor_verified:
@@ -230,8 +245,14 @@ export class UsersService {
       user.bank_accounts?.find((b) => b.is_primary) || user.bank_accounts?.[0];
 
     const p = user.user_profile;
-    const first_name = p && p.first_name && p.first_name.trim() !== '' ? p.first_name.trim() : user.email.split('@')[0];
-    const last_name = p && p.last_name && p.last_name.trim() !== '' ? p.last_name.trim() : 'ผู้ใช้งาน';
+    const first_name =
+      p && p.first_name && p.first_name.trim() !== ''
+        ? p.first_name.trim()
+        : user.email.split('@')[0];
+    const last_name =
+      p && p.last_name && p.last_name.trim() !== ''
+        ? p.last_name.trim()
+        : 'ผู้ใช้งาน';
     const phone = p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
     const profile = {
       ...(p || {}),
@@ -299,9 +320,10 @@ export class UsersService {
 
       // 2. Save Profile
       const profileData = user_profile || {
-        first_name: userData.username || userData.email?.split('@')[0] || 'ผู้ใช้งาน',
+        first_name:
+          userData.username || userData.email?.split('@')[0] || 'ผู้ใช้งาน',
         last_name: 'ใหม่',
-        phone: '-'
+        phone: '-',
       };
       const profile = tem.create(UserProfile, {
         ...profileData,
@@ -318,7 +340,7 @@ export class UsersService {
 
       // 4. Assign Role
       const desiredRole = userData?.role ? userData.role : UserRole.USER;
-      
+
       const normalized = this.normalizeRoleName(desiredRole);
       const allRoles = await tem.find(Role);
       let role = allRoles.find(
@@ -353,9 +375,16 @@ export class UsersService {
       if (!finalUser) throw new Error('Failed to load created user');
 
       const p = finalUser.user_profile;
-      const first_name = p && p.first_name && p.first_name.trim() !== '' ? p.first_name.trim() : finalUser.email.split('@')[0];
-      const last_name = p && p.last_name && p.last_name.trim() !== '' ? p.last_name.trim() : 'ผู้ใช้งาน';
-      const phone = p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
+      const first_name =
+        p && p.first_name && p.first_name.trim() !== ''
+          ? p.first_name.trim()
+          : finalUser.email.split('@')[0];
+      const last_name =
+        p && p.last_name && p.last_name.trim() !== ''
+          ? p.last_name.trim()
+          : 'ผู้ใช้งาน';
+      const phone =
+        p && p.phone && p.phone.trim() !== '' ? p.phone.trim() : '-';
       const finalProfile = {
         ...(p || {}),
         first_name,
@@ -367,7 +396,9 @@ export class UsersService {
         ...finalUser,
         user_profile: finalProfile,
         role:
-          finalUser.roles && finalUser.roles.length > 0 ? finalUser.roles[0].role_name : 'User',
+          finalUser.roles && finalUser.roles.length > 0
+            ? finalUser.roles[0].role_name
+            : 'User',
         username: finalProfile.first_name,
       } as any;
     });
@@ -552,20 +583,23 @@ export class UsersService {
   }
 
   async bulkImportUsers(orgId: number, csvContent: string): Promise<number> {
-    const lines = csvContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const lines = csvContent
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
     if (lines.length <= 1) return 0; // Only header or empty
-    
+
     // Skip header
     const dataLines = lines.slice(1);
     let count = 0;
-    
+
     for (const line of dataLines) {
       const [email, firstName, lastName, phone] = line.split(',');
       if (!email) continue;
-      
+
       const existingUser = await this.findByEmail(email);
       if (existingUser) continue;
-      
+
       await this.create({
         email,
         password: 'Password123!', // Default password
@@ -574,24 +608,26 @@ export class UsersService {
         user_profile: {
           first_name: firstName || email.split('@')[0],
           last_name: lastName || 'Employee',
-          phone: phone || '-'
-        }
+          phone: phone || '-',
+        },
       });
       count++;
     }
-    
+
     return count;
   }
 
   async setPersonalGoal(userId: number, targetReductionPercent: number) {
-    let profile = await this.userProfileRepository.findOne({ where: { user: { id: userId } } });
+    let profile = await this.userProfileRepository.findOne({
+      where: { user: { id: userId } },
+    });
     if (!profile) {
       profile = this.userProfileRepository.create({
         user: { id: userId } as User,
         first_name: 'ผู้ใช้งาน',
         last_name: 'ใหม่',
         phone: '-',
-        personal_goal_percent: targetReductionPercent
+        personal_goal_percent: targetReductionPercent,
       });
     } else {
       profile.personal_goal_percent = targetReductionPercent;

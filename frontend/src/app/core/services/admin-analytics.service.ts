@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface AdminStats {
   totalOrganizations: number;
@@ -30,7 +31,7 @@ export interface AdminStats {
 })
 export class AdminAnalyticsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/admin-stats';
+  private apiUrl = `${environment.apiUrl}/admin-stats`;
 
   getAdminDashboardStats(): Observable<AdminStats> {
     return this.http.get<AdminStats>(`${this.apiUrl}/dashboard`);

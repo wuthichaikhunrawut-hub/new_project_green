@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, UseGuards, Req, Header } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Header,
+} from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
@@ -8,7 +16,10 @@ export class UserSubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Get('my')
-  @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0')
+  @Header(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  )
   @Header('Pragma', 'no-cache')
   @Header('Expires', '0')
   async getMySubscription(@Req() req) {

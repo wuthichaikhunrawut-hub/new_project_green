@@ -11,6 +11,7 @@ import { ScoreIndicatorInput } from '../../core/services/audit-score.service';
 import { UserSubscriptionsService } from '../../core/services/user-subscriptions.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-dashboard',
@@ -119,7 +120,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.cdr.markForCheck();
       });
 
-      this.http.get<any[]>(`http://localhost:3001/audit-logs?org_id=${orgId}&limit=5`).subscribe({
+      this.http.get<any[]>(`${environment.apiUrl}/audit-logs?org_id=${orgId}&limit=5`).subscribe({
         next: (logs: any[]) => {
           this.recentActivities = logs || [];
           this.cdr.markForCheck();

@@ -33,7 +33,9 @@ export class GeminiService {
     const cd = this.orgCooldowns.get(orgId);
     if (!cd) return false;
     if (new Date() < cd.until) {
-      console.warn(`[AI Cache] Circuit breaker active for Org ID ${orgId} until ${cd.until.toISOString()}. Reason: ${cd.reason}`);
+      console.warn(
+        `[AI Cache] Circuit breaker active for Org ID ${orgId} until ${cd.until.toISOString()}. Reason: ${cd.reason}`,
+      );
       return true;
     }
     this.orgCooldowns.delete(orgId);
@@ -43,7 +45,9 @@ export class GeminiService {
   private setCooldown(orgId: number, durationMinutes: number, reason: string) {
     const until = new Date(Date.now() + durationMinutes * 60 * 1000);
     this.orgCooldowns.set(orgId, { until, reason });
-    console.log(`[AI Cache] Set circuit breaker cooldown for Org ID ${orgId} for ${durationMinutes} minutes. Reason: ${reason}`);
+    console.log(
+      `[AI Cache] Set circuit breaker cooldown for Org ID ${orgId} for ${durationMinutes} minutes. Reason: ${reason}`,
+    );
   }
 
   constructor(
@@ -63,12 +67,19 @@ export class GeminiService {
     if (this.ai) return this.ai;
 
     const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey || apiKey === 'your_api_key_here' || apiKey === 'your_secure_api_key_here') {
+    if (
+      !apiKey ||
+      apiKey === 'your_api_key_here' ||
+      apiKey === 'your_secure_api_key_here'
+    ) {
       throw new InternalServerErrorException(
         'GEMINI_API_KEY is not configured. Please set it in backend/.env and restart the server.',
       );
     }
-    console.log('[GeminiService] Initializing with API Key:', apiKey.substring(0, 10) + '...');
+    console.log(
+      '[GeminiService] Initializing with API Key:',
+      apiKey.substring(0, 10) + '...',
+    );
     this.ai = new GoogleGenAI({ apiKey });
     return this.ai;
   }
@@ -94,13 +105,19 @@ export class GeminiService {
     if (msg.includes('429') || msg.includes('quota') || msg.includes('limit')) {
       return 'โควตาการใช้งาน AI เต็มรูปแบบชั่วคราว กรุณารอ 1-2 นาทีแล้วลองใหม่อีกครั้ง';
     }
-    if (msg.includes('api_key') || msg.includes('unauthorized') || msg.includes('key')) {
+    if (
+      msg.includes('api_key') ||
+      msg.includes('unauthorized') ||
+      msg.includes('key')
+    ) {
       return 'ระบบเชื่อมต่อ AI ไม่ถูกต้อง (API Key มีปัญหา) กรุณาติดต่อผู้ดูแลระบบ';
     }
     return 'ไม่สามารถประมวลผลผ่าน AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
   }
 
-  private async executeWithFallback<T>(fn: (aiClient: GoogleGenAI) => Promise<T>): Promise<T> {
+  private async executeWithFallback<T>(
+    fn: (aiClient: GoogleGenAI) => Promise<T>,
+  ): Promise<T> {
     const timeoutMs = 15000;
     const errMsg = 'Timeout';
 
@@ -112,19 +129,37 @@ export class GeminiService {
         throw error;
       }
 
-      console.warn('[GeminiService] Primary API key failed, checking backup key...', error.message || error);
-      
-      const backupKey = process.env.GEMINI_BACKUP_API_KEY || process.env.GEMINI_API_KEY_BACKUP;
-      if (backupKey && backupKey !== 'your_backup_api_key_here' && backupKey !== 'your_backup_gemini_api_key_here') {
+      console.warn(
+        '[GeminiService] Primary API key failed, checking backup key...',
+        error.message || error,
+      );
+
+      const backupKey =
+        process.env.GEMINI_BACKUP_API_KEY || process.env.GEMINI_API_KEY_BACKUP;
+      if (
+        backupKey &&
+        backupKey !== 'your_backup_api_key_here' &&
+        backupKey !== 'your_backup_gemini_api_key_here'
+      ) {
         try {
-          console.log('[GeminiService] Switching to backup API key:', backupKey.substring(0, 10) + '...');
+          console.log(
+            '[GeminiService] Switching to backup API key:',
+            backupKey.substring(0, 10) + '...',
+          );
           const backupAi = new GoogleGenAI({ apiKey: backupKey });
-          const result = await this.withTimeout(fn(backupAi), timeoutMs, errMsg);
-          
-          this.ai = backupAi; 
+          const result = await this.withTimeout(
+            fn(backupAi),
+            timeoutMs,
+            errMsg,
+          );
+
+          this.ai = backupAi;
           return result;
         } catch (backupError: any) {
-          console.error('[GeminiService] Both primary and backup API keys failed!', backupError.message || backupError);
+          console.error(
+            '[GeminiService] Both primary and backup API keys failed!',
+            backupError.message || backupError,
+          );
           if (backupError.message === errMsg) {
             throw backupError;
           }
@@ -195,14 +230,19 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     });
   }
 
-  async getSessionMessages(sessionId: number, userId: number): Promise<ChatMessage[]> {
+  async getSessionMessages(
+    sessionId: number,
+    userId: number,
+  ): Promise<ChatMessage[]> {
     const session = await this.chatSessionRepo.findOne({
       where: { id: sessionId, user_id: userId },
       relations: ['messages'],
-      order: { updated_at: 'DESC' }
+      order: { updated_at: 'DESC' },
     });
     if (!session) throw new InternalServerErrorException('Session not found');
-    return session.messages.sort((a, b) => a.created_at.getTime() - b.created_at.getTime());
+    return session.messages.sort(
+      (a, b) => a.created_at.getTime() - b.created_at.getTime(),
+    );
   }
 
   async createSession(userId: number, title: string): Promise<ChatSession> {
@@ -214,7 +254,11 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     await this.chatSessionRepo.delete({ id: sessionId, user_id: userId });
   }
 
-  async chat(message: string, userId?: number, sessionId?: number): Promise<ChatResult> {
+  async chat(
+    message: string,
+    userId?: number,
+    sessionId?: number,
+  ): Promise<ChatResult> {
     const ai = this.getClient();
 
     try {
@@ -223,24 +267,30 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
         try {
           const user = await this.userRepo.findOne({
             where: { id: userId },
-            relations: ['organization']
+            relations: ['organization'],
           });
           const org = user?.organization;
           if (org) {
-            const branches = await this.orgRepo.manager.query(
-              'SELECT name, location FROM organization_units WHERE org_id = $1',
-              [org.id]
-            ).catch(() => []);
+            const branches = await this.orgRepo.manager
+              .query(
+                'SELECT name, location FROM organization_units WHERE org_id = $1',
+                [org.id],
+              )
+              .catch(() => []);
 
-            const carbonSummary = await this.orgRepo.manager.query(
-              'SELECT type, SUM(amount) as total_amount, SUM(emission) as total_emission, unit FROM carbon_logs WHERE org_id = $1 GROUP BY type, unit',
-              [org.id]
-            ).catch(() => []);
+            const carbonSummary = await this.orgRepo.manager
+              .query(
+                'SELECT type, SUM(amount) as total_amount, SUM(emission) as total_emission, unit FROM carbon_logs WHERE org_id = $1 GROUP BY type, unit',
+                [org.id],
+              )
+              .catch(() => []);
 
-            const assessments = await this.orgRepo.manager.query(
-              'SELECT status, count(*) as count FROM assessments WHERE org_id = $1 GROUP BY status',
-              [org.id]
-            ).catch(() => []);
+            const assessments = await this.orgRepo.manager
+              .query(
+                'SELECT status, count(*) as count FROM assessments WHERE org_id = $1 GROUP BY status',
+                [org.id],
+              )
+              .catch(() => []);
 
             orgContext = `--- ข้อมูลสภาพแวดล้อมและพลังงานขององค์กรปัจจุบัน (${org.name}) ---
 อุตสาหกรรม: ${org.industry_type || '-'}
@@ -261,7 +311,10 @@ ${assessments.length === 0 ? '- ยังไม่มีความคืบห
 `;
           }
         } catch (ctxErr) {
-          console.error('[GeminiService] Failed to compile org context for AI prompt:', ctxErr);
+          console.error(
+            '[GeminiService] Failed to compile org context for AI prompt:',
+            ctxErr,
+          );
         }
       }
 
@@ -283,17 +336,26 @@ ${orgContext}`;
 
       let historyContext = '';
       let session: ChatSession | null = null;
-      
+
       if (userId && sessionId) {
         session = await this.chatSessionRepo.findOne({
           where: { id: sessionId, user_id: userId },
-          relations: ['messages']
+          relations: ['messages'],
         });
-        
+
         if (session && session.messages.length > 0) {
-          const recentMessages = session.messages.sort((a, b) => b.created_at.getTime() - a.created_at.getTime()).slice(0, 10).reverse();
-          historyContext = '--- ประวัติการสนทนาก่อนหน้า ---\n' + 
-            recentMessages.map(m => `${m.role === 'user' ? 'ผู้ใช้' : 'GreenBot'}: ${m.content}`).join('\n\n') + 
+          const recentMessages = session.messages
+            .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
+            .slice(0, 10)
+            .reverse();
+          historyContext =
+            '--- ประวัติการสนทนาก่อนหน้า ---\n' +
+            recentMessages
+              .map(
+                (m) =>
+                  `${m.role === 'user' ? 'ผู้ใช้' : 'GreenBot'}: ${m.content}`,
+              )
+              .join('\n\n') +
             '\n------------------------------\n\n';
         }
       }
@@ -307,16 +369,29 @@ ${orgContext}`;
         });
       });
 
-      const reply = response.text?.trim() || 'ขออภัย ไม่สามารถตอบกลับได้ในขณะนี้';
+      const reply =
+        response.text?.trim() || 'ขออภัย ไม่สามารถตอบกลับได้ในขณะนี้';
 
       try {
         if (session) {
-          const userMsg = this.chatMessageRepo.create({ role: 'user', content: message, session });
-          const botMsg = this.chatMessageRepo.create({ role: 'assistant', content: reply, session });
+          const userMsg = this.chatMessageRepo.create({
+            role: 'user',
+            content: message,
+            session,
+          });
+          const botMsg = this.chatMessageRepo.create({
+            role: 'assistant',
+            content: reply,
+            session,
+          });
           await this.chatMessageRepo.save([userMsg, botMsg]);
-          
-          if (session.messages.length === 0 || session.title === 'New Conversation') {
-            session.title = message.substring(0, 30) + (message.length > 30 ? '...' : '');
+
+          if (
+            session.messages.length === 0 ||
+            session.title === 'New Conversation'
+          ) {
+            session.title =
+              message.substring(0, 30) + (message.length > 30 ? '...' : '');
             await this.chatSessionRepo.save(session);
           }
         }
@@ -329,7 +404,7 @@ ${orgContext}`;
             answer: reply,
             intent: 'Chat',
             related_module: 'gemini',
-            confidence_score: 1.0
+            confidence_score: 1.0,
           });
           await this.chatLogRepo.save(flatLog);
         }
@@ -344,7 +419,11 @@ ${orgContext}`;
     }
   }
 
-  async validateEvidence(fileBuffer: Buffer, mimeType: string, categoryId: string): Promise<any> {
+  async validateEvidence(
+    fileBuffer: Buffer,
+    mimeType: string,
+    categoryId: string,
+  ): Promise<any> {
     const ai = this.getClient();
 
     try {
@@ -408,30 +487,39 @@ ${orgContext}`;
     if (userId) {
       const user = await this.userRepo.findOne({
         where: { id: userId },
-        relations: ['organization']
+        relations: ['organization'],
       });
       org = user?.organization || null;
     }
 
     const currentDataString = `${data.greenScore || 0}-${data.carbonTotal || 0}-${data.orgTarget || 0}-${JSON.stringify(data.extra || {})}`;
-    currentHash = crypto.createHash('sha256').update(currentDataString).digest('hex');
+    currentHash = crypto
+      .createHash('sha256')
+      .update(currentDataString)
+      .digest('hex');
 
     // 1. Check if Circuit Breaker Cooldown is active
     if (org && this.isCooldownActive(org.id) && org.cached_executive_summary) {
-      console.log('[AI Cache] Circuit breaker active for Executive Summary. Serving cached summary.');
-      return { 
-        summary: org.cached_executive_summary, 
+      console.log(
+        '[AI Cache] Circuit breaker active for Executive Summary. Serving cached summary.',
+      );
+      return {
+        summary: org.cached_executive_summary,
         lastAnalyzedAt: org.last_summary_analyzed_at,
-        isFallback: true 
+        isFallback: true,
       };
     }
 
     // 2. Check if Cache Hash matches
-    if (org && org.last_summary_hash === currentHash && org.cached_executive_summary) {
+    if (
+      org &&
+      org.last_summary_hash === currentHash &&
+      org.cached_executive_summary
+    ) {
       console.log('[AI Cache] Executive Summary cache hit for Org ID:', org.id);
-      return { 
-        summary: org.cached_executive_summary, 
-        lastAnalyzedAt: org.last_summary_analyzed_at 
+      return {
+        summary: org.cached_executive_summary,
+        lastAnalyzedAt: org.last_summary_analyzed_at,
       };
     }
 
@@ -447,7 +535,9 @@ ${orgContext}`;
 
 ตอบกลับเป็นภาษาไทยเชิงธุรกิจ ความยาวไม่เกิน 4-5 ประโยค ชี้ให้เห็นถึงความเสี่ยง แนวโน้ม หรือความสำเร็จที่โดดเด่นเท่านั้น`;
 
-      console.log('[AI Cache] Executive Summary cache mismatch. Fetching fresh summary from Gemini...');
+      console.log(
+        '[AI Cache] Executive Summary cache mismatch. Fetching fresh summary from Gemini...',
+      );
       const response = await this.executeWithFallback(async (aiClient) => {
         return aiClient.models.generateContent({
           model: MODEL,
@@ -456,7 +546,7 @@ ${orgContext}`;
       });
 
       const text = response.text?.trim() || '';
-      
+
       if (org) {
         org.cached_executive_summary = text;
         org.last_summary_hash = currentHash;
@@ -467,24 +557,29 @@ ${orgContext}`;
       return { summary: text };
     } catch (error) {
       console.error('Gemini Executive Summary error:', error);
-      
+
       if (org) {
         // Set cooldown for 5 minutes when API fails (like 429 quota exhaustion)
         const errMsg = (error as Error).message || '';
-        const reason = errMsg.includes('429') || errMsg.includes('quota') ? 'Rate limit (429) exceeded' : 'API Connection Failure';
+        const reason =
+          errMsg.includes('429') || errMsg.includes('quota')
+            ? 'Rate limit (429) exceeded'
+            : 'API Connection Failure';
         this.setCooldown(org.id, 5, reason);
 
         // Fallback to previous cached summary if available
         if (org.cached_executive_summary) {
-          console.warn('[AI Cache] Gemini API failed. Falling back to previous cached summary.');
-          return { 
-            summary: org.cached_executive_summary, 
+          console.warn(
+            '[AI Cache] Gemini API failed. Falling back to previous cached summary.',
+          );
+          return {
+            summary: org.cached_executive_summary,
             lastAnalyzedAt: org.last_summary_analyzed_at,
-            isFallback: true 
+            isFallback: true,
           };
         }
       }
-      
+
       throw new InternalServerErrorException(this.translateAiError(error));
     }
   }
@@ -496,36 +591,51 @@ ${orgContext}`;
     if (userId) {
       const user = await this.userRepo.findOne({
         where: { id: userId },
-        relations: ['organization']
+        relations: ['organization'],
       });
       org = user?.organization || null;
     }
 
     const currentDataString = `${JSON.stringify(data.weakPoints || [])}`;
-    currentHash = crypto.createHash('sha256').update(currentDataString).digest('hex');
+    currentHash = crypto
+      .createHash('sha256')
+      .update(currentDataString)
+      .digest('hex');
 
     // 1. Check if Circuit Breaker Cooldown is active
     if (org && this.isCooldownActive(org.id) && org.cached_recommendations) {
-      console.log('[AI Cache] Circuit breaker active for Recommendations. Serving cached recommendations.');
+      console.log(
+        '[AI Cache] Circuit breaker active for Recommendations. Serving cached recommendations.',
+      );
       try {
         const parsed = JSON.parse(org.cached_recommendations);
         return {
           ...parsed,
           isFallback: true,
-          lastAnalyzedAt: org.last_recommendations_analyzed_at
+          lastAnalyzedAt: org.last_recommendations_analyzed_at,
         };
       } catch (err) {
-        console.error('[AI Cache] Failed to parse cached recommendations during cooldown.', err);
+        console.error(
+          '[AI Cache] Failed to parse cached recommendations during cooldown.',
+          err,
+        );
       }
     }
 
     // 2. Check if Cache Hash matches
-    if (org && org.last_recommendations_hash === currentHash && org.cached_recommendations) {
+    if (
+      org &&
+      org.last_recommendations_hash === currentHash &&
+      org.cached_recommendations
+    ) {
       console.log('[AI Cache] Recommendations cache hit for Org ID:', org.id);
       try {
         return JSON.parse(org.cached_recommendations);
       } catch (err) {
-        console.error('[AI Cache] Failed to parse cached recommendations JSON, fetching fresh...', err);
+        console.error(
+          '[AI Cache] Failed to parse cached recommendations JSON, fetching fresh...',
+          err,
+        );
       }
     }
 
@@ -546,7 +656,9 @@ ${orgContext}`;
   "missingDocuments": ["เอกสาร ก.", "เอกสาร ข."]
 }`;
 
-      console.log('[AI Cache] Recommendations cache mismatch. Fetching fresh Action Plan from Gemini...');
+      console.log(
+        '[AI Cache] Recommendations cache mismatch. Fetching fresh Action Plan from Gemini...',
+      );
       const response = await this.executeWithFallback(async (aiClient) => {
         return aiClient.models.generateContent({
           model: MODEL,
@@ -572,21 +684,29 @@ ${orgContext}`;
       if (org) {
         // Set cooldown for 5 minutes when API fails
         const errMsg = (error as Error).message || '';
-        const reason = errMsg.includes('429') || errMsg.includes('quota') ? 'Rate limit (429) exceeded' : 'API Connection Failure';
+        const reason =
+          errMsg.includes('429') || errMsg.includes('quota')
+            ? 'Rate limit (429) exceeded'
+            : 'API Connection Failure';
         this.setCooldown(org.id, 5, reason);
 
         // Fallback to previous cached recommendations if available
         if (org.cached_recommendations) {
-          console.warn('[AI Cache] Gemini API failed. Falling back to previous cached recommendations.');
+          console.warn(
+            '[AI Cache] Gemini API failed. Falling back to previous cached recommendations.',
+          );
           try {
             const parsed = JSON.parse(org.cached_recommendations);
             return {
               ...parsed,
               isFallback: true,
-              lastAnalyzedAt: org.last_recommendations_analyzed_at
+              lastAnalyzedAt: org.last_recommendations_analyzed_at,
             };
           } catch (err) {
-            console.error('[AI Cache] Failed to parse fallback cached recommendations.', err);
+            console.error(
+              '[AI Cache] Failed to parse fallback cached recommendations.',
+              err,
+            );
           }
         }
       }

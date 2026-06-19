@@ -42,19 +42,17 @@ export class AuthService {
       ...registerDto.orgData,
     });
 
-    // 2. Hash password
-    const hashedPassword = await bcrypt.hash(registerDto.userData.password, 12);
-
-    // 3. Create User
+    // 2. Create User
     const user = await this.usersService.create({
       ...registerDto.userData,
-      password_hash: hashedPassword,
       organization: org,
       user_profile: {
-        first_name: registerDto.userData.firstName || registerDto.userData.email.split('@')[0],
+        first_name:
+          registerDto.userData.firstName ||
+          registerDto.userData.email.split('@')[0],
         last_name: registerDto.userData.lastName || 'ผู้ดูแลระบบ',
-        phone: registerDto.userData.phone || '-'
-      }
+        phone: registerDto.userData.phone || '-',
+      },
     });
 
     // The first user who registers a new organization becomes the ORG_ADMIN
@@ -76,8 +74,11 @@ export class AuthService {
 
     // Send Verification Email (Non-blocking)
     const userName = user.user_profile?.first_name || user.email.split('@')[0];
-    this.sendVerificationEmail(user.id, user.email, userName).catch(e => {
-      this.logger.error(`Failed to send verification email to ${user.email}`, e.stack);
+    this.sendVerificationEmail(user.id, user.email, userName).catch((e) => {
+      this.logger.error(
+        `Failed to send verification email to ${user.email}`,
+        e.stack,
+      );
     });
 
     return result;
@@ -104,12 +105,13 @@ export class AuthService {
     const fullUser = await this.usersService.findOne(user.id);
     const result = {
       access_token: await this.jwtService.signAsync(payload),
-      user: { 
-        id: user.id, 
-        email: user.email, 
+      user: {
+        id: user.id,
+        email: user.email,
         role: payload.role,
-        username: fullUser?.user_profile?.first_name || user.email.split('@')[0],
-        user_profile: fullUser?.user_profile
+        username:
+          fullUser?.user_profile?.first_name || user.email.split('@')[0],
+        user_profile: fullUser?.user_profile,
       },
       organization: user.organization
         ? {
@@ -119,6 +121,9 @@ export class AuthService {
           }
         : null,
     };
+
+    // Update last login timestamp
+    await this.usersService.update(user.id, { last_login_at: new Date() });
 
     await this.auditLogsService.logAction(
       user.id,
@@ -137,10 +142,7 @@ export class AuthService {
       throw new ConflictException('อีเมลนี้ถูกใช้งานแล้ว');
     }
 
-    // 1. Hash password
-    const hashedPassword = await bcrypt.hash(registerDto.userData.password, 12);
-
-    // 2. Create User as ASSESSOR
+    // 1. Create User as ASSESSOR
     const user = await this.usersService.create({
       email: registerDto.userData.email,
       password: registerDto.userData.password,
@@ -185,9 +187,13 @@ export class AuthService {
     };
 
     // Send Verification Email (Non-blocking)
-    const userName = registerDto.profileData.firstName || user.email.split('@')[0];
-    this.sendVerificationEmail(user.id, user.email, userName).catch(e => {
-      this.logger.error(`Failed to send verification email to ${user.email}`, e.stack);
+    const userName =
+      registerDto.profileData.firstName || user.email.split('@')[0];
+    this.sendVerificationEmail(user.id, user.email, userName).catch((e) => {
+      this.logger.error(
+        `Failed to send verification email to ${user.email}`,
+        e.stack,
+      );
     });
 
     return result;
@@ -198,8 +204,13 @@ export class AuthService {
 
     // Always return success to prevent user enumeration
     if (!user) {
-      this.logger.warn(`Forgot password requested for non-existing email: ${email}`);
-      return { message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ' };
+      this.logger.warn(
+        `Forgot password requested for non-existing email: ${email}`,
+      );
+      return {
+        message:
+          'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ',
+      };
     }
 
     // Generate secure token
@@ -211,26 +222,41 @@ export class AuthService {
     await this.usersService.updateResetToken(user.id, token, expires);
 
     // Build reset link
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
     const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
 
     // Get user name for email
     const fullUser = await this.usersService.findOne(user.id);
-    const userName = fullUser?.user_profile?.first_name || user.email.split('@')[0];
+    const userName =
+      fullUser?.user_profile?.first_name || user.email.split('@')[0];
 
     // Send email
     try {
-      const html = this.mailService.getResetPasswordTemplate(userName, resetLink);
-      await this.mailService.sendMail(user.email, 'รีเซ็ตรหัสผ่าน Green Sync', html);
+      const html = this.mailService.getResetPasswordTemplate(
+        userName,
+        resetLink,
+      );
+      await this.mailService.sendMail(
+        user.email,
+        'รีเซ็ตรหัสผ่าน Green Sync',
+        html,
+      );
       this.logger.log(`Reset password email sent to: ${user.email}`);
     } catch (error) {
-      this.logger.error(`Failed to send reset email to ${user.email}:`, error.message);
+      this.logger.error(
+        `Failed to send reset email to ${user.email}:`,
+        error.message,
+      );
     }
 
     // Always log the link for development convenience
-    this.logger.log(`🔗 Password reset link for ${user.email}: ${resetLink}`);
+    this.logger.debug(`🔗 Password reset link for ${user.email}: ${resetLink}`);
 
-    return { message: 'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ' };
+    return {
+      message:
+        'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ',
+    };
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -244,34 +270,61 @@ export class AuthService {
 
     const user = await this.usersService.findByResetToken(token);
     if (!user) {
-      throw new BadRequestException('ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว');
+      throw new BadRequestException(
+        'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว',
+      );
     }
 
     // Check expiry
-    if (user.reset_password_expires && user.reset_password_expires < new Date()) {
-      throw new BadRequestException('ลิงก์รีเซ็ตรหัสผ่านหมดอายุแล้ว กรุณาขอลิงก์ใหม่');
+    if (
+      user.reset_password_expires &&
+      user.reset_password_expires < new Date()
+    ) {
+      throw new BadRequestException(
+        'ลิงก์รีเซ็ตรหัสผ่านหมดอายุแล้ว กรุณาขอลิงก์ใหม่',
+      );
     }
 
     // Hash new password and clear token
     const hashedPassword = await bcrypt.hash(newPassword, 12);
-    await this.usersService.updatePasswordAndClearToken(user.id, hashedPassword);
+    await this.usersService.updatePasswordAndClearToken(
+      user.id,
+      hashedPassword,
+    );
 
     this.logger.log(`Password reset successful for user: ${user.email}`);
-    return { message: 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้' };
+    return {
+      message:
+        'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว คุณสามารถเข้าสู่ระบบด้วยรหัสผ่านใหม่ได้',
+    };
   }
 
   async sendVerificationEmail(userId: number, email: string, userName: string) {
     const token = await this.jwtService.signAsync(
       { sub: userId, email, purpose: 'email-verification' },
-      { expiresIn: '1d' }
+      { expiresIn: '1d' },
     );
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
     const verifyLink = `${frontendUrl}/auth/verify-email?token=${token}`;
 
-    const html = this.mailService.getVerificationEmailTemplate(userName, verifyLink);
-    await this.mailService.sendMail(email, 'ยืนยันอีเมลสำหรับ Green Sync', html);
-    
-    this.logger.log(`🔗 Verification link for ${email}: ${verifyLink}`);
+    try {
+      const html = this.mailService.getVerificationEmailTemplate(
+        userName,
+        verifyLink,
+      );
+      await this.mailService.sendMail(
+        email,
+        'ยืนยันอีเมลสำหรับ Green Sync',
+        html,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to send verification email to ${email}: ${error.message}`,
+      );
+    }
+
+    this.logger.debug(`🔗 Verification link for ${email}: ${verifyLink}`);
   }
 
   async verifyEmail(token: string) {
@@ -297,7 +350,10 @@ export class AuthService {
       await this.usersService.verifyEmail(userId);
 
       this.logger.log(`Email verified successfully for user: ${user.email}`);
-      return { success: true, message: 'ยืนยันอีเมลสำเร็จแล้ว คุณสามารถเข้าสู่ระบบและเริ่มใช้งานได้' };
+      return {
+        success: true,
+        message: 'ยืนยันอีเมลสำเร็จแล้ว คุณสามารถเข้าสู่ระบบและเริ่มใช้งานได้',
+      };
     } catch (error) {
       this.logger.error('Email verification failed:', error.message);
       throw new BadRequestException('ลิงก์ยืนยันอีเมลหมดอายุหรือไม่ถูกต้อง');

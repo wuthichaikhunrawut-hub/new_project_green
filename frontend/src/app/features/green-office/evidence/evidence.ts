@@ -236,10 +236,24 @@ export class GreenOfficeEvidenceComponent implements OnInit {
 
   openPreview(file: any) {
     if (file.url) {
-      window.open(file.url, '_blank');
+      this.selectedPreviewFile = file;
     } else {
-      this.toast.success('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
+      this.toast.error('ไม่พบ URL สำหรับเปิดไฟล์นี้ครับ');
     }
+  }
+
+  downloadFile(file: any) {
+    if (!file || !file.url) {
+      this.toast.error('ไม่พบไฟล์ดาวน์โหลด');
+      return;
+    }
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.target = '_blank';
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   startEdit(file: any) {

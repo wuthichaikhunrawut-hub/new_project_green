@@ -38,7 +38,16 @@ export class NotificationsController {
   }
 
   @Post()
-  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ORG_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER', 'ASSESSOR')
+  @Roles(
+    'ADMIN',
+    'SYSTEM_ADMIN',
+    'ORGANIZATION_ADMIN',
+    'ORG_ADMIN',
+    'EXECUTIVE',
+    'EMPLOYEE',
+    'USER',
+    'ASSESSOR',
+  )
   create(
     @Body()
     body: {
@@ -57,7 +66,16 @@ export class NotificationsController {
   }
 
   @Post('bulk')
-  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ORG_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER', 'ASSESSOR')
+  @Roles(
+    'ADMIN',
+    'SYSTEM_ADMIN',
+    'ORGANIZATION_ADMIN',
+    'ORG_ADMIN',
+    'EXECUTIVE',
+    'EMPLOYEE',
+    'USER',
+    'ASSESSOR',
+  )
   createBulk(
     @Body()
     body: {
@@ -122,6 +140,10 @@ export class NotificationsController {
     @Body('reason') reason: string,
     @Request() req,
   ) {
-    return this.notificationsService.rejectAcademicChange(id, req.user.sub, reason);
+    return this.notificationsService.rejectAcademicChange(
+      id,
+      req.user.sub,
+      reason,
+    );
   }
 }

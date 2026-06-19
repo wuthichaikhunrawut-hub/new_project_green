@@ -27,7 +27,7 @@ export class UsersService {
       const currentUser = this.authService.getUser();
       const orgId = this.authService.getOrganizationId();
 
-      if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+
       if (orgId) headers = headers.set('x-org-id', String(orgId));
       if (currentUser?.role) headers = headers.set('x-user-role', String(currentUser.role));
       if (currentUser?.id) headers = headers.set('x-user-id', String(currentUser.id));

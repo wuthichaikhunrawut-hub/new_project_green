@@ -9,6 +9,8 @@ import { CarbonLog } from './entities/carbon-log.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { CreateCarbonLogDto } from './dto/create-carbon-log.dto';
 import { UpdateCarbonLogDto } from './dto/update-carbon-log.dto';
+import { EmissionFactor } from './entities/emission-factor.entity';
+import { UserProfile } from '../users/entities/user-profile.entity';
 
 @Injectable()
 export class CarbonLogsService {
@@ -25,11 +27,14 @@ export class CarbonLogsService {
       });
 
       // Recalculate total_emission on backend if factor exists
-      if (createDto.emission_factor_id && createDto.usage_amount !== undefined) {
-        const factor = await this.logRepository.manager.findOne(
-          'EmissionFactor',
-          { where: { id: createDto.emission_factor_id } }
-        ) as any;
+      if (
+        createDto.emission_factor_id &&
+        createDto.usage_amount !== undefined
+      ) {
+        const factor = (await this.logRepository.manager.findOne(
+          EmissionFactor,
+          { where: { id: createDto.emission_factor_id } },
+        )) as any;
         if (factor && factor.factor_value != null) {
           log.total_emission = createDto.usage_amount * factor.factor_value;
         }
@@ -41,7 +46,9 @@ export class CarbonLogsService {
         relations: ['emission_factor'],
       });
       if (!res) {
-        throw new InternalServerErrorException('ไม่สามารถบันทึกข้อมูลคาร์บอนได้');
+        throw new InternalServerErrorException(
+          'ไม่สามารถบันทึกข้อมูลคาร์บอนได้',
+        );
       }
       return res;
     } catch (e) {
@@ -83,10 +90,10 @@ export class CarbonLogsService {
       const usage = updateDto.usage_amount ?? log.usage_amount;
 
       if (efId && usage !== undefined) {
-        const factor = await this.logRepository.manager.findOne(
-          'EmissionFactor',
-          { where: { id: efId } }
-        ) as any;
+        const factor = (await this.logRepository.manager.findOne(
+          EmissionFactor,
+          { where: { id: efId } },
+        )) as any;
         if (factor && factor.factor_value != null) {
           log.total_emission = usage * factor.factor_value;
         }
@@ -124,12 +131,15 @@ export class CarbonLogsService {
   }
 
   async getCarbonTrend(orgId: number, startDate?: string, endDate?: string) {
-    const qb = this.logRepository.createQueryBuilder('log')
+    const qb = this.logRepository
+      .createQueryBuilder('log')
       .where('log.org_id = :orgId', { orgId })
       .orderBy('log.created_at', 'ASC');
 
     if (startDate) {
-      qb.andWhere('log.created_at >= :startDate', { startDate: new Date(startDate) });
+      qb.andWhere('log.created_at >= :startDate', {
+        startDate: new Date(startDate),
+      });
     }
     if (endDate) {
       qb.andWhere('log.created_at <= :endDate', { endDate: new Date(endDate) });
@@ -140,9 +150,12 @@ export class CarbonLogsService {
     const monthlyTrend: Record<string, number> = {};
 
     logs.forEach((log) => {
-      const date = log.created_at ? new Date(log.created_at) : new Date(log.year || new Date().getFullYear(), (log.month || 1) - 1);
+      const date = log.created_at
+        ? new Date(log.created_at)
+        : new Date(log.year || new Date().getFullYear(), (log.month || 1) - 1);
       const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthlyTrend[monthYear] = (monthlyTrend[monthYear] || 0) + Number(log.total_emission || 0);
+      monthlyTrend[monthYear] =
+        (monthlyTrend[monthYear] || 0) + Number(log.total_emission || 0);
     });
 
     return Object.entries(monthlyTrend)
@@ -174,19 +187,25 @@ export class CarbonLogsService {
         ? new Date(log.created_at)
         : new Date(log.year || new Date().getFullYear(), (log.month || 1) - 1);
       const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthlyTrend[monthYear] = (monthlyTrend[monthYear] || 0) + Number(log.total_emission || 0);
+      monthlyTrend[monthYear] =
+        (monthlyTrend[monthYear] || 0) + Number(log.total_emission || 0);
     });
 
     const trend = Object.entries(monthlyTrend)
       .map(([month, emission]) => ({ month, emission }))
       .sort((a, b) => a.month.localeCompare(b.month));
 
-    const totalEmission = logs.reduce((sum, l) => sum + Number(l.total_emission || 0), 0);
+    const totalEmission = logs.reduce(
+      (sum, l) => sum + Number(l.total_emission || 0),
+      0,
+    );
 
-    const profile = await this.logRepository.manager.findOne('UserProfile', {
+    const profile = (await this.logRepository.manager.findOne(UserProfile, {
       where: { userId },
-    }) as any;
-    const personalGoalPercent = profile?.personal_goal_percent ? Number(profile.personal_goal_percent) : 0;
+    })) as any;
+    const personalGoalPercent = profile?.personal_goal_percent
+      ? Number(profile.personal_goal_percent)
+      : 0;
 
     return {
       userId,

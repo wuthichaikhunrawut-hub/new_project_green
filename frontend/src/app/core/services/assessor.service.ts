@@ -2,6 +2,7 @@ import { Injectable, PLATFORM_ID, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
 import {
   ApproveAssessmentPayload,
@@ -18,14 +19,14 @@ export class AssessorService {
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly apiUrl = 'http://localhost:3001/assessor';
+  private readonly apiUrl = `${environment.apiUrl}/assessor`;
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       const user = this.authService.getUser();
-      if (token) headers = headers.set('Authorization', `Bearer ${token}`);
+
       if (user?.role) headers = headers.set('x-user-role', String(user.role));
       if (user?.id) headers = headers.set('x-user-id', String(user.id));
     }
@@ -110,5 +111,11 @@ export class AssessorService {
       payload,
       { headers: this.getHeaders() }
     );
+  }
+
+  getCalendar(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/calendar`, {
+      headers: this.getHeaders(),
+    });
   }
 }

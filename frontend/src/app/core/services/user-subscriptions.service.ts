@@ -2,6 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import { Observable, Subject } from 'rxjs';
 export class UserSubscriptionsService {
   private http = inject(HttpClient);
   public quotaUpdated$ = new Subject<void>();
-  private apiUrl = 'http://localhost:3001/subscriptions';
+  private apiUrl = `${environment.apiUrl}/subscriptions`;
 
   private platformId = inject(PLATFORM_ID);
 
@@ -18,7 +19,7 @@ export class UserSubscriptionsService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+
       }
     }
     return headers;

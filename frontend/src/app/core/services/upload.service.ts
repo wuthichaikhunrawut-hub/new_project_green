@@ -1,13 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, catchError } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UploadService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/uploads';
+  private apiUrl = `${environment.apiUrl}/uploads`;
 
   uploadFile(
     file: File, 

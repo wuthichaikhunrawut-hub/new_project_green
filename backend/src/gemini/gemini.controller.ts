@@ -11,6 +11,7 @@ import {
   Request,
   Param,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { GeminiService } from './gemini.service';
 import { memoryStorage } from 'multer';
@@ -30,6 +31,7 @@ export class GeminiController {
   constructor(private readonly geminiService: GeminiService) {}
 
   @Post('ocr')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @FeatureCode('AI_SCAN')
   @UseInterceptors(
     FeatureQuotaInterceptor,
@@ -69,7 +71,7 @@ export class GeminiController {
   @FeatureCode('AI_ASSISTANCE')
   @UseInterceptors(FeatureQuotaInterceptor)
   async chat(
-    @Body() body: { message: string, sessionId?: number },
+    @Body() body: { message: string; sessionId?: number },
     @Request() req: { user: JwtUser },
   ) {
     if (!body?.message?.trim()) {
@@ -86,19 +88,31 @@ export class GeminiController {
   }
 
   @Post('sessions')
-  async createSession(@Request() req: { user: JwtUser }, @Body() body: { title?: string }) {
+  async createSession(
+    @Request() req: { user: JwtUser },
+    @Body() body: { title?: string },
+  ) {
     const userId = Number(req.user.sub);
-    return this.geminiService.createSession(userId, body.title || 'New Conversation');
+    return this.geminiService.createSession(
+      userId,
+      body.title || 'New Conversation',
+    );
   }
 
   @Get('sessions/:id/messages')
-  async getSessionMessages(@Request() req: { user: JwtUser }, @Param('id') id: string) {
+  async getSessionMessages(
+    @Request() req: { user: JwtUser },
+    @Param('id') id: string,
+  ) {
     const userId = Number(req.user.sub);
     return this.geminiService.getSessionMessages(+id, userId);
   }
 
   @Delete('sessions/:id')
-  async deleteSession(@Request() req: { user: JwtUser }, @Param('id') id: string) {
+  async deleteSession(
+    @Request() req: { user: JwtUser },
+    @Param('id') id: string,
+  ) {
     const userId = Number(req.user.sub);
     await this.geminiService.deleteSession(+id, userId);
     return { success: true };
@@ -111,6 +125,7 @@ export class GeminiController {
   }
 
   @Post('evidence-validation')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @FeatureCode('AI_SCAN')
   @UseInterceptors(
     FeatureQuotaInterceptor,
@@ -124,7 +139,11 @@ export class GeminiController {
     @Body('categoryId') categoryId: string,
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
-    return this.geminiService.validateEvidence(file.buffer, file.mimetype, categoryId || 'ไม่ระบุหมวดหมู่');
+    return this.geminiService.validateEvidence(
+      file.buffer,
+      file.mimetype,
+      categoryId || 'ไม่ระบุหมวดหมู่',
+    );
   }
 
   @Delete('history')
@@ -137,10 +156,13 @@ export class GeminiController {
   @Delete('history/:ids')
   async deleteHistoryLogs(
     @Request() req: { user: JwtUser },
-    @Param('ids') idsStr: string
+    @Param('ids') idsStr: string,
   ) {
     const userId = Number(req.user.sub);
-    const ids = idsStr.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+    const ids = idsStr
+      .split(',')
+      .map((id) => parseInt(id, 10))
+      .filter((id) => !isNaN(id));
     if (ids.length > 0) {
       await this.geminiService.deleteChatLogs(ids, userId);
     }
@@ -148,13 +170,19 @@ export class GeminiController {
   }
 
   @Post('executive-summary')
-  async getExecutiveSummary(@Body() body: any, @Request() req: { user: JwtUser }) {
+  async getExecutiveSummary(
+    @Body() body: any,
+    @Request() req: { user: JwtUser },
+  ) {
     const userId = Number(req.user.sub);
     return this.geminiService.generateExecutiveSummary(body, userId);
   }
 
   @Post('recommendations')
-  async getRecommendations(@Body() body: any, @Request() req: { user: JwtUser }) {
+  async getRecommendations(
+    @Body() body: any,
+    @Request() req: { user: JwtUser },
+  ) {
     const userId = Number(req.user.sub);
     return this.geminiService.getRecommendations(body, userId);
   }

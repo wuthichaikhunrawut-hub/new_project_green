@@ -37,3 +37,16 @@ Thumbs.db
 out.html
 reset-user.js
 *.pdf
+
+# Custom audit & scratch files
+scratch/
+greensync_backend_analysis.zip
+greensync_technical_guide.html
+output_excel_contents.txt
+system_audit_report.html
+tools/analysis_result.json
+tools/analyze_ast.js
+tools/analyze_roles.js
+tools/summarize.js
+*.xlsx
+*.zip

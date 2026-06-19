@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface GreenCriteria {
   id: number;
@@ -17,7 +18,7 @@ export interface GreenCriteria {
 })
 export class GreenCriteriaService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/admin/green-criteria';
+  private apiUrl = `${environment.apiUrl}/admin/green-criteria`;
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({

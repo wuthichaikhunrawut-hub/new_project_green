@@ -92,19 +92,30 @@ export class AssessmentsService {
 
     if (normalizedRole === 'ADMIN' || normalizedRole === 'SYSTEM_ADMIN') {
       return this.assessmentRepository.find({
-        relations: ['organization', 'assessor', 'assessor.user_profile', 'certificates'],
+        relations: [
+          'organization',
+          'assessor',
+          'assessor.user_profile',
+          'certificates',
+        ],
         order: { submitted_at: 'DESC' },
       });
     }
 
     if (normalizedRole === 'ASSESSOR' || normalizedRole === 'ASSESSOR_ADMIN') {
-      const whereCondition = normalizedRole === 'ASSESSOR' && assessorId 
-        ? { assessor_user_id: Number(assessorId) } 
-        : {};
+      const whereCondition =
+        normalizedRole === 'ASSESSOR' && assessorId
+          ? { assessor_user_id: Number(assessorId) }
+          : {};
 
       return this.assessmentRepository.find({
         where: whereCondition,
-        relations: ['organization', 'assessor', 'assessor.user_profile', 'certificates'],
+        relations: [
+          'organization',
+          'assessor',
+          'assessor.user_profile',
+          'certificates',
+        ],
         order: { submitted_at: 'DESC' },
       });
     }
@@ -164,7 +175,10 @@ export class AssessmentsService {
       await tem.save(assessment);
 
       // Update details if provided (e.g., scores from self-assessment or Assessor)
-      if (updateAssessmentDto.details && updateAssessmentDto.details.length > 0) {
+      if (
+        updateAssessmentDto.details &&
+        updateAssessmentDto.details.length > 0
+      ) {
         const detailsToSave: AssessmentDetail[] = [];
         for (const updateDetail of updateAssessmentDto.details) {
           const detailToUpdate = assessment.details.find(
@@ -202,9 +216,10 @@ export class AssessmentsService {
       });
       const newTotalScore = freshDetails.reduce((sum, d) => {
         // Use assessor_score if set, otherwise fallback to self_score
-        const score = d.assessor_score !== null && d.assessor_score !== undefined
-          ? Number(d.assessor_score)
-          : Number(d.self_score || 0);
+        const score =
+          d.assessor_score !== null && d.assessor_score !== undefined
+            ? Number(d.assessor_score)
+            : Number(d.self_score || 0);
         return sum + score;
       }, 0);
 
@@ -212,16 +227,34 @@ export class AssessmentsService {
       await tem.save(assessment);
 
       // Email notifications based on status change
-      if (updateAssessmentDto.status && oldStatus !== updateAssessmentDto.status) {
+      if (
+        updateAssessmentDto.status &&
+        oldStatus !== updateAssessmentDto.status
+      ) {
         // Find org admin user
-        const adminUser = await this.usersService.findOrgAdmin(assessment.organization.id);
+        const adminUser = await this.usersService.findOrgAdmin(
+          assessment.organization.id,
+        );
         if (adminUser) {
           if (updateAssessmentDto.status === 'SUBMITTED') {
-            const html = this.mailService.getAssessmentSubmittedTemplate(assessment.organization.name);
-            this.mailService.sendMail(adminUser.email, 'ระบบได้รับข้อมูลการประเมินแล้ว', html).catch(e => console.error(e));
-          } else if (['REVISION_REQUESTED', 'APPROVED', 'REJECTED'].includes(updateAssessmentDto.status)) {
-            const html = this.mailService.getAssessmentReviewedTemplate(assessment.organization.name, updateAssessmentDto.status);
-            this.mailService.sendMail(adminUser.email, 'แจ้งผลการประเมินเบื้องต้น', html).catch(e => console.error(e));
+            const html = this.mailService.getAssessmentSubmittedTemplate(
+              assessment.organization.name,
+            );
+            this.mailService
+              .sendMail(adminUser.email, 'ระบบได้รับข้อมูลการประเมินแล้ว', html)
+              .catch((e) => console.error(e));
+          } else if (
+            ['REVISION_REQUESTED', 'APPROVED', 'REJECTED'].includes(
+              updateAssessmentDto.status,
+            )
+          ) {
+            const html = this.mailService.getAssessmentReviewedTemplate(
+              assessment.organization.name,
+              updateAssessmentDto.status,
+            );
+            this.mailService
+              .sendMail(adminUser.email, 'แจ้งผลการประเมินเบื้องต้น', html)
+              .catch((e) => console.error(e));
           }
         }
       }

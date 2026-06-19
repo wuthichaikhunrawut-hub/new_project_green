@@ -1,6 +1,13 @@
 import { PartialType } from '@nestjs/mapped-types';
 import { UserRole } from '../entities/user.entity';
-import { IsString, IsEmail, IsBoolean, IsOptional, ValidateNested, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsBoolean,
+  IsOptional,
+  ValidateNested,
+  IsNumber,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 class OrganizationDto {

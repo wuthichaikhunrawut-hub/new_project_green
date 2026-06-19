@@ -47,6 +47,7 @@
     "cookie-parser": "^1.4.7",
     "csurf": "^1.11.0",
     "helmet": "^8.2.0",
+    "joi": "^18.2.3",
     "multer": "^2.0.2",
     "nodemailer": "^8.0.7",
     "openai": "^6.39.0",

@@ -17,4 +17,3 @@ export class UpdateCertificateDto {
   @IsString()
   certificate_url?: string;
 }
-

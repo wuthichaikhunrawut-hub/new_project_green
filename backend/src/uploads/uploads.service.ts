@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -43,9 +47,60 @@ export class UploadsService {
       carbonLogId?: number;
       category?: string;
     },
+    currentUser?: any,
   ): Promise<EvidenceFile> {
     if (!file) {
       throw new BadRequestException('File is missing');
+    }
+
+    const role = currentUser?.role;
+    const normalizeRole = (r: string): string => {
+      return String(r || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s_]/g, '');
+    };
+    const userRole = normalizeRole(role);
+
+    if (
+      userRole !== 'SYSTEMADMIN' &&
+      userRole !== 'ASSESSOR' &&
+      userRole !== 'ASSESSORADMIN'
+    ) {
+      const orgId = Number(currentUser?.orgId);
+
+      if (metadata?.assessmentDetailId) {
+        const detail = (await this.evidenceFileRepository.manager.findOne(
+          'AssessmentDetail',
+          {
+            where: { id: metadata.assessmentDetailId },
+            relations: ['assessment'],
+          },
+        )) as any;
+        if (
+          detail &&
+          detail.assessment &&
+          Number(detail.assessment.org_id) !== orgId
+        ) {
+          throw new ForbiddenException(
+            'คุณไม่มีสิทธิ์อัปโหลดไฟล์ให้การประเมินขององค์กรอื่น',
+          );
+        }
+      }
+
+      if (metadata?.carbonLogId) {
+        const log = (await this.evidenceFileRepository.manager.findOne(
+          'CarbonLog',
+          {
+            where: { id: metadata.carbonLogId },
+          },
+        )) as any;
+        if (log && Number(log.org_id) !== orgId) {
+          throw new ForbiddenException(
+            'คุณไม่มีสิทธิ์อัปโหลดไฟล์ให้ประวัติคาร์บอนขององค์กรอื่น',
+          );
+        }
+      }
     }
 
     if (!this.supabase || !this.bucket) {
@@ -93,7 +148,9 @@ export class UploadsService {
       // If it is a certificate upload, DO NOT save it in the evidence_files table.
       // Certificates have their own dedicated table ('certificates') and are linked via certificate_url.
       if (folder === 'certificates') {
-        console.log('📜 Certificate file uploaded successfully, skipping EvidenceFile DB record creation.');
+        console.log(
+          '📜 Certificate file uploaded successfully, skipping EvidenceFile DB record creation.',
+        );
         return {
           id: 0,
           file_name: originalName,
@@ -127,11 +184,96 @@ export class UploadsService {
     }
   }
 
-  async deleteFile(id: number) {
-    const file = await this.evidenceFileRepository.findOne({ where: { id } });
+  private async validateFileOwnership(file: EvidenceFile, currentUser?: any) {
+    const role = currentUser?.role;
+    const normalizeRole = (r: string): string => {
+      return String(r || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s_]/g, '');
+    };
+    const userRole = normalizeRole(role);
+
+    if (
+      userRole === 'SYSTEMADMIN' ||
+      userRole === 'ASSESSOR' ||
+      userRole === 'ASSESSORADMIN'
+    ) {
+      return; // Admins and assessors are allowed
+    }
+
+    const orgId = Number(currentUser?.orgId);
+    if (!orgId) {
+      throw new ForbiddenException(
+        'คุณไม่มีสิทธิ์เข้าถึงไฟล์นี้ (ไม่ระบุองค์กร)',
+      );
+    }
+
+    let fileOrgId: number | undefined = undefined;
+
+    // Check 1: Uploaded by user's organization
+    if (file.uploaded_by?.organization?.id) {
+      fileOrgId = Number(file.uploaded_by.organization.id);
+    }
+
+    // Check 2: Assessment detail's assessment's organization
+    if (file.assessment_detail?.assessment?.org_id) {
+      fileOrgId = Number(file.assessment_detail.assessment.org_id);
+    }
+
+    // Check 3: Carbon log's organization (if carbon_log_id is present)
+    if (file.carbon_log_id) {
+      const log = (await this.evidenceFileRepository.manager.findOne(
+        'CarbonLog',
+        {
+          where: { id: file.carbon_log_id },
+        },
+      )) as any;
+      if (log && log.org_id) {
+        fileOrgId = Number(log.org_id);
+      }
+    }
+
+    if (!fileOrgId || fileOrgId !== orgId) {
+      throw new ForbiddenException(
+        'คุณไม่มีสิทธิ์เข้าถึงหรือจัดการไฟล์ขององค์กรอื่น',
+      );
+    }
+  }
+
+  async findOne(id: number, currentUser?: any): Promise<EvidenceFile> {
+    const file = await this.evidenceFileRepository.findOne({
+      where: { id },
+      relations: [
+        'uploaded_by',
+        'uploaded_by.organization',
+        'assessment_detail',
+        'assessment_detail.assessment',
+      ],
+    });
     if (!file) {
       throw new BadRequestException('File not found');
     }
+
+    await this.validateFileOwnership(file, currentUser);
+    return file;
+  }
+
+  async deleteFile(id: number, currentUser?: any) {
+    const file = await this.evidenceFileRepository.findOne({
+      where: { id },
+      relations: [
+        'uploaded_by',
+        'uploaded_by.organization',
+        'assessment_detail',
+        'assessment_detail.assessment',
+      ],
+    });
+    if (!file) {
+      throw new BadRequestException('File not found');
+    }
+
+    await this.validateFileOwnership(file, currentUser);
 
     // 1. Delete from Supabase Storage
     // Extract path after /public/bucket-name/
@@ -155,15 +297,64 @@ export class UploadsService {
     return { success: true };
   }
 
-  async findAll() {
-    const all = await this.evidenceFileRepository.find({
+  async findAll(currentUser?: any) {
+    const role = currentUser?.role;
+    const normalizeRole = (r: string): string => {
+      return String(r || '')
+        .trim()
+        .toUpperCase()
+        .replace(/[\s_]/g, '');
+    };
+    const userRole = normalizeRole(role);
+
+    let all = await this.evidenceFileRepository.find({
+      relations: [
+        'uploaded_by',
+        'uploaded_by.organization',
+        'assessment_detail',
+        'assessment_detail.assessment',
+      ],
       order: { uploaded_at: 'DESC' },
     });
+
     // Filter out any certificate files to ensure they don't leak into evidence files list
-    return all.filter(f => !f.file_url || !f.file_url.includes('/certificates/'));
+    all = all.filter(
+      (f) => !f.file_url || !f.file_url.includes('/certificates/'),
+    );
+
+    if (
+      userRole !== 'SYSTEMADMIN' &&
+      userRole !== 'ASSESSOR' &&
+      userRole !== 'ASSESSORADMIN'
+    ) {
+      const orgId = Number(currentUser?.orgId);
+      all = all.filter((file) => {
+        const fileOrgId =
+          file.uploaded_by?.organization?.id ||
+          file.assessment_detail?.assessment?.org_id;
+        return fileOrgId ? Number(fileOrgId) === orgId : false;
+      });
+    }
+
+    return all;
   }
 
-  async update(id: number, data: { category: string }) {
+  async update(id: number, data: { category: string }, currentUser?: any) {
+    const file = await this.evidenceFileRepository.findOne({
+      where: { id },
+      relations: [
+        'uploaded_by',
+        'uploaded_by.organization',
+        'assessment_detail',
+        'assessment_detail.assessment',
+      ],
+    });
+    if (!file) {
+      throw new BadRequestException('File not found');
+    }
+
+    await this.validateFileOwnership(file, currentUser);
+
     await this.evidenceFileRepository.update(id, data);
     return await this.evidenceFileRepository.findOne({ where: { id } });
   }

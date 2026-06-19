@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../shared/services/toast.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-assessor-profile',
@@ -17,7 +18,6 @@ export class AssessorProfileComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
-
 
   user: any = null;
   isLoading = true;
@@ -47,13 +47,13 @@ export class AssessorProfileComponent implements OnInit {
     if (!currentUser || !currentUser.id) {
       this.errorMessage = 'ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่';
       this.isLoading = false;
-        this.cdr.markForCheck();
+      this.cdr.markForCheck();
       return;
     }
 
     const userId = currentUser.id;
 
-    this.http.get<any>('http://localhost:3001/users/profile/me', {
+    this.http.get<any>(`${environment.apiUrl}/users/profile/me`, {
       headers: { 'x-user-id': userId.toString() }
     }).subscribe({
       next: (data) => {
@@ -98,7 +98,7 @@ export class AssessorProfileComponent implements OnInit {
     const currentUser = this.authService.currentUserValue;
     if (!currentUser?.id) return;
 
-    this.http.patch<any>('http://localhost:3001/users/profile/me', this.formData, {
+    this.http.patch<any>(`${environment.apiUrl}/users/profile/me`, this.formData, {
       headers: { 'x-user-id': currentUser.id.toString() }
     }).subscribe({
       next: () => {
@@ -111,5 +111,13 @@ export class AssessorProfileComponent implements OnInit {
         this.isSaving = false;
       }
     });
+  }
+
+  connectStripeSimulated() {
+    const randomId = 'acct_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+    this.formData.assessor_profile.bank_name = 'STRIPE';
+    this.formData.assessor_profile.bank_account_no = randomId;
+    this.toast.success('เชื่อมต่อ Stripe Connected Account จำลองสำเร็จ!', 'กรุณากดบันทึกข้อมูลเพื่อเสร็จสิ้นการตั้งค่า');
+    this.cdr.markForCheck();
   }
 }

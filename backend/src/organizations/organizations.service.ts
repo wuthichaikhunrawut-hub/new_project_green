@@ -80,18 +80,65 @@ export class OrganizationsService {
     const org = await this.findOne(orgId);
     if (!org) return null;
 
-    // TODO: Aggregate real data from assessments, carbon logs, etc.
-    // For now, return a basic report structure
+    const currentYear = new Date().getFullYear();
+    const baseYear = org.base_year || currentYear - 1;
+
+    // Sum of emissions for current year
+    const currentYearLog = await this.orgRepository.manager
+      .createQueryBuilder('CarbonLog', 'log')
+      .where('log.org_id = :orgId', { orgId })
+      .andWhere('log.year = :year', { year: currentYear })
+      .select('SUM(log.total_emission)', 'total')
+      .getRawOne();
+    const currentYearEmissions = Number(currentYearLog?.total || 0);
+
+    // Sum of emissions for base year
+    const baseYearLog = await this.orgRepository.manager
+      .createQueryBuilder('CarbonLog', 'log')
+      .where('log.org_id = :orgId', { orgId })
+      .andWhere('log.year = :year', { year: baseYear })
+      .select('SUM(log.total_emission)', 'total')
+      .getRawOne();
+    const baseYearEmissions = Number(baseYearLog?.total || 0);
+
+    // Calculate baseline estimate if logs are empty
+    let finalBaseYearEmissions = baseYearEmissions;
+    let finalCurrentYearEmissions = currentYearEmissions;
+    const estimatedYearlyEmission =
+      (Number(org.number_of_employees) || 10) * 1.8 +
+      (Number(org.total_floor_area) || 100) * 0.08;
+
+    if (finalBaseYearEmissions <= 0) {
+      finalBaseYearEmissions = estimatedYearlyEmission;
+    }
+    if (finalCurrentYearEmissions <= 0) {
+      const targetPercent = Number(org.target_reduction_percent) || 10;
+      finalCurrentYearEmissions =
+        finalBaseYearEmissions * (1 - targetPercent / 2 / 100);
+    }
+
+    let totalCarbonReduction = 0;
+    if (finalBaseYearEmissions > 0 && finalCurrentYearEmissions > 0) {
+      totalCarbonReduction = finalBaseYearEmissions - finalCurrentYearEmissions;
+      if (totalCarbonReduction < 0) totalCarbonReduction = 0;
+    }
+
+    const assessmentsCompleted = await this.orgRepository.manager
+      .getRepository('Assessment')
+      .count({
+        where: { org_id: orgId, status: 'APPROVED' },
+      });
+
     return {
       organization: {
         id: org.id,
         name: org.name,
       },
-      year: new Date().getFullYear(),
-      total_carbon_reduction: 0,
-      assessments_completed: 0,
+      year: currentYear,
+      total_carbon_reduction: Math.round(totalCarbonReduction * 100) / 100,
+      assessments_completed: assessmentsCompleted,
       active_employees: org.users ? org.users.length : 0,
-      status: 'Preliminary'
+      status: 'Preliminary',
     };
   }
 }

@@ -24,8 +24,11 @@ export class JwtAuthGuard implements CanActivate {
     }
     try {
       const secret = this.configService.get<string>('JWT_SECRET');
+      if (!secret) {
+        throw new Error('JWT_SECRET must be defined');
+      }
       const payload = await this.jwtService.verifyAsync(token, {
-        secret: secret || 'GREEN_SYNC_SUPER_SECRET_KEY_FOR_LOCAL_DEV',
+        secret: secret,
       });
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers

@@ -56,6 +56,13 @@ export class AssessorReportComponent implements OnInit {
 
         this.isLoading = false;
         this.cdr.markForCheck();
+
+        // Auto print if query param is set
+        if (this.route.snapshot.queryParamMap.get('print') === 'true') {
+          setTimeout(() => {
+            this.print();
+          }, 500);
+        }
       },
       error: () => {
         this.isLoading = false;

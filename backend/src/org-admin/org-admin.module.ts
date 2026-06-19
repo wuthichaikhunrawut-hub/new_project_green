@@ -7,10 +7,7 @@ import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Assessment, CarbonLog]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Assessment, CarbonLog]), AuthModule],
   controllers: [OrgAdminController],
   providers: [OrgAdminService],
 })

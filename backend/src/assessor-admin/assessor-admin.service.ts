@@ -19,25 +19,38 @@ export class AssessorAdminService {
   ) {}
 
   async assignAssessor(assessmentId: number, assessorId: number) {
-    const assessment = await this.assessmentRepository.findOne({ where: { id: assessmentId } });
+    const assessment = await this.assessmentRepository.findOne({
+      where: { id: assessmentId },
+    });
     if (!assessment) throw new NotFoundException('Assessment not found');
-    
+
     assessment.assessor_user_id = assessorId;
     if (assessment.status === 'SUBMITTED') {
       assessment.status = 'IN_REVIEW';
     }
     await this.assessmentRepository.save(assessment);
-    
-    return { success: true, message: 'Assigned successfully', assessmentId, assessorId };
+
+    return {
+      success: true,
+      message: 'Assigned successfully',
+      assessmentId,
+      assessorId,
+    };
   }
 
   async getAssessorPerformance(assessorId: number) {
-    const assessments = await this.assessmentRepository.find({ where: { assessor_user_id: assessorId } });
-    
-    const completed = assessments.filter(a => ['APPROVED', 'REJECTED'].includes(a.status)).length;
-    const pending = assessments.filter(a => ['IN_REVIEW', 'REVISION_REQUESTED'].includes(a.status)).length;
-    const approved = assessments.filter(a => a.status === 'APPROVED').length;
-    
+    const assessments = await this.assessmentRepository.find({
+      where: { assessor_user_id: assessorId },
+    });
+
+    const completed = assessments.filter((a) =>
+      ['APPROVED', 'REJECTED'].includes(a.status),
+    ).length;
+    const pending = assessments.filter((a) =>
+      ['IN_REVIEW', 'REVISION_REQUESTED'].includes(a.status),
+    ).length;
+    const approved = assessments.filter((a) => a.status === 'APPROVED').length;
+
     const approvalRate = completed > 0 ? (approved / completed) * 100 : 0;
 
     return {
@@ -54,25 +67,38 @@ export class AssessorAdminService {
       where: { is_active: true },
       relations: ['roles'],
     });
-    const assessors = allAssessors.filter(u =>
-      u.roles?.some(r => r.role_name === 'ASSESSOR' || r.role_name === 'ASSESSOR_ADMIN')
+    const assessors = allAssessors.filter((u) =>
+      u.roles?.some(
+        (r) => r.role_name === 'ASSESSOR' || r.role_name === 'ASSESSOR_ADMIN',
+      ),
     );
     const totalAssessors = assessors.length;
 
     // Stats from assessments
     const allAssessments = await this.assessmentRepository.find();
-    const assigned = allAssessments.filter(a => a.assessor_user_id !== null && a.assessor_user_id !== undefined);
-    const unassigned = allAssessments.filter(a => !a.assessor_user_id && ['PENDING', 'SUBMITTED'].includes(a.status));
-    const inReview = allAssessments.filter(a => a.status === 'IN_REVIEW').length;
-    const completed = allAssessments.filter(a => ['APPROVED', 'REJECTED'].includes(a.status)).length;
-    const approved = allAssessments.filter(a => a.status === 'APPROVED').length;
-    const globalApprovalRate = completed > 0 ? Math.round((approved / completed) * 100 * 10) / 10 : 0;
+    const assigned = allAssessments.filter(
+      (a) => a.assessor_user_id !== null && a.assessor_user_id !== undefined,
+    );
+    const unassigned = allAssessments.filter(
+      (a) => !a.assessor_user_id && ['PENDING', 'SUBMITTED'].includes(a.status),
+    );
+    const inReview = allAssessments.filter(
+      (a) => a.status === 'IN_REVIEW',
+    ).length;
+    const completed = allAssessments.filter((a) =>
+      ['APPROVED', 'REJECTED'].includes(a.status),
+    ).length;
+    const approved = allAssessments.filter(
+      (a) => a.status === 'APPROVED',
+    ).length;
+    const globalApprovalRate =
+      completed > 0 ? Math.round((approved / completed) * 100 * 10) / 10 : 0;
 
     // Recent assignments (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentAssignments = assigned.filter(a =>
-      a.updated_at && new Date(a.updated_at) >= thirtyDaysAgo
+    const recentAssignments = assigned.filter(
+      (a) => a.updated_at && new Date(a.updated_at) >= thirtyDaysAgo,
     ).length;
 
     return {
@@ -88,15 +114,17 @@ export class AssessorAdminService {
   }
 
   async processPayout(assessorId: number, amount: number) {
-    const profile = await this.assessorProfileRepository.findOne({ 
+    const profile = await this.assessorProfileRepository.findOne({
       where: { user: { id: assessorId } },
-      relations: ['user', 'user.bank_accounts']
+      relations: ['user', 'user.bank_accounts'],
     });
 
     if (!profile) throw new NotFoundException('Assessor profile not found');
 
-    const bankAccount = profile.user?.bank_accounts?.find(b => b.is_primary) || profile.user?.bank_accounts?.[0];
-    
+    const bankAccount =
+      profile.user?.bank_accounts?.find((b) => b.is_primary) ||
+      profile.user?.bank_accounts?.[0];
+
     if (!bankAccount) {
       throw new Error('Assessor does not have a registered bank account');
     }
@@ -105,8 +133,8 @@ export class AssessorAdminService {
     const stripeTransfer = await this.stripeService.createPayoutOrTransfer(
       amount,
       'thb',
-      undefined,
-      assessorId
+      bankAccount.account_no,
+      assessorId,
     );
 
     return {

@@ -1,4 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
+import { environment } from '../../../../environments/environment';
 import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -157,7 +158,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
         } : null
       };
 
-      this.http.post('http://localhost:3001/notifications/propose-academic', proposePayload).subscribe({
+      this.http.post(`${environment.apiUrl}/notifications/propose-academic`, proposePayload).subscribe({
         next: () => {
           this.toast.success('ยื่นข้อเสนอแก้ไขสูตรคาร์บอนต่อ System Admin เรียบร้อยแล้วครับ');
           this.closeModal();

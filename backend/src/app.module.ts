@@ -23,15 +23,44 @@ import { ExecutiveModule } from './executive/executive.module';
 import { AssessorAdminModule } from './assessor-admin/assessor-admin.module';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
+import * as Joi from 'joi';
+
 @Module({
   imports: [
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100, // Limit each IP to 100 requests per 60 seconds
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100, // Limit each IP to 100 requests per 60 seconds
+      },
+    ]),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test', 'provision')
+          .default('development'),
+        PORT: Joi.number().default(3001),
+        DB_HOST: Joi.string().required(),
+        DB_PORT: Joi.number().default(5432),
+        DB_USERNAME: Joi.string().required(),
+        DB_PASSWORD: Joi.string().required(),
+        DB_NAME: Joi.string().required(),
+        JWT_SECRET: Joi.string().required(),
+        GEMINI_API_KEY: Joi.string().required(),
+        STRIPE_SECRET_KEY: Joi.string().optional(),
+        SUPABASE_URL: Joi.string().required(),
+        SUPABASE_KEY: Joi.string().required(),
+        SUPABASE_BUCKET: Joi.string().default('greensync-storage'),
+        SMTP_HOST: Joi.string().required(),
+        SMTP_PORT: Joi.number().default(587),
+        SMTP_USER: Joi.string().required(),
+        SMTP_PASS: Joi.string().required(),
+      }),
+      validationOptions: {
+        allowUnknown: true,
+        abortEarly: true,
+      },
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -44,7 +73,7 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'greenoffice'),
         autoLoadEntities: true,
-        synchronize: false, // Use migrations instead of auto-sync
+        synchronize: true, // Auto-create tables from entities
         logging: false,
       }),
     }),

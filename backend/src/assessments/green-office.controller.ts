@@ -1,4 +1,12 @@
-import { Controller, Get, Put, Param, Body, Headers, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Param,
+  Body,
+  Headers,
+  UseGuards,
+} from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -17,11 +25,12 @@ export class GreenOfficeController {
       numericOrgId = parseInt(orgId, 10);
       if (isNaN(numericOrgId)) numericOrgId = 0;
     }
-    const results = await this.greenCriteriaService.findAllForFrontend(numericOrgId);
-    return results.map(r => ({
+    const results =
+      await this.greenCriteriaService.findAllForFrontend(numericOrgId);
+    return results.map((r) => ({
       ...r,
       max_score: r.maxScore,
-      current_score: r.currentScore
+      current_score: r.currentScore,
     }));
   }
 

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface Feature {
   id: number;
@@ -35,7 +36,7 @@ export interface Invoice {
 @Injectable({ providedIn: 'root' })
 export class SubscriptionsAdminService {
   private http = inject(HttpClient);
-  private baseUrl = 'http://localhost:3001/subscriptions';
+  private baseUrl = `${environment.apiUrl}/subscriptions`;
 
   getPlans(): Observable<SubscriptionPlan[]> {
     return this.http.get<SubscriptionPlan[]>(`${this.baseUrl}/plans`);

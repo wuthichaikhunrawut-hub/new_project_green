@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { PLATFORM_ID } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 interface ChatMessage {
   id: string;
@@ -164,13 +165,13 @@ export class ChatbotComponent implements OnInit {
   getHeaders() {
     const token = isPlatformBrowser(this.platformId) ? localStorage.getItem('access_token') : '';
     return new HttpHeaders({
-      'Authorization': `Bearer ${token}`,
+      
       'Content-Type': 'application/json'
     });
   }
 
   loadSessions() {
-    this.http.get<any[]>('http://localhost:3001/gemini/sessions', { headers: this.getHeaders() }).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/gemini/sessions`, { headers: this.getHeaders() }).subscribe({
       next: (res) => {
         this.sessions = res;
         this.cdr.markForCheck();
@@ -181,7 +182,7 @@ export class ChatbotComponent implements OnInit {
   selectSession(id: number) {
     this.currentSessionId = id;
     this.messages = [];
-    this.http.get<any[]>(`http://localhost:3001/gemini/sessions/${id}/messages`, { headers: this.getHeaders() }).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/gemini/sessions/${id}/messages`, { headers: this.getHeaders() }).subscribe({
       next: (res) => {
         this.messages = res.map(m => ({
           id: String(m.id),
@@ -202,7 +203,7 @@ export class ChatbotComponent implements OnInit {
 
   deleteSession(id: number, event: Event) {
     event.stopPropagation();
-    this.http.delete(`http://localhost:3001/gemini/sessions/${id}`, { headers: this.getHeaders() }).subscribe({
+    this.http.delete(`${environment.apiUrl}/gemini/sessions/${id}`, { headers: this.getHeaders() }).subscribe({
       next: () => {
         this.sessions = this.sessions.filter(s => s.id !== id);
         if (this.currentSessionId === id) this.newSession();
@@ -270,7 +271,7 @@ export class ChatbotComponent implements OnInit {
       payload.sessionId = this.currentSessionId;
     }
 
-    this.http.post<{ reply: string }>('http://localhost:3001/gemini/chat', payload, { headers }).subscribe({
+    this.http.post<{ reply: string }>(`${environment.apiUrl}/gemini/chat`, payload, { headers }).subscribe({
       next: (res) => {
         const idx = this.messages.findIndex(m => m.id === loadingMsg.id);
         if (idx !== -1) {

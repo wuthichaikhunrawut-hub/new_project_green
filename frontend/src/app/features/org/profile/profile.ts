@@ -1,3 +1,4 @@
+import { UploadService } from '../../../core/services/upload.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -24,6 +25,7 @@ export class OrgProfileComponent implements OnInit {
   private authService = inject(AuthService);
   private usersService = inject(UsersService);
   private branchesService = inject(OrgBranchesService);
+  private uploadService = inject(UploadService);
   private cdr = inject(ChangeDetectorRef);
 
   orgForm!: FormGroup;
@@ -37,6 +39,7 @@ export class OrgProfileComponent implements OnInit {
   orgId: number | null = null;
   userId: number | null = null;
   currentUser: User | null = null;
+  orgLogoUrl: string | null = null;
   
   branches: OrgBranch[] = [];
   isLoading = true;
@@ -49,6 +52,10 @@ export class OrgProfileComponent implements OnInit {
     this.orgId = this.authService.getOrganizationId();
     this.currentUser = this.authService.getUser();
     this.userId = this.currentUser?.id || null;
+    
+    if (this.orgId) {
+      this.orgLogoUrl = localStorage.getItem('org_logo_' + this.orgId);
+    }
     
     this.initForms();
     
@@ -202,6 +209,32 @@ export class OrgProfileComponent implements OnInit {
   }
 
   onLogoUpload() {
-    this.toast.success('????????????????????????????????????????????');
+    document.getElementById('logoInput')?.click();
+  }
+
+  onLogoFileSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (file) {
+      this.isLoading = true;
+      this.cdr.markForCheck();
+      
+      this.uploadService.uploadFile(file, 'logos', { userId: this.userId || undefined }).subscribe({
+        next: (res) => {
+          this.orgLogoUrl = res.file_url;
+          if (this.orgId) {
+            localStorage.setItem('org_logo_' + this.orgId, res.file_url);
+          }
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          this.toast.success('อัปโหลดโลโก้องค์กรสำเร็จ!');
+        },
+        error: (err) => {
+          console.error('Logo upload error:', err);
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          this.toast.error('เกิดข้อผิดพลาดในการอัปโหลดโลโก้');
+        }
+      });
+    }
   }
 }

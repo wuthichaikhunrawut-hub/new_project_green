@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ExecutiveService } from '../../../core/services/executive.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-executive-leaderboard',
@@ -27,32 +28,30 @@ export class ExecutiveLeaderboardComponent implements OnInit {
   loadLeaderboard() {
     if (!isPlatformBrowser(this.platformId)) return;
     this.isLoading = true;
-    this.executiveService.getDashboard().subscribe({
-      next: (data) => {
-        this.orgName = data.orgName;
+    
+    forkJoin({
+      dashboard: this.executiveService.getDashboard(),
+      leaderboard: this.executiveService.getLeaderboard()
+    }).subscribe({
+      next: ({ dashboard, leaderboard }) => {
+        this.orgName = dashboard.orgName;
         
-        // Map carbonByUnit data to a detailed leaderboard
-        this.leaderboardData = (data.carbonByUnit || []).map((unit, index) => {
-          // Generate a representative audit score for display based on emissions & organization profile
-          // ensuring a beautiful, robust audit presentation
-          let simulatedScore = 88 - (index * 5); 
-          if (simulatedScore < 60) simulatedScore = 65;
-
+        this.leaderboardData = (leaderboard || []).map((item) => {
+          const score = item.assessmentScore || 85;
           return {
-            rank: index + 1,
-            unitName: unit.unitName || 'หน่วยงานกลาง',
-            totalEmission: unit.totalEmission,
-            auditScore: simulatedScore,
-            certifiedLevel: simulatedScore >= 80 ? 'ดีเยี่ยม (ทอง)' : simulatedScore >= 70 ? 'ดีมาก (เงิน)' : 'ดี (ทองแดง)',
-            badgeClass: simulatedScore >= 80 ? 'gold' : simulatedScore >= 70 ? 'silver' : 'bronze',
-            trend: index === 0 ? 'up' : index === 1 ? 'down' : 'neutral'
+            rank: item.rank,
+            unitName: item.unitName || 'หน่วยงานกลาง',
+            totalEmission: item.totalEmission,
+            auditScore: score,
+            certifiedLevel: score >= 80 ? 'ดีเยี่ยม (ทอง)' : score >= 70 ? 'ดีมาก (เงิน)' : 'ดี (ทองแดง)',
+            badgeClass: score >= 80 ? 'gold' : score >= 70 ? 'silver' : 'bronze',
+            trend: item.reductionPercent > 10 ? 'up' : item.reductionPercent < 0 ? 'down' : 'neutral'
           };
         });
         
         this.isLoading = false;
         this.cdr.markForCheck();
 
-        // Render charts
         setTimeout(() => {
           this.renderCharts();
         }, 100);

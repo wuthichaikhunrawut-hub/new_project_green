@@ -44,7 +44,14 @@ export class AdminSettingsComponent implements OnInit {
     'stripe.public_key': '',
     'stripe.secret_key': '',
     'stripe.webhook_secret': '',
-    'stripe.currency': 'thb'
+    'stripe.currency': 'thb',
+    'smtp.mode': 'mock',
+    'smtp.host': '',
+    'smtp.port': 587,
+    'smtp.user': '',
+    'smtp.pass': '',
+    'smtp.sender': 'Green Office System <no-reply@greensync.com>',
+    'smtp.fallback_email': 'admin@greensync.com'
   };
 
   isLoading = true;
@@ -58,7 +65,6 @@ export class AdminSettingsComponent implements OnInit {
     this.isLoading = true;
     this.settingsService.getSettings().subscribe({
       next: (data) => {
-        console.log('Backend Settings Received:', data);
         if (data) {
           // Force update each key to be sure
           Object.keys(data).forEach(key => {
@@ -66,9 +72,9 @@ export class AdminSettingsComponent implements OnInit {
           });
           // Also spread for safety
           this.settings = { ...this.settings, ...data };
-          console.log('Current Frontend Settings:', this.settings);
         }
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load settings:', err);

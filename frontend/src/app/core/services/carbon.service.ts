@@ -4,6 +4,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 export interface CarbonLog {
   id?: string;
@@ -19,8 +20,8 @@ export interface CarbonLog {
 
 @Injectable({ providedIn: 'root' })
 export class CarbonService {
-  private apiUrl = 'http://localhost:3001/carbon-logs';
-  private geminiUrl = 'http://localhost:3001/gemini/ocr';
+  private apiUrl = `${environment.apiUrl}/carbon-logs`;
+  private geminiUrl = `${environment.apiUrl}/gemini/ocr`;
   private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient, private authService: AuthService) {}
@@ -30,7 +31,7 @@ export class CarbonService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+
       }
       const org = JSON.parse(localStorage.getItem('currentOrg') || '{}') as {
         id?: number | string;
@@ -108,7 +109,7 @@ export class CarbonService {
   uploadFile(file: File, folder: string = 'evidence', category?: string): Observable<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    let uploadUrl = `http://localhost:3001/uploads?folder=${folder}`;
+    let uploadUrl = `${environment.apiUrl}/uploads?folder=${folder}`;
     if (category) {
       uploadUrl += `&category=${encodeURIComponent(category)}`;
     }

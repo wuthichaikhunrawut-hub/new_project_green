@@ -17,7 +17,10 @@ describe('AuthService', () => {
     usersService = {
       findByEmail: jest.fn(),
       getPrimaryRoleForUser: jest.fn().mockResolvedValue('ORG_ADMIN'),
-      findOne: jest.fn().mockResolvedValue({ id: 1, user_profile: { first_name: 'Test' } }),
+      findOne: jest
+        .fn()
+        .mockResolvedValue({ id: 1, user_profile: { first_name: 'Test' } }),
+      update: jest.fn().mockResolvedValue(true),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -25,7 +28,10 @@ describe('AuthService', () => {
         AuthService,
         { provide: UsersService, useValue: usersService },
         { provide: OrganizationsService, useValue: {} },
-        { provide: JwtService, useValue: { signAsync: jest.fn().mockResolvedValue('test_token') } },
+        {
+          provide: JwtService,
+          useValue: { signAsync: jest.fn().mockResolvedValue('test_token') },
+        },
         { provide: AuditLogsService, useValue: { logAction: jest.fn() } },
         { provide: MailService, useValue: {} },
         { provide: ConfigService, useValue: {} },
@@ -42,7 +48,9 @@ describe('AuthService', () => {
   describe('login', () => {
     it('should throw UnauthorizedException if user not found', async () => {
       (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
-      await expect(service.login({ email: 'test@test.com', password: 'password' })).rejects.toThrow(UnauthorizedException);
+      await expect(
+        service.login({ email: 'test@test.com', password: 'password' }),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should return token if credentials are valid', async () => {
@@ -54,7 +62,10 @@ describe('AuthService', () => {
       };
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      const result = await service.login({ email: 'test@test.com', password: 'password123' });
+      const result = await service.login({
+        email: 'test@test.com',
+        password: 'password123',
+      });
       expect(result.access_token).toBe('test_token');
       expect(result.user.email).toBe('test@test.com');
       expect(result.organization?.name).toBe('Test Org');

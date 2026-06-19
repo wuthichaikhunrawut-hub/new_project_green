@@ -70,7 +70,7 @@ export class AssessorController {
   @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN')
   async getCertificatePdf(
     @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response
+    @Res() res: Response,
   ) {
     const pdfBuffer = await this.assessorService.generateCertificatePdf(id);
     res.set({
@@ -82,13 +82,31 @@ export class AssessorController {
   }
 
   @Get('organizations/:orgId/carbon-summary')
-  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER')
+  @Roles(
+    'ASSESSOR',
+    'SYSTEM_ADMIN',
+    'ADMIN',
+    'ORG_ADMIN',
+    'ORGANIZATION_ADMIN',
+    'EXECUTIVE',
+    'EMPLOYEE',
+    'USER',
+  )
   getCarbonSummary(@Param('orgId', ParseIntPipe) orgId: number) {
     return this.assessorService.getOrgCarbonSummary(orgId);
   }
 
   @Get('assessments/:id')
-  @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN', 'ORGANIZATION_ADMIN', 'EXECUTIVE', 'EMPLOYEE', 'USER')
+  @Roles(
+    'ASSESSOR',
+    'SYSTEM_ADMIN',
+    'ADMIN',
+    'ORG_ADMIN',
+    'ORGANIZATION_ADMIN',
+    'EXECUTIVE',
+    'EMPLOYEE',
+    'USER',
+  )
   getAssessment(@Param('id', ParseIntPipe) id: number) {
     return this.assessorService.getAssessmentDetail(id);
   }

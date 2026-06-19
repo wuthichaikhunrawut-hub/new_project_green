@@ -161,12 +161,34 @@
                 <option value="KTB">ธนาคารกรุงไทย (KTB)</option>
                 <option value="TTB">ธนาคารทหารไทยธนชาต (TTB)</option>
                 <option value="GSB">ธนาคารออมสิน (GSB)</option>
+                <option value="STRIPE">Stripe Connect (ค่าตอบแทนประเมิน)</option>
               </select>
             </div>
             <div class="col-md-6">
-              <label class="form-label small fw-bold text-muted">เลขที่บัญชี</label>
+              <label class="form-label small fw-bold text-muted">เลขที่บัญชี / Stripe Account ID</label>
               <input type="text" class="form-control" [(ngModel)]="formData.assessor_profile.bank_account_no"
-                placeholder="ระบุเฉพาะตัวเลข">
+                placeholder="ระบุเลขที่บัญชี หรือรหัส acct_...">
+            </div>
+            <div class="col-12 mt-2">
+              <div class="d-flex align-items-center justify-content-between bg-white p-3 rounded-3 border">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="bg-indigo-50 p-2.5 rounded-3 text-indigo-600">
+                    <i class="fa-brands fa-stripe fs-4"></i>
+                  </div>
+                  <div class="text-start">
+                    <div class="fw-bold text-sm">Stripe Connect</div>
+                    <small class="text-muted text-xs">สำหรับเชื่อมต่อการโอนเงินค่าตอบแทนอัตโนมัติ</small>
+                  </div>
+                </div>
+                <div>
+                  <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 font-bold" (click)="connectStripeSimulated()" *ngIf="!(formData.assessor_profile.bank_account_no || '').startsWith('acct_')">
+                    <i class="fa-solid fa-link me-1"></i> เชื่อมต่อบัญชีจำลอง
+                  </button>
+                  <span class="badge bg-success rounded-pill px-3 py-1.5 text-xs text-white" *ngIf="(formData.assessor_profile.bank_account_no || '').startsWith('acct_')">
+                    <i class="fa-solid fa-circle-check me-1"></i> เชื่อมต่อสำเร็จ
+                  </span>
+                </div>
+              </div>
             </div>
             <div class="col-12 mt-3">
               <div class="alert alert-info border-0 rounded-3 mb-0">

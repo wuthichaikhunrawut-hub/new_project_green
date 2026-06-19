@@ -6,6 +6,8 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { AssessmentCardComponent } from '../../../shared/components/assessment/assessment-card/assessment-card';
 import { timeout } from 'rxjs';
 import { AssessmentDataService } from '../../../core/services/assessment-data.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface Category {
   id: number;
@@ -62,6 +64,10 @@ export class GreenOfficeFormComponent implements OnInit {
   isLoading = true;
   errorMsg = '';
   assessmentId: number | null = null;
+  showAIModal = false;
+  aiLoading = false;
+  aiResult: any = null;
+  private http = inject(HttpClient);
 
   questions: Question[] = [];
   activeSubCategory: string = '';
@@ -559,6 +565,40 @@ export class GreenOfficeFormComponent implements OnInit {
   }
 
   analyzeAI() {
-    this.toast.success('AI กำลังวิเคราะห์ข้อมูลการประเมิน...\nข้อแนะนำเบื้องต้น: หมวดที่ 1 ควรเพิ่มหลักฐานภาพถ่ายการประชุมคณะทำงานเพื่อให้ได้คะแนนเต็ม');
+    const weakPoints: any[] = [];
+    Object.keys(this.allQuestions).forEach((catId: any) => {
+      const qs = this.allQuestions[catId];
+      qs.forEach(q => {
+        if (q.score !== null && q.score < q.max_score) {
+          weakPoints.push({
+            id: q.id,
+            title: q.title,
+            score: q.score,
+            maxScore: q.max_score,
+            comment: q.details
+          });
+        }
+      });
+    });
+
+    this.aiLoading = true;
+    this.showAIModal = true;
+    this.aiResult = null;
+    this.cdr.markForCheck();
+
+    this.http.post<any>(`${environment.apiUrl}/gemini/recommendations`, { weakPoints }).subscribe({
+      next: (res) => {
+        this.aiResult = res;
+        this.aiLoading = false;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('AI Recommendations call failed:', err);
+        this.toast.error('ไม่สามารถดึงข้อมูลวิเคราะห์จาก AI ได้ในขณะนี้');
+        this.aiLoading = false;
+        this.showAIModal = false;
+        this.cdr.markForCheck();
+      }
+    });
   }
 }

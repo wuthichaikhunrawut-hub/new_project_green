@@ -1,9 +1,10 @@
 import { ToastService } from '../../core/services/toast.service';
-import { Component, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { GeminiService, BillScanResult } from '../../services/gemini';
 import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
+import { EmissionFactorsService, EmissionFactor } from '../../core/services/emission-factors.service';
 @Component({
   selector: 'app-ai-scan',
   standalone: true,
@@ -11,10 +12,12 @@ import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
   templateUrl: './ai-scan.html',
   styleUrl: './ai-scan.css'
 })
-export class AiScanComponent {
+export class AiScanComponent implements OnInit {
   private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
+  private factorsService = inject(EmissionFactorsService);
 
+  factors: EmissionFactor[] = [];
   selectedFile: File | null = null;
   previewUrl: string | null = null;
   isProcessing = false;
@@ -33,6 +36,17 @@ export class AiScanComponent {
     private geminiService: GeminiService,
     private carbonService: CarbonService
   ) {}
+
+  ngOnInit() {
+    this.factorsService.getFactors().subscribe({
+      next: (data) => {
+        this.factors = data;
+      },
+      error: (err) => {
+        console.error('Failed to load emission factors:', err);
+      }
+    });
+  }
 
   onFileChange(event: any) {
     const file = event.target.files[0];
@@ -242,11 +256,14 @@ export class AiScanComponent {
     let factor = 0;
     const type = this.formData.type;
     if (type === 'Electricity') {
-      factor = 0.5;
+      const match = this.factors.find(f => f.name.includes('Electricity') || f.name.includes('ไฟฟ้า'));
+      factor = match ? match.factor_value : 0.4999;
     } else if (type === 'Water') {
-      factor = 0.3;
+      const match = this.factors.find(f => f.name.includes('Water') || f.name.includes('น้ำประปา'));
+      factor = match ? match.factor_value : 0.337;
     } else if (type === 'Fuel') {
-      factor = 2.3;
+      const match = this.factors.find(f => f.name.includes('Diesel') || f.name.includes('ดีเซล') || f.name.includes('น้ำมันดีเซล'));
+      factor = match ? match.factor_value : 2.7086;
     }
     const calculatedEmission = (this.formData.amount || 0) * factor;
 

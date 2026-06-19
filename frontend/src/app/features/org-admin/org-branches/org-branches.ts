@@ -128,14 +128,20 @@ export class OrgBranchesComponent implements OnInit {
     const pendingAssignments: { empId: number; branchId: number }[] = [];
     
     this.employees.forEach(emp => {
-      if (emp.org_unit_id) {
-        if (!this.branchEmployeesMap.has(emp.org_unit_id)) {
-          this.branchEmployeesMap.set(emp.org_unit_id, []);
+      const currentBranchId = emp.org_unit_id || emp.organization_unit?.id;
+      if (currentBranchId) {
+        if (!this.branchEmployeesMap.has(currentBranchId)) {
+          this.branchEmployeesMap.set(currentBranchId, []);
         }
-        this.branchEmployeesMap.get(emp.org_unit_id)!.push(emp);
+        this.branchEmployeesMap.get(currentBranchId)!.push(emp);
       } else {
         if (mainBranch && mainBranch.id != null) {
           emp.org_unit_id = mainBranch.id;
+          if (emp.organization_unit) {
+            emp.organization_unit.id = mainBranch.id;
+          } else {
+            emp.organization_unit = { id: mainBranch.id } as any;
+          }
           if (!this.branchEmployeesMap.has(mainBranch.id)) {
             this.branchEmployeesMap.set(mainBranch.id, []);
           }
@@ -251,6 +257,13 @@ export class OrgBranchesComponent implements OnInit {
         const emp = this.employees.find(e => e.id === userId);
         if (emp) {
           emp.org_unit_id = branchId ?? undefined;
+          if (branchId === null) {
+            emp.organization_unit = undefined;
+          } else if (emp.organization_unit) {
+            emp.organization_unit.id = branchId;
+          } else {
+            emp.organization_unit = { id: branchId } as any;
+          }
         }
         this.mapEmployees();
         this.cdr.markForCheck();

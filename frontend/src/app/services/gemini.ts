@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface BillScanResult {
   type: string;
@@ -9,14 +10,13 @@ export interface BillScanResult {
   date: string;
   confidence: number;
   rawText: string;
-
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class GeminiService {
-  private apiUrl = 'http://localhost:3001/gemini';
+  private apiUrl = `${environment.apiUrl}/gemini`;
 
   constructor(private http: HttpClient) {}
 
@@ -35,5 +35,9 @@ export class GeminiService {
     formData.append('file', file);
     formData.append('categoryId', categoryId);
     return this.http.post<any>(`${this.apiUrl}/evidence-validation`, formData);
+  }
+
+  analyzeImage(base64Image: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/analyze`, { image: base64Image });
   }
 }

@@ -45,7 +45,7 @@ export class GreenCriteriaService {
         where: { organization: { id: orgId }, status: 'APPROVED' },
       });
       hasPassed = !!passedAss;
-      
+
       const pendingAss = await this.assessmentRepository.findOne({
         where: { organization: { id: orgId }, status: 'PENDING' },
       });
@@ -71,14 +71,14 @@ export class GreenCriteriaService {
     }
 
     return filtered.map((item) => {
-      const detail = details.find(d => d.criteria_id === item.id);
+      const detail = details.find((d) => d.criteria_id === item.id);
       return {
         id: item.id,
         category: item.category_number,
         code: item.criteria_code,
         name: item.criteria_name,
         maxScore: item.max_score,
-        currentScore: detail ? (detail.self_score || 0) : 0,
+        currentScore: detail ? detail.self_score || 0 : 0,
         status: detail && detail.self_score > 0 ? 'Completed' : 'Pending',
       };
     });
@@ -143,7 +143,10 @@ export class GreenCriteriaService {
 
       // Find or create assessment detail for this criteria
       let detail = await tem.findOne(AssessmentDetail, {
-        where: { assessment: { id: assessment.id }, criteria: { id: criteriaId } },
+        where: {
+          assessment: { id: assessment.id },
+          criteria: { id: criteriaId },
+        },
       });
 
       if (!detail) {
@@ -162,8 +165,11 @@ export class GreenCriteriaService {
       const allDetails = await tem.find(AssessmentDetail, {
         where: { assessment: { id: assessment.id } },
       });
-      
-      const totalScore = allDetails.reduce((sum, d) => sum + (d.self_score || 0), 0);
+
+      const totalScore = allDetails.reduce(
+        (sum, d) => sum + (d.self_score || 0),
+        0,
+      );
       assessment.total_score = totalScore;
       await tem.save(assessment);
 

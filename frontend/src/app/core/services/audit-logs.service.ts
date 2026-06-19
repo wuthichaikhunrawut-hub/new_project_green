@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface AuditLog {
   id: string;
@@ -20,7 +21,7 @@ export interface AuditLog {
 export class AuditLogsService {
   private http = inject(HttpClient);
   // URL to web api
-  private apiUrl = 'http://localhost:3001/audit-logs';
+  private apiUrl = `${environment.apiUrl}/audit-logs`;
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({

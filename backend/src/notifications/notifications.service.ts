@@ -22,7 +22,7 @@ export class NotificationsService {
     try {
       const admins = await this.usersService.findAll('System Admin');
       if (admins && admins.length > 0) return admins[0];
-      
+
       const systemAdmins = await this.usersService.findAll('SYSTEM_ADMIN');
       if (systemAdmins && systemAdmins.length > 0) return systemAdmins[0];
 
@@ -87,7 +87,9 @@ export class NotificationsService {
     };
 
     const sanitizedTitle = this.sanitizeText(data.title);
-    const sanitizedMessage = isJson(data.message) ? data.message : this.sanitizeText(data.message);
+    const sanitizedMessage = isJson(data.message)
+      ? data.message
+      : this.sanitizeText(data.message);
 
     const notification = this.notificationsRepository.create({
       ...data,
@@ -102,13 +104,18 @@ export class NotificationsService {
       .findOne(finalRecipientId)
       .then((user) => {
         if (user && user.email) {
-          this.mailService.sendMail(
-            user.email,
-            `แจ้งเตือนระบบ: ${sanitizedTitle}`,
-            `<h3>${sanitizedTitle}</h3><p>${sanitizedMessage}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
-          ).catch((mailErr) => {
-            console.error('Error sending email notification:', mailErr.message || mailErr);
-          });
+          this.mailService
+            .sendMail(
+              user.email,
+              `แจ้งเตือนระบบ: ${sanitizedTitle}`,
+              `<h3>${sanitizedTitle}</h3><p>${sanitizedMessage}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
+            )
+            .catch((mailErr) => {
+              console.error(
+                'Error sending email notification:',
+                mailErr.message || mailErr,
+              );
+            });
         }
       })
       .catch((err) =>
@@ -136,7 +143,9 @@ export class NotificationsService {
     };
 
     const sanitizedTitle = this.sanitizeText(data.title);
-    const sanitizedMessage = isJson(data.message) ? data.message : this.sanitizeText(data.message);
+    const sanitizedMessage = isJson(data.message)
+      ? data.message
+      : this.sanitizeText(data.message);
 
     const notifications = data.recipient_ids.map((id) =>
       this.notificationsRepository.create({
@@ -154,13 +163,18 @@ export class NotificationsService {
         .findOne(id)
         .then((user) => {
           if (user && user.email) {
-            this.mailService.sendMail(
-              user.email,
-              `แจ้งเตือนระบบ: ${sanitizedTitle}`,
-              `<h3>${sanitizedTitle}</h3><p>${sanitizedMessage}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
-            ).catch((mailErr) => {
-              console.error(`Error sending bulk email to user ${id}:`, mailErr.message || mailErr);
-            });
+            this.mailService
+              .sendMail(
+                user.email,
+                `แจ้งเตือนระบบ: ${sanitizedTitle}`,
+                `<h3>${sanitizedTitle}</h3><p>${sanitizedMessage}</p>${data.link ? `<a href="${data.link}">คลิกเพื่อดูรายละเอียด</a>` : ''}`,
+              )
+              .catch((mailErr) => {
+                console.error(
+                  `Error sending bulk email to user ${id}:`,
+                  mailErr.message || mailErr,
+                );
+              });
           }
         })
         .catch((err) =>
@@ -232,7 +246,9 @@ export class NotificationsService {
     const adminId = admin ? admin.id : userId;
 
     const title = `คำเสนอวิชาการ: ${
-      data.targetType === 'CRITERIA' ? 'เกณฑ์สำนักงานสีเขียว' : 'สูตรคำนวณคาร์บอน'
+      data.targetType === 'CRITERIA'
+        ? 'เกณฑ์สำนักงานสีเขียว'
+        : 'สูตรคำนวณคาร์บอน'
     }`;
 
     const messageObj = {
@@ -256,7 +272,10 @@ export class NotificationsService {
     });
   }
 
-  async approveAcademicChange(notificationId: number, adminId: number): Promise<any> {
+  async approveAcademicChange(
+    notificationId: number,
+    adminId: number,
+  ): Promise<any> {
     const notification = await this.notificationsRepository.findOne({
       where: { id: notificationId },
     });
@@ -276,7 +295,11 @@ export class NotificationsService {
     }
 
     if (payload.targetType === 'CRITERIA') {
-      if (!payload.targetId || payload.targetId === 0 || payload.targetId === '0') {
+      if (
+        !payload.targetId ||
+        payload.targetId === 0 ||
+        payload.targetId === '0'
+      ) {
         const details = payload.details || {};
         await this.greenCriteriaService.create({
           category_number: Number(details.category_number || 1),
@@ -284,7 +307,9 @@ export class NotificationsService {
           criteria_name: String(payload.name || ''),
           max_score: parseFloat(payload.newValue || '0'),
           description: String(details.description || ''),
-          year_version: Number(details.year_version || new Date().getFullYear()),
+          year_version: Number(
+            details.year_version || new Date().getFullYear(),
+          ),
         });
       } else {
         await this.greenCriteriaService.update(payload.targetId, {
@@ -292,7 +317,11 @@ export class NotificationsService {
         });
       }
     } else if (payload.targetType === 'EMISSION_FACTOR') {
-      if (!payload.targetId || payload.targetId === 0 || payload.targetId === '0') {
+      if (
+        !payload.targetId ||
+        payload.targetId === 0 ||
+        payload.targetId === '0'
+      ) {
         const details = payload.details || {};
         await this.emissionFactorsService.create({
           scope: Number(details.scope || 1),

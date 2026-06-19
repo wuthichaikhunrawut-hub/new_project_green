@@ -24,7 +24,11 @@ export class StripeService implements OnModuleInit {
     if (!this.stripe) await this.initStripe();
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test';
     try {
-      return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      return this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        webhookSecret,
+      );
     } catch (error) {
       console.error('Webhook signature verification failed:', error);
       throw error;
@@ -96,12 +100,20 @@ export class StripeService implements OnModuleInit {
       console.log(`Canceling Stripe Subscription: ${subscriptionId}`);
       return await this.stripe.subscriptions.cancel(subscriptionId);
     } catch (error) {
-      console.error(`Stripe Cancel Subscription Error (${subscriptionId}):`, error);
+      console.error(
+        `Stripe Cancel Subscription Error (${subscriptionId}):`,
+        error,
+      );
       throw error;
     }
   }
 
-  async createPayoutOrTransfer(amount: number, currency: string = 'thb', destination?: string, userId?: number) {
+  async createPayoutOrTransfer(
+    amount: number,
+    currency: string = 'thb',
+    destination?: string,
+    userId?: number,
+  ) {
     if (!this.stripe) await this.initStripe();
     const metadata = userId ? { user_id: userId.toString() } : undefined;
     if (this.stripe) {

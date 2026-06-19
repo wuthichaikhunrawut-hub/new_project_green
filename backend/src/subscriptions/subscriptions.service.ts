@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { SubscriptionPlan } from './entities/subscription-plan.entity';
@@ -49,7 +53,7 @@ export class SubscriptionsService {
       relations: ['organization'],
     });
     if (!user || !user.organization) {
-      throw new Error('Organization not found for user');
+      throw new NotFoundException('Organization not found for user');
     }
     return user.organization;
   }
@@ -58,8 +62,12 @@ export class SubscriptionsService {
     await this.orgRepository.update(orgId, { stripe_customer_id: stripeId });
   }
 
-  async getOrganizationByStripeCustomerId(stripeId: string): Promise<Organization | null> {
-    return this.orgRepository.findOne({ where: { stripe_customer_id: stripeId } });
+  async getOrganizationByStripeCustomerId(
+    stripeId: string,
+  ): Promise<Organization | null> {
+    return this.orgRepository.findOne({
+      where: { stripe_customer_id: stripeId },
+    });
   }
 
   // ---- Stripe Webhook Handlers ----
@@ -94,9 +102,11 @@ export class SubscriptionsService {
   async handleInvoicePaymentSucceeded(invoice: any) {
     const org = await this.getOrganizationByStripeCustomerId(invoice.customer);
     if (!org) return;
-    
-    console.log(`Payment succeeded for org ${org.name}, amount: ${invoice.amount_paid}`);
-    
+
+    console.log(
+      `Payment succeeded for org ${org.name}, amount: ${invoice.amount_paid}`,
+    );
+
     await this.createPaymentRecord({
       org_id: org.id,
       amount: invoice.amount_paid / 100,
@@ -114,12 +124,19 @@ export class SubscriptionsService {
   }
 
   async handleSubscriptionChange(subscription: any) {
-    const org = await this.getOrganizationByStripeCustomerId(subscription.customer);
+    const org = await this.getOrganizationByStripeCustomerId(
+      subscription.customer,
+    );
     if (!org) return;
     console.log(`Subscription ${subscription.status} for org ${org.name}`);
-    const activeSub = await this.orgSubRepository.findOne({ where: { org_id: org.id } });
+    const activeSub = await this.orgSubRepository.findOne({
+      where: { org_id: org.id },
+    });
     if (activeSub) {
-      activeSub.status = subscription.status === 'active' || subscription.status === 'trialing' ? 'ACTIVE' : 'EXPIRED';
+      activeSub.status =
+        subscription.status === 'active' || subscription.status === 'trialing'
+          ? 'ACTIVE'
+          : 'EXPIRED';
       activeSub.end_date = new Date(subscription.current_period_end * 1000);
       await this.orgSubRepository.save(activeSub);
     }
@@ -133,6 +150,49 @@ export class SubscriptionsService {
     const org = await this.getOrganizationByStripeCustomerId(session.customer);
     if (!org) return;
     console.log(`Checkout completed for org ${org.name}`);
+
+    // Update organization with Stripe subscription ID
+    if (session.subscription) {
+      org.stripe_subscription_id = session.subscription;
+      await this.orgRepository.save(org);
+    }
+
+    // Activate subscription in database
+    const planId = session.metadata?.planId
+      ? Number(session.metadata.planId)
+      : 36; // Default to Premium
+    let activeSub = await this.orgSubRepository.findOne({
+      where: { org_id: org.id },
+    });
+
+    if (activeSub) {
+      activeSub.plan_id = planId;
+      activeSub.status = 'ACTIVE';
+      activeSub.start_date = new Date();
+      activeSub.end_date = new Date(
+        new Date().setFullYear(new Date().getFullYear() + 1),
+      );
+      activeSub.auto_renew = true;
+      await this.orgSubRepository.save(activeSub);
+    } else {
+      activeSub = this.orgSubRepository.create({
+        org_id: org.id,
+        plan_id: planId,
+        status: 'ACTIVE',
+        start_date: new Date(),
+        end_date: new Date(
+          new Date().setFullYear(new Date().getFullYear() + 1),
+        ),
+        auto_renew: true,
+      });
+      await this.orgSubRepository.save(activeSub);
+    }
+
+    await this.auditLogsService.logAction(
+      undefined,
+      'SUBSCRIBE_PLAN_STRIPE',
+      `Organization ${org.id} subscribed to plan ${planId} via Stripe checkout`,
+    );
   }
 
   // ---- Subscription Plans ----
@@ -210,7 +270,7 @@ export class SubscriptionsService {
       where: { id },
       relations: ['features'],
     });
-    if (!plan) throw new Error('Plan not found');
+    if (!plan) throw new NotFoundException('Plan not found');
 
     Object.assign(plan, planData);
 
@@ -256,7 +316,7 @@ export class SubscriptionsService {
       where: { id },
       relations: ['organization', 'plan'],
     });
-    if (!invoice) throw new Error('Invoice not found');
+    if (!invoice) throw new NotFoundException('Invoice not found');
 
     await this.invoicesRepository.update(id, { status });
     const updated = await this.invoicesRepository.findOne({
@@ -321,7 +381,7 @@ export class SubscriptionsService {
         return parsed; // return actual limit (0 = unlimited)
       }
     }
-    
+
     // Default fallbacks if not defined:
     if (featureCode.toUpperCase() === 'AI_SCAN') {
       if (planId === 3) return 20;
@@ -361,7 +421,7 @@ export class SubscriptionsService {
     const used = log ? log.usage_count : 0;
 
     return {
-      allowed: (limit === 0 || limit >= 999999) ? true : used < limit,
+      allowed: limit === 0 || limit >= 999999 ? true : used < limit,
       used,
       limit,
     };
@@ -425,19 +485,21 @@ export class SubscriptionsService {
     });
 
     const quotaPromises = sub.plan.features.map(async (feature) => {
-      const limit = await this.getQuotaLimit(
-        sub.plan.id,
-        feature.feature_code,
-      );
+      const limit = await this.getQuotaLimit(sub.plan.id, feature.feature_code);
       const log = logs.find(
-        (entry) => entry.feature_code.toUpperCase() === feature.feature_code.toUpperCase(),
+        (entry) =>
+          entry.feature_code.toUpperCase() ===
+          feature.feature_code.toUpperCase(),
       );
       return {
         feature_code: feature.feature_code.toUpperCase(),
         feature_name: feature.feature_name,
         used: log?.usage_count ?? 0,
         limit,
-        allowed: (limit === 0 || limit >= 999999) ? true : (log?.usage_count ?? 0) < limit,
+        allowed:
+          limit === 0 || limit >= 999999
+            ? true
+            : (log?.usage_count ?? 0) < limit,
       };
     });
 
@@ -457,24 +519,26 @@ export class SubscriptionsService {
   }
 
   async cancelSubscription(orgId: number) {
-    const sub = await this.orgSubRepository.findOne({ where: { org_id: orgId, status: 'ACTIVE' } });
-    if (!sub) throw new Error('No active subscription found');
-    
+    const sub = await this.orgSubRepository.findOne({
+      where: { org_id: orgId, status: 'ACTIVE' },
+    });
+    if (!sub) throw new NotFoundException('No active subscription found');
+
     const org = await this.orgRepository.findOne({ where: { id: orgId } });
     if (org && org.stripe_subscription_id) {
       await this.stripeService.cancelSubscription(org.stripe_subscription_id);
     }
-    
+
     sub.auto_renew = false;
     sub.status = 'CANCELLED';
     await this.orgSubRepository.save(sub);
-    
+
     await this.auditLogsService.logAction(
       undefined,
       'CANCEL_SUBSCRIPTION',
       `Organization ${orgId} cancelled their subscription`,
     );
-    
+
     return { success: true, message: 'Subscription cancelled successfully' };
   }
 
@@ -483,7 +547,7 @@ export class SubscriptionsService {
       where: { id: invoiceId },
     });
     if (!invoice) {
-      throw new Error('Invoice not found');
+      throw new NotFoundException('Invoice not found');
     }
 
     const existingPayment = await this.paymentRepository.findOne({
@@ -517,10 +581,12 @@ export class SubscriptionsService {
     }
 
     if (plan.price_per_month > 0) {
-      throw new BadRequestException('Cannot subscribe directly to a paid plan without payment info');
+      throw new BadRequestException(
+        'Cannot subscribe directly to a paid plan without payment info',
+      );
     }
 
-    let existingSub = await this.orgSubRepository.findOne({
+    const existingSub = await this.orgSubRepository.findOne({
       where: { org_id: orgId, status: 'ACTIVE' },
     });
 

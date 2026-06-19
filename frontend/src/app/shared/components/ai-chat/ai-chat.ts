@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
+import { environment } from '../../../../environments/environment';
 
 interface ChatMessage {
   role: 'user' | 'bot';
@@ -93,7 +94,7 @@ export class AiChatComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+
       }
     }
     return headers;
@@ -104,7 +105,7 @@ export class AiChatComponent implements OnInit {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    this.http.get<any[]>('http://localhost:3001/gemini/history', {
+    this.http.get<any[]>(`${environment.apiUrl}/gemini/history`, {
       headers: this.getHeaders()
     }).subscribe({
       next: (logs) => {
@@ -125,7 +126,7 @@ export class AiChatComponent implements OnInit {
   }
 
   loadHistoryAfterMessage() {
-    this.http.get<any[]>('http://localhost:3001/gemini/history', {
+    this.http.get<any[]>(`${environment.apiUrl}/gemini/history`, {
       headers: this.getHeaders()
     }).subscribe({
       next: (logs) => {
@@ -234,7 +235,7 @@ export class AiChatComponent implements OnInit {
     this.cdr.markForCheck();
 
     this.http.post<{ reply: string }>(
-      'http://localhost:3001/gemini/chat',
+      `${environment.apiUrl}/gemini/chat`,
       { message: text },
       { headers: this.getHeaders() }
     ).subscribe({
@@ -292,7 +293,7 @@ export class AiChatComponent implements OnInit {
 
     if (this.showDeleteConfirmModal && this.sessionToDelete) {
       const idsStr = this.sessionToDelete.logIds.join(',');
-      this.http.delete(`http://localhost:3001/gemini/history/${idsStr}`, {
+      this.http.delete(`${environment.apiUrl}/gemini/history/${idsStr}`, {
         headers: this.getHeaders()
       }).subscribe({
         next: () => {
@@ -308,7 +309,7 @@ export class AiChatComponent implements OnInit {
         }
       });
     } else if (this.showDeleteAllConfirmModal) {
-      this.http.delete('http://localhost:3001/gemini/history', {
+      this.http.delete(`${environment.apiUrl}/gemini/history`, {
         headers: this.getHeaders()
       }).subscribe({
         next: () => {

@@ -6,7 +6,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 const PdfPrinter = require('pdfmake/js/Printer').default;
-import { getThaiPdfFonts, getGreenSyncPdfStyles } from '../common/pdf-fonts.config';
+import {
+  getThaiPdfFonts,
+  getGreenSyncPdfStyles,
+} from '../common/pdf-fonts.config';
 import { StripeService } from '../subscriptions/stripe.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In, IsNull } from 'typeorm';
@@ -14,6 +17,7 @@ import { Assessment } from '../assessments/entities/assessment.entity';
 import { AssessmentDetail } from '../assessments/entities/assessment-detail.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { Certificate } from '../assessments/entities/certificate.entity';
+import { User } from '../users/entities/user.entity';
 import { ApproveAssessmentDto } from './dto/approve-assessment.dto';
 import { RequestRevisionDto } from './dto/request-revision.dto';
 import { SaveEvidenceReviewDto } from './dto/save-evidence-review.dto';
@@ -486,7 +490,6 @@ export class AssessorService {
     };
   }
 
-
   private countNearDeadline(assessments: Assessment[]): number {
     const threshold = Date.now() - 14 * 24 * 60 * 60 * 1000;
     return assessments.filter((a) => {
@@ -563,7 +566,27 @@ export class AssessorService {
   }
 
   async getPayouts(assessorUserId: number) {
-    const transfers = await this.stripeService.listTransfersForUser(assessorUserId);
+    const user = await this.assessmentRepo.manager.getRepository(User).findOne({
+      where: { id: assessorUserId },
+      relations: ['bank_accounts'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('ไม่พบข้อมูลผู้ประเมิน');
+    }
+
+    const stripeAccount = user.bank_accounts?.find(
+      (b) => b.account_no && b.account_no.startsWith('acct_'),
+    );
+
+    if (!stripeAccount) {
+      throw new BadRequestException(
+        'คุณยังไม่มีบัญชี Stripe Connected Account ที่ถูกต้อง (ต้องขึ้นต้นด้วย acct_) กรุณาเพิ่มข้อมูลในระบบธนาคารเพื่อทำธุรกรรม Payout',
+      );
+    }
+
+    const transfers =
+      await this.stripeService.listTransfersForUser(assessorUserId);
     if (transfers && transfers.length > 0) {
       return transfers.map((t: any) => ({
         id: t.id,
@@ -571,34 +594,28 @@ export class AssessorService {
         bankName: 'Stripe Payout',
         accountNo: t.destination || 'N/A',
         status: t.status === 'successful' ? 'PAID' : 'PENDING',
-        date: new Date(t.created * 1000)
+        date: new Date(t.created * 1000),
       }));
     }
 
-    return [
-      {
-        id: 'tr_mock_1',
-        amount: 3000,
-        bankName: 'Stripe Payout (Simulated)',
-        accountNo: 'acct_mock_assessor',
-        status: 'PAID',
-        date: new Date()
-      }
-    ];
+    return [];
   }
 
   async getCalendar(assessorUserId: number) {
     const assigned = await this.assessmentRepo.find({
       where: { assessor_user_id: assessorUserId, status: In(ACTIVE_STATUSES) },
-      relations: ['organization']
+      relations: ['organization'],
     });
 
     const unassigned = await this.assessmentRepo.find({
-      where: { assessor_user_id: IsNull(), status: In(['PENDING', 'SUBMITTED']) },
-      relations: ['organization']
+      where: {
+        assessor_user_id: IsNull(),
+        status: In(['PENDING', 'SUBMITTED']),
+      },
+      relations: ['organization'],
     });
 
-    const assignedMapped = assigned.map(a => ({
+    const assignedMapped = assigned.map((a) => ({
       id: a.id,
       title: `ตรวจประเมิน: ${a.organization?.name || 'องค์กร'}`,
       date: a.submitted_at || a.created_at,
@@ -606,7 +623,7 @@ export class AssessorService {
       isAssigned: true,
     }));
 
-    const unassignedMapped = unassigned.map(a => ({
+    const unassignedMapped = unassigned.map((a) => ({
       id: a.id,
       title: `[ยังไม่รับงาน] ตรวจประเมิน: ${a.organization?.name || 'องค์กร'}`,
       date: a.submitted_at || a.created_at,
@@ -618,18 +635,32 @@ export class AssessorService {
   }
 
   async generateCertificatePdf(assessmentId: number): Promise<Buffer> {
-    const cert = await this.certificateRepo.findOne({ where: { assessment_id: assessmentId } });
+    const cert = await this.certificateRepo.findOne({
+      where: { assessment_id: assessmentId },
+    });
     if (!cert) throw new NotFoundException('Certificate not found');
     const assessment = await this.getAssessmentDetail(assessmentId);
 
     const printer = new PdfPrinter(getThaiPdfFonts());
 
     const issuedDateStr = cert.issued_at
-      ? new Date(cert.issued_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
-      : new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' });
+      ? new Date(cert.issued_at).toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
+      : new Date().toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
 
     const expiredDateStr = cert.expired_at
-      ? new Date(cert.expired_at).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })
+      ? new Date(cert.expired_at).toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        })
       : '-';
 
     const docDefinition: any = {
@@ -641,16 +672,20 @@ export class AssessorService {
           canvas: [
             {
               type: 'rect',
-              x: 20, y: 20,
-              w: 772, h: 556,
+              x: 20,
+              y: 20,
+              w: 772,
+              h: 556,
               lineWidth: 4,
               lineColor: '#16a34a',
               r: 8,
             },
             {
               type: 'rect',
-              x: 28, y: 28,
-              w: 756, h: 540,
+              x: 28,
+              y: 28,
+              w: 756,
+              h: 540,
               lineWidth: 1,
               lineColor: '#bbf7d0',
               r: 6,
@@ -660,20 +695,50 @@ export class AssessorService {
       ],
       content: [
         { text: '\n' },
-        { text: '🌿 ใบรับรองสำนักงานสีเขียว', style: 'header', alignment: 'center', margin: [0, 20, 0, 8] },
-        { text: 'Green Office Certificate', style: 'subheaderEn', alignment: 'center', margin: [0, 0, 0, 30] },
         {
-          canvas: [{ type: 'line', x1: 80, y1: 0, x2: 690, y2: 0, lineWidth: 1, lineColor: '#d1fae5' }],
+          text: '🌿 ใบรับรองสำนักงานสีเขียว',
+          style: 'header',
+          alignment: 'center',
+          margin: [0, 20, 0, 8],
+        },
+        {
+          text: 'Green Office Certificate',
+          style: 'subheaderEn',
+          alignment: 'center',
+          margin: [0, 0, 0, 30],
+        },
+        {
+          canvas: [
+            {
+              type: 'line',
+              x1: 80,
+              y1: 0,
+              x2: 690,
+              y2: 0,
+              lineWidth: 1,
+              lineColor: '#d1fae5',
+            },
+          ],
           margin: [0, 0, 0, 24],
         },
-        { text: 'ใบรับรองฉบับนี้มอบให้แก่', style: 'label', alignment: 'center', margin: [0, 0, 0, 10] },
+        {
+          text: 'ใบรับรองฉบับนี้มอบให้แก่',
+          style: 'label',
+          alignment: 'center',
+          margin: [0, 0, 0, 10],
+        },
         {
           text: assessment?.organization?.name || 'ชื่อองค์กร',
           style: 'orgName',
           alignment: 'center',
           margin: [0, 0, 0, 20],
         },
-        { text: 'ผ่านการรับรองมาตรฐานสำนักงานสีเขียวในระดับ', style: 'label', alignment: 'center', margin: [0, 0, 0, 10] },
+        {
+          text: 'ผ่านการรับรองมาตรฐานสำนักงานสีเขียวในระดับ',
+          style: 'label',
+          alignment: 'center',
+          margin: [0, 0, 0, 10],
+        },
         {
           text: assessment?.certified_level || 'ระดับรับรอง',
           style: 'level',
@@ -681,7 +746,17 @@ export class AssessorService {
           margin: [0, 0, 0, 30],
         },
         {
-          canvas: [{ type: 'line', x1: 80, y1: 0, x2: 690, y2: 0, lineWidth: 1, lineColor: '#d1fae5' }],
+          canvas: [
+            {
+              type: 'line',
+              x1: 80,
+              y1: 0,
+              x2: 690,
+              y2: 0,
+              lineWidth: 1,
+              lineColor: '#d1fae5',
+            },
+          ],
           margin: [0, 0, 0, 24],
         },
         {
@@ -731,7 +806,7 @@ export class AssessorService {
       try {
         const pdfDoc = printer.createPdfKitDocument(docDefinition);
         const chunks: Buffer[] = [];
-        pdfDoc.on('data', chunk => chunks.push(chunk));
+        pdfDoc.on('data', (chunk) => chunks.push(chunk));
         pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
         pdfDoc.on('error', reject);
         pdfDoc.end();

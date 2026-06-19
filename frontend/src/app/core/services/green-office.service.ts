@@ -3,10 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { isPlatformBrowser } from '@angular/common';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { AssessmentCriteria as GreenCriteria } from '../models/assessment.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class GreenOfficeService {
-  private apiUrl = 'http://localhost:3001/green-office';
+  private apiUrl = `${environment.apiUrl}/green-office`;
   private platformId = inject(PLATFORM_ID);
 
   constructor(private http: HttpClient) {}
@@ -16,7 +17,7 @@ export class GreenOfficeService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+
       }
       const org = JSON.parse(localStorage.getItem('currentOrg') || '{}');
       if (org.id) {

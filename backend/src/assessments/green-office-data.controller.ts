@@ -14,11 +14,12 @@ export class GreenOfficeDataController {
       numericOrgId = parseInt(orgId, 10);
       if (isNaN(numericOrgId)) numericOrgId = 0;
     }
-    const results = await this.greenCriteriaService.findAllForFrontend(numericOrgId);
-    return results.map(r => ({
+    const results =
+      await this.greenCriteriaService.findAllForFrontend(numericOrgId);
+    return results.map((r) => ({
       ...r,
       max_score: r.maxScore,
-      current_score: r.currentScore
+      current_score: r.currentScore,
     }));
   }
 }

@@ -68,19 +68,15 @@ export class FeatureQuotaInterceptor implements NestInterceptor {
 
     // 3. Handle request and log usage on success
     return next.handle().pipe(
-      tap(async () => {
-        try {
-          await this.subscriptionsService.logFeatureUsage(
-            orgId,
-            featureCode,
-            1,
-          );
-        } catch (error) {
-          this.logger.error(
-            `Failed to log feature usage for org ${orgId}, feature ${featureCode}`,
-            error,
-          );
-        }
+      tap(() => {
+        this.subscriptionsService
+          .logFeatureUsage(orgId, featureCode, 1)
+          .catch((error) => {
+            this.logger.error(
+              `Failed to log feature usage for org ${orgId}, feature ${featureCode}`,
+              error,
+            );
+          });
       }),
     );
   }

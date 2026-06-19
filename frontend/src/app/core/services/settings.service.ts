@@ -2,6 +2,7 @@ import { Injectable, inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +10,7 @@ import { isPlatformBrowser } from '@angular/common';
 export class SettingsService {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
-  private apiUrl = 'http://localhost:3001/settings';
+  private apiUrl = `${environment.apiUrl}/settings`;
 
   private getHeaders(): HttpHeaders {
     let token = null;
@@ -20,7 +21,7 @@ export class SettingsService {
       'Content-Type': 'application/json'
     });
     if (token) {
-      headers = headers.set('Authorization', `Bearer ${token}`);
+
     }
     return headers;
   }

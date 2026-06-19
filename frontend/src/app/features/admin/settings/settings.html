@@ -105,6 +105,56 @@
             </div>
         </div>
 
+        <!-- SMTP Integration Settings -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2">
+                        <i class="fa-solid fa-paper-plane me-2 text-primary"></i>ตั้งค่าระบบส่งอีเมล (SMTP Settings)
+                    </h5>
+                    
+                    <div class="alert alert-info border-0 rounded-3 small">
+                        <i class="fa-solid fa-circle-info me-2"></i>
+                        ใช้สำหรับตั้งค่าการส่งอีเมลระบบ เช่น จดหมายต้อนรับ การยืนยันตัวตน และรีเซ็ตรหัสผ่าน สามารถเปิดโหมดจำลอง (Mock) เพื่อส่งข้อมูลกลับไปยังอีเมลแจ้งเตือนกลางได้โดยไม่ต้องใช้ SMTP จริง
+                    </div>
+
+                    <div class="row g-4 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">โหมดการส่งจดหมาย (Mailer Mode)</label>
+                            <select class="form-select" [(ngModel)]="settings['smtp.mode']">
+                                <option value="mock">Mock Mode (จำลองการส่ง)</option>
+                                <option value="live">Live Mode (ส่งผ่าน SMTP จริง)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">อีเมลแจ้งเตือนกลางขององค์กร (Fallback/Central Email)</label>
+                            <input type="email" class="form-control" [(ngModel)]="settings['smtp.fallback_email']" placeholder="admin@greensync.com">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">SMTP Host</label>
+                            <input type="text" class="form-control" [(ngModel)]="settings['smtp.host']" placeholder="smtp.gmail.com" [disabled]="settings['smtp.mode'] !== 'live'">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label small fw-bold text-muted">SMTP Port</label>
+                            <input type="number" class="form-control" [(ngModel)]="settings['smtp.port']" placeholder="587" [disabled]="settings['smtp.mode'] !== 'live'">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-muted">SMTP User</label>
+                            <input type="text" class="form-control" [(ngModel)]="settings['smtp.user']" placeholder="user@gmail.com" [disabled]="settings['smtp.mode'] !== 'live'">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">SMTP Password</label>
+                            <input type="password" class="form-control" [(ngModel)]="settings['smtp.pass']" placeholder="••••••••" autocomplete="new-password" [disabled]="settings['smtp.mode'] !== 'live'">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">ชื่อผู้ส่งเริ่มต้น (Sender Signature)</label>
+                            <input type="text" class="form-control" [(ngModel)]="settings['smtp.sender']" placeholder="Green Office System <no-reply@greensync.com>" [disabled]="settings['smtp.mode'] !== 'live'">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Email Templates -->
         <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">

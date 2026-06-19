@@ -105,9 +105,8 @@ export class AssessorHistoryComponent implements OnInit {
   }
 
   printReport(item: AssessorAssignmentItem): void {
-    // Open evaluate page in new tab and trigger print
-    const url = `/assessor/report/${item.id}`;
-    const win = window.open(url, '_blank');
+    const url = `/assessor/report/${item.id}?print=true`;
+    window.open(url, '_blank');
   }
 
   exportCsv(): void {

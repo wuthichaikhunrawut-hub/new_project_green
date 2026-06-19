@@ -1,28 +1,8 @@
 [
   {
     "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
-    "line": 475,
+    "line": 483,
     "content": "// Fallback to mock removed, always return real calculation"
-  },
-  {
-    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
-    "line": 482,
-    "content": "isMock: false,"
-  },
-  {
-    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
-    "line": 486,
-    "content": "private mockCarbonSummary(orgId: number, orgName?: string): OrgCarbonSummary {"
-  },
-  {
-    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\assessor.service.ts",
-    "line": 512,
-    "content": "isMock: true,"
-  },
-  {
-    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\assessor\\interfaces\\assessor.types.ts",
-    "line": 13,
-    "content": "isMock?: boolean;"
   },
   {
     "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\gemini\\dto\\update-gemini.dto.ts",
@@ -31,13 +11,33 @@
   },
   {
     "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
-    "line": 57,
-    "content": "this.logger.log(`📧 [MOCK EMAIL] To: ${to} | Subject: ${subject}`);"
+    "line": 39,
+    "content": "const mode = (await this.settingsService.getSetting('smtp.mode')) || 'mock';"
   },
   {
     "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
-    "line": 58,
-    "content": "return { mock: true };"
+    "line": 85,
+    "content": "this.logger.warn('⚠️ SMTP config incomplete for LIVE mode. Falling back to MOCK.');"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
+    "line": 89,
+    "content": "// Default to Mock"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
+    "line": 90,
+    "content": "this.logger.log(`📧 [MOCK EMAIL] To: ${to} | Subject: ${subject} | Fallback / Organization Central Notification Email: ${fallbackEmail}`);"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
+    "line": 92,
+    "content": "mock: true,"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\notifications\\mail.service.ts",
+    "line": 97,
+    "content": "messageId: 'mock-id-' + Date.now(),"
   },
   {
     "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\organizations\\dto\\update-organization.dto.ts",
@@ -45,28 +45,38 @@
     "content": "PartialType(CreateOrganizationDto) {} (Empty Function)"
   },
   {
-    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\users\\users.service.ts",
-    "line": 591,
-    "content": "// Mock SMTP: Log invitation email in the backend console"
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\settings\\settings.service.ts",
+    "line": 40,
+    "content": "'smtp.mode': 'mock',"
   },
   {
-    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\users\\users.service.ts",
-    "line": 593,
-    "content": "console.log('📧 MOCK EMAIL: User Invitation');"
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\subscriptions\\stripe.service.ts",
+    "line": 135,
+    "content": "destination: destination || 'acct_mock_assessor',"
   },
   {
-    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\core\\models\\assessor.model.ts",
-    "line": 15,
-    "content": "isMock?: boolean;"
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\subscriptions\\stripe.service.ts",
+    "line": 149,
+    "content": "id: 'tr_mock_' + Math.random().toString(36).substring(2, 15),"
   },
   {
-    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\features\\assessment\\category\\category.ts",
-    "line": 290,
-    "content": "// Fallback for mock files"
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\subscriptions\\stripe.service.ts",
+    "line": 153,
+    "content": "destination: destination || 'acct_mock_assessor',"
   },
   {
-    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\features\\requests\\evaluate\\request-evaluate.ts",
-    "line": 24,
-    "content": "isMock: boolean;"
+    "file": "c:\\Users\\Vteca\\project-green\\backend\\src\\subscriptions\\stripe.service.ts",
+    "line": 157,
+    "content": "description: `Assessor Payout for User ${userId} (Mock)`,"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\features\\admin\\settings\\settings.ts",
+    "line": 48,
+    "content": "'smtp.mode': 'mock',"
+  },
+  {
+    "file": "c:\\Users\\Vteca\\project-green\\frontend\\src\\app\\features\\executive\\goal-setting\\goal-setting.ts",
+    "line": 86,
+    "content": "// Fallback mock goals if no custom goals saved yet"
   }
 ]

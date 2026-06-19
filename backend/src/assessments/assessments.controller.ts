@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   UseGuards,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
@@ -44,41 +45,53 @@ export class AssessmentsController {
 
   @Post()
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
-  create(
-    @Body() createAssessmentDto: CreateAssessmentDto,
-    @Headers() headers: any,
-  ) {
-    return this.assessmentsService.create(
-      createAssessmentDto,
-      this.getOrgId(headers),
-    );
+  create(@Body() createAssessmentDto: CreateAssessmentDto, @Req() req: any) {
+    const role = req.user.role;
+    const orgId =
+      role === 'SYSTEM_ADMIN'
+        ? req.headers['x-org-id']
+          ? parseInt(req.headers['x-org-id'], 10)
+          : 0
+        : req.user.orgId;
+    return this.assessmentsService.create(createAssessmentDto, orgId);
   }
 
   @Get('draft')
-  getDraft(@Headers() headers: any) {
-    const orgId = this.getOrgId(headers);
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
+  getDraft(@Req() req: any) {
+    const orgId = req.user.orgId;
     return this.assessmentsService.getDraft(orgId);
   }
 
   @Get()
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN')
-  findAll(@Headers() headers: any) {
-    const role = this.getUserRole(headers);
-    const assessorId = headers['x-user-id'];
-    return this.assessmentsService.findAll(
-      this.getOrgId(headers),
-      role,
-      assessorId,
-    );
+  findAll(@Req() req: any) {
+    const role = req.user.role;
+    let orgId = req.user.orgId;
+    if (
+      role === 'SYSTEM_ADMIN' ||
+      role === 'ASSESSOR' ||
+      role === 'ASSESSOR_ADMIN'
+    ) {
+      const headerOrgId = req.headers['x-org-id'];
+      orgId = headerOrgId ? parseInt(headerOrgId, 10) : 0;
+    }
+    const assessorId = role === 'ASSESSOR' ? req.user.sub : undefined;
+    return this.assessmentsService.findAll(orgId, role, assessorId);
   }
 
   @Get(':id')
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN')
-  findOne(@Param('id', ParseIntPipe) id: number, @Headers() headers: any) {
-    // Pass 0 as orgId for ASSESSOR/ADMIN to bypass org filter, otherwise enforce it
-    const role = this.getUserRole(headers);
-    const orgId =
-      ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const role = req.user.role;
+    const orgId = [
+      'ASSESSOR',
+      'ASSESSOR_ADMIN',
+      'ADMIN',
+      'SYSTEM_ADMIN',
+    ].includes(role)
+      ? 0
+      : req.user.orgId;
     return this.assessmentsService.findOne(+id, orgId);
   }
 
@@ -87,20 +100,32 @@ export class AssessmentsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateAssessmentDto: UpdateAssessmentDto,
-    @Headers() headers: any,
+    @Req() req: any,
   ) {
-    const role = this.getUserRole(headers);
-    const orgId =
-      ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);
+    const role = req.user.role;
+    const orgId = [
+      'ASSESSOR',
+      'ASSESSOR_ADMIN',
+      'ADMIN',
+      'SYSTEM_ADMIN',
+    ].includes(role)
+      ? 0
+      : req.user.orgId;
     return this.assessmentsService.update(+id, updateAssessmentDto, orgId);
   }
 
   @Delete(':id')
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
-  remove(@Param('id', ParseIntPipe) id: number, @Headers() headers: any) {
-    const role = this.getUserRole(headers);
-    const orgId =
-      ['ASSESSOR', 'ASSESSOR_ADMIN', 'ADMIN', 'SYSTEM_ADMIN'].includes(role) ? 0 : this.getOrgId(headers);
+  remove(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const role = req.user.role;
+    const orgId = [
+      'ASSESSOR',
+      'ASSESSOR_ADMIN',
+      'ADMIN',
+      'SYSTEM_ADMIN',
+    ].includes(role)
+      ? 0
+      : req.user.orgId;
     return this.assessmentsService.remove(+id, orgId);
   }
 }

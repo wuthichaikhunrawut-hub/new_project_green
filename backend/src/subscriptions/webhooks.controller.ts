@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Post,
-  Req,
-  Headers,
-  RawBodyRequest,
-} from '@nestjs/common';
+import { Controller, Post, Req, Headers, RawBodyRequest } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 
 @Controller('webhook')
@@ -19,6 +13,9 @@ export class WebhooksController {
     if (!signature || !request.rawBody) {
       return { received: false, error: 'Missing signature or rawBody' };
     }
-    return this.subscriptionsService.handleStripeWebhook(signature, request.rawBody);
+    return this.subscriptionsService.handleStripeWebhook(
+      signature,
+      request.rawBody,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface AssessorUser {
   id: string;
@@ -30,7 +31,8 @@ export interface AssessorUser {
 @Injectable({ providedIn: 'root' })
 export class AssessorsAdminService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/users';
+  private apiUrl = `${environment.apiUrl}/users`;
+  private adminApiUrl = `${environment.apiUrl}/assessor-admin`;
   private headers = () => new HttpHeaders({ 'Content-Type': 'application/json' });
 
   getAssessors(): Observable<AssessorUser[]> {
@@ -43,5 +45,17 @@ export class AssessorsAdminService {
 
   suspendAssessor(id: string, isActive: boolean): Observable<AssessorUser> {
     return this.http.put<AssessorUser>(`${this.apiUrl}/${id}`, { is_active: isActive }, { headers: this.headers() });
+  }
+
+  getDashboardStats(): Observable<any> {
+    return this.http.get<any>(`${this.adminApiUrl}/dashboard`, { headers: this.headers() });
+  }
+
+  assignAssessor(assessmentId: number, assessorId: number): Observable<any> {
+    return this.http.post<any>(`${this.adminApiUrl}/assignments`, { assessmentId, assessorId }, { headers: this.headers() });
+  }
+
+  processPayout(assessorId: number, amount: number): Observable<any> {
+    return this.http.post<any>(`${this.adminApiUrl}/payouts`, { assessorId, amount }, { headers: this.headers() });
   }
 }

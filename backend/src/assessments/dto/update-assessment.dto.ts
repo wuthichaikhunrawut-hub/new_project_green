@@ -13,4 +13,3 @@ export class UpdateAssessmentDto extends PartialType(CreateAssessmentDto) {
     auditor_comment?: string;
   }[];
 }
-

@@ -43,16 +43,19 @@ export class GreenCriteriaController {
   }
 
   @Post()
+  @Roles('SYSTEM_ADMIN')
   create(@Body() data: Partial<GreenCriteriaMaster>) {
     return this.greenCriteriaService.create(data);
   }
 
   @Put(':id')
+  @Roles('SYSTEM_ADMIN')
   update(@Param('id') id: string, @Body() data: Partial<GreenCriteriaMaster>) {
     return this.greenCriteriaService.update(+id, data);
   }
 
   @Put(':id/score')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'EMPLOYEE', 'USER')
   updateScore(
     @Param('id') id: string,
     @Body('score') score: number,
@@ -67,6 +70,7 @@ export class GreenCriteriaController {
   }
 
   @Delete(':id')
+  @Roles('SYSTEM_ADMIN')
   remove(@Param('id') id: string) {
     return this.greenCriteriaService.remove(+id);
   }

@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 export interface EmissionFactor {
   id: string;
@@ -18,7 +19,7 @@ export interface EmissionFactor {
 })
 export class EmissionFactorsService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3001/admin/emission-factors';
+  private apiUrl = `${environment.apiUrl}/admin/emission-factors`;
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({

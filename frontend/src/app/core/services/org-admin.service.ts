@@ -4,19 +4,20 @@ import { isPlatformBrowser } from '@angular/common';
 import { Observable } from 'rxjs';
 import { RevisionCenterResponse } from '../models/org-admin.model';
 import { Assessment } from '../models/assessment.model';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class OrgAdminService {
   private readonly http = inject(HttpClient);
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly apiUrl = 'http://localhost:3001/org-admin';
+  private readonly apiUrl = `${environment.apiUrl}/org-admin`;
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-        headers = headers.set('Authorization', `Bearer ${token}`);
+
       }
     }
     return headers;

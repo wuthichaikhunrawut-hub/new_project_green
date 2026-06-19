@@ -36,7 +36,14 @@ export class SettingsService implements OnModuleInit {
       'stripe.secret_key': '',
       'stripe.webhook_secret': '',
       'stripe.currency': 'thb',
-      'industry_benchmark': '12000',
+      industry_benchmark: '12000',
+      'smtp.mode': 'mock',
+      'smtp.host': '',
+      'smtp.port': '587',
+      'smtp.user': '',
+      'smtp.pass': '',
+      'smtp.sender': 'Green Office System <no-reply@greensync.com>',
+      'smtp.fallback_email': 'admin@greensync.com',
     };
 
     for (const [key, value] of Object.entries(defaults)) {
@@ -57,6 +64,15 @@ export class SettingsService implements OnModuleInit {
     const settings = await this.settingRepo.find();
     const result: Record<string, any> = {};
     for (const s of settings) {
+      // Send masked values for sensitive keys instead of completely skipping or exposing them
+      if (
+        s.key === 'stripe.secret_key' ||
+        s.key === 'stripe.webhook_secret' ||
+        s.key === 'smtp.pass'
+      ) {
+        result[s.key] = s.value ? '••••••••' : '';
+        continue;
+      }
       result[s.key] = this.parseValue(s.key, s.value);
     }
     return result;
@@ -74,6 +90,7 @@ export class SettingsService implements OnModuleInit {
     if (
       !key.startsWith('payment.') &&
       !key.startsWith('stripe.') &&
+      !key.startsWith('smtp.') &&
       !isNaN(Number(value)) &&
       value !== ''
     ) {
@@ -87,6 +104,20 @@ export class SettingsService implements OnModuleInit {
   ): Promise<Record<string, any>> {
     for (const [key, value] of Object.entries(settings)) {
       const valStr = String(value);
+
+      // Skip updating sensitive keys if they are sent as masked values or empty, but only if they already have an existing value
+      if (
+        (key === 'stripe.secret_key' ||
+          key === 'stripe.webhook_secret' ||
+          key === 'smtp.pass') &&
+        (valStr === '••••••••' || valStr.includes('•') || valStr === '')
+      ) {
+        const existing = await this.settingRepo.findOne({ where: { key } });
+        if (existing && existing.value) {
+          continue;
+        }
+      }
+
       const existing = await this.settingRepo.findOne({ where: { key } });
       if (existing) {
         existing.value = valStr;

@@ -53,23 +53,24 @@ export class AnalyticsService {
     });
     const totalAssessors = verifiedAssessors + pendingAssessors;
 
-    // Revenue Stats
-    const invoices = await this.invoiceRepo.find({ where: { status: 'PAID' } });
-    const subscriptionRevenue = invoices.reduce(
-      (sum, inv) => sum + Number(inv.amount || 0),
-      0,
-    );
+    // Revenue Stats (Total)
+    const revenueSum = await this.invoiceRepo
+      .createQueryBuilder('inv')
+      .where('inv.status = :status', { status: 'PAID' })
+      .select('SUM(inv.amount)', 'sum')
+      .getRawOne<{ sum: string | null }>();
+    const subscriptionRevenue = Number(revenueSum?.sum || 0);
 
     // Revenue this month
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentInvoices = invoices.filter(
-      (inv) => new Date(inv.created_at) >= thirtyDaysAgo,
-    );
-    const revenueMonth = recentInvoices.reduce(
-      (sum, inv) => sum + Number(inv.amount || 0),
-      0,
-    );
+    const recentRevenueSum = await this.invoiceRepo
+      .createQueryBuilder('inv')
+      .where('inv.status = :status', { status: 'PAID' })
+      .andWhere('inv.created_at >= :date', { date: thirtyDaysAgo })
+      .select('SUM(inv.amount)', 'sum')
+      .getRawOne<{ sum: string | null }>();
+    const revenueMonth = Number(recentRevenueSum?.sum || 0);
 
     // Plan Distribution
     const activeSubs = await this.orgSubRepo.find({ relations: ['plan'] });
@@ -94,12 +95,12 @@ export class AnalyticsService {
       where: { status: 'REJECTED' },
     });
 
-    // Global Stats (Calculated)
-    const carbonLogs = await this.carbonLogRepo.find();
-    const carbonReduction = carbonLogs.reduce(
-      (sum, log) => sum + Number(log.total_emission || 0),
-      0,
-    );
+    // Global Stats (Calculated via SQL aggregate)
+    const carbonLogsSum = await this.carbonLogRepo
+      .createQueryBuilder('log')
+      .select('SUM(log.total_emission)', 'sum')
+      .getRawOne<{ sum: string | null }>();
+    const carbonReduction = Number(carbonLogsSum?.sum || 0);
 
     const finishedAssessments = await this.assessmentRepo.count({
       where: [{ status: 'APPROVED' }, { status: 'REJECTED' }],
@@ -111,9 +112,14 @@ export class AnalyticsService {
 
     // Storage stats from database
     const totalFiles = await this.evidenceFileRepo.count();
-    const files = await this.evidenceFileRepo.find({ select: ['file_size'] });
-    const totalSizeBytes = files.reduce((sum, f) => sum + Number(f.file_size || 0), 0);
-    const storageUsageGb = Number((totalSizeBytes / (1024 * 1024 * 1024)).toFixed(4));
+    const storageSum = await this.evidenceFileRepo
+      .createQueryBuilder('file')
+      .select('SUM(file.file_size)', 'sum')
+      .getRawOne<{ sum: string | null }>();
+    const totalSizeBytes = Number(storageSum?.sum || 0);
+    const storageUsageGb = Number(
+      (totalSizeBytes / (1024 * 1024 * 1024)).toFixed(4),
+    );
 
     return {
       totalOrganizations,
@@ -141,24 +147,31 @@ export class AnalyticsService {
   }
 
   async getRevenueStats() {
-    const invoices = await this.invoiceRepo.find({ where: { status: 'PAID' } });
-    
-    // Group by month
-    const monthlyRevenue: Record<string, number> = {};
-    
-    invoices.forEach((inv) => {
-      const date = new Date(inv.created_at);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      monthlyRevenue[monthYear] = (monthlyRevenue[monthYear] || 0) + Number(inv.amount || 0);
-    });
+    const totalRevenueSum = await this.invoiceRepo
+      .createQueryBuilder('inv')
+      .where('inv.status = :status', { status: 'PAID' })
+      .select('SUM(inv.amount)', 'sum')
+      .getRawOne<{ sum: string | null }>();
+    const totalRevenue = Number(totalRevenueSum?.sum || 0);
 
-    const trend = Object.entries(monthlyRevenue)
-      .map(([month, amount]) => ({ month, amount }))
-      .sort((a, b) => a.month.localeCompare(b.month));
+    // Group by month using postgres date formatting
+    const rawTrend = await this.invoiceRepo
+      .createQueryBuilder('inv')
+      .where('inv.status = :status', { status: 'PAID' })
+      .select("TO_CHAR(inv.created_at, 'YYYY-MM')", 'month')
+      .addSelect('SUM(inv.amount)', 'amount')
+      .groupBy("TO_CHAR(inv.created_at, 'YYYY-MM')")
+      .orderBy("TO_CHAR(inv.created_at, 'YYYY-MM')", 'ASC')
+      .getRawMany<{ month: string; amount: string }>();
+
+    const trend = rawTrend.map((t) => ({
+      month: t.month,
+      amount: Number(t.amount || 0),
+    }));
 
     return {
       trend,
-      totalRevenue: invoices.reduce((sum, inv) => sum + Number(inv.amount || 0), 0)
+      totalRevenue,
     };
   }
 }

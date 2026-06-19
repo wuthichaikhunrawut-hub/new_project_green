@@ -5,32 +5,44 @@
     <p class="text-sm text-gray-500 mt-1">Set and monitor your organization's sustainability targets.</p>
   </header>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex justify-center items-center py-20">
+    <div class="loader ease-linear rounded-full border-4 border-t-4 border-emerald-500 h-12 w-12 border-t-transparent animate-spin"></div>
+  </div>
+
+  <div *ngIf="!isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Goal Setting Form -->
     <div class="lg:col-span-1 space-y-6">
       <div class="rounded-xl bg-white p-6 shadow-sm ring-1 ring-gray-900/5">
         <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">Create New Goal</h3>
-        <form class="space-y-4">
+        <form class="space-y-4" (submit)="$event.preventDefault(); saveGoal();">
           <div>
             <label for="goal-title" class="block text-sm font-medium leading-6 text-gray-900">Goal Title</label>
             <div class="mt-2">
-              <input type="text" name="title" id="goal-title" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6" placeholder="e.g. Reduce scope 2 emissions by 20%">
+              <input type="text" name="title" id="goal-title" [(ngModel)]="title" required
+                     class="block w-full rounded-xl border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6" 
+                     placeholder="e.g. Reduce Scope 2 emissions by 20%">
             </div>
           </div>
           <div>
             <label for="target-date" class="block text-sm font-medium leading-6 text-gray-900">Target Date</label>
             <div class="mt-2">
-              <input type="date" name="target-date" id="target-date" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
+              <input type="date" name="target-date" id="target-date" [(ngModel)]="targetDate" required
+                     class="block w-full rounded-xl border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6">
             </div>
           </div>
           <div>
             <label for="baseline" class="block text-sm font-medium leading-6 text-gray-900">Reduction Target (%)</label>
             <div class="mt-2">
-              <input type="number" min="1" max="100" name="baseline" id="baseline" class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
+              <input type="number" min="1" max="100" name="baseline" id="baseline" [(ngModel)]="targetPercent" required
+                     class="block w-full rounded-xl border-0 py-2 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-emerald-600 sm:text-sm sm:leading-6"
+                     placeholder="e.g. 25">
             </div>
           </div>
           <div class="pt-4">
-            <button type="button" class="w-full rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 transition-colors">
+            <button type="submit" [disabled]="isSaving || !title || !targetDate || targetPercent === null"
+                    class="w-full flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600 transition-colors disabled:opacity-50">
+              <i class="fa-solid fa-spinner animate-spin" *ngIf="isSaving"></i>
               Save Goal
             </button>
           </div>
@@ -41,43 +53,37 @@
     <!-- Active Goals List -->
     <div class="lg:col-span-2">
       <div class="rounded-xl bg-white shadow-sm ring-1 ring-gray-900/5 overflow-hidden">
-        <div class="border-b border-gray-200 px-6 py-4">
+        <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-slate-50/50">
           <h3 class="text-base font-semibold leading-6 text-gray-900">Active Goals</h3>
+          <span class="text-xs text-gray-500 font-medium">{{ orgName }}</span>
         </div>
-        <ul role="list" class="divide-y divide-gray-100">
-          <li class="p-6">
+        
+        <div *ngIf="goals.length === 0" class="p-12 text-center text-gray-500">
+          <i class="fa-solid fa-bullseye text-4xl text-slate-300 mb-2 block"></i>
+          ยังไม่มีเป้าหมายคาร์บอนในขณะนี้
+        </div>
+
+        <ul role="list" class="divide-y divide-gray-100" *ngIf="goals.length > 0">
+          <li *ngFor="let goal of goals" class="p-6 hover:bg-slate-50/20 transition-colors">
             <div class="flex items-center justify-between mb-2">
               <div>
-                <p class="text-sm font-semibold text-gray-900">Net Zero by 2030</p>
-                <p class="text-xs text-gray-500">Target: 100% reduction | Deadline: Dec 2030</p>
+                <p class="text-sm font-bold text-gray-900">{{ goal.title }}</p>
+                <p class="text-xs text-gray-500 mt-0.5">Target: {{ goal.targetPercent }}% reduction | Deadline: {{ goal.targetDate | date:'MMMM yyyy' }}</p>
               </div>
-              <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">On Track</span>
+              <span class="inline-flex items-center rounded-xl px-2.5 py-1 text-xs font-bold ring-1 ring-inset"
+                    [ngClass]="getGoalStatusClasses(goal.status)">
+                {{ goal.status }}
+              </span>
             </div>
             <div class="mt-4">
-              <div class="flex justify-between text-xs font-medium text-gray-500 mb-1">
+              <div class="flex justify-between text-xs font-semibold text-gray-500 mb-1">
                 <span>Progress</span>
-                <span>45%</span>
+                <span>{{ goal.progress }}%</span>
               </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-green-600 h-2.5 rounded-full" style="width: 45%"></div>
-              </div>
-            </div>
-          </li>
-          <li class="p-6">
-            <div class="flex items-center justify-between mb-2">
-              <div>
-                <p class="text-sm font-semibold text-gray-900">Reduce Energy Consumption HQ</p>
-                <p class="text-xs text-gray-500">Target: 25% reduction | Deadline: Jun 2027</p>
-              </div>
-              <span class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">At Risk</span>
-            </div>
-            <div class="mt-4">
-              <div class="flex justify-between text-xs font-medium text-gray-500 mb-1">
-                <span>Progress</span>
-                <span>12%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-yellow-500 h-2.5 rounded-full" style="width: 12%"></div>
+              <div class="w-full bg-slate-100 rounded-full h-2 shadow-inner">
+                <div class="h-2 rounded-full transition-all duration-500" 
+                     [ngClass]="getProgressBarClasses(goal.status)"
+                     [style.width.%]="goal.progress"></div>
               </div>
             </div>
           </li>

@@ -43,7 +43,10 @@ export class AssessorAdminController {
 
   @Patch('assessors/:id/status')
   @Roles('SYSTEM_ADMIN', 'ASSESSOR_ADMIN')
-  updateAssessorStatus(@Param('id') id: string, @Body() updateData: { is_active: boolean }) {
+  updateAssessorStatus(
+    @Param('id') id: string,
+    @Body() updateData: { is_active: boolean },
+  ) {
     return this.usersService.update(+id, { is_active: updateData.is_active });
   }
 
@@ -56,7 +59,10 @@ export class AssessorAdminController {
   @Post('assignments')
   @Roles('SYSTEM_ADMIN', 'ASSESSOR_ADMIN')
   assignAssessor(@Body() body: { assessmentId: number; assessorId: number }) {
-    return this.assessorAdminService.assignAssessor(body.assessmentId, body.assessorId);
+    return this.assessorAdminService.assignAssessor(
+      body.assessmentId,
+      body.assessorId,
+    );
   }
 
   @Get('performance/:assessorId')
@@ -68,6 +74,9 @@ export class AssessorAdminController {
   @Post('payouts')
   @Roles('SYSTEM_ADMIN', 'ASSESSOR_ADMIN')
   processPayout(@Body() body: { assessorId: number; amount: number }) {
-    return this.assessorAdminService.processPayout(body.assessorId, body.amount);
+    return this.assessorAdminService.processPayout(
+      body.assessorId,
+      body.amount,
+    );
   }
 }

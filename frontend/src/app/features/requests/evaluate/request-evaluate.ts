@@ -8,6 +8,7 @@ import { Assessment, AssessmentDetail } from '../../../core/models/assessment.mo
 import { ThaiDatePipe } from '../../../shared/pipes/thai-date-pipe';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 interface CarbonScope {
   scope: number;
@@ -154,12 +155,7 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
 
   loadCarbonSummary(orgId: number) {
     this.carbonLoading = true;
-    let token: string | null = null;
-    if (isPlatformBrowser(this.platformId)) {
-      token = localStorage.getItem('access_token');
-    }
-    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
-    this.http.get<CarbonSummary>(`http://localhost:3001/assessor/organizations/${orgId}/carbon-summary`, { headers })
+    this.http.get<CarbonSummary>(`${environment.apiUrl}/assessor/organizations/${orgId}/carbon-summary`)
       .subscribe({
         next: (data) => {
           this.carbonSummary = data;
