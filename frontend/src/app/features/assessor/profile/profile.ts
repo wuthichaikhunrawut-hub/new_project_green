@@ -11,7 +11,7 @@ import { environment } from '../../../../environments/environment';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './profile.html',
-  styleUrls: ['./profile.css']
+  styleUrls: ['./profile.css'],
 })
 export class AssessorProfileComponent implements OnInit {
   private http = inject(HttpClient);
@@ -32,8 +32,8 @@ export class AssessorProfileComponent implements OnInit {
       years_experience: 0,
       education_background: '',
       bank_name: '',
-      bank_account_no: ''
-    }
+      bank_account_no: '',
+    },
   };
 
   ngOnInit() {
@@ -53,44 +53,46 @@ export class AssessorProfileComponent implements OnInit {
 
     const userId = currentUser.id;
 
-    this.http.get<any>(`${environment.apiUrl}/users/profile/me`, {
-      headers: { 'x-user-id': userId.toString() }
-    }).subscribe({
-      next: (data) => {
-        this.user = data || {
-          username: currentUser.username || '',
-          email: (currentUser as any).email || '',
-          role: currentUser.role || 'ASSESSOR',
-          assessor_verified: currentUser.assessor_verified || false
-        };
-        if (data) {
-          this.formData.bio = data.bio || '';
-          if (data.assessor_profile) {
-            this.formData.assessor_profile = {
-              license_number: data.assessor_profile.license_number || '',
-              expertise_tags: data.assessor_profile.expertise_tags || '',
-              years_experience: data.assessor_profile.years_experience || 0,
-              education_background: data.assessor_profile.education_background || '',
-              bank_name: data.assessor_profile.bank_name || '',
-              bank_account_no: data.assessor_profile.bank_account_no || ''
-            };
+    this.http
+      .get<any>(`${environment.apiUrl}/users/profile/me`, {
+        headers: { 'x-user-id': userId.toString() },
+      })
+      .subscribe({
+        next: (data) => {
+          this.user = data || {
+            username: currentUser.username || '',
+            email: (currentUser as any).email || '',
+            role: currentUser.role || 'ASSESSOR',
+            assessor_verified: currentUser.assessor_verified || false,
+          };
+          if (data) {
+            this.formData.bio = data.bio || '';
+            if (data.assessor_profile) {
+              this.formData.assessor_profile = {
+                license_number: data.assessor_profile.license_number || '',
+                expertise_tags: data.assessor_profile.expertise_tags || '',
+                years_experience: data.assessor_profile.years_experience || 0,
+                education_background: data.assessor_profile.education_background || '',
+                bank_name: data.assessor_profile.bank_name || '',
+                bank_account_no: data.assessor_profile.bank_account_no || '',
+              };
+            }
           }
-        }
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Failed to load profile', err);
-        this.user = {
-          username: currentUser.username || '',
-          email: (currentUser as any).email || '',
-          role: currentUser.role || 'ASSESSOR',
-          assessor_verified: currentUser.assessor_verified || false
-        };
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Failed to load profile', err);
+          this.user = {
+            username: currentUser.username || '',
+            email: (currentUser as any).email || '',
+            role: currentUser.role || 'ASSESSOR',
+            assessor_verified: currentUser.assessor_verified || false,
+          };
+          this.isLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   saveProfile() {
@@ -98,26 +100,20 @@ export class AssessorProfileComponent implements OnInit {
     const currentUser = this.authService.currentUserValue;
     if (!currentUser?.id) return;
 
-    this.http.patch<any>(`${environment.apiUrl}/users/profile/me`, this.formData, {
-      headers: { 'x-user-id': currentUser.id.toString() }
-    }).subscribe({
-      next: () => {
-        this.toast.success('อัปเดตข้อมูลสำเร็จ');
-        this.isSaving = false;
-      },
-      error: (err) => {
-        console.error('Failed to update profile', err);
-        this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-        this.isSaving = false;
-      }
-    });
-  }
-
-  connectStripeSimulated() {
-    const randomId = 'acct_' + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
-    this.formData.assessor_profile.bank_name = 'STRIPE';
-    this.formData.assessor_profile.bank_account_no = randomId;
-    this.toast.success('เชื่อมต่อ Stripe Connected Account จำลองสำเร็จ!', 'กรุณากดบันทึกข้อมูลเพื่อเสร็จสิ้นการตั้งค่า');
-    this.cdr.markForCheck();
+    this.http
+      .patch<any>(`${environment.apiUrl}/users/profile/me`, this.formData, {
+        headers: { 'x-user-id': currentUser.id.toString() },
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success('อัปเดตข้อมูลสำเร็จ');
+          this.isSaving = false;
+        },
+        error: (err) => {
+          console.error('Failed to update profile', err);
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+          this.isSaving = false;
+        },
+      });
   }
 }

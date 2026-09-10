@@ -1,13 +1,12 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AssessmentCardComponent } from '../../../shared/components/assessment/assessment-card/assessment-card';
 import { timeout } from 'rxjs';
 import { AssessmentDataService } from '../../../core/services/assessment-data.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { clampNumber, escapeHtml } from '../../../shared/security/html-escape';
 
 interface Category {
   id: number;
@@ -34,13 +33,13 @@ interface Question {
 @Component({
   selector: 'app-green-office-form',
   standalone: true,
-  imports: [CommonModule, BaseChartDirective, AssessmentCardComponent],
+  imports: [CommonModule, AssessmentCardComponent],
   templateUrl: './form.html',
-  styleUrl: './form.css'
+  styleUrl: './form.css',
 })
 export class GreenOfficeFormComponent implements OnInit {
   private toast = inject(ToastService);
-
+  private platformId = inject(PLATFORM_ID);
 
   // ชื่อหมวด (title) hardcode ไว้เพราะ DB ไม่มีเก็บ
   private categoryTitles: { [key: number]: string } = {
@@ -54,7 +53,13 @@ export class GreenOfficeFormComponent implements OnInit {
   };
 
   private categoryWeights: { [key: number]: number } = {
-    1: 25, 2: 15, 3: 15, 4: 15, 5: 15, 6: 15, 7: 10,
+    1: 25,
+    2: 15,
+    3: 15,
+    4: 15,
+    5: 15,
+    6: 15,
+    7: 10,
   };
 
   categories: Category[] = [];
@@ -84,38 +89,43 @@ export class GreenOfficeFormComponent implements OnInit {
   loadCriteria(): void {
     this.isLoading = true;
     this.errorMsg = '';
-    this.assessmentData.getDraft().pipe(
-      timeout(8000)
-    ).subscribe({
-      next: (data: any) => {
-        try {
-          if (!data || !data.details || data.details.length === 0) {
-            this.errorMsg = 'ไม่พบข้อมูลแบบร่างประเมินในระบบ (Data is empty)';
+    this.assessmentData
+      .getDraft()
+      .pipe(timeout(8000))
+      .subscribe({
+        next: (data: any) => {
+          try {
+            if (!data || !data.details || data.details.length === 0) {
+              this.errorMsg = 'ไม่พบข้อมูลแบบร่างประเมินในระบบ (Data is empty)';
+              this.isLoading = false;
+              return;
+            }
+            this.assessmentId = data.id;
+            this.buildFromApiData(data.details);
+            this.cdr.markForCheck();
+          } catch (e: any) {
+            console.error('Error parsing assessment data:', e);
+            this.errorMsg = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล: ' + e.message;
+          } finally {
             this.isLoading = false;
-            return;
+            this.cdr.markForCheck();
           }
-          this.assessmentId = data.id;
-          this.buildFromApiData(data.details);
-          this.cdr.markForCheck();
-        } catch (e: any) {
-          console.error('Error parsing assessment data:', e);
-          this.errorMsg = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล: ' + e.message;
-        } finally {
+        },
+        error: (err) => {
+          console.error('Failed to load assessment draft', err);
+          if (err.name === 'TimeoutError') {
+            this.errorMsg =
+              'การเชื่อมต่อล่าช้าเกินไป (Connection Timeout) กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อผู้ดูแลระบบ';
+          } else {
+            this.errorMsg =
+              'ไม่สามารถโหลดข้อมูลแบบร่างได้ (' +
+              (err.message || err.statusText || 'Unknown Error') +
+              ')';
+          }
           this.isLoading = false;
           this.cdr.markForCheck();
-        }
-      },
-      error: (err) => {
-        console.error('Failed to load assessment draft', err);
-        if (err.name === 'TimeoutError') {
-          this.errorMsg = 'การเชื่อมต่อล่าช้าเกินไป (Connection Timeout) กรุณาตรวจสอบอินเทอร์เน็ตหรือติดต่อผู้ดูแลระบบ';
-        } else {
-          this.errorMsg = 'ไม่สามารถโหลดข้อมูลแบบร่างได้ (' + (err.message || err.statusText || 'Unknown Error') + ')';
-        }
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    });
+        },
+      });
   }
 
   private buildFromApiData(details: any[]): void {
@@ -145,7 +155,7 @@ export class GreenOfficeFormComponent implements OnInit {
 
     // สร้าง categories จาก catNums ที่มีจริงใน DB
     const sortedCatNums = Array.from(catNums).sort((a, b) => a - b);
-    this.categories = sortedCatNums.map(num => ({
+    this.categories = sortedCatNums.map((num) => ({
       id: num,
       title: this.categoryTitles[num] ?? `หมวดที่ ${num}`,
       progress: 0,
@@ -155,14 +165,7 @@ export class GreenOfficeFormComponent implements OnInit {
     }));
 
     // อัปเดต Radar Chart Labels
-    this.radarChartLabels = this.categories.map(c => `หมวด ${c.id}`);
-    this.radarChartData = {
-      labels: this.radarChartLabels,
-      datasets: [{
-        ...this.radarChartData.datasets[0],
-        data: this.categories.map(() => 0),
-      }]
-    };
+    this.radarChartLabels = this.categories.map((c) => `หมวด ${c.id}`);
 
     // เลือก category แรกเป็นค่าเริ่มต้น
     if (this.categories.length > 0) {
@@ -172,43 +175,74 @@ export class GreenOfficeFormComponent implements OnInit {
   }
 
   recalculateAllCategoriesProgress() {
-    this.categories.forEach(cat => {
+    this.categories.forEach((cat) => {
       const questions = this.allQuestions[cat.id] ?? [];
-      const answeredCount = questions.filter(q => q.score !== null && q.score > 0).length;
-      cat.progress = questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+      const answeredCount = questions.filter((q) => q.score !== null && q.score > 0).length;
+      cat.progress =
+        questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
 
       const sumScores = questions.reduce((acc, q) => acc + (q.score || 0), 0);
       const maxPossible = questions.reduce((acc, q) => acc + (q.max_score || 5), 0);
-      cat.currentScore = maxPossible > 0
-        ? Number(((sumScores / maxPossible) * cat.totalWeight).toFixed(2))
-        : 0;
+      cat.currentScore =
+        maxPossible > 0 ? Number(((sumScores / maxPossible) * cat.totalWeight).toFixed(2)) : 0;
 
       if (cat.progress === 100) cat.status = 'completed';
       else if (cat.progress > 0) cat.status = 'in-progress';
       else cat.status = 'pending';
     });
 
-    this.radarChartData = {
-      labels: this.radarChartLabels,
-      datasets: [{
-        ...this.radarChartData.datasets[0],
-        data: this.categories.map(c => (c.currentScore / c.totalWeight) * 100)
-      }]
-    };
+    this.renderRadarChart();
+  }
+
+  private radarChartInstance: any = null;
+  private async renderRadarChart() {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const el = document.querySelector('#radarChart');
+    if (!el) return;
+
+    try {
+      const ApexCharts = (await import('apexcharts')).default;
+      const seriesData = this.categories.map((c) =>
+        Math.round((c.currentScore / c.totalWeight) * 100),
+      );
+      const categoriesLabels = this.categories.map((c) => `หมวด ${c.id}`);
+
+      const options = {
+        series: [{ name: 'คะแนนประเมิน (%)', data: seriesData }],
+        chart: {
+          height: 220,
+          type: 'radar',
+          toolbar: { show: false },
+        },
+        xaxis: { categories: categoriesLabels },
+        colors: ['#059669'],
+        fill: { opacity: 0.25 },
+        markers: { size: 3, colors: ['#059669'] },
+      };
+
+      if (this.radarChartInstance) {
+        this.radarChartInstance.updateOptions(options);
+      } else {
+        this.radarChartInstance = new ApexCharts(el, options);
+        this.radarChartInstance.render();
+      }
+    } catch {
+      // Non-critical chart rendering fallback
+    }
   }
 
   get filteredQuestions(): Question[] {
     if (!this.activeSubCategory) return this.questions;
-    return this.questions.filter(q => q.id.startsWith(this.activeSubCategory + '.'));
+    return this.questions.filter((q) => q.id.startsWith(this.activeSubCategory + '.'));
   }
 
   get activeCategoryTitle(): string {
-    const category = this.categories.find(c => c.id === this.activeCategory);
+    const category = this.categories.find((c) => c.id === this.activeCategory);
     return category ? category.title : '';
   }
 
   get activeCategoryData(): Category {
-    return this.categories.find(c => c.id === this.activeCategory) ?? this.categories[0];
+    return this.categories.find((c) => c.id === this.activeCategory) ?? this.categories[0];
   }
 
   get totalScore(): number {
@@ -231,49 +265,14 @@ export class GreenOfficeFormComponent implements OnInit {
     return 'bg-red-100 text-red-700 border-red-200';
   }
 
-  // ── Radar Chart ──
-  public radarChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: {
-      r: {
-        angleLines: { color: 'rgba(0,0,0,0.1)' },
-        grid: { color: 'rgba(0,0,0,0.1)' },
-        pointLabels: {
-          font: { family: "'IBM Plex Sans Thai', sans-serif", size: 10, weight: 'bold' },
-          color: '#64748b'
-        },
-        ticks: { display: false, stepSize: 20 },
-        suggestedMin: 0,
-        suggestedMax: 100
-      }
-    },
-    plugins: { legend: { display: false } }
-  };
-
   public radarChartLabels: string[] = [];
-  public radarChartData: ChartData<'radar'> = {
-    labels: [],
-    datasets: [{
-      data: [],
-      label: 'คะแนนเฉลี่ย (%)',
-      backgroundColor: 'rgba(22, 163, 74, 0.2)',
-      borderColor: '#16a34a',
-      pointBackgroundColor: '#16a34a',
-      pointBorderColor: '#fff',
-      pointHoverBackgroundColor: '#fff',
-      pointHoverBorderColor: '#16a34a',
-      borderWidth: 3,
-    }]
-  };
-  public radarChartType: ChartType = 'radar';
 
   selectCategory(id: number) {
     this.activeCategory = id;
     this.questions = this.allQuestions[id] ?? [];
 
     const subSet = new Set<string>();
-    this.questions.forEach(q => {
+    this.questions.forEach((q) => {
       const parts = q.id.split('.');
       if (parts.length >= 2) subSet.add(`${parts[0]}.${parts[1]}`);
     });
@@ -291,7 +290,7 @@ export class GreenOfficeFormComponent implements OnInit {
     if (currentIndex < this.subCategories.length - 1) {
       this.selectSubCategory(this.subCategories[currentIndex + 1]);
     } else {
-      const catIndex = this.categories.findIndex(c => c.id === this.activeCategory);
+      const catIndex = this.categories.findIndex((c) => c.id === this.activeCategory);
       if (catIndex < this.categories.length - 1) {
         this.selectCategory(this.categories[catIndex + 1].id);
       }
@@ -303,7 +302,7 @@ export class GreenOfficeFormComponent implements OnInit {
     if (currentIndex > 0) {
       this.selectSubCategory(this.subCategories[currentIndex - 1]);
     } else {
-      const catIndex = this.categories.findIndex(c => c.id === this.activeCategory);
+      const catIndex = this.categories.findIndex((c) => c.id === this.activeCategory);
       if (catIndex > 0) {
         this.selectCategory(this.categories[catIndex - 1].id);
         this.activeSubCategory = this.subCategories[this.subCategories.length - 1];
@@ -314,7 +313,7 @@ export class GreenOfficeFormComponent implements OnInit {
   onCardChanged(index: number, event: any) {
     // หา index จริงใน this.questions จาก filteredQuestions
     const changedQ = this.filteredQuestions[index];
-    const realIndex = this.questions.findIndex(q => q.id === changedQ.id);
+    const realIndex = this.questions.findIndex((q) => q.id === changedQ.id);
     if (realIndex > -1) {
       this.questions[realIndex] = { ...this.questions[realIndex], ...event };
     }
@@ -322,32 +321,26 @@ export class GreenOfficeFormComponent implements OnInit {
   }
 
   recalculateProgress() {
-    const catIndex = this.categories.findIndex(c => c.id === this.activeCategory);
+    const catIndex = this.categories.findIndex((c) => c.id === this.activeCategory);
     if (catIndex > -1) {
       const cat = this.categories[catIndex];
       const questions = this.allQuestions[cat.id] ?? [];
 
-      const answeredCount = questions.filter(q => q.score !== null).length;
-      cat.progress = questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
+      const answeredCount = questions.filter((q) => q.score !== null).length;
+      cat.progress =
+        questions.length > 0 ? Math.round((answeredCount / questions.length) * 100) : 0;
 
       const sumScores = questions.reduce((acc, q) => acc + (q.score || 0), 0);
       const maxPossible = questions.reduce((acc, q) => acc + (q.max_score || 5), 0);
-      cat.currentScore = maxPossible > 0
-        ? Number(((sumScores / maxPossible) * cat.totalWeight).toFixed(2))
-        : 0;
+      cat.currentScore =
+        maxPossible > 0 ? Number(((sumScores / maxPossible) * cat.totalWeight).toFixed(2)) : 0;
 
       if (cat.progress === 100) cat.status = 'completed';
       else if (cat.progress > 0) cat.status = 'in-progress';
       else cat.status = 'pending';
     }
 
-    this.radarChartData = {
-      labels: this.radarChartLabels,
-      datasets: [{
-        ...this.radarChartData.datasets[0],
-        data: this.categories.map(c => (c.currentScore / c.totalWeight) * 100)
-      }]
-    };
+    this.renderRadarChart();
   }
 
   saveProgress() {
@@ -355,34 +348,34 @@ export class GreenOfficeFormComponent implements OnInit {
 
     const detailsToUpdate: any[] = [];
     for (const catId in this.allQuestions) {
-      this.allQuestions[catId].forEach(q => {
+      this.allQuestions[catId].forEach((q) => {
         detailsToUpdate.push({
           assessment_detail_id: q.detailId,
           self_score: q.score || 0,
-          applicant_comment: q.details || ''
+          applicant_comment: q.details || '',
         });
       });
     }
 
     const payload = {
       total_score: this.totalScore,
-      details: detailsToUpdate
+      details: detailsToUpdate,
     };
 
     this.toast.success('กำลังบันทึกข้อมูลแบบร่าง...');
     this.assessmentData.updateDraft(this.assessmentId, payload).subscribe({
       next: () => this.toast.success('บันทึกฉบับร่างเรียบร้อยแล้ว!'),
-      error: () => this.toast.error('ไม่สามารถบันทึกแบบร่างได้ กรุณาลองใหม่อีกครั้ง')
+      error: () => this.toast.error('ไม่สามารถบันทึกแบบร่างได้ กรุณาลองใหม่อีกครั้ง'),
     });
   }
 
   async downloadPDF() {
     this.toast.success('กำลังสร้างรายงานประเมินตนเอง (PDF)... กรุณารอสักครู่');
-    
+
     try {
       const { jsPDF } = await import('jspdf');
       const { default: html2canvas } = await import('html2canvas');
-      
+
       const printContainer = document.createElement('div');
       printContainer.style.position = 'absolute';
       printContainer.style.left = '-9999px';
@@ -391,6 +384,20 @@ export class GreenOfficeFormComponent implements OnInit {
       printContainer.style.padding = '0';
       printContainer.style.background = '#ffffff';
       printContainer.style.color = '#1e293b';
+
+      // This report is assembled as an HTML string for html2canvas. Escape
+      // every dynamic text value and normalize numeric values before they are
+      // inserted into markup or inline styles.
+      const assessmentLevel = escapeHtml(this.assessmentLevel);
+      const assessmentId = escapeHtml(this.assessmentId || 'NEW-001');
+      const totalScore = clampNumber(this.totalScore, 0, 100);
+      const reportDate = escapeHtml(
+        new Date().toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+      );
 
       let htmlContent = `
         <div style="font-family: 'Sarabun', 'Inter', sans-serif; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
@@ -404,7 +411,7 @@ export class GreenOfficeFormComponent implements OnInit {
               </div>
               <div style="border: 2px double #34d399; padding: 12px; border-radius: 8px; text-align: center; background: rgba(255,255,255,0.05); min-width: 130px;">
                 <div style="color: #a7f3d0; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 2px;">ระดับผลการประเมิน</div>
-                <div style="color: #ffffff; font-size: 16px; font-weight: 800;">${this.assessmentLevel}</div>
+                <div style="color: #ffffff; font-size: 16px; font-weight: 800;">${assessmentLevel}</div>
               </div>
             </div>
           </div>
@@ -417,11 +424,11 @@ export class GreenOfficeFormComponent implements OnInit {
                 <span style="display: block; font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">บัญชีผู้ดูแลระบบองค์กร (Organization Admin)</span>
                 
                 <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">รหัสการประเมิน</span>
-                <span style="display: block; font-size: 14px; font-family: monospace; font-weight: bold; color: #334155;">GS-SELF-${this.assessmentId || 'NEW-001'}</span>
+                <span style="display: block; font-size: 14px; font-family: monospace; font-weight: bold; color: #334155;">GS-SELF-${assessmentId}</span>
               </div>
               <div style="text-align: right;">
                 <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">วันที่จัดทำรายงาน</span>
-                <span style="display: block; font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <span style="display: block; font-size: 15px; font-weight: bold; color: #0f172a; margin-bottom: 12px;">${reportDate}</span>
                 
                 <span style="display: block; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: bold; margin-bottom: 4px;">มาตรฐานอ้างอิง</span>
                 <span style="display: block; font-size: 14px; font-weight: bold; color: #047857;">Green Office 2569</span>
@@ -433,7 +440,7 @@ export class GreenOfficeFormComponent implements OnInit {
               <!-- Score Showcase Card -->
               <div style="flex: 1; background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 24px; text-align: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
                 <span style="display: block; font-size: 12px; font-weight: 700; color: #065f46; text-transform: uppercase; margin-bottom: 8px;">คะแนนรวมที่ได้</span>
-                <span style="font-size: 40px; font-weight: 900; color: #047857;">${this.totalScore}</span>
+                <span style="font-size: 40px; font-weight: 900; color: #047857;">${totalScore}</span>
                 <span style="font-size: 16px; color: #065f46; font-weight: 700;">/ 100</span>
                 <span style="display: block; font-size: 11px; color: #065f46; margin-top: 8px; opacity: 0.8;">*คะแนนถ่วงน้ำหนักเฉลี่ยสมบูรณ์</span>
               </div>
@@ -463,20 +470,25 @@ export class GreenOfficeFormComponent implements OnInit {
               <tbody>
       `;
 
-      this.categories.forEach(cat => {
+      this.categories.forEach((cat) => {
+        const title = escapeHtml(cat.title);
+        const progress = clampNumber(cat.progress, 0, 100);
+        const currentScore = clampNumber(cat.currentScore, 0, 100);
+        const totalWeight = clampNumber(cat.totalWeight, 0, 100);
+        const isComplete = progress === 100;
         htmlContent += `
           <tr style="border-bottom: 1px solid #e2e8f0;">
-            <td style="padding: 16px; font-size: 13px; font-weight: bold; color: #1e293b;">${cat.title}</td>
-            <td style="padding: 16px; font-size: 13px; text-align: center; color: #64748b;">${cat.totalWeight} คะแนน</td>
+            <td style="padding: 16px; font-size: 13px; font-weight: bold; color: #1e293b;">${title}</td>
+            <td style="padding: 16px; font-size: 13px; text-align: center; color: #64748b;">${totalWeight} คะแนน</td>
             <td style="padding: 16px; vertical-align: middle;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 11px; font-weight: bold; color: ${cat.progress === 100 ? '#047857' : '#b45309'};">${cat.progress}%</span>
+                <span style="font-size: 11px; font-weight: bold; color: ${isComplete ? '#047857' : '#b45309'};">${progress}%</span>
                 <div style="flex: 1; background-color: #f1f5f9; height: 6px; border-radius: 9999px; overflow: hidden; min-width: 100px; border: 1px solid #e2e8f0;">
-                  <div style="background-color: ${cat.progress === 100 ? '#10b981' : '#f59e0b'}; height: 6px; border-radius: 9999px; width: ${cat.progress}%;"></div>
+                  <div style="background-color: ${isComplete ? '#10b981' : '#f59e0b'}; height: 6px; border-radius: 9999px; width: ${progress}%;"></div>
                 </div>
               </div>
             </td>
-            <td style="padding: 16px; font-size: 13px; text-align: right; font-weight: bold; color: #047857;">${cat.currentScore} / ${cat.totalWeight}</td>
+            <td style="padding: 16px; font-size: 13px; text-align: right; font-weight: bold; color: #047857;">${currentScore} / ${totalWeight}</td>
           </tr>
         `;
       });
@@ -507,7 +519,7 @@ export class GreenOfficeFormComponent implements OnInit {
 
           <!-- Premium Corporate Footer -->
           <div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-size: 10px; color: #94a3b8;">เอกสารรายงานประเมินอย่างเป็นทางการเลขที่: GS-REP-${this.assessmentId || '001'}</span>
+            <span style="font-size: 10px; color: #94a3b8;">เอกสารรายงานประเมินอย่างเป็นทางการเลขที่: GS-REP-${assessmentId}</span>
             <span style="font-size: 10px; color: #94a3b8;">ลิขสิทธิ์ © ${new Date().getFullYear()} Green Sync. All Rights Reserved.</span>
           </div>
         </div>
@@ -518,17 +530,18 @@ export class GreenOfficeFormComponent implements OnInit {
 
       const canvas = await html2canvas(printContainer, {
         scale: 2,
-        useCORS: true
+        useCORS: true,
       });
-      
+
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
+
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      pdf.save(`GreenSync_Self_Assessment_${this.assessmentId || 'Report'}.pdf`);
-      
+      const safeFileId = String(this.assessmentId || 'Report').replace(/[^A-Za-z0-9_-]/g, '_');
+      pdf.save(`GreenSync_Self_Assessment_${safeFileId}.pdf`);
+
       document.body.removeChild(printContainer);
       this.toast.success('ดาวน์โหลดรายงาน PDF สำเร็จแล้ว!');
     } catch (error) {
@@ -538,17 +551,19 @@ export class GreenOfficeFormComponent implements OnInit {
   }
 
   submitAssessment() {
-    const isAllComplete = this.categories.every(c => c.progress === 100);
+    const isAllComplete = this.categories.every((c) => c.progress === 100);
     const incompleteItems: string[] = [];
 
     for (const catId in this.allQuestions) {
-      this.allQuestions[catId].forEach(q => {
+      this.allQuestions[catId].forEach((q) => {
         if (q.score === 5 && q.fileCount === 0) incompleteItems.push(q.id);
       });
     }
 
     if (incompleteItems.length > 0) {
-      this.toast.error(`ไม่สามารถส่งแบบประเมินได้:\nข้อต่อไปนี้ได้รับคะแนนเต็ม แต่ยังไม่มีการแนบหลักฐาน: ${incompleteItems.join(', ')}`);
+      this.toast.error(
+        `ไม่สามารถส่งแบบประเมินได้:\nข้อต่อไปนี้ได้รับคะแนนเต็ม แต่ยังไม่มีการแนบหลักฐาน: ${incompleteItems.join(', ')}`,
+      );
       return;
     }
 
@@ -556,8 +571,11 @@ export class GreenOfficeFormComponent implements OnInit {
       if (!this.assessmentId) return;
       const payload = { status: 'SUBMITTED', total_score: this.totalScore };
       this.assessmentData.updateDraft(this.assessmentId, payload).subscribe({
-        next: () => this.toast.success('ส่งแบบประเมินเรียบร้อยแล้ว! คณะกรรมการจะดำเนินการตรวจประเมินในลำดับถัดไป'),
-        error: () => this.toast.error('เกิดข้อผิดพลาดในการส่งแบบประเมิน')
+        next: () =>
+          this.toast.success(
+            'ส่งแบบประเมินเรียบร้อยแล้ว! คณะกรรมการจะดำเนินการตรวจประเมินในลำดับถัดไป',
+          ),
+        error: () => this.toast.error('เกิดข้อผิดพลาดในการส่งแบบประเมิน'),
       });
     } else {
       this.toast.success('กรุณากรอกข้อมูลให้ครบทุกหมวดก่อนส่งแบบประเมิน');
@@ -568,14 +586,14 @@ export class GreenOfficeFormComponent implements OnInit {
     const weakPoints: any[] = [];
     Object.keys(this.allQuestions).forEach((catId: any) => {
       const qs = this.allQuestions[catId];
-      qs.forEach(q => {
+      qs.forEach((q) => {
         if (q.score !== null && q.score < q.max_score) {
           weakPoints.push({
             id: q.id,
             title: q.title,
             score: q.score,
             maxScore: q.max_score,
-            comment: q.details
+            comment: q.details,
           });
         }
       });
@@ -598,7 +616,7 @@ export class GreenOfficeFormComponent implements OnInit {
         this.aiLoading = false;
         this.showAIModal = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 }

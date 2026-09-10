@@ -15,7 +15,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((error) => {
       console.error('🚨 Error Intercepted:', error);
-      
+
       // จัดการ 401 Unauthorized - token หมดอายุหรือไม่ถูกต้อง
       if (error.status === 401) {
         if (isPlatformBrowser(platformId)) {
@@ -26,20 +26,23 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
           // Redirect ไป login
           router.navigate(['/login']);
         } else {
-          console.warn('🔐 401 Unauthorized on Server - Ignoring redirect and suppressing error to prevent SSR crash');
+          console.warn(
+            '🔐 401 Unauthorized on Server - Ignoring redirect and suppressing error to prevent SSR crash',
+          );
           return EMPTY;
         }
       }
-      
+
       // If we are on the server and it's any other error, also suppress it to prevent SSR crash
       if (!isPlatformBrowser(platformId)) {
-         return EMPTY;
+        return EMPTY;
       }
-      
+
       // ดึงข้อความแจ้งเตือนจาก API หรือใช้ Default Message
       let errorMsg = 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
       if (error.error && error.error.message) {
-        errorMsg = typeof error.error.message === 'string' ? error.error.message : error.error.message[0];
+        errorMsg =
+          typeof error.error.message === 'string' ? error.error.message : error.error.message[0];
       } else if (error.message) {
         errorMsg = error.message;
       }
@@ -50,6 +53,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       return throwError(() => error);
-    })
+    }),
   );
 };

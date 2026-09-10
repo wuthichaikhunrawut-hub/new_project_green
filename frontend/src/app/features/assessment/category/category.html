@@ -1,161 +1,226 @@
 <div class="page-container" *ngIf="categoryData">
+  <!-- ════════ HEADER ════════ -->
+  <header class="page-header">
+    <div class="header-left">
+      <h1 class="page-title">{{ categoryData.title }}</h1>
+      <p class="page-subtitle">{{ categoryData.description }}</p>
+    </div>
+    <div class="header-right">
+      <div class="score-card">
+        <span class="score-label">คะแนนเต็ม</span>
+        <span class="score-value">{{ categoryData.totalScore }} <small>คะแนน</small></span>
+      </div>
+    </div>
+  </header>
 
-    <!-- ════════ HEADER ════════ -->
-    <header class="page-header">
-        <div class="header-left">
-            <h1 class="page-title">{{ categoryData.title }}</h1>
-            <p class="page-subtitle">{{ categoryData.description }}</p>
-        </div>
-        <div class="header-right">
-            <div class="score-card">
-                <span class="score-label">คะแนนเต็ม</span>
-                <span class="score-value">{{ categoryData.totalScore }} <small>คะแนน</small></span>
-            </div>
-        </div>
-    </header>
+  <!-- ════════ PROGRESS BAR ════════ -->
+  <div class="progress-section">
+    <div class="progress-header">
+      <span class="progress-label">ความคืบหน้าการประเมิน</span>
+      <span class="progress-percent">{{ categoryData.progress }}%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" [style.width.%]="categoryData.progress"></div>
+    </div>
+  </div>
 
-    <!-- ════════ PROGRESS BAR ════════ -->
-    <div class="progress-section">
-        <div class="progress-header">
-            <span class="progress-label">ความคืบหน้าการประเมิน</span>
-            <span class="progress-percent">{{ categoryData.progress }}%</span>
-        </div>
-        <div class="progress-track">
-            <div class="progress-fill" [style.width.%]="categoryData.progress"></div>
-        </div>
+  <!-- ════════ REQUIREMENTS LIST ════════ -->
+  <div class="requirements-container">
+    <!-- Empty State / Edge case -->
+    <div class="empty-state" *ngIf="categoryData.questions.length === 0">
+      <i class="fa-solid fa-list-check empty-icon"></i>
+      <p>ไม่มีข้อกำหนดสำหรับหมวดหมู่นี้</p>
     </div>
 
-    <!-- ════════ REQUIREMENTS LIST ════════ -->
-    <div class="requirements-container">
-
-        <!-- Empty State / Edge case -->
-        <div class="empty-state" *ngIf="categoryData.questions.length === 0">
-            <i class="fa-solid fa-list-check empty-icon"></i>
-            <p>ไม่มีข้อกำหนดสำหรับหมวดหมู่นี้</p>
+    <!-- Requirement Card -->
+    <div class="req-card" *ngFor="let q of categoryData.questions; let i = index">
+      <!-- Card Header: Title & Status -->
+      <div class="req-header">
+        <div class="req-title-wrapper">
+          <div class="req-badge">{{ q.id }}</div>
+          <div class="req-title-group">
+            <h3 class="req-title">{{ q.text }}</h3>
+            <p class="req-desc" *ngIf="q.description">{{ q.description }}</p>
+          </div>
         </div>
 
-        <!-- Requirement Card -->
-        <div class="req-card" *ngFor="let q of categoryData.questions; let i = index">
-
-            <!-- Card Header: Title & Status -->
-            <div class="req-header">
-                <div class="req-title-wrapper">
-                    <div class="req-badge">{{ q.id }}</div>
-                    <div class="req-title-group">
-                        <h3 class="req-title">{{ q.text }}</h3>
-                        <p class="req-desc" *ngIf="q.description">{{ q.description }}</p>
-                    </div>
-                </div>
-
-                <!-- Status Badge -->
-                <div class="status-badge" [class.status-approved]="q.status === 'approved'"
-                    [class.status-pending]="q.status === 'pending'" [class.status-rejected]="q.status === 'rejected'"
-                    [class.status-uploaded]="q.status === 'uploaded'">
-                    <i class="fa-solid fa-check-circle" *ngIf="q.status === 'approved'"></i>
-                    <i class="fa-solid fa-clock" *ngIf="q.status === 'pending'"></i>
-                    <i class="fa-solid fa-circle-exclamation" *ngIf="q.status === 'rejected'"></i>
-                    <i class="fa-solid fa-file-arrow-up" *ngIf="q.status === 'uploaded'"></i>
-                    <span>
-                        {{ q.status === 'approved' ? 'ผ่านเกณฑ์' :
-                        q.status === 'pending' ? 'รอหลักฐาน' :
-                        q.status === 'uploaded' ? 'รอตรวจสอบ' : 'ไม่ผ่านเกณฑ์' }}
-                    </span>
-                </div>
-            </div>
-
-            <!-- Self Assessment Section -->
-            <div class="self-assessment-section" style="padding: 1rem; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; margin-bottom: 1rem; background-color: #f8fafc;">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <label class="form-label" style="font-size: 0.875rem; font-weight: 600; color: #475569;">ประเมินตนเอง (คะแนนเต็ม {{ q.maxScore }})</label>
-                        <input type="number" class="form-control" [(ngModel)]="q.selfScore" [max]="q.maxScore" min="0" step="0.5" placeholder="คะแนน">
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label" style="font-size: 0.875rem; font-weight: 600; color: #475569;">คำอธิบายเพิ่มเติม</label>
-                        <div class="input-group">
-                            <input type="text" class="form-control" [(ngModel)]="q.applicantComment" placeholder="กรอกคำอธิบายการประเมิน...">
-                            <button class="btn btn-outline-success" type="button" (click)="saveDetail(q)">
-                                <i class="fa-solid fa-save"></i> บันทึก
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Evidence Section -->
-            <div class="evidence-section">
-
-                <!-- Upload Action -->
-                <div class="upload-area">
-                    <div class="upload-controls">
-                        <button class="btn-upload" (click)="triggerUpload(q.id)" [disabled]="isUploading">
-                            <i class="fa-solid fa-plus"></i>
-                            เลือกไฟล์
-                        </button>
-                        <button class="btn-confirm" *ngIf="pendingFiles[q.id] && pendingFiles[q.id].length > 0" 
-                                (click)="confirmUpload(q.id)" [disabled]="isUploading">
-                            <i class="fa-solid" [class.fa-cloud-arrow-up]="!isUploading" [class.fa-spinner]="isUploading" [class.fa-spin]="isUploading"></i>
-                            {{ isUploading ? 'กำลังอัปโหลด...' : 'กดยืนยันเพื่ออัปโหลด (' + pendingFiles[q.id].length + ')' }}
-                        </button>
-                    </div>
-                    <span class="upload-hint">รองรับไฟล์: PDF, JPG, PNG (สูงสุด 5MB)</span>
-                </div>
-
-                <!-- Pending Files (Waiting for confirm) -->
-                <div class="pending-list" *ngIf="pendingFiles[q.id] && pendingFiles[q.id].length > 0">
-                    <div class="pending-item" *ngFor="let pFile of pendingFiles[q.id]; let pIndex = index">
-                        <div class="file-info">
-                            <i class="fa-solid fa-clock-rotate-left pending-icon"></i>
-                            <div class="file-details">
-                                <span class="file-name text-amber-600">{{ pFile.name }}</span>
-                                <span class="file-status text-amber-500">รอยืนยันการอัปโหลด</span>
-                            </div>
-                        </div>
-                        <button class="btn-remove-pending" (click)="removePendingFile(q.id, pIndex)" [disabled]="isUploading">
-                            <i class="fa-solid fa-xmark"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- File List (Already uploaded) -->
-                <div class="file-list" *ngIf="q.files.length > 0">
-                    <div class="file-item" *ngFor="let file of q.files; let fIndex = index">
-                        <div class="file-info">
-                            <i class="fa-solid fa-file-pdf file-icon" *ngIf="file.name.toLowerCase().includes('.pdf')"></i>
-                            <i class="fa-solid fa-image file-icon-img"
-                                *ngIf="file.name.toLowerCase().includes('.jpg') || file.name.toLowerCase().includes('.png') || file.name.toLowerCase().includes('.jpeg')"></i>
-                            <i class="fa-solid fa-file-word file-icon-doc" *ngIf="file.name.toLowerCase().includes('.doc')"></i>
-                            <div class="file-details">
-                                <span class="file-name">{{ file.name }}</span>
-                                <span class="file-size text-slate-400">{{ file.size }}</span>
-                            </div>
-                        </div>
-                        <div class="file-actions">
-                            <button class="btn-icon-soft" title="ดูไฟล์" (click)="viewFile(file)"><i class="fa-regular fa-eye"></i></button>
-                            <button class="btn-icon-danger" title="ลบไฟล์" (click)="deleteFile(q.id, fIndex)"><i
-                                    class="fa-regular fa-trash-can"></i></button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
+        <!-- Status Badge -->
+        <div
+          class="status-badge"
+          [class.status-approved]="q.status === 'approved'"
+          [class.status-pending]="q.status === 'pending'"
+          [class.status-rejected]="q.status === 'rejected'"
+          [class.status-uploaded]="q.status === 'uploaded'"
+        >
+          <i class="fa-solid fa-check-circle" *ngIf="q.status === 'approved'"></i>
+          <i class="fa-solid fa-clock" *ngIf="q.status === 'pending'"></i>
+          <i class="fa-solid fa-circle-exclamation" *ngIf="q.status === 'rejected'"></i>
+          <i class="fa-solid fa-file-arrow-up" *ngIf="q.status === 'uploaded'"></i>
+          <span>
+            {{
+              q.status === 'approved'
+                ? 'ผ่านเกณฑ์'
+                : q.status === 'pending'
+                  ? 'รอหลักฐาน'
+                  : q.status === 'uploaded'
+                    ? 'รอตรวจสอบ'
+                    : 'ไม่ผ่านเกณฑ์'
+            }}
+          </span>
         </div>
+      </div>
+
+      <!-- Self Assessment Section -->
+      <div
+        class="self-assessment-section"
+        style="
+          padding: 1rem;
+          border-top: 1px solid #e2e8f0;
+          border-bottom: 1px solid #e2e8f0;
+          margin-bottom: 1rem;
+          background-color: #f8fafc;
+        "
+      >
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label" style="font-size: 0.875rem; font-weight: 600; color: #475569"
+              >ประเมินตนเอง (คะแนนเต็ม {{ q.maxScore }})</label
+            >
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="q.selfScore"
+              [max]="q.maxScore"
+              min="0"
+              step="0.5"
+              placeholder="คะแนน"
+            />
+          </div>
+          <div class="col-md-8">
+            <label class="form-label" style="font-size: 0.875rem; font-weight: 600; color: #475569"
+              >คำอธิบายเพิ่มเติม</label
+            >
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="q.applicantComment"
+                placeholder="กรอกคำอธิบายการประเมิน..."
+              />
+              <button class="btn btn-outline-success" type="button" (click)="saveDetail(q)">
+                <i class="fa-solid fa-save"></i> บันทึก
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Evidence Section -->
+      <div class="evidence-section">
+        <!-- Upload Action -->
+        <div class="upload-area">
+          <div class="upload-controls">
+            <button class="btn-upload" (click)="triggerUpload(q.id)" [disabled]="isUploading">
+              <i class="fa-solid fa-plus"></i>
+              เลือกไฟล์
+            </button>
+            <button
+              class="btn-confirm"
+              *ngIf="pendingFiles[q.id] && pendingFiles[q.id].length > 0"
+              (click)="confirmUpload(q.id)"
+              [disabled]="isUploading"
+            >
+              <i
+                class="fa-solid"
+                [class.fa-cloud-arrow-up]="!isUploading"
+                [class.fa-spinner]="isUploading"
+                [class.fa-spin]="isUploading"
+              ></i>
+              {{
+                isUploading
+                  ? 'กำลังอัปโหลด...'
+                  : 'กดยืนยันเพื่ออัปโหลด (' + pendingFiles[q.id].length + ')'
+              }}
+            </button>
+          </div>
+          <span class="upload-hint">รองรับไฟล์: PDF, JPG, PNG (สูงสุด 5MB)</span>
+        </div>
+
+        <!-- Pending Files (Waiting for confirm) -->
+        <div class="pending-list" *ngIf="pendingFiles[q.id] && pendingFiles[q.id].length > 0">
+          <div class="pending-item" *ngFor="let pFile of pendingFiles[q.id]; let pIndex = index">
+            <div class="file-info">
+              <i class="fa-solid fa-clock-rotate-left pending-icon"></i>
+              <div class="file-details">
+                <span class="file-name text-amber-600">{{ pFile.name }}</span>
+                <span class="file-status text-amber-500">รอยืนยันการอัปโหลด</span>
+              </div>
+            </div>
+            <button
+              class="btn-remove-pending"
+              (click)="removePendingFile(q.id, pIndex)"
+              [disabled]="isUploading"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- File List (Already uploaded) -->
+        <div class="file-list" *ngIf="q.files.length > 0">
+          <div class="file-item" *ngFor="let file of q.files; let fIndex = index">
+            <div class="file-info">
+              <i
+                class="fa-solid fa-file-pdf file-icon"
+                *ngIf="file.name.toLowerCase().includes('.pdf')"
+              ></i>
+              <i
+                class="fa-solid fa-image file-icon-img"
+                *ngIf="
+                  file.name.toLowerCase().includes('.jpg') ||
+                  file.name.toLowerCase().includes('.png') ||
+                  file.name.toLowerCase().includes('.jpeg')
+                "
+              ></i>
+              <i
+                class="fa-solid fa-file-word file-icon-doc"
+                *ngIf="file.name.toLowerCase().includes('.doc')"
+              ></i>
+              <div class="file-details">
+                <span class="file-name">{{ file.name }}</span>
+                <span class="file-size text-slate-400">{{ file.size }}</span>
+              </div>
+            </div>
+            <div class="file-actions">
+              <button class="btn-icon-soft" title="ดูไฟล์" (click)="viewFile(file)">
+                <i class="fa-regular fa-eye"></i>
+              </button>
+              <button class="btn-icon-danger" title="ลบไฟล์" (click)="deleteFile(q.id, fIndex)">
+                <i class="fa-regular fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- ════════ BOTTOM NAVIGATION ════════ -->
-    <div class="bottom-nav">
-        <button class="btn-nav" [disabled]="categoryId <= 1" (click)="goPrevious()">
-            <i class="fa-solid fa-arrow-left"></i>
-            หมวดก่อนหน้า
-        </button>
-        <button class="btn-nav btn-primary" (click)="goNext()">
-            {{ categoryId < 6 ? 'ถัดไป' : 'กลับสู่หน้าหลัก' }} <i class="fa-solid"
-                [class.fa-arrow-right]="categoryId < 6" [class.fa-house]="categoryId === 6"></i>
-        </button>
-    </div>
+  <!-- ════════ BOTTOM NAVIGATION ════════ -->
+  <div class="bottom-nav">
+    <button class="btn-nav" [disabled]="categoryId <= 1" (click)="goPrevious()">
+      <i class="fa-solid fa-arrow-left"></i>
+      หมวดก่อนหน้า
+    </button>
+    <button class="btn-nav btn-primary" (click)="goNext()">
+      {{ categoryId < 6 ? 'ถัดไป' : 'กลับสู่หน้าหลัก' }}
+      <i
+        class="fa-solid"
+        [class.fa-arrow-right]="categoryId < 6"
+        [class.fa-house]="categoryId === 6"
+      ></i>
+    </button>
+  </div>
 
-    <!-- Hidden file input for uploads -->
-    <input type="file" #fileInput class="hidden" (change)="onFileSelected($event)">
-
+  <!-- Hidden file input for uploads -->
+  <input type="file" #fileInput class="hidden" (change)="onFileSelected($event)" />
 </div>

@@ -1,9 +1,8 @@
 <div class="exec-container">
-  
   <!-- Hero Section -->
   <div class="hero-panel fade-in-up">
     <div class="hero-glow"></div>
-    
+
     <div class="hero-header">
       <div class="hero-title-group">
         <h1>วิเคราะห์ข้อมูลอัจฉริยะสำหรับผู้บริหาร</h1>
@@ -27,16 +26,21 @@
         </div>
         <div *ngIf="!isLoadingSummary" class="ai-typing">
           {{ executiveSummary }}
-          <span *ngIf="isUpdatingSummary" class="ml-2 inline-flex items-center text-sm text-emerald-500 font-medium whitespace-nowrap animate-pulse">
-             <i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังอัปเดตบทวิเคราะห์...
+          <span
+            *ngIf="isUpdatingSummary"
+            class="ml-2 inline-flex items-center text-sm text-emerald-500 font-medium whitespace-nowrap animate-pulse"
+          >
+            <i class="fa-solid fa-spinner fa-spin mr-1"></i> กำลังอัปเดตบทวิเคราะห์...
           </span>
         </div>
       </div>
-      
+
       <div class="hero-stats">
         <div class="hero-stat-item">
           <span class="stat-label">เป้าหมายการลดคาร์บอน</span>
-          <span class="stat-val success"><i class="fa-solid fa-circle-check mr-1"></i>{{ orgTarget }}%</span>
+          <span class="stat-val success"
+            ><i class="fa-solid fa-circle-check mr-1"></i>{{ orgTarget }}%</span
+          >
         </div>
         <div class="hero-stat-item">
           <span class="stat-label">ความเสี่ยงด้านความยั่งยืน</span>
@@ -73,7 +77,7 @@
         <div class="kpi-icon teal"><i class="fa-solid fa-cloud-meatball"></i></div>
       </div>
       <div class="kpi-value-row">
-        <div class="kpi-value">{{ carbonTotal | number:'1.0-2' }}</div>
+        <div class="kpi-value">{{ carbonTotal | number: '1.0-2' }}</div>
         <div class="kpi-unit">tCO₂e</div>
       </div>
       <div class="kpi-trend down"><i class="fa-solid fa-arrow-down"></i> ลดลงตามเป้าหมาย</div>
@@ -101,9 +105,13 @@
         <div class="kpi-icon amber"><i class="fa-solid fa-award"></i></div>
       </div>
       <div class="kpi-value-row">
-        <div class="kpi-value" style="font-size: 1.8rem; font-weight: 800; margin-top: 0.3rem;">{{ latestCertifiedLevel }}</div>
+        <div class="kpi-value" style="font-size: 1.8rem; font-weight: 800; margin-top: 0.3rem">
+          {{ latestCertifiedLevel }}
+        </div>
       </div>
-      <div class="kpi-trend neutral"><i class="fa-solid fa-shield-halved"></i> มาตรฐาน Green Office</div>
+      <div class="kpi-trend neutral">
+        <i class="fa-solid fa-shield-halved"></i> มาตรฐาน Green Office
+      </div>
     </div>
   </div>
 
@@ -114,7 +122,9 @@
       <div class="panel-header">
         <div>
           <h3 class="panel-title">เปรียบเทียบปริมาณการปล่อยคาร์บอนรายหน่วยงาน / สาขา</h3>
-          <p class="panel-subtitle">แสดงสัดส่วนการปล่อยก๊าซเรือนกระจกเปรียบเทียบกันทุกยูนิต (tCO₂e)</p>
+          <p class="panel-subtitle">
+            แสดงสัดส่วนการปล่อยก๊าซเรือนกระจกเปรียบเทียบกันทุกยูนิต (tCO₂e)
+          </p>
         </div>
       </div>
       <div class="chart-container">
@@ -137,18 +147,27 @@
   </div>
 
   <!-- Real Certificates Table -->
-  <div class="panel fade-in-up" style="margin-bottom: 2rem;" *ngIf="dashboardData && dashboardData.approvedAssessments.length > 0">
+  <div
+    class="panel fade-in-up"
+    style="margin-bottom: 2rem"
+    *ngIf="dashboardData && dashboardData.approvedAssessments.length > 0"
+  >
     <div class="panel-header">
       <div>
-        <h3 class="panel-title"><i class="fa-solid fa-certificate text-teal-600 mr-2"></i> เอกสารใบรับรองและผลประเมินที่เป็นทางการ</h3>
-        <p class="panel-subtitle">ดาวน์โหลดและเปิดดูใบรับรองจริงที่ได้รับอนุมัติจากผู้ประเมินอย่างเป็นทางการ (อบก.)</p>
+        <h3 class="panel-title">
+          <i class="fa-solid fa-certificate text-teal-600 mr-2"></i>
+          เอกสารใบรับรองและผลประเมินที่เป็นทางการ
+        </h3>
+        <p class="panel-subtitle">
+          ดาวน์โหลดและเปิดดูใบรับรองจริงที่ได้รับอนุมัติจากผู้ประเมินอย่างเป็นทางการ (อบก.)
+        </p>
       </div>
     </div>
-    
+
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-sm" style="border-collapse: collapse;">
+      <table class="w-full text-left text-sm" style="border-collapse: collapse">
         <thead>
-          <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600;">
+          <tr style="border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600">
             <th class="py-3 px-4">ปีการประเมิน</th>
             <th class="py-3 px-4">คะแนนรวม</th>
             <th class="py-3 px-4">ระดับการรับรอง</th>
@@ -158,21 +177,42 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of dashboardData.approvedAssessments" style="border-bottom: 1px solid #e2e8f0; font-weight: 500;" class="hover:bg-slate-50 transition-colors">
+          <tr
+            *ngFor="let item of dashboardData.approvedAssessments"
+            style="border-bottom: 1px solid #e2e8f0; font-weight: 500"
+            class="hover:bg-slate-50 transition-colors"
+          >
             <td class="py-3 px-4 text-teal-700 font-bold">ปี {{ item.assessmentYear }}</td>
             <td class="py-3 px-4 font-bold">{{ item.totalScore }} คะแนน</td>
             <td class="py-3 px-4">
-              <span class="impact-badge" [ngClass]="{'low': item.certifiedLevel === 'GOLD' || item.certifiedLevel === 'ดีเยี่ยม', 'medium': item.certifiedLevel === 'SILVER' || item.certifiedLevel === 'ดีมาก', 'high': item.certifiedLevel === 'BRONZE' || item.certifiedLevel === 'ดี'}">
+              <span
+                class="impact-badge"
+                [ngClass]="{
+                  low: item.certifiedLevel === 'GOLD' || item.certifiedLevel === 'ดีเยี่ยม',
+                  medium: item.certifiedLevel === 'SILVER' || item.certifiedLevel === 'ดีมาก',
+                  high: item.certifiedLevel === 'BRONZE' || item.certifiedLevel === 'ดี',
+                }"
+              >
                 {{ item.certifiedLevel }}
               </span>
             </td>
             <td class="py-3 px-4 text-gray-600">{{ item.certificateNo || 'รอออกเลขใบรับรอง' }}</td>
-            <td class="py-3 px-4 text-gray-500">{{ item.approvedAt | date:'d MMMM yyyy':'':'th-TH' }}</td>
+            <td class="py-3 px-4 text-gray-500">
+              {{ item.approvedAt | date: 'd MMMM yyyy' : '' : 'th-TH' }}
+            </td>
             <td class="py-3 px-4 text-center">
-              <a *ngIf="item.certificateUrl" [href]="item.certificateUrl" target="_blank" class="pill-btn active inline-flex items-center gap-1 py-1 px-3" style="text-decoration: none;">
+              <a
+                *ngIf="item.certificateUrl"
+                [href]="item.certificateUrl"
+                target="_blank"
+                class="pill-btn active inline-flex items-center gap-1 py-1 px-3"
+                style="text-decoration: none"
+              >
                 <i class="fa-solid fa-download"></i> ดาวน์โหลด PDF
               </a>
-              <span *ngIf="!item.certificateUrl" class="text-xs text-gray-400">ไม่มีเอกสารอัปโหลด</span>
+              <span *ngIf="!item.certificateUrl" class="text-xs text-gray-400"
+                >ไม่มีเอกสารอัปโหลด</span
+              >
             </td>
           </tr>
         </tbody>
@@ -185,17 +225,22 @@
     <div class="panel-header">
       <div>
         <h3 class="panel-title">
-          <i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-2"></i> มาตรการและคำแนะนำอัจฉริยะจาก AI (Smart Interventions)
-          <span *ngIf="isUpdatingRecommendations" class="ml-2 text-xs text-amber-500 font-medium animate-pulse inline-block">
+          <i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-2"></i>
+          มาตรการและคำแนะนำอัจฉริยะจาก AI (Smart Interventions)
+          <span
+            *ngIf="isUpdatingRecommendations"
+            class="ml-2 text-xs text-amber-500 font-medium animate-pulse inline-block"
+          >
             <i class="fa-solid fa-spinner fa-spin mr-1"></i>
           </span>
         </h3>
-        <p class="panel-subtitle">แผนการดำเนินการที่เสนอแนะเพื่อยกระดับความยั่งยืนและลดต้นทุนพลังงานขององค์กร</p>
+        <p class="panel-subtitle">
+          แผนการดำเนินการที่เสนอแนะเพื่อยกระดับความยั่งยืนและลดต้นทุนพลังงานขององค์กร
+        </p>
       </div>
     </div>
-    
+
     <div class="rec-grid">
-      
       <!-- Loading State -->
       <ng-container *ngIf="isLoadingRecommendations">
         <div class="rec-card" *ngFor="let i of [1, 2]">
@@ -210,7 +255,10 @@
       </ng-container>
 
       <!-- Empty State -->
-      <div *ngIf="!isLoadingRecommendations && recommendations.length === 0" class="p-4 text-center text-gray-500 w-full col-span-2">
+      <div
+        *ngIf="!isLoadingRecommendations && recommendations.length === 0"
+        class="p-4 text-center text-gray-500 w-full col-span-2"
+      >
         ยังไม่มีคำแนะนำในขณะนี้
       </div>
 
@@ -218,8 +266,22 @@
       <ng-container *ngIf="!isLoadingRecommendations && recommendations.length > 0">
         <div class="rec-card" *ngFor="let rec of recommendations; let i = index">
           <div class="rec-header">
-            <div class="rec-icon" [ngClass]="{'high': rec.expectedImpact === 'High' || rec.expectedImpact === 'high', 'medium': rec.expectedImpact === 'Medium' || rec.expectedImpact === 'medium', 'low': rec.expectedImpact === 'Low' || rec.expectedImpact === 'low'}">
-              <i class="fa-solid" [ngClass]="{'fa-bolt': i % 3 === 0, 'fa-recycle': i % 3 === 1, 'fa-file-contract': i % 3 === 2}"></i>
+            <div
+              class="rec-icon"
+              [ngClass]="{
+                high: rec.expectedImpact === 'High' || rec.expectedImpact === 'high',
+                medium: rec.expectedImpact === 'Medium' || rec.expectedImpact === 'medium',
+                low: rec.expectedImpact === 'Low' || rec.expectedImpact === 'low',
+              }"
+            >
+              <i
+                class="fa-solid"
+                [ngClass]="{
+                  'fa-bolt': i % 3 === 0,
+                  'fa-recycle': i % 3 === 1,
+                  'fa-file-contract': i % 3 === 2,
+                }"
+              ></i>
             </div>
             <div class="rec-content">
               <h4>{{ rec.title }}</h4>
@@ -227,13 +289,24 @@
             </div>
           </div>
           <div class="rec-footer">
-            <span class="impact-badge" [ngClass]="{'high': rec.expectedImpact === 'High' || rec.expectedImpact === 'high', 'medium': rec.expectedImpact === 'Medium' || rec.expectedImpact === 'medium', 'low': rec.expectedImpact === 'Low' || rec.expectedImpact === 'low'}">ผลกระทบระดับ{{ rec.expectedImpact === 'High' ? 'สูง' : rec.expectedImpact === 'Medium' ? 'ปานกลาง' : 'ทั่วไป' }}</span>
+            <span
+              class="impact-badge"
+              [ngClass]="{
+                high: rec.expectedImpact === 'High' || rec.expectedImpact === 'high',
+                medium: rec.expectedImpact === 'Medium' || rec.expectedImpact === 'medium',
+                low: rec.expectedImpact === 'Low' || rec.expectedImpact === 'low',
+              }"
+              >ผลกระทบระดับ{{
+                rec.expectedImpact === 'High'
+                  ? 'สูง'
+                  : rec.expectedImpact === 'Medium'
+                    ? 'ปานกลาง'
+                    : 'ทั่วไป'
+              }}</span
+            >
           </div>
         </div>
       </ng-container>
-
     </div>
   </div>
-
 </div>
-

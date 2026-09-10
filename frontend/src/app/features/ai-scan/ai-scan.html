@@ -1,28 +1,32 @@
 <div class="min-h-screen bg-gray-50/70 px-4 sm:px-6 lg:px-8 py-8">
-
   <!-- ── Page Header ── -->
   <div class="page-header mb-8">
     <div class="page-header-left">
       <div class="flex items-center gap-3 mb-2">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm">
+        <div
+          class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-sm"
+        >
           <i class="fa-solid fa-wand-magic-sparkles text-white text-base"></i>
         </div>
         <h1 class="page-title">สแกนบิลพลังงานด้วย AI</h1>
       </div>
-      <p class="page-subtitle">อัปโหลดบิลค่าไฟฟ้าหรือค่าน้ำ แล้วให้ AI ดึงข้อมูลการใช้งานโดยอัตโนมัติ</p>
+      <p class="page-subtitle">
+        อัปโหลดบิลค่าไฟฟ้าหรือค่าน้ำ แล้วให้ AI ดึงข้อมูลการใช้งานโดยอัตโนมัติ
+      </p>
     </div>
   </div>
 
   <!-- ── Main Stacked Layout ── -->
   <div class="flex flex-col gap-6 max-w-7xl mx-auto w-full">
-
     <!-- ═══════════════ LEFT — Upload Zone ═══════════════ -->
     <div class="flex flex-col gap-5">
-
       <!-- Upload card -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-5 pt-5 pb-3 flex items-center gap-3 border-b border-gray-50">
-          <span class="w-7 h-7 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-black">1</span>
+          <span
+            class="w-7 h-7 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center text-xs font-black"
+            >1</span
+          >
           <h2 class="text-sm font-bold text-gray-700">อัปโหลดบิลค่าพลังงาน</h2>
         </div>
 
@@ -36,25 +40,39 @@
             [class.hover:bg-violet-50]="!previewUrl"
             [class.border-violet-300]="previewUrl"
             [class.bg-violet-50]="previewUrl"
-            (click)="fileInput.click()">
-
-            <input type="file" #fileInput hidden (change)="onFileChange($event)" accept="image/*,application/pdf">
+            (click)="fileInput.click()"
+          >
+            <input
+              type="file"
+              #fileInput
+              hidden
+              (change)="onFileChange($event)"
+              accept="image/*,application/pdf"
+            />
 
             <!-- Empty state -->
             <div *ngIf="!previewUrl" class="text-center px-6 py-8">
-              <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <div
+                class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-white shadow-sm border border-gray-100 flex items-center justify-center group-hover:scale-105 transition-transform"
+              >
                 <i class="fa-solid fa-cloud-arrow-up text-2xl text-violet-400"></i>
               </div>
               <p class="font-bold text-gray-700 mb-1">ลากไฟล์มาวางที่นี่ หรือคลิกเพื่อเลือก</p>
               <p class="text-xs text-gray-400 mb-3">รองรับไฟล์ JPG, PNG, PDF</p>
               <div class="flex justify-center gap-2">
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500">
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500"
+                >
                   <i class="fa-solid fa-image text-[10px]"></i> JPG
                 </span>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500">
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500"
+                >
                   <i class="fa-solid fa-image text-[10px]"></i> PNG
                 </span>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500">
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-gray-100 text-xs font-semibold text-gray-500"
+                >
                   <i class="fa-solid fa-file-pdf text-[10px]"></i> PDF
                 </span>
               </div>
@@ -63,16 +81,26 @@
 
             <!-- Document preview -->
             <div *ngIf="previewUrl" class="w-full h-full relative p-3">
-              <img [src]="previewUrl" class="mx-auto rounded-lg shadow-md object-contain w-full max-h-[850px] min-h-[350px] transition-all" alt="Preview">
-              <div class="absolute top-4 right-4 flex gap-2 items-center" (click)="$event.stopPropagation();">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur border border-gray-200 shadow-md text-xs font-bold text-gray-700">
+              <img
+                [src]="previewUrl"
+                class="mx-auto rounded-lg shadow-md object-contain w-full max-h-[850px] min-h-[350px] transition-all"
+                alt="Preview"
+              />
+              <div
+                class="absolute top-4 right-4 flex gap-2 items-center"
+                (click)="$event.stopPropagation()"
+              >
+                <span
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 backdrop-blur border border-gray-200 shadow-md text-xs font-bold text-gray-700"
+                >
                   <i class="fa-solid fa-file text-violet-500 text-sm"></i> พร้อมใช้งาน
                 </span>
-                <button 
+                <button
                   type="button"
-                  (click)="reset(); $event.stopPropagation();"
+                  (click)="reset(); $event.stopPropagation()"
                   class="w-8 h-8 rounded-full bg-red-100 border border-red-200 text-red-600 flex items-center justify-center shadow-sm hover:bg-red-500 hover:text-white transition-all cursor-pointer"
-                  title="ลบไฟล์นี้">
+                  title="ลบไฟล์นี้"
+                >
                   <i class="fa-solid fa-xmark text-sm font-bold"></i>
                 </button>
               </div>
@@ -80,58 +108,78 @@
           </div>
 
           <!-- Error alert -->
-          <div *ngIf="errorMessage" class="mt-3 flex items-start gap-2 bg-red-50 border border-red-100 text-red-700 rounded-lg px-4 py-3 text-sm">
+          <div
+            *ngIf="errorMessage"
+            class="mt-3 flex items-start gap-2 bg-red-50 border border-red-100 text-red-700 rounded-lg px-4 py-3 text-sm"
+          >
             <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
             <span>{{ errorMessage }}</span>
           </div>
 
           <!-- Scan button -->
           <div class="mt-4 flex flex-col gap-2" *ngIf="previewUrl">
-            <button *ngIf="!scanResult"
+            <button
+              *ngIf="!scanResult"
               (click)="processAi()"
               [disabled]="isProcessing"
-              class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-sm hover:from-violet-700 hover:to-indigo-700 disabled:opacity-70 transition-all">
-              <span *ngIf="isProcessing" class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+              class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-3 text-sm font-bold text-white shadow-sm hover:from-violet-700 hover:to-indigo-700 disabled:opacity-70 transition-all"
+            >
+              <span
+                *ngIf="isProcessing"
+                class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+              ></span>
               <i *ngIf="!isProcessing" class="fa-solid fa-microchip"></i>
               {{ isProcessing ? 'AI กำลังประมวลผล...' : 'เริ่มสแกนด้วย AI' }}
             </button>
-            <button *ngIf="scanResult" (click)="reset()"
-              class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all">
+            <button
+              *ngIf="scanResult"
+              (click)="reset()"
+              class="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+            >
               <i class="fa-solid fa-rotate-left text-gray-400"></i> อัปโหลดบิลใบใหม่
             </button>
           </div>
         </div>
       </div>
-
     </div>
 
     <!-- ═══════════════ RIGHT — AI Results Panel ═══════════════ -->
     <div class="flex flex-col gap-5">
-
       <!-- Processing / Empty / Results card -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="px-5 pt-5 pb-3 flex items-center justify-between border-b border-gray-50">
           <div class="flex items-center gap-3">
-            <span class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black">2</span>
+            <span
+              class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-black"
+              >2</span
+            >
             <h2 class="text-sm font-bold text-gray-700">ผลลัพธ์ AI</h2>
           </div>
           <!-- Confidence badge -->
-          <div *ngIf="scanResult" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
-               [ngClass]="{
-                 'bg-green-50 text-green-700 border border-green-200': scanResult.confidence >= 70,
-                 'bg-yellow-50 text-yellow-700 border border-yellow-200': scanResult.confidence >= 40 && scanResult.confidence < 70,
-                 'bg-red-50 text-red-700 border border-red-200': scanResult.confidence < 40
-               }">
+          <div
+            *ngIf="scanResult"
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+            [ngClass]="{
+              'bg-green-50 text-green-700 border border-green-200': scanResult.confidence >= 70,
+              'bg-yellow-50 text-yellow-700 border border-yellow-200':
+                scanResult.confidence >= 40 && scanResult.confidence < 70,
+              'bg-red-50 text-red-700 border border-red-200': scanResult.confidence < 40,
+            }"
+          >
             <i class="fa-solid fa-robot text-[10px]"></i>
             AI Confidence {{ scanResult.confidence }}%
           </div>
         </div>
 
         <div class="p-5">
-
           <!-- Empty state (no file) -->
-          <div *ngIf="!isProcessing && !previewUrl && !scanResult" class="flex flex-col items-center justify-center py-14 text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center">
+          <div
+            *ngIf="!isProcessing && !previewUrl && !scanResult"
+            class="flex flex-col items-center justify-center py-14 text-center"
+          >
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center"
+            >
               <i class="fa-solid fa-robot text-2xl text-gray-300"></i>
             </div>
             <p class="font-bold text-gray-400 mb-1 text-sm">ระบบพร้อมทำงาน</p>
@@ -142,29 +190,45 @@
           <div *ngIf="isProcessing" class="py-10 flex flex-col items-center text-center">
             <div class="relative w-20 h-20 mb-6">
               <div class="absolute inset-0 rounded-full border-4 border-violet-100"></div>
-              <div class="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin"></div>
-              <div class="absolute inset-3 rounded-full bg-violet-50 flex items-center justify-center">
+              <div
+                class="absolute inset-0 rounded-full border-4 border-violet-500 border-t-transparent animate-spin"
+              ></div>
+              <div
+                class="absolute inset-3 rounded-full bg-violet-50 flex items-center justify-center"
+              >
                 <i class="fa-solid fa-wand-magic-sparkles text-violet-500"></i>
               </div>
             </div>
             <p class="font-black text-gray-800 mb-1">กำลังวิเคราะห์เอกสาร...</p>
             <p class="text-sm text-gray-400 max-w-xs">AI กำลังอ่านและดึงข้อมูลจากเอกสารของคุณ</p>
             <div class="mt-5 flex flex-col gap-2 w-48">
-              <div class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2">
+              <div
+                class="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 rounded-lg px-3 py-2"
+              >
                 <i class="fa-solid fa-circle-check text-green-400 text-[10px]"></i> สแกนเอกสาร
               </div>
-              <div class="flex items-center gap-2 text-xs text-gray-500 bg-violet-50 rounded-lg px-3 py-2 animate-pulse">
-                <div class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></div> ดึงข้อมูลพลังงาน
+              <div
+                class="flex items-center gap-2 text-xs text-gray-500 bg-violet-50 rounded-lg px-3 py-2 animate-pulse"
+              >
+                <div class="w-2 h-2 rounded-full bg-violet-400 animate-ping"></div>
+                ดึงข้อมูลพลังงาน
               </div>
-              <div class="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+              <div
+                class="flex items-center gap-2 text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2"
+              >
                 <i class="fa-solid fa-ellipsis text-gray-300 text-[10px]"></i> วิเคราะห์โครงสร้างบิล
               </div>
             </div>
           </div>
 
           <!-- Ready state: file loaded but not scanned -->
-          <div *ngIf="!isProcessing && previewUrl && !scanResult" class="py-10 flex flex-col items-center text-center">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center">
+          <div
+            *ngIf="!isProcessing && previewUrl && !scanResult"
+            class="py-10 flex flex-col items-center text-center"
+          >
+            <div
+              class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-violet-50 border border-violet-100 flex items-center justify-center"
+            >
               <i class="fa-solid fa-magnifying-glass text-xl text-violet-400"></i>
             </div>
             <p class="font-bold text-gray-700 mb-1 text-sm">พร้อมสแกน</p>
@@ -173,53 +237,73 @@
 
           <!-- AI Scan Result banner -->
           <div *ngIf="scanResult && !isProcessing" class="animate-in">
-            <div class="flex items-center gap-3 mb-4 p-3 rounded-xl"
-                 [ngClass]="{
-                   'bg-green-50 border border-green-100': scanResult.confidence >= 70,
-                   'bg-yellow-50 border border-yellow-100': scanResult.confidence >= 40 && scanResult.confidence < 70,
-                   'bg-red-50 border border-red-100': scanResult.confidence < 40
-                 }">
-              <i class="fa-solid fa-circle-check text-xl shrink-0"
-                 [ngClass]="{
-                   'text-green-500': scanResult.confidence >= 70,
-                   'text-yellow-500': scanResult.confidence >= 40 && scanResult.confidence < 70,
-                   'text-red-500': scanResult.confidence < 40
-                 }"></i>
+            <div
+              class="flex items-center gap-3 mb-4 p-3 rounded-xl"
+              [ngClass]="{
+                'bg-green-50 border border-green-100': scanResult.confidence >= 70,
+                'bg-yellow-50 border border-yellow-100':
+                  scanResult.confidence >= 40 && scanResult.confidence < 70,
+                'bg-red-50 border border-red-100': scanResult.confidence < 40,
+              }"
+            >
+              <i
+                class="fa-solid fa-circle-check text-xl shrink-0"
+                [ngClass]="{
+                  'text-green-500': scanResult.confidence >= 70,
+                  'text-yellow-500': scanResult.confidence >= 40 && scanResult.confidence < 70,
+                  'text-red-500': scanResult.confidence < 40,
+                }"
+              ></i>
               <div>
                 <p class="text-sm font-bold text-gray-800">วิเคราะห์เสร็จสิ้น</p>
-                <p class="text-xs text-gray-500">ความมั่นใจ AI: <span class="font-black">{{ scanResult.confidence }}%</span></p>
+                <p class="text-xs text-gray-500">
+                  ความมั่นใจ AI: <span class="font-black">{{ scanResult.confidence }}%</span>
+                </p>
               </div>
             </div>
 
             <!-- Raw extract snippet -->
-            <div *ngIf="scanResult.rawText" class="mb-4 bg-gray-50 border border-gray-100 rounded-lg p-3 font-mono text-xs text-gray-500 overflow-hidden">
-              <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">ข้อมูลดิบที่ดึงได้</p>
+            <div
+              *ngIf="scanResult.rawText"
+              class="mb-4 bg-gray-50 border border-gray-100 rounded-lg p-3 font-mono text-xs text-gray-500 overflow-hidden"
+            >
+              <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">
+                ข้อมูลดิบที่ดึงได้
+              </p>
               <p class="leading-relaxed line-clamp-3">{{ scanResult.rawText }}</p>
             </div>
           </div>
-
         </div>
       </div>
 
       <!-- Data review form card (shown once file is picked) -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
-           [class.opacity-50]="isProcessing"
-           [class.hidden]="!previewUrl && !scanResult">
-
+      <div
+        class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+        [class.opacity-50]="isProcessing"
+        [class.hidden]="!previewUrl && !scanResult"
+      >
         <div class="px-5 pt-5 pb-3 border-b border-gray-50 flex items-center gap-3">
-          <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black">3</span>
+          <span
+            class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-black"
+            >3</span
+          >
           <h2 class="text-sm font-bold text-gray-700">ตรวจสอบและยืนยันข้อมูล</h2>
         </div>
 
         <div class="p-5">
           <form #logForm="ngForm" (ngSubmit)="confirmSave()">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-
               <!-- Type -->
               <div class="sm:col-span-2">
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">ประเภทกิจกรรม <span class="text-red-400 normal-case font-normal">*</span></label>
-                <select class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
-                        name="type" [(ngModel)]="formData.type" [disabled]="isProcessing">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5"
+                  >ประเภทกิจกรรม <span class="text-red-400 normal-case font-normal">*</span></label
+                >
+                <select
+                  class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  name="type"
+                  [(ngModel)]="formData.type"
+                  [disabled]="isProcessing"
+                >
                   <option value="" disabled>เลือกประเภทพลังงาน</option>
                   <option value="Electricity">ไฟฟ้า (Electricity)</option>
                   <option value="Water">น้ำประปา (Water)</option>
@@ -229,17 +313,30 @@
 
               <!-- Amount -->
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">ปริมาณที่ใช้ <span class="text-red-400 normal-case font-normal">*</span></label>
-                <input type="number"
-                       class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-black text-violet-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
-                       name="amount" [(ngModel)]="formData.amount" [disabled]="isProcessing" placeholder="เช่น 1250">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5"
+                  >ปริมาณที่ใช้ <span class="text-red-400 normal-case font-normal">*</span></label
+                >
+                <input
+                  type="number"
+                  class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-black text-violet-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  name="amount"
+                  [(ngModel)]="formData.amount"
+                  [disabled]="isProcessing"
+                  placeholder="เช่น 1250"
+                />
               </div>
 
               <!-- Unit -->
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">หน่วย <span class="text-red-400 normal-case font-normal">*</span></label>
-                <select class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
-                        name="unit" [(ngModel)]="formData.unit" [disabled]="isProcessing">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5"
+                  >หน่วย <span class="text-red-400 normal-case font-normal">*</span></label
+                >
+                <select
+                  class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  name="unit"
+                  [(ngModel)]="formData.unit"
+                  [disabled]="isProcessing"
+                >
                   <option value="kWh">kWh (ไฟฟ้า)</option>
                   <option value="หน่วย">หน่วย (น้ำประปา)</option>
                   <option value="ลิตร">ลิตร (น้ำมัน)</option>
@@ -248,30 +345,53 @@
 
               <!-- Date -->
               <div class="sm:col-span-2">
-                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5">รอบการจดแจ้ง <span class="text-red-400 normal-case font-normal">*</span></label>
-                <input type="text"
-                       class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
-                       name="date" [(ngModel)]="formData.date" [disabled]="isProcessing" placeholder="เช่น ตุลาคม 2566">
+                <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-1.5"
+                  >รอบการจดแจ้ง <span class="text-red-400 normal-case font-normal">*</span></label
+                >
+                <input
+                  type="text"
+                  class="w-full rounded-lg border border-gray-200 py-2.5 px-3 text-sm font-medium text-gray-700 focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-all"
+                  name="date"
+                  [(ngModel)]="formData.date"
+                  [disabled]="isProcessing"
+                  placeholder="เช่น ตุลาคม 2566"
+                />
               </div>
             </div>
 
             <!-- Notice -->
-            <div class="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3.5 py-3 text-xs text-amber-700 font-medium mb-4">
+            <div
+              class="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3.5 py-3 text-xs text-amber-700 font-medium mb-4"
+            >
               <i class="fa-solid fa-circle-info mt-0.5 shrink-0"></i>
-              {{ scanResult ? 'ข้อมูลบางส่วนอาจไม่ถูกต้อง 100% โปรดตรวจสอบกับบิลจริงก่อนบันทึก' : 'โปรดตรวจสอบความถูกต้องก่อนกดบันทึก' }}
+              {{
+                scanResult
+                  ? 'ข้อมูลบางส่วนอาจไม่ถูกต้อง 100% โปรดตรวจสอบกับบิลจริงก่อนบันทึก'
+                  : 'โปรดตรวจสอบความถูกต้องก่อนกดบันทึก'
+              }}
             </div>
 
             <!-- Actions -->
             <div class="flex gap-2">
-              <button type="button" (click)="reset()"
-                      [disabled]="isSaving || isProcessing"
-                      class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-all">
+              <button
+                type="button"
+                (click)="reset()"
+                [disabled]="isSaving || isProcessing"
+                class="rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-all"
+              >
                 ล้างข้อมูล
               </button>
-              <button type="submit"
-                      [disabled]="isSaving || isProcessing || !formData.amount || !formData.date || !formData.type"
-                      class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 py-2.5 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 transition-all shadow-sm">
-                <span *ngIf="isSaving" class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+              <button
+                type="submit"
+                [disabled]="
+                  isSaving || isProcessing || !formData.amount || !formData.date || !formData.type
+                "
+                class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-green-600 py-2.5 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50 transition-all shadow-sm"
+              >
+                <span
+                  *ngIf="isSaving"
+                  class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+                ></span>
                 <i *ngIf="!isSaving" class="fa-solid fa-floppy-disk"></i>
                 {{ isSaving ? 'กำลังบันทึกข้อมูล...' : 'ยืนยันและบันทึกข้อมูล' }}
               </button>
@@ -279,8 +399,6 @@
           </form>
         </div>
       </div>
-
     </div>
   </div>
-
 </div>

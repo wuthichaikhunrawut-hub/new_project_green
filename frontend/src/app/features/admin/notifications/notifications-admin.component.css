@@ -17,8 +17,14 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Page Header */
@@ -35,7 +41,9 @@
   border: 1px solid rgba(0, 0, 0, 0.03);
   box-shadow: var(--card-shadow);
   padding: 32px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 /* Form Styling */
@@ -50,7 +58,8 @@
   font-size: 0.9rem;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
   height: 48px;
   border-radius: var(--radius-xl);
   border: 1px solid var(--input-border);
@@ -60,7 +69,8 @@
   background-color: white;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
   border-color: var(--input-focus);
   box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
   outline: none;
@@ -255,7 +265,9 @@ textarea.form-control {
 .tab-pill.active {
   background-color: white !important;
   color: #10b981 !important; /* Emerald color for Project Green */
-  box-shadow: 0 4px 10px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+  box-shadow:
+    0 4px 10px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
 }
 
 .tab-pill:hover:not(.active) {
@@ -267,14 +279,18 @@ textarea.form-control {
   background: white;
   border-radius: 20px;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 10px 25px -5px rgba(0, 0, 0, 0.02),
+    0 8px 10px -6px rgba(0, 0, 0, 0.02);
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
 .premium-card-proposal:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 35px -5px rgba(16, 185, 129, 0.08), 0 10px 15px -8px rgba(16, 185, 129, 0.04);
+  box-shadow:
+    0 20px 35px -5px rgba(16, 185, 129, 0.08),
+    0 10px 15px -8px rgba(16, 185, 129, 0.04);
   border-color: rgba(16, 185, 129, 0.15);
 }
 
@@ -356,4 +372,3 @@ textarea.form-control {
 @media (prefers-color-scheme: dark) {
   /* custom rules */
 }
-

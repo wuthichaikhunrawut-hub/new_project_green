@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Body,
   UseGuards,
   Req,
   Delete,
@@ -17,20 +16,13 @@ import { Request } from 'express';
 import { StripeService } from './stripe.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SubscriptionsService } from './subscriptions.service';
-import Stripe from 'stripe';
 
 @Controller('payments')
 export class PaymentController {
-  private stripe: any;
-  private endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
   constructor(
     private readonly stripeService: StripeService,
     private readonly subscriptionsService: SubscriptionsService,
-  ) {
-    const secretKey = process.env.STRIPE_SECRET_KEY || 'sk_test_fake';
-    this.stripe = new Stripe(secretKey, { apiVersion: '2023-10-16' as any });
-  }
+  ) {}
 
   @Post('webhook')
   @HttpCode(HttpStatus.OK)
@@ -96,7 +88,16 @@ export class PaymentController {
 
   @UseGuards(JwtAuthGuard)
   @Delete('methods/:id')
-  async detachPaymentMethod(@Param('id') id: string) {
+  async detachPaymentMethod(@Req() req, @Param('id') id: string) {
+    const org = await this.subscriptionsService.getOrganizationByUserId(
+      req.user.sub,
+    );
+    const method = await this.stripeService.getPaymentMethod(id);
+    if (method.customer !== org.stripe_customer_id) {
+      throw new BadRequestException(
+        'Payment method does not belong to this organization',
+      );
+    }
     return this.stripeService.detachPaymentMethod(id);
   }
 }

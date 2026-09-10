@@ -99,6 +99,7 @@ export class AssessmentsService {
           'certificates',
         ],
         order: { submitted_at: 'DESC' },
+        take: 50,
       });
     }
 
@@ -117,6 +118,7 @@ export class AssessmentsService {
           'certificates',
         ],
         order: { submitted_at: 'DESC' },
+        take: 50,
       });
     }
 
@@ -124,6 +126,7 @@ export class AssessmentsService {
       where: { organization: { id: orgId } },
       relations: ['organization', 'certificates'],
       order: { submitted_at: 'DESC' },
+      take: 50,
     });
   }
 

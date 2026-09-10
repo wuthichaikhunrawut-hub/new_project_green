@@ -61,7 +61,12 @@ export class AssessorEvidenceReviewComponent implements OnInit {
             category: f.category,
           })),
           comment: d.auditor_comment ?? '',
-          result: d.assessor_score > 0 ? 'PASS' : d.assessor_score === 0 && d.auditor_comment ? 'FAIL' : null,
+          result:
+            d.assessor_score > 0
+              ? 'PASS'
+              : d.assessor_score === 0 && d.auditor_comment
+                ? 'FAIL'
+                : null,
         }));
         if (this.orgId) {
           this.assessorService.getCarbonSummary(this.orgId).subscribe({

@@ -7,7 +7,7 @@ import { CarbonEquivalencyService } from '../../../core/services/carbon-equivale
   standalone: true,
   imports: [CommonModule],
   templateUrl: './impact-equivalency-card.html',
-  styleUrls: ['./impact-equivalency-card.css']
+  styleUrls: ['./impact-equivalency-card.css'],
 })
 export class ImpactEquivalencyCardComponent {
   @Input({ required: true }) reducedTco2e = 0;

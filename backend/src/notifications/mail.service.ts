@@ -1,11 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
   private readonly logger = new Logger(MailService.name);
 
   constructor(
@@ -13,20 +16,10 @@ export class MailService {
     private settingsService: SettingsService,
   ) {
     const host = this.configService.get<string>('SMTP_HOST');
-    const port = this.configService.get<number>('SMTP_PORT');
     const user = this.configService.get<string>('SMTP_USER');
     const pass = this.configService.get<string>('SMTP_PASS');
 
     if (host && user && pass) {
-      this.transporter = nodemailer.createTransport({
-        host,
-        port,
-        secure: port === 465, // true for 465, false for other ports
-        auth: {
-          user,
-          pass,
-        },
-      });
       this.logger.log('🚀 MailService initialized with default env SMTP');
     } else {
       this.logger.warn(
@@ -94,13 +87,17 @@ export class MailService {
           }
         }
       } else {
-        this.logger.warn(
-          '⚠️ SMTP config incomplete for LIVE mode. Falling back to MOCK.',
+        throw new ServiceUnavailableException(
+          'SMTP is configured for LIVE mode but required credentials are missing',
         );
       }
     }
 
-    // Default to Mock
+    if (mode !== 'mock') {
+      throw new ServiceUnavailableException(`Unsupported SMTP mode: ${mode}`);
+    }
+
+    // Mock delivery is allowed only when explicitly selected.
     this.logger.log(
       `📧 [MOCK EMAIL] To: ${to} | Subject: ${subject} | Fallback / Organization Central Notification Email: ${fallbackEmail}`,
     );

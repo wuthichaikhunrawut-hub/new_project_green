@@ -7,7 +7,6 @@ import { Organization } from '../organizations/entities/organization.entity';
 import { Invoice } from '../subscriptions/entities/invoice.entity';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { OrganizationSubscription } from '../subscriptions/entities/organization-subscription.entity';
-import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import { AssessorProfile } from '../users/entities/assessor-profile.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { EvidenceFile } from '../assessments/entities/evidence-file.entity';
@@ -22,7 +21,6 @@ import { SettingsModule } from '../settings/settings.module';
       Invoice,
       Assessment,
       OrganizationSubscription,
-      SubscriptionPlan,
       AssessorProfile,
       CarbonLog,
       EvidenceFile,

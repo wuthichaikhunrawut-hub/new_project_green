@@ -25,11 +25,26 @@ export class AuditLogsService {
     return this.auditLogRepository.save(log);
   }
 
-  async findAll(): Promise<AuditLog[]> {
-    return this.auditLogRepository.find({
-      relations: ['user'],
-      order: { created_at: 'DESC' },
-      take: 100, // default limit
-    });
+  async findAll(
+    page?: number,
+    limit?: number,
+    orgId?: number,
+  ): Promise<AuditLog[]> {
+    const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 50;
+    const safePage = page ? Math.max(1, Number(page)) : 1;
+    const skip = (safePage - 1) * safeLimit;
+
+    const query = this.auditLogRepository
+      .createQueryBuilder('log')
+      .leftJoinAndSelect('log.user', 'user')
+      .orderBy('log.created_at', 'DESC')
+      .skip(skip)
+      .take(safeLimit);
+
+    if (orgId) {
+      query.andWhere('user.org_id = :orgId', { orgId });
+    }
+
+    return query.getMany();
   }
 }

@@ -7,12 +7,7 @@ import { BillingService, PaymentMethod } from '../../../core/services/billing.se
 import { SettingsService } from '../../../core/services/settings.service';
 import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
 import { SubscriptionPlan } from '../../../core/services/subscriptions-admin.service';
-import {
-  loadStripe,
-  Stripe,
-  StripeElements,
-  StripePaymentElement,
-} from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeElements, StripePaymentElement } from '@stripe/stripe-js';
 import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-dialog';
 
 @Component({
@@ -20,7 +15,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-di
   standalone: true,
   imports: [CommonModule, RouterModule, ConfirmDialogComponent],
   templateUrl: './billing.html',
-  styleUrl: './billing.css'
+  styleUrl: './billing.css',
 })
 export class BillingComponent implements OnInit {
   private toast = inject(ToastService);
@@ -42,13 +37,16 @@ export class BillingComponent implements OnInit {
   isStripeLoading = true;
   isSaving = false;
   errorMessage = '';
-  
+
   showDeleteConfirm = false;
   methodToDelete: string | null = null;
-  
+
   selectedPlan: SubscriptionPlan | null = null;
   billingCycle = 'monthly';
-  nextBillingDate = new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' });
+  nextBillingDate = new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString(
+    'th-TH',
+    { day: 'numeric', month: 'long', year: 'numeric' },
+  );
 
   async ngOnInit() {
     const state = window.history.state;
@@ -69,7 +67,7 @@ export class BillingComponent implements OnInit {
         error: (err) => {
           console.error('Auto-fetch plan error:', err);
           this.setupPaymentFlow();
-        }
+        },
       });
     }
 
@@ -136,17 +134,17 @@ export class BillingComponent implements OnInit {
                     fontWeight: '600',
                     marginBottom: '8px',
                     color: '#475569',
-                  }
-                }
-              }
+                  },
+                },
+              },
             });
 
             this.paymentElement = this.elements.create('payment', {
-              layout: 'tabs'
+              layout: 'tabs',
             });
-            
+
             this.paymentElement.mount(this.paymentElementRef.nativeElement);
-            
+
             this.paymentElement.on('ready', () => {
               this.isStripeLoading = false;
               // Force a resize event to ensure Stripe recalculates height
@@ -157,7 +155,8 @@ export class BillingComponent implements OnInit {
 
             this.paymentElement.on('loaderror', (event: { error?: { message?: string } }) => {
               this.isStripeLoading = false;
-              this.errorMessage = 'ไม่สามารถโหลดฟอร์มชำระเงินได้ เนื่องจากปัญหาการเชื่อมต่อ กรุณารีเฟรชหน้าจอหรือตรวจสอบอินเทอร์เน็ตของคุณ';
+              this.errorMessage =
+                'ไม่สามารถโหลดฟอร์มชำระเงินได้ เนื่องจากปัญหาการเชื่อมต่อ กรุณารีเฟรชหน้าจอหรือตรวจสอบอินเทอร์เน็ตของคุณ';
             });
 
             (
@@ -174,12 +173,12 @@ export class BillingComponent implements OnInit {
           error: (err) => {
             this.isStripeLoading = false;
             this.errorMessage = 'ไม่สามารถเชื่อมต่อกับระบบชำระเงินได้ในขณะนี้';
-          }
+          },
         });
       },
       error: (err) => {
         this.isStripeLoading = false;
-      }
+      },
     });
   }
 
@@ -192,7 +191,7 @@ export class BillingComponent implements OnInit {
       },
       error: (err) => {
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -211,7 +210,7 @@ export class BillingComponent implements OnInit {
           this.isSaving = false;
           this.errorMessage = err.error?.message || 'เกิดข้อผิดพลาดในการเปิดใช้งานแพ็กเกจฟรี';
           this.toast.error(this.errorMessage);
-        }
+        },
       });
       return;
     }
@@ -221,24 +220,55 @@ export class BillingComponent implements OnInit {
     this.isSaving = true;
     this.errorMessage = '';
 
-    const { error } = await this.stripe.confirmSetup({
+    const { error, setupIntent } = await this.stripe.confirmSetup({
       elements: this.elements,
       confirmParams: {
         return_url: window.location.origin + '/subscription/billing',
       },
-      redirect: 'if_required'
+      redirect: 'if_required',
     });
 
     if (error) {
       this.errorMessage = error.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
       this.isSaving = false;
     } else {
-      // Success - reload methods
-      this.loadPaymentMethods();
-      this.isSaving = false;
-      this.toast.success('บันทึกข้อมูลการชำระเงินเรียบร้อยแล้ว');
-      // Re-init payment element to clear it
-      await this.initStripe();
+      const paymentMethodId =
+        typeof setupIntent?.payment_method === 'string'
+          ? setupIntent.payment_method
+          : setupIntent?.payment_method?.id;
+      if (!this.selectedPlan || !paymentMethodId) {
+        this.errorMessage = 'ไม่พบข้อมูลแพ็กเกจหรือช่องทางชำระเงิน กรุณาลองใหม่';
+        this.isSaving = false;
+        return;
+      }
+
+      this.userSubService.subscribeToPaidPlan(this.selectedPlan.id, paymentMethodId).subscribe({
+        next: async (result) => {
+          if (result.clientSecret) {
+            const confirmation = await this.stripe!.confirmPayment({
+              clientSecret: result.clientSecret,
+              confirmParams: {
+                payment_method: paymentMethodId,
+                return_url: window.location.origin + '/subscription',
+              },
+              redirect: 'if_required',
+            });
+            if (confirmation.error) {
+              this.errorMessage = confirmation.error.message || 'ไม่สามารถยืนยันการชำระเงินได้';
+              this.isSaving = false;
+              return;
+            }
+          }
+          this.isSaving = false;
+          this.toast.success('สมัครแพ็กเกจและบันทึกการชำระเงินเรียบร้อยแล้ว');
+          this.router.navigate(['/subscription']);
+        },
+        error: (subscribeError) => {
+          this.errorMessage = subscribeError.error?.message || 'ไม่สามารถสมัครแพ็กเกจได้';
+          this.isSaving = false;
+          this.toast.error(this.errorMessage);
+        },
+      });
     }
   }
 

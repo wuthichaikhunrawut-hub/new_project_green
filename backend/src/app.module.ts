@@ -41,21 +41,46 @@ import * as Joi from 'joi';
           .valid('development', 'production', 'test', 'provision')
           .default('development'),
         PORT: Joi.number().default(3001),
-        DB_HOST: Joi.string().required(),
+        DB_HOST: Joi.string().default('127.0.0.1'),
         DB_PORT: Joi.number().default(5432),
-        DB_USERNAME: Joi.string().required(),
-        DB_PASSWORD: Joi.string().required(),
-        DB_NAME: Joi.string().required(),
-        JWT_SECRET: Joi.string().required(),
-        GEMINI_API_KEY: Joi.string().required(),
-        STRIPE_SECRET_KEY: Joi.string().optional(),
-        SUPABASE_URL: Joi.string().required(),
-        SUPABASE_KEY: Joi.string().required(),
+        DB_USERNAME: Joi.string().default('postgres'),
+        DB_PASSWORD: Joi.string().allow('').default('postgres'),
+        DB_NAME: Joi.string().default('project-green'),
+        JWT_SECRET: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().min(16).required(),
+          otherwise: Joi.string().default('dev_jwt_secret_key_12345_greensync'),
+        }),
+        GEMINI_API_KEY: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().required(),
+          otherwise: Joi.string().default('mock-gemini-key'),
+        }),
+        STRIPE_PUBLIC_KEY: Joi.string().optional().allow(''),
+        STRIPE_SECRET_KEY: Joi.string().optional().allow(''),
+        STRIPE_WEBHOOK_SECRET: Joi.string().optional().allow(''),
+        SUPABASE_URL: Joi.string().default('https://mock.supabase.co'),
+        SUPABASE_KEY: Joi.string().default('mock-supabase-key'),
         SUPABASE_BUCKET: Joi.string().default('greensync-storage'),
-        SMTP_HOST: Joi.string().required(),
+        SMTP_HOST: Joi.string().default('smtp.example.com'),
         SMTP_PORT: Joi.number().default(587),
-        SMTP_USER: Joi.string().required(),
-        SMTP_PASS: Joi.string().required(),
+        SMTP_USER: Joi.string().default('mock_user@example.com'),
+        SMTP_PASS: Joi.string().default('mock_pass'),
+        ALLOWED_ORIGINS: Joi.when('NODE_ENV', {
+          is: 'production',
+          then: Joi.string().min(1).required(),
+          otherwise: Joi.string().default(
+            'http://localhost:4200,http://localhost:80',
+          ),
+        }),
+        DB_SYNCHRONIZE: Joi.boolean()
+          .truthy('true')
+          .falsy('false')
+          .default(true),
+        ENABLE_SWAGGER: Joi.boolean()
+          .truthy('true')
+          .falsy('false')
+          .default(false),
       }),
       validationOptions: {
         allowUnknown: true,
@@ -73,7 +98,11 @@ import * as Joi from 'joi';
         password: configService.get<string>('DB_PASSWORD', 'postgres'),
         database: configService.get<string>('DB_NAME', 'greenoffice'),
         autoLoadEntities: true,
-        synchronize: true, // Auto-create tables from entities
+        // Development keeps the current fast schema workflow. Production must
+        // always use reviewed migrations and can never auto-modify the schema.
+        synchronize:
+          configService.get<string>('NODE_ENV') !== 'production' &&
+          configService.get<boolean>('DB_SYNCHRONIZE', true),
         logging: false,
       }),
     }),

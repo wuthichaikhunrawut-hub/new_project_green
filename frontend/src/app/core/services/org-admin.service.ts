@@ -17,7 +17,6 @@ export class OrgAdminService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-
       }
     }
     return headers;

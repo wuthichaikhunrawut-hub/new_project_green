@@ -12,7 +12,7 @@ export interface Role {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UsersService {
   private http = inject(HttpClient);
@@ -26,7 +26,6 @@ export class UsersService {
       const token = localStorage.getItem('access_token');
       const currentUser = this.authService.getUser();
       const orgId = this.authService.getOrganizationId();
-
 
       if (orgId) headers = headers.set('x-org-id', String(orgId));
       if (currentUser?.role) headers = headers.set('x-user-role', String(currentUser.role));
@@ -58,5 +57,4 @@ export class UsersService {
   deleteUser(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
   }
-
 }

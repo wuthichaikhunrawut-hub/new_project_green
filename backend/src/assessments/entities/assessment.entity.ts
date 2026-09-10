@@ -7,12 +7,15 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { User } from '../../users/entities/user.entity';
 import { AssessmentDetail } from './assessment-detail.entity';
 import { Certificate } from './certificate.entity';
 
+@Index(['org_id', 'status'])
+@Index(['assessor_user_id', 'status'])
 @Entity('assessments')
 export class Assessment {
   @PrimaryGeneratedColumn('increment', { name: 'assessment_id' })

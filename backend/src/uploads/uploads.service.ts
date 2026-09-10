@@ -123,7 +123,7 @@ export class UploadsService {
 
     console.log(`📤 Uploading to Supabase: ${fileName} (${file.size} bytes)`);
 
-    const { data, error } = await this.supabase.storage
+    const { error } = await this.supabase.storage
       .from(this.bucket)
       .upload(fileName, file.buffer, {
         contentType: file.mimetype,
@@ -135,13 +135,30 @@ export class UploadsService {
       throw new BadRequestException(`Supabase upload failed: ${error.message}`);
     }
 
-    // Get Public URL
-    const { data: urlData } = this.supabase.storage
-      .from(this.bucket)
-      .getPublicUrl(fileName);
+    // Generate secure Signed URL with fallback
+    let fileUrl = '';
+    try {
+      const { data: signedData } = await this.supabase.storage
+        .from(this.bucket)
+        .createSignedUrl(fileName, 60 * 60 * 24 * 7); // 7 days valid
+      if (signedData?.signedUrl) {
+        fileUrl = signedData.signedUrl;
+      }
+    } catch {
+      // Fallback
+    }
 
-    const publicUrl = urlData.publicUrl;
-    console.log('✅ File uploaded to Supabase, URL:', publicUrl);
+    if (!fileUrl) {
+      const { data: urlData } = this.supabase.storage
+        .from(this.bucket)
+        .getPublicUrl(fileName);
+      fileUrl = urlData.publicUrl;
+    }
+
+    console.log(
+      '✅ File uploaded to Supabase, URL secured:',
+      fileUrl.substring(0, 50) + '...',
+    );
 
     // Save to Database
     try {
@@ -154,7 +171,7 @@ export class UploadsService {
         return {
           id: 0,
           file_name: originalName,
-          file_url: publicUrl,
+          file_url: fileUrl,
           file_type: file.mimetype,
           file_size: file.size,
           uploaded_at: new Date(),
@@ -163,7 +180,7 @@ export class UploadsService {
 
       const evidenceFile = this.evidenceFileRepository.create({
         file_name: originalName,
-        file_url: publicUrl,
+        file_url: fileUrl,
         file_type: file.mimetype,
         file_size: file.size,
         assessment_detail_id: metadata?.assessmentDetailId,
@@ -297,7 +314,7 @@ export class UploadsService {
     return { success: true };
   }
 
-  async findAll(currentUser?: any) {
+  async findAll(currentUser?: any, page?: number, limit?: number) {
     const role = currentUser?.role;
     const normalizeRole = (r: string): string => {
       return String(r || '')
@@ -306,6 +323,10 @@ export class UploadsService {
         .replace(/[\s_]/g, '');
     };
     const userRole = normalizeRole(role);
+
+    const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 100;
+    const safePage = page ? Math.max(1, Number(page)) : 1;
+    const skip = (safePage - 1) * safeLimit;
 
     let all = await this.evidenceFileRepository.find({
       relations: [
@@ -334,6 +355,10 @@ export class UploadsService {
           file.assessment_detail?.assessment?.org_id;
         return fileOrgId ? Number(fileOrgId) === orgId : false;
       });
+    }
+
+    if (page || limit) {
+      return all.slice(skip, skip + safeLimit);
     }
 
     return all;

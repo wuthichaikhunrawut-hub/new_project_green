@@ -1,16 +1,33 @@
 <div class="evaluate-wrapper animate-in" [class.loading]="isLoading">
-
   <!-- ═══ CONFIRM DIALOG ═══ -->
   <div class="confirm-overlay" *ngIf="showConfirm" (click)="onConfirmCancel()">
     <div class="confirm-dialog" (click)="$event.stopPropagation()">
-      <div class="confirm-icon" [class.icon-approve]="confirmAction === 'APPROVED'" [class.icon-reject]="confirmAction === 'REJECTED'" [class.icon-revision]="confirmAction === 'REVISION_REQUESTED'">
-        <i class="fa-solid" [class.fa-check]="confirmAction === 'APPROVED'" [class.fa-xmark]="confirmAction === 'REJECTED'" [class.fa-rotate-left]="confirmAction === 'REVISION_REQUESTED'"></i>
+      <div
+        class="confirm-icon"
+        [class.icon-approve]="confirmAction === 'APPROVED'"
+        [class.icon-reject]="confirmAction === 'REJECTED'"
+        [class.icon-revision]="confirmAction === 'REVISION_REQUESTED'"
+      >
+        <i
+          class="fa-solid"
+          [class.fa-check]="confirmAction === 'APPROVED'"
+          [class.fa-xmark]="confirmAction === 'REJECTED'"
+          [class.fa-rotate-left]="confirmAction === 'REVISION_REQUESTED'"
+        ></i>
       </div>
       <h5 class="confirm-title">{{ confirmTitle }}</h5>
       <p class="confirm-msg">{{ confirmMsg }}</p>
       <div class="confirm-actions">
         <button class="btn-cancel" (click)="onConfirmCancel()">ยกเลิก</button>
-        <button class="btn-confirm" [class.btn-confirm-approve]="confirmAction === 'APPROVED'" [class.btn-confirm-reject]="confirmAction === 'REJECTED'" [class.btn-confirm-revision]="confirmAction === 'REVISION_REQUESTED'" (click)="onConfirmOk()">ยืนยัน</button>
+        <button
+          class="btn-confirm"
+          [class.btn-confirm-approve]="confirmAction === 'APPROVED'"
+          [class.btn-confirm-reject]="confirmAction === 'REJECTED'"
+          [class.btn-confirm-revision]="confirmAction === 'REVISION_REQUESTED'"
+          (click)="onConfirmOk()"
+        >
+          ยืนยัน
+        </button>
       </div>
     </div>
   </div>
@@ -24,7 +41,9 @@
       <div class="header-info">
         <h1 class="header-title">
           ตรวจประเมิน
-          <span class="org-name" *ngIf="request?.organization?.name">{{ request!.organization.name }}</span>
+          <span class="org-name" *ngIf="request?.organization?.name">{{
+            request!.organization.name
+          }}</span>
           <span class="req-id text-muted">#{{ request?.id }}</span>
         </h1>
         <div class="header-meta">
@@ -32,7 +51,9 @@
           <span class="sep">·</span>
           <span>ส่งคำขอ {{ request?.submitted_at | thaiDate }}</span>
           <span class="sep">·</span>
-          <span class="status-badge" [class]="getStatusClass(request?.status || '')">{{ getStatusLabel(request?.status || '') }}</span>
+          <span class="status-badge" [class]="getStatusClass(request?.status || '')">{{
+            getStatusLabel(request?.status || '')
+          }}</span>
         </div>
       </div>
     </div>
@@ -54,10 +75,8 @@
 
   <!-- ═══ MAIN 3-COLUMN LAYOUT ═══ -->
   <div class="evaluate-body" *ngIf="!isLoading && request">
-
     <!-- ── LEFT PANEL: ข้อมูลองค์กร + Carbon ── -->
     <aside class="left-panel">
-
       <!-- Organization Info -->
       <div class="info-card">
         <div class="card-header-label">
@@ -75,11 +94,13 @@
           </div>
           <div class="info-row">
             <span class="info-label">จำนวนพนักงาน</span>
-            <span class="info-val">{{ (request.organization?.number_of_employees ?? '-') | number }} คน</span>
+            <span class="info-val"
+              >{{ request.organization?.number_of_employees ?? '-' | number }} คน</span
+            >
           </div>
           <div class="info-row">
             <span class="info-label">พื้นที่ใช้สอย</span>
-            <span class="info-val">{{ (request.organization?.total_floor_area ?? '-') }} ตร.ม.</span>
+            <span class="info-val">{{ request.organization?.total_floor_area ?? '-' }} ตร.ม.</span>
           </div>
         </div>
       </div>
@@ -89,7 +110,6 @@
         <div class="card-header-label">
           <i class="fa-solid fa-leaf"></i>
           ข้อมูล Carbon Footprint
-
         </div>
 
         <div class="carbon-loading" *ngIf="carbonLoading">
@@ -101,11 +121,15 @@
           <div class="scope-list">
             <div class="scope-item" *ngFor="let scope of carbonSummary.scopes">
               <div class="scope-icon-wrap" [style.background]="getScopeColor(scope.scope) + '20'">
-                <i class="fa-solid" [class]="getScopeIcon(scope.scope)" [style.color]="getScopeColor(scope.scope)"></i>
+                <i
+                  class="fa-solid"
+                  [class]="getScopeIcon(scope.scope)"
+                  [style.color]="getScopeColor(scope.scope)"
+                ></i>
               </div>
               <div class="scope-details">
                 <div class="scope-name">Scope {{ scope.scope }}</div>
-                <div class="scope-desc">{{ scope.label | slice:9 }}</div>
+                <div class="scope-desc">{{ scope.label | slice: 9 }}</div>
               </div>
               <div class="scope-value" [style.color]="getScopeColor(scope.scope)">
                 {{ scope.totalEmission.toFixed(1) }}<small>tCO₂e</small>
@@ -135,26 +159,38 @@
             <div class="cat-name">{{ group.categoryName }}</div>
             <div class="cat-bar-wrap">
               <div class="cat-bar">
-                <div class="cat-bar-fill" [style.width.%]="getCategoryPercent(group)" [class.cat-bar-gold]="getCategoryPercent(group) >= 90" [class.cat-bar-silver]="getCategoryPercent(group) >= 70 && getCategoryPercent(group) < 90" [class.cat-bar-bronze]="getCategoryPercent(group) >= 50 && getCategoryPercent(group) < 70" [class.cat-bar-fail]="getCategoryPercent(group) < 50"></div>
+                <div
+                  class="cat-bar-fill"
+                  [style.width.%]="getCategoryPercent(group)"
+                  [class.cat-bar-gold]="getCategoryPercent(group) >= 90"
+                  [class.cat-bar-silver]="
+                    getCategoryPercent(group) >= 70 && getCategoryPercent(group) < 90
+                  "
+                  [class.cat-bar-bronze]="
+                    getCategoryPercent(group) >= 50 && getCategoryPercent(group) < 70
+                  "
+                  [class.cat-bar-fail]="getCategoryPercent(group) < 50"
+                ></div>
               </div>
-              <span class="cat-score-text">{{ getCategoryAssessorScore(group) }}/{{ getCategoryMaxScore(group) }}</span>
+              <span class="cat-score-text"
+                >{{ getCategoryAssessorScore(group) }}/{{ getCategoryMaxScore(group) }}</span
+              >
             </div>
           </div>
         </div>
       </div>
-
     </aside>
 
     <!-- ── CENTER PANEL: เกณฑ์การประเมิน ── -->
     <main class="center-panel">
-
       <!-- Tab Navigation -->
       <div class="tab-nav" *ngIf="categoryGroups.length > 0">
         <button
           *ngFor="let group of categoryGroups; let i = index"
           class="tab-btn"
           [class.active]="activeTab === i"
-          (click)="activeTab = i">
+          (click)="activeTab = i"
+        >
           <span class="tab-num">{{ group.categoryNumber }}</span>
           <span class="tab-label">{{ group.categoryName }}</span>
           <span class="tab-score" [class.tab-score-done]="getCategoryPercent(group) > 0">
@@ -169,15 +205,21 @@
           <div class="group-banner">
             <span class="group-num">หมวด {{ group.categoryNumber }}</span>
             <span class="group-name">{{ group.categoryName }}</span>
-            <span class="group-total-score">{{ getCategoryAssessorScore(group) }} / {{ getCategoryMaxScore(group) }} คะแนน</span>
+            <span class="group-total-score"
+              >{{ getCategoryAssessorScore(group) }} / {{ getCategoryMaxScore(group) }} คะแนน</span
+            >
           </div>
 
           <div class="criteria-card" *ngFor="let item of group.details; let idx = index">
             <!-- Criteria Header -->
             <div class="criteria-card-header">
               <div class="criteria-meta">
-                <span class="criteria-code">{{ item.criteria?.criteria_code ?? ('ข้อ ' + (idx + 1)) }}</span>
-                <span class="criteria-name">{{ item.criteria?.criteria_name ?? 'ไม่ระบุชื่อเกณฑ์' }}</span>
+                <span class="criteria-code">{{
+                  item.criteria?.criteria_code ?? 'ข้อ ' + (idx + 1)
+                }}</span>
+                <span class="criteria-name">{{
+                  item.criteria?.criteria_name ?? 'ไม่ระบุชื่อเกณฑ์'
+                }}</span>
               </div>
               <span class="max-score-badge">เต็ม {{ item.criteria?.max_score ?? 5 }}</span>
             </div>
@@ -191,9 +233,7 @@
             <div class="criteria-body">
               <!-- Org Self Assessment -->
               <div class="section-block self-assessment-block">
-                <div class="section-label">
-                  <i class="fa-solid fa-user"></i> ข้อมูลจากองค์กร
-                </div>
+                <div class="section-label"><i class="fa-solid fa-user"></i> ข้อมูลจากองค์กร</div>
                 <div class="self-info">
                   <div class="self-score-display">
                     <span>ประเมินตนเอง</span>
@@ -213,20 +253,20 @@
                   <span class="file-count">{{ getEvidenceFiles(item).length }} ไฟล์</span>
                 </div>
                 <div class="evidence-list" *ngIf="getEvidenceFiles(item).length > 0; else noFiles">
-                  <a *ngFor="let file of getEvidenceFiles(item)"
+                  <a
+                    *ngFor="let file of getEvidenceFiles(item)"
                     [href]="getFileUrl(file)"
                     target="_blank"
                     class="file-chip"
-                    [title]="getFileName(file)">
+                    [title]="getFileName(file)"
+                  >
                     <i class="fa-regular fa-file"></i>
-                    <span>{{ getFileName(file) | slice:0:30 }}</span>
+                    <span>{{ getFileName(file) | slice: 0 : 30 }}</span>
                     <i class="fa-solid fa-arrow-up-right-from-square open-icon"></i>
                   </a>
                 </div>
                 <ng-template #noFiles>
-                  <div class="no-files">
-                    <i class="fa-solid fa-ban"></i> ไม่มีไฟล์แนบ
-                  </div>
+                  <div class="no-files"><i class="fa-solid fa-ban"></i> ไม่มีไฟล์แนบ</div>
                 </ng-template>
               </div>
 
@@ -240,16 +280,19 @@
                   <div class="score-input-wrap">
                     <label>คะแนนที่ให้</label>
                     <div class="score-input-group">
-                      <input type="number"
+                      <input
+                        type="number"
                         [value]="getScore(item)"
                         (change)="setScore(item, $event)"
                         [disabled]="!canEdit"
-                        min="0" [max]="item.criteria?.max_score ?? 5"
+                        min="0"
+                        [max]="item.criteria?.max_score ?? 5"
                         class="score-input"
                         [class.score-pass]="isPass(item)"
-                        [class.score-fail]="isFailing(item)">
+                        [class.score-fail]="isFailing(item)"
+                      />
                       <span class="score-max">/ {{ item.criteria?.max_score ?? 5 }}</span>
-                      
+
                       <span class="score-status-badge score-status-pass" *ngIf="isPass(item)">
                         <i class="fa-solid fa-circle-check"></i> ผ่านเกณฑ์
                       </span>
@@ -262,10 +305,20 @@
                   <div class="pass-fail-wrap" *ngIf="canEdit">
                     <label>ผลตรวจเร็ว</label>
                     <div class="pass-fail-btns">
-                      <button type="button" class="pf-btn pf-pass" [class.active]="isPass(item)" (click)="setPassFail(item, true)">
+                      <button
+                        type="button"
+                        class="pf-btn pf-pass"
+                        [class.active]="isPass(item)"
+                        (click)="setPassFail(item, true)"
+                      >
                         <i class="fa-solid fa-check"></i> ผ่าน
                       </button>
-                      <button type="button" class="pf-btn pf-fail" [class.active]="isFailing(item)" (click)="setPassFail(item, false)">
+                      <button
+                        type="button"
+                        class="pf-btn pf-fail"
+                        [class.active]="isFailing(item)"
+                        (click)="setPassFail(item, false)"
+                      >
                         <i class="fa-solid fa-xmark"></i> ไม่ผ่าน
                       </button>
                     </div>
@@ -274,15 +327,17 @@
 
                 <div class="comment-wrap">
                   <label>ข้อคิดเห็นเฉพาะข้อ</label>
-                  <textarea class="comment-input" rows="3"
+                  <textarea
+                    class="comment-input"
+                    rows="3"
                     [value]="getComment(item)"
                     (input)="setComment(item, $any($event.target).value)"
                     [disabled]="!canEdit"
-                    placeholder="ระบุข้อเสนอแนะ ข้อบกพร่อง หรือจุดที่ต้องปรับปรุง..."></textarea>
+                    placeholder="ระบุข้อเสนอแนะ ข้อบกพร่อง หรือจุดที่ต้องปรับปรุง..."
+                  ></textarea>
                 </div>
               </div>
             </div>
-
           </div>
 
           <!-- Save draft for this category -->
@@ -318,8 +373,14 @@
 
         <!-- Certification Level -->
         <div class="cert-level-display">
-          <div class="cert-level-badge" [style.background]="getCertificationLevel().bg + '20'" [style.border-color]="getCertificationLevel().bg">
-            <span class="cert-level-text" [style.color]="getCertificationLevel().bg">{{ getCertificationLevel().level }}</span>
+          <div
+            class="cert-level-badge"
+            [style.background]="getCertificationLevel().bg + '20'"
+            [style.border-color]="getCertificationLevel().bg"
+          >
+            <span class="cert-level-text" [style.color]="getCertificationLevel().bg">{{
+              getCertificationLevel().level
+            }}</span>
             <span class="cert-percent">({{ getCertificationLevel().percent }}%)</span>
           </div>
         </div>
@@ -331,7 +392,9 @@
             <div class="mini-bar">
               <div class="mini-bar-fill" [style.width.%]="getCategoryPercent(group)"></div>
             </div>
-            <span class="mini-bar-val">{{ getCategoryAssessorScore(group) }}/{{ getCategoryMaxScore(group) }}</span>
+            <span class="mini-bar-val"
+              >{{ getCategoryAssessorScore(group) }}/{{ getCategoryMaxScore(group) }}</span
+            >
           </div>
         </div>
       </div>
@@ -343,10 +406,13 @@
           ข้อคิดเห็นภาพรวม
           <span class="required-mark" *ngIf="canEdit">*</span>
         </div>
-        <textarea class="overall-textarea" rows="5"
+        <textarea
+          class="overall-textarea"
+          rows="5"
           [(ngModel)]="overallComment"
           [disabled]="!canEdit"
-          placeholder="สรุปผลการตรวจประเมินโดยรวม, ข้อแนะนำสำหรับองค์กร, และเหตุผลในการตัดสิน..."></textarea>
+          placeholder="สรุปผลการตรวจประเมินโดยรวม, ข้อแนะนำสำหรับองค์กร, และเหตุผลในการตัดสิน..."
+        ></textarea>
       </div>
 
       <!-- Action Buttons -->
@@ -358,16 +424,28 @@
           <i class="fa-solid fa-floppy-disk"></i>
           {{ isSaving ? 'กำลังบันทึก...' : 'บันทึกร่าง' }}
         </button>
-        <button class="action-btn btn-revision" (click)="openConfirm('REVISION_REQUESTED')" [disabled]="isSaving">
+        <button
+          class="action-btn btn-revision"
+          (click)="openConfirm('REVISION_REQUESTED')"
+          [disabled]="isSaving"
+        >
           <i class="fa-solid fa-rotate-left"></i> ขอให้แก้ไข
         </button>
-        <button class="action-btn btn-reject" (click)="openConfirm('REJECTED')" [disabled]="isSaving">
+        <button
+          class="action-btn btn-reject"
+          (click)="openConfirm('REJECTED')"
+          [disabled]="isSaving"
+        >
           <i class="fa-solid fa-xmark"></i> ปฏิเสธคำขอ
         </button>
-        <button class="action-btn btn-approve"
+        <button
+          class="action-btn btn-approve"
           (click)="openConfirm('APPROVED')"
           [disabled]="isSaving || !allScoredAndHasComment"
-          [title]="!allScoredAndHasComment ? 'กรอกคะแนนครบทุกข้อและเพิ่มข้อคิดเห็นภาพรวมก่อนอนุมัติ' : ''">
+          [title]="
+            !allScoredAndHasComment ? 'กรอกคะแนนครบทุกข้อและเพิ่มข้อคิดเห็นภาพรวมก่อนอนุมัติ' : ''
+          "
+        >
           <i class="fa-solid fa-check"></i> อนุมัติผ่านรับรอง
         </button>
         <div class="approve-hint" *ngIf="!allScoredAndHasComment">
@@ -384,8 +462,6 @@
           <i class="fa-solid fa-arrow-left"></i> ย้อนกลับ
         </button>
       </div>
-
     </aside>
-
   </div>
 </div>

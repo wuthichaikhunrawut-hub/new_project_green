@@ -1,4 +1,12 @@
-import { Component, inject, Input, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -11,7 +19,7 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './sidebar.html',
-  styleUrls: ['./sidebar.css']
+  styleUrls: ['./sidebar.css'],
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
@@ -31,9 +39,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.authService.currentUser$.subscribe(user => {
+      this.authService.currentUser$.subscribe((user) => {
         this.user = user;
-        
+
         // Dynamic profile fetch: If user_profile name is not populated in the current session,
         // fetch full user details from backend to retrieve the real name (e.g. วีระเดช)
         if (user && user.id) {
@@ -43,12 +51,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
                 this.user = {
                   ...this.user,
                   user_profile: fullUser.user_profile,
-                  username: fullUser.username
+                  username: fullUser.username,
                 };
                 this.cdr.markForCheck();
               }
             },
-            error: (err) => console.warn('Sidebar failed to fetch full user profile dynamically', err)
+            error: (err) =>
+              console.warn('Sidebar failed to fetch full user profile dynamically', err),
           });
         }
 
@@ -57,7 +66,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
           this.loadPendingCount();
         }
         this.cdr.markForCheck();
-      })
+      }),
     );
   }
 
@@ -67,10 +76,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.pendingCount = (data.stats.pending ?? 0) + (data.stats.inReview ?? 0);
         this.cdr.markForCheck();
       },
-      error: () => { 
-        this.pendingCount = 0; 
+      error: () => {
+        this.pendingCount = 0;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -79,7 +88,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   get roleKey(): string {
-    const r = String(this.user?.role || '').trim().toUpperCase().split(' ').join('_');
+    const r = String(this.user?.role || '')
+      .trim()
+      .toUpperCase()
+      .split(' ')
+      .join('_');
     if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
     if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
     if (r === 'ASSESSOR') return 'ASSESSOR';
@@ -103,18 +116,32 @@ export class SidebarComponent implements OnInit, OnDestroy {
       const last = this.user.user_profile.last_name || '';
       return `${first} ${last}`.trim();
     }
-    
+
     // Return username or email split handle as fallback name (e.g. user02)
     return this.user?.username || this.user?.email?.split('@')[0] || 'ผู้ใช้งาน';
   }
 
-  get isSystemAdmin(): boolean { return this.roleKey === 'SYSTEM_ADMIN'; }
-  get isOrgAdmin(): boolean { return this.roleKey === 'ORG_ADMIN'; }
-  get isAnyAdmin(): boolean { return this.isSystemAdmin || this.isOrgAdmin; }
-  get isAssessor(): boolean { return this.roleKey === 'ASSESSOR' || this.roleKey === 'ASSESSOR_ADMIN'; }
-  get isAssessorAdmin(): boolean { return this.roleKey === 'ASSESSOR_ADMIN'; }
-  get isExecutive(): boolean { return this.roleKey === 'EXECUTIVE'; }
-  get isEmployee(): boolean { return this.roleKey === 'EMPLOYEE'; }
+  get isSystemAdmin(): boolean {
+    return this.roleKey === 'SYSTEM_ADMIN';
+  }
+  get isOrgAdmin(): boolean {
+    return this.roleKey === 'ORG_ADMIN';
+  }
+  get isAnyAdmin(): boolean {
+    return this.isSystemAdmin || this.isOrgAdmin;
+  }
+  get isAssessor(): boolean {
+    return this.roleKey === 'ASSESSOR' || this.roleKey === 'ASSESSOR_ADMIN';
+  }
+  get isAssessorAdmin(): boolean {
+    return this.roleKey === 'ASSESSOR_ADMIN';
+  }
+  get isExecutive(): boolean {
+    return this.roleKey === 'EXECUTIVE';
+  }
+  get isEmployee(): boolean {
+    return this.roleKey === 'EMPLOYEE';
+  }
   /** User or Employee or Executive — regular org members */
   get isOrgMember(): boolean {
     return ['USER', 'EMPLOYEE', 'EXECUTIVE', 'ORG_ADMIN'].includes(this.roleKey);
@@ -155,6 +182,4 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.mobileMenuOpen = false;
     }
   }
-
-
 }

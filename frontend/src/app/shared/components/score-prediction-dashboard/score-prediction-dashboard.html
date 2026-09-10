@@ -1,9 +1,15 @@
 <div class="score-card rounded-[2.5rem] p-8 border">
   <div class="flex items-start justify-between gap-6">
     <div>
-      <div class="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">Score Prediction Dashboard</div>
-      <div class="mt-2 text-2xl font-black text-slate-800 tracking-tight">ความพร้อมตามเกณฑ์ 2569</div>
-      <div class="mt-2 text-sm text-slate-500 font-medium">คำนวณคะแนนดิบ 0-4 คะแนน ต่อหนึ่งตัวชี้วัด</div>
+      <div class="text-[10px] font-black tracking-[0.18em] uppercase text-slate-500">
+        Score Prediction Dashboard
+      </div>
+      <div class="mt-2 text-2xl font-black text-slate-800 tracking-tight">
+        ความพร้อมตามเกณฑ์ 2569
+      </div>
+      <div class="mt-2 text-sm text-slate-500 font-medium">
+        คำนวณคะแนนดิบ 0-4 คะแนน ต่อหนึ่งตัวชี้วัด
+      </div>
     </div>
 
     <div class="shrink-0">
@@ -28,7 +34,9 @@
         </svg>
         <div class="absolute inset-0 flex flex-col items-center justify-center">
           <div class="text-2xl font-black text-slate-800 tabular-nums">{{ summary.percent }}%</div>
-          <div class="text-[10px] font-black tracking-widest uppercase" [ngClass]="levelClass">{{ summary.level }}</div>
+          <div class="text-[10px] font-black tracking-widest uppercase" [ngClass]="levelClass">
+            {{ summary.level }}
+          </div>
         </div>
       </div>
     </div>
@@ -39,15 +47,28 @@
       คะแนนรวม {{ summary.totalScore }} / {{ summary.maxScore }}
     </div>
 
-    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black"
-         [ngClass]="summary.readyForAudit ? 'bg-emerald-500/10 text-emerald-800 border-emerald-300/40' : 'bg-slate-500/10 text-slate-700 border-slate-300/40'">
-      <span class="w-2 h-2 rounded-full" [class.bg-emerald-600]="summary.readyForAudit" [class.bg-slate-500]="!summary.readyForAudit"></span>
+    <div
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl border text-xs font-black"
+      [ngClass]="
+        summary.readyForAudit
+          ? 'bg-emerald-500/10 text-emerald-800 border-emerald-300/40'
+          : 'bg-slate-500/10 text-slate-700 border-slate-300/40'
+      "
+    >
+      <span
+        class="w-2 h-2 rounded-full"
+        [class.bg-emerald-600]="summary.readyForAudit"
+        [class.bg-slate-500]="!summary.readyForAudit"
+      ></span>
       {{ summary.readyForAudit ? 'Ready for Audit' : 'In Progress' }}
     </div>
   </div>
 
   <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div *ngFor="let item of summary.indicators" class="rounded-2xl bg-white/60 border border-white/30 p-5">
+    <div
+      *ngFor="let item of summary.indicators"
+      class="rounded-2xl bg-white/60 border border-white/30 p-5"
+    >
       <div class="flex items-start justify-between gap-4">
         <div>
           <div class="text-xs font-black text-slate-800">{{ item.code }}</div>
@@ -56,8 +77,14 @@
         </div>
 
         <div class="shrink-0">
-          <div class="w-12 h-12 rounded-2xl flex items-center justify-center border font-black"
-               [ngClass]="item.score === 4 ? 'bg-emerald-500/10 text-emerald-700 border-emerald-200/60' : 'bg-slate-500/10 text-slate-700 border-slate-200/60'">
+          <div
+            class="w-12 h-12 rounded-2xl flex items-center justify-center border font-black"
+            [ngClass]="
+              item.score === 4
+                ? 'bg-emerald-500/10 text-emerald-700 border-emerald-200/60'
+                : 'bg-slate-500/10 text-slate-700 border-slate-200/60'
+            "
+          >
             {{ item.score }}
           </div>
         </div>

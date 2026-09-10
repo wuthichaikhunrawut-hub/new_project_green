@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  ForbiddenException,
   Logger,
   NotFoundException,
 } from '@nestjs/common';
@@ -79,7 +80,10 @@ export class AssessorService {
   async getHistory(assessorUserId: number): Promise<AssessorAssignmentItem[]> {
     try {
       const assessments = await this.assessmentRepo.find({
-        where: { status: In(COMPLETED_STATUSES) },
+        where: {
+          assessor_user_id: assessorUserId,
+          status: In(COMPLETED_STATUSES),
+        },
         relations: ['organization', 'certificates'],
         order: { updated_at: 'DESC' },
         take: 100,
@@ -111,6 +115,20 @@ export class AssessorService {
     } catch (error) {
       this.logger.error(`getOrgCarbonSummary failed for org ${orgId}`, error);
       throw new InternalServerErrorException('ไม่สามารถคำนวณข้อมูลคาร์บอนได้');
+    }
+  }
+
+  async assertAssessorOrganizationAccess(
+    assessorUserId: number,
+    orgId: number,
+  ): Promise<void> {
+    const assigned = await this.assessmentRepo.exists({
+      where: { assessor_user_id: assessorUserId, org_id: orgId },
+    });
+    if (!assigned) {
+      throw new ForbiddenException(
+        'ไม่มีสิทธิ์เข้าถึงข้อมูลองค์กรที่ไม่ได้รับมอบหมาย',
+      );
     }
   }
 
@@ -183,7 +201,8 @@ export class AssessorService {
     } catch (error) {
       if (
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
@@ -267,7 +286,8 @@ export class AssessorService {
     } catch (error) {
       if (
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
@@ -312,6 +332,13 @@ export class AssessorService {
 
       return this.getAssessmentDetail(assessmentId);
     } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
+      ) {
+        throw error;
+      }
       this.logger.error(`updateCertificate failed id=${assessmentId}`, error);
       throw new InternalServerErrorException(
         'ไม่สามารถบันทึกข้อมูลใบรับรองได้',
@@ -357,7 +384,8 @@ export class AssessorService {
     } catch (error) {
       if (
         error instanceof BadRequestException ||
-        error instanceof NotFoundException
+        error instanceof NotFoundException ||
+        error instanceof ForbiddenException
       ) {
         throw error;
       }
@@ -369,24 +397,20 @@ export class AssessorService {
   private async loadAssessmentsForAssessor(
     assessorUserId: number,
   ): Promise<Assessment[]> {
-    const assigned = await this.assessmentRepo.find({
-      where: {
-        assessor_user_id: assessorUserId,
-        status: In(ACTIVE_STATUSES),
-      },
+    return this.assessmentRepo.find({
+      where: [
+        {
+          assessor_user_id: assessorUserId,
+          status: In(ACTIVE_STATUSES),
+        },
+        {
+          assessor_user_id: IsNull(),
+          status: In(['PENDING', 'SUBMITTED', 'IN_REVIEW']),
+        },
+      ],
       relations: ['organization', 'certificates'],
       order: { created_at: 'DESC' },
     });
-
-    const unassigned = await this.assessmentRepo.find({
-      where: { status: In(['PENDING', 'SUBMITTED', 'IN_REVIEW']) },
-      relations: ['organization', 'certificates'],
-      order: { created_at: 'DESC' },
-    });
-
-    const map = new Map<number, Assessment>();
-    [...unassigned, ...assigned].forEach((a) => map.set(a.id, a));
-    return Array.from(map.values());
   }
 
   private buildStats(assessments: Assessment[]): AssessorDashboardStats {
@@ -412,14 +436,24 @@ export class AssessorService {
   private async buildAssignments(
     assessments: Assessment[],
   ): Promise<AssessorAssignmentItem[]> {
+    const organizations = new Map<number, string>();
+    for (const assessment of assessments) {
+      const orgId = assessment.org_id ?? assessment.organization?.id;
+      if (orgId) {
+        organizations.set(
+          orgId,
+          assessment.organization?.name ?? `องค์กร #${orgId}`,
+        );
+      }
+    }
+    const carbonSummaries = await this.computeCarbonSummaries(organizations);
+
     const items: AssessorAssignmentItem[] = [];
     for (const a of assessments) {
       const orgId = a.org_id ?? a.organization?.id;
       if (!orgId) continue;
-      const carbonSummary = await this.computeCarbonSummary(
-        orgId,
-        a.organization?.name,
-      );
+      const carbonSummary = carbonSummaries.get(orgId);
+      if (!carbonSummary) continue;
       items.push({
         id: a.id,
         orgId,
@@ -437,6 +471,62 @@ export class AssessorService {
       });
     }
     return items;
+  }
+
+  private createEmptyCarbonSummary(
+    orgId: number,
+    orgName: string,
+  ): OrgCarbonSummary {
+    const scopes = [1, 2, 3].map((scope) => ({
+      scope,
+      label: SCOPE_LABELS[scope],
+      totalEmission: 0,
+      logCount: 0,
+    }));
+    return { orgId, orgName, scopes, totalEmission: 0 };
+  }
+
+  private async computeCarbonSummaries(
+    organizations: Map<number, string>,
+  ): Promise<Map<number, OrgCarbonSummary>> {
+    const summaries = new Map<number, OrgCarbonSummary>();
+    for (const [orgId, orgName] of organizations) {
+      summaries.set(orgId, this.createEmptyCarbonSummary(orgId, orgName));
+    }
+    if (organizations.size === 0) return summaries;
+
+    const rows = await this.carbonLogRepo
+      .createQueryBuilder('log')
+      .leftJoin('log.emission_factor', 'factor')
+      .where('log.org_id IN (:...orgIds)', {
+        orgIds: Array.from(organizations.keys()),
+      })
+      .select('log.org_id', 'orgId')
+      .addSelect('factor.scope', 'scope')
+      .addSelect('COUNT(log.carbon_log_id)', 'logCount')
+      .addSelect('COALESCE(SUM(log.total_emission), 0)', 'totalEmission')
+      .groupBy('log.org_id')
+      .addGroupBy('factor.scope')
+      .getRawMany<{
+        orgId: string;
+        scope: string;
+        logCount: string;
+        totalEmission: string;
+      }>();
+
+    for (const row of rows) {
+      const orgId = Number(row.orgId);
+      const scope = Number(row.scope);
+      const summary = summaries.get(orgId);
+      if (!summary || ![1, 2, 3].includes(scope)) continue;
+      const scopeSummary = summary.scopes.find((item) => item.scope === scope);
+      if (!scopeSummary) continue;
+      scopeSummary.totalEmission = Number(row.totalEmission) || 0;
+      scopeSummary.logCount = Number(row.logCount) || 0;
+      summary.totalEmission += scopeSummary.totalEmission;
+    }
+
+    return summaries;
   }
 
   private async computeCarbonSummary(
@@ -463,12 +553,10 @@ export class AssessorService {
       });
     }
 
-    let hasRealData = false;
     for (const row of rows) {
       const scope = Number(row.scope);
       if (!scope || !scopeMap.has(scope)) continue;
       const total = Number(row.totalEmission) || 0;
-      if (total > 0) hasRealData = true;
       scopeMap.set(scope, {
         scope,
         label: SCOPE_LABELS[scope],
@@ -510,6 +598,15 @@ export class AssessorService {
     assessment: Assessment,
     assessorUserId: number,
   ): Promise<void> {
+    if (
+      assessment.assessor_user_id &&
+      Number(assessment.assessor_user_id) !== assessorUserId
+    ) {
+      throw new ForbiddenException(
+        'การประเมินนี้มอบหมายให้ผู้ตรวจประเมินคนอื่นแล้ว',
+      );
+    }
+    assessment.assessor = { id: assessorUserId } as User;
     if (!assessment.assessor_user_id) {
       assessment.assessor_user_id = assessorUserId;
       await this.assessmentRepo.save(assessment);

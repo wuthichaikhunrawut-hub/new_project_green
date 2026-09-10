@@ -44,6 +44,9 @@ export class User {
   @Column({ type: 'boolean', default: true })
   is_active: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  password_setup_required: boolean;
+
   @Column({ type: 'timestamp without time zone', nullable: true })
   email_verified_at: Date;
 

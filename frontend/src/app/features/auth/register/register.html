@@ -2,7 +2,7 @@
   <div class="register-card shadow-lg animate-in">
     <div class="text-center mb-5">
       <div class="logo-wrapper">
-        <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="brand-logo">
+        <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="brand-logo" />
       </div>
       <h2 class="fw-bold text-dark mb-1">ลงทะเบียนองค์กร</h2>
       <p class="text-muted small">GreenSync Enterprise - แพลตฟอร์มจัดการคาร์บอนฟุตพริ้นท์</p>
@@ -27,13 +27,25 @@
         <div class="row g-4">
           <div class="col-12">
             <label class="form-label">ชื่อองค์กร / หน่วยงาน</label>
-            <input type="text" class="form-control" [(ngModel)]="orgData.name" name="orgName"
-              placeholder="ระบุชื่อเต็มขององค์กร" required>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="orgData.name"
+              name="orgName"
+              placeholder="ระบุชื่อเต็มขององค์กร"
+              required
+            />
           </div>
 
           <div class="col-md-6">
             <label class="form-label">เลขประจำตัวผู้เสียภาษี</label>
-            <input type="text" class="form-control" [(ngModel)]="orgData.tax_id" name="taxId" placeholder="เลข 13 หลัก">
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="orgData.tax_id"
+              name="taxId"
+              placeholder="เลข 13 หลัก"
+            />
           </div>
 
           <div class="col-md-6">
@@ -51,7 +63,12 @@
           <div class="col-md-4">
             <label class="form-label">จำนวนพนักงาน</label>
             <div class="input-group">
-              <input type="number" class="form-control" [(ngModel)]="orgData.number_of_employees" name="employees">
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="orgData.number_of_employees"
+                name="employees"
+              />
               <span class="input-group-text">คน</span>
             </div>
           </div>
@@ -59,7 +76,12 @@
           <div class="col-md-4">
             <label class="form-label">พื้นที่ใช้สอยรวม</label>
             <div class="input-group">
-              <input type="number" class="form-control" [(ngModel)]="orgData.total_floor_area" name="area">
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="orgData.total_floor_area"
+                name="area"
+              />
               <span class="input-group-text">ตร.ม.</span>
             </div>
           </div>
@@ -67,27 +89,46 @@
           <div class="col-md-4">
             <label class="form-label">ชั่วโมงทำงาน/ปี</label>
             <div class="input-group">
-              <input type="number" class="form-control" [(ngModel)]="orgData.working_hours_per_year" name="hours">
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="orgData.working_hours_per_year"
+                name="hours"
+              />
               <span class="input-group-text">ชม.</span>
             </div>
           </div>
 
           <div class="col-md-6">
             <label class="form-label">ปีฐาน (Base Year)</label>
-            <input type="number" class="form-control" [(ngModel)]="orgData.base_year" name="baseYear">
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="orgData.base_year"
+              name="baseYear"
+            />
           </div>
 
           <div class="col-md-6">
             <label class="form-label">เป้าหมายการลด (%)</label>
             <div class="input-group">
-              <input type="number" class="form-control" [(ngModel)]="orgData.target_reduction_percent" name="target">
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="orgData.target_reduction_percent"
+                name="target"
+              />
               <span class="input-group-text">%</span>
             </div>
           </div>
 
           <div class="col-12">
             <label class="form-label">สถานะ Green Office ปัจจุบัน</label>
-            <select class="form-select" [(ngModel)]="orgData.current_green_status" name="greenStatus">
+            <select
+              class="form-select"
+              [(ngModel)]="orgData.current_green_status"
+              name="greenStatus"
+            >
               <option value="none">ยังไม่ได้เข้าร่วม</option>
               <option value="gold">ระดับเหรียญทอง (Gold)</option>
               <option value="silver">ระดับเหรียญเงิน (Silver)</option>
@@ -108,44 +149,104 @@
         <div class="row g-4 mb-4">
           <div class="col-md-6">
             <label class="form-label">ชื่อ (First Name)</label>
-            <input type="text" class="form-control" [(ngModel)]="userData.firstName" name="firstName" required>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="userData.firstName"
+              name="firstName"
+              required
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label">นามสกุล (Last Name)</label>
-            <input type="text" class="form-control" [(ngModel)]="userData.lastName" name="lastName" required>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="userData.lastName"
+              name="lastName"
+              required
+            />
           </div>
           <div class="col-12">
             <label class="form-label">เบอร์โทรศัพท์ (Phone)</label>
-            <input type="text" class="form-control" [(ngModel)]="userData.phone" name="phone" required>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="userData.phone"
+              name="phone"
+              required
+            />
           </div>
           <div class="col-12">
             <label class="form-label">อีเมลติดต่อ (Business Email)</label>
-            <input type="email" class="form-control" [(ngModel)]="userData.email" name="email"
-              placeholder="example@company.com" required>
+            <input
+              type="email"
+              class="form-control"
+              [(ngModel)]="userData.email"
+              name="email"
+              placeholder="example@company.com"
+              required
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label">รหัสผ่าน</label>
-            <input type="password" class="form-control" [(ngModel)]="userData.password" name="password" required>
+            <input
+              type="password"
+              class="form-control"
+              [(ngModel)]="userData.password"
+              name="password"
+              required
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label">ยืนยันรหัสผ่าน</label>
-            <input type="password" class="form-control" [(ngModel)]="userData.confirmPassword" name="confirmPass"
-              required>
+            <input
+              type="password"
+              class="form-control"
+              [(ngModel)]="userData.confirmPassword"
+              name="confirmPass"
+              required
+            />
           </div>
         </div>
 
         <div class="form-check mt-4 mb-2">
-          <input class="form-check-input" type="checkbox" id="acceptTerms" [(ngModel)]="acceptTerms" name="acceptTerms" required>
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="acceptTerms"
+            [(ngModel)]="acceptTerms"
+            name="acceptTerms"
+            required
+          />
           <label class="form-check-label text-muted small" for="acceptTerms">
-            ฉันได้อ่านและยอมรับ <a routerLink="/terms" target="_blank" class="text-success text-decoration-none">ข้อตกลงการให้บริการ</a> และ <a routerLink="/privacy-policy" target="_blank" class="text-success text-decoration-none">นโยบายความเป็นส่วนตัว</a>
+            ฉันได้อ่านและยอมรับ
+            <a routerLink="/terms" target="_blank" class="text-success text-decoration-none"
+              >ข้อตกลงการให้บริการ</a
+            >
+            และ
+            <a
+              routerLink="/privacy-policy"
+              target="_blank"
+              class="text-success text-decoration-none"
+              >นโยบายความเป็นส่วนตัว</a
+            >
           </label>
         </div>
 
         <div class="d-flex gap-3 mt-4">
-          <button type="button" class="btn btn-outline-secondary px-4 py-3 fw-bold" (click)="prevStep()">
+          <button
+            type="button"
+            class="btn btn-outline-secondary px-4 py-3 fw-bold"
+            (click)="prevStep()"
+          >
             <i class="fa-solid fa-arrow-left me-2"></i> ย้อนกลับ
           </button>
-          <button type="submit" class="btn btn-success flex-grow-1 py-3 fw-bold" [disabled]="isLoading || !acceptTerms">
+          <button
+            type="submit"
+            class="btn btn-success flex-grow-1 py-3 fw-bold"
+            [disabled]="isLoading || !acceptTerms"
+          >
             <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
             สร้างบัญชีและเริ่มใช้งาน
           </button>
@@ -154,7 +255,9 @@
 
       <div class="text-center mt-5">
         <span class="text-muted small">มีบัญชีอยู่แล้ว?</span>
-        <a routerLink="/login" class="text-success fw-bold text-decoration-none small ms-2">เข้าสู่ระบบที่นี่</a>
+        <a routerLink="/login" class="text-success fw-bold text-decoration-none small ms-2"
+          >เข้าสู่ระบบที่นี่</a
+        >
       </div>
     </form>
   </div>

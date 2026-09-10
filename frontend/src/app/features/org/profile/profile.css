@@ -1,14 +1,37 @@
 /* Typography & Colors */
-.text-dark { color: #0f172a; }
-.text-primary { color: #10b981; }
-.bg-primary { background-color: #10b981 !important; }
-.bg-light-subtle { background-color: #f8fafc !important; }
+.text-dark {
+  color: #0f172a;
+}
+.text-primary {
+  color: #10b981;
+}
+.bg-primary {
+  background-color: #10b981 !important;
+}
+.bg-light-subtle {
+  background-color: #f8fafc !important;
+}
 
 /* Buttons */
-.btn-primary { background-color: #10b981; color: white; border: none; }
-.btn-primary:hover { background-color: #059669; color: white; transform: translateY(-1px); }
-.btn-outline-dark-navy { border: 1px solid #0f172a; color: #0f172a; background: transparent; }
-.btn-outline-dark-navy:hover { background-color: #0f172a; color: white; }
+.btn-primary {
+  background-color: #10b981;
+  color: white;
+  border: none;
+}
+.btn-primary:hover {
+  background-color: #059669;
+  color: white;
+  transform: translateY(-1px);
+}
+.btn-outline-dark-navy {
+  border: 1px solid #0f172a;
+  color: #0f172a;
+  background: transparent;
+}
+.btn-outline-dark-navy:hover {
+  background-color: #0f172a;
+  color: white;
+}
 
 /* Custom Inputs */
 .custom-input {
@@ -49,7 +72,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-

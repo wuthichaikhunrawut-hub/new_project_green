@@ -1,5 +1,4 @@
 <div class="dash-wrapper animate-in">
-
   <!-- ══ GREETING BANNER ══ -->
   <div class="greeting-banner">
     <div class="greeting-left">
@@ -34,56 +33,32 @@
   </div>
 
   <ng-container *ngIf="!isLoading">
-
     <!-- ══ STAT CARDS ══ -->
     <div class="stats-grid">
-      <div class="stat-card stat-amber">
-        <div class="stat-icon"><i class="fa-solid fa-clock"></i></div>
-        <div class="stat-body">
-          <p class="stat-label">รอตรวจประเมิน</p>
-          <p class="stat-number">{{ stats.pending }}</p>
-        </div>
-        <div class="stat-trend" *ngIf="stats.pending > 0">
-          <i class="fa-solid fa-arrow-up"></i> ต้องดำเนินการ
-        </div>
-      </div>
-
-      <div class="stat-card stat-blue">
-        <div class="stat-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-        <div class="stat-body">
-          <p class="stat-label">กำลังตรวจสอบ</p>
-          <p class="stat-number">{{ stats.inReview }}</p>
-        </div>
-        <div class="stat-trend">
-          <i class="fa-solid fa-circle-dot"></i> In Progress
-        </div>
-      </div>
-
-      <div class="stat-card stat-violet">
-        <div class="stat-icon"><i class="fa-solid fa-rotate-left"></i></div>
-        <div class="stat-body">
-          <p class="stat-label">ส่งกลับแก้ไข</p>
-          <p class="stat-number">{{ stats.revisionRequested }}</p>
-        </div>
-        <div class="stat-trend">
-          <i class="fa-solid fa-pen"></i> รอองค์กรแก้ไข
-        </div>
-      </div>
-
-      <div class="stat-card stat-red" [class.stat-red-alert]="stats.nearDeadline > 0">
+      <div
+        *ngFor="let card of statCards"
+        class="stat-card"
+        [ngClass]="card.tone"
+        [class.stat-red-alert]="card.deadline && stats.nearDeadline > 0"
+      >
         <div class="stat-icon">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          <span class="alert-pulse" *ngIf="stats.nearDeadline > 0"></span>
+          <i class="fa-solid" [ngClass]="card.icon"></i>
+          <span class="alert-pulse" *ngIf="card.deadline && stats.nearDeadline > 0"></span>
         </div>
         <div class="stat-body">
-          <p class="stat-label">ใกล้ครบกำหนด</p>
-          <p class="stat-number">{{ stats.nearDeadline }}</p>
+          <p class="stat-label">{{ card.label }}</p>
+          <p class="stat-number">{{ stats[card.key] }}</p>
         </div>
-        <div class="stat-trend stat-trend-urgent" *ngIf="stats.nearDeadline > 0">
-          <i class="fa-solid fa-fire"></i> ต้องรีบดำเนินการ!
-        </div>
-        <div class="stat-trend" *ngIf="stats.nearDeadline === 0">
-          <i class="fa-solid fa-check"></i> ทุกอย่างปกติ
+        <div
+          class="stat-trend"
+          [class.stat-trend-urgent]="card.deadline && stats.nearDeadline > 0"
+          *ngIf="!card.hideTrendWhenEmpty || stats[card.key] > 0"
+        >
+          <i
+            class="fa-solid"
+            [ngClass]="card.deadline && stats.nearDeadline === 0 ? 'fa-check' : card.trendIcon"
+          ></i>
+          {{ card.deadline && stats.nearDeadline === 0 ? 'ทุกอย่างปกติ' : card.trendText }}
         </div>
       </div>
     </div>
@@ -92,7 +67,12 @@
     <div class="deadline-alert" *ngIf="nearDeadlineItems.length > 0">
       <div class="deadline-alert-header">
         <i class="fa-solid fa-fire-flame-curved"></i>
-        <span>รายการที่รอนานเกิน 10 วัน — ต้องดำเนินการด่วน ({{ nearDeadlineItems.length }} รายการ)</span>
+        <span
+          >รายการที่รอนานเกิน 10 วัน — ต้องดำเนินการด่วน ({{
+            nearDeadlineItems.length
+          }}
+          รายการ)</span
+        >
       </div>
       <div class="deadline-list">
         <div class="deadline-item" *ngFor="let item of nearDeadlineItems">
@@ -106,7 +86,9 @@
               <span class="dot">·</span>
               รอมา <strong class="days-urgent">{{ getDaysWaiting(item) }} วัน</strong>
               <span class="dot">·</span>
-              <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+              <span class="badge-sm" [class]="statusClass(item.status)">{{
+                statusLabel(item.status)
+              }}</span>
             </div>
           </div>
           <div class="deadline-actions">
@@ -120,7 +102,6 @@
 
     <!-- ══ MAIN CONTENT: 2 COLUMN ══ -->
     <div class="main-grid">
-
       <!-- LEFT: Active Assignments -->
       <div class="assignments-panel">
         <div class="panel-header">
@@ -147,15 +128,14 @@
                   <div class="org-meta">
                     ปีประเมิน {{ item.assessmentYear }}
                     <span class="dot">·</span>
-                    <span *ngIf="item.submittedAt">
-                      ส่งมา {{ getDaysWaiting(item) }} วัน
-                    </span>
+                    <span *ngIf="item.submittedAt"> ส่งมา {{ getDaysWaiting(item) }} วัน </span>
                   </div>
                 </div>
               </div>
               <div class="assignment-badges">
-                <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
-
+                <span class="badge-sm" [class]="statusClass(item.status)">{{
+                  statusLabel(item.status)
+                }}</span>
               </div>
             </div>
 
@@ -163,19 +143,22 @@
             <div class="carbon-mini" *ngIf="item.carbonSummary">
               <div class="carbon-mini-title">
                 <i class="fa-solid fa-leaf"></i>
-                Carbon: {{ item.carbonSummary.totalEmission | number:'1.1-1' }} tCO₂e
+                Carbon: {{ item.carbonSummary.totalEmission | number: '1.1-1' }} tCO₂e
               </div>
               <div class="scope-bars">
                 <div class="scope-bar-row" *ngFor="let scope of item.carbonSummary.scopes">
                   <span class="scope-tag">S{{ scope.scope }}</span>
                   <div class="scope-track">
-                    <div class="scope-fill"
-                      [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)"
+                    <div
+                      class="scope-fill"
+                      [style.width]="
+                        scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)
+                      "
                       [style.min-width]="scope.totalEmission > 0 ? '4px' : '0'"
-                      [style.background]="getScopeColor(scope.scope)">
-                    </div>
+                      [style.background]="getScopeColor(scope.scope)"
+                    ></div>
                   </div>
-                  <span class="scope-val">{{ scope.totalEmission | number:'1.1-1' }}</span>
+                  <span class="scope-val">{{ scope.totalEmission | number: '1.1-1' }}</span>
                 </div>
               </div>
             </div>
@@ -192,7 +175,6 @@
 
       <!-- RIGHT: Stats Summary -->
       <div class="summary-panel">
-
         <!-- Score Average Card -->
         <div class="avg-score-card">
           <div class="avg-title">
@@ -200,20 +182,21 @@
             คะแนนเฉลี่ยที่ให้
           </div>
           <div class="avg-display">
-            <div class="avg-number">{{ stats.avgScorePercent | number:'1.0-1' }}</div>
+            <div class="avg-number">{{ stats.avgScorePercent | number: '1.0-1' }}</div>
             <div class="avg-unit">%</div>
           </div>
           <div class="avg-cert">
             ระดับเฉลี่ย: <strong>{{ getCertLevelFromScore(stats.avgScorePercent) }}</strong>
           </div>
           <div class="avg-bar">
-            <div class="avg-bar-fill"
+            <div
+              class="avg-bar-fill"
               [style.width.%]="stats.avgScorePercent"
               [class.bar-gold]="stats.avgScorePercent >= 90"
               [class.bar-silver]="stats.avgScorePercent >= 70 && stats.avgScorePercent < 90"
               [class.bar-bronze]="stats.avgScorePercent >= 50 && stats.avgScorePercent < 70"
-              [class.bar-fail]="stats.avgScorePercent < 50">
-            </div>
+              [class.bar-fail]="stats.avgScorePercent < 50"
+            ></div>
           </div>
         </div>
 
@@ -275,7 +258,12 @@
               <i class="fa-solid fa-chevron-right qn-arrow"></i>
             </a>
             <a routerLink="/admin/criteria" class="qn-item">
-              <div class="qn-icon qn-orange animate-pulse" style="background: rgba(249, 115, 22, 0.1); color: #f97316;"><i class="fa-solid fa-flask"></i></div>
+              <div
+                class="qn-icon qn-orange animate-pulse"
+                style="background: rgba(249, 115, 22, 0.1); color: #f97316"
+              >
+                <i class="fa-solid fa-flask"></i>
+              </div>
               <div>
                 <div class="qn-name">เสนอแก้ไขเกณฑ์ประเมิน</div>
                 <div class="qn-desc">ยื่นข้อเสนอแก้ไขเกณฑ์ Green Office ต่อแอดมิน</div>
@@ -283,7 +271,12 @@
               <i class="fa-solid fa-chevron-right qn-arrow"></i>
             </a>
             <a routerLink="/admin/emission-factors" class="qn-item">
-              <div class="qn-icon qn-teal" style="background: rgba(20, 184, 166, 0.1); color: #14b8a6;"><i class="fa-solid fa-leaf"></i></div>
+              <div
+                class="qn-icon qn-teal"
+                style="background: rgba(20, 184, 166, 0.1); color: #14b8a6"
+              >
+                <i class="fa-solid fa-leaf"></i>
+              </div>
               <div>
                 <div class="qn-name">เสนอแก้ไขสูตรคาร์บอน</div>
                 <div class="qn-desc">ยื่นคำเสนอแนะอัตราคาร์บอนฟุตพริ้นท์</div>
@@ -292,9 +285,7 @@
             </a>
           </div>
         </div>
-
       </div>
     </div>
-
   </ng-container>
 </div>

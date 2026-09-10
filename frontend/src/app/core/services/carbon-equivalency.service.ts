@@ -15,7 +15,7 @@ export class CarbonEquivalencyService {
 
     return {
       trees: Math.round(kg / kgPerTreePerYear),
-      flights: Math.round(kg / kgPerFlight)
+      flights: Math.round(kg / kgPerFlight),
     };
   }
 }

@@ -135,6 +135,50 @@ async function seed() {
     console.log(`✅ User seeded: ${u.email} (${u.role})`);
   }
 
+  // 4. Seed Subscription Data for Org 1 to allow E2E and feature usage
+  console.log('🌱 Seeding default subscription and features...');
+  
+  // Create Feature AI_ASSISTANCE
+  const featRes = await client.query(
+    `INSERT INTO features (feature_code, feature_name, description)
+     VALUES ('AI_ASSISTANCE', 'AI Assistant Help', 'Enables AI chat and analysis')
+     ON CONFLICT (feature_code) DO UPDATE SET feature_name = EXCLUDED.feature_name
+     RETURNING feature_id`
+  );
+  const featureId = featRes.rows[0].feature_id;
+
+  // Create Subscription Plan
+  const planRes = await client.query(
+    `INSERT INTO subscription_plans (plan_name, description, price_per_month, max_users, max_locations, is_active)
+     VALUES ('Enterprise Plan', 'Default enterprise tier with all options', 999.0, 100, 100, true)
+     ON CONFLICT DO NOTHING
+     RETURNING plan_id`
+  );
+  let planId;
+  if (planRes.rows.length > 0) {
+    planId = planRes.rows[0].plan_id;
+  } else {
+    const existingPlan = await client.query("SELECT plan_id FROM subscription_plans LIMIT 1");
+    planId = existingPlan.rows[0].plan_id;
+  }
+
+  // Link Plan and Feature
+  await client.query(
+    `INSERT INTO plan_features (plan_id, feature_id)
+     VALUES ($1, $2)
+     ON CONFLICT DO NOTHING`,
+    [planId, featureId]
+  );
+
+  // Subscribe Organization 1 to the plan
+  await client.query(
+    `INSERT INTO organization_subscriptions (org_id, plan_id, start_date, end_date, status, auto_renew)
+     VALUES ($1, $2, '2026-01-01', '2030-01-01', 'ACTIVE', true)
+     ON CONFLICT DO NOTHING`,
+    [orgId, planId]
+  );
+  console.log('✅ Subscription and features seeded successfully!');
+
   console.log('🎉 Seeding successfully completed!');
   await client.end();
 }

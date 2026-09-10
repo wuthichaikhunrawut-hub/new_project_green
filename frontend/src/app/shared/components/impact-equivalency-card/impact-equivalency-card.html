@@ -8,7 +8,9 @@
 
     <div class="shrink-0 rounded-2xl bg-emerald-500/10 border border-emerald-200/60 px-4 py-3">
       <div class="text-[10px] font-black tracking-widest uppercase text-emerald-700">Reduced</div>
-      <div class="text-2xl font-black text-emerald-800 tabular-nums">{{ reducedTco2e | number:'1.2-2' }}</div>
+      <div class="text-2xl font-black text-emerald-800 tabular-nums">
+        {{ reducedTco2e | number: '1.2-2' }}
+      </div>
       <div class="text-xs font-bold text-emerald-700">tCO2e</div>
     </div>
   </div>
@@ -16,7 +18,15 @@
   <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="rounded-2xl bg-white/60 border border-white/30 p-5 flex gap-4 items-center">
       <div class="icon-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-emerald-700">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="w-6 h-6 text-emerald-700"
+        >
           <path d="M12 22s8-4 8-10V7l-8-4-8 4v5c0 6 8 10 8 10z" />
           <path d="M12 22V10" />
           <path d="M7 12c1.5-1.5 4-2 5-2s3.5.5 5 2" />
@@ -24,21 +34,35 @@
       </div>
       <div>
         <div class="text-xs font-black text-slate-800">เทียบเท่าต้นไม้ดูดซับคาร์บอน</div>
-        <div class="mt-1 text-2xl font-black text-slate-800 tabular-nums">{{ eq.trees | number }}</div>
+        <div class="mt-1 text-2xl font-black text-slate-800 tabular-nums">
+          {{ eq.trees | number }}
+        </div>
         <div class="text-xs font-bold text-slate-500">ต้น/ปี (ประมาณการ)</div>
       </div>
     </div>
 
     <div class="rounded-2xl bg-white/60 border border-white/30 p-5 flex gap-4 items-center">
       <div class="icon-box">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-sky-700">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="w-6 h-6 text-sky-700"
+        >
           <path d="M10.18 9" />
-          <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2v4l-2 1v1l4-1 4 1v-1l-2-1v-4l8 2z" />
+          <path
+            d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9L2 14v2l8-2v4l-2 1v1l4-1 4 1v-1l-2-1v-4l8 2z"
+          />
         </svg>
       </div>
       <div>
         <div class="text-xs font-black text-slate-800">เทียบเท่าการลดการเดินทาง</div>
-        <div class="mt-1 text-2xl font-black text-slate-800 tabular-nums">{{ eq.flights | number }}</div>
+        <div class="mt-1 text-2xl font-black text-slate-800 tabular-nums">
+          {{ eq.flights | number }}
+        </div>
         <div class="text-xs font-bold text-slate-500">เที่ยวบิน (ประมาณการ)</div>
       </div>
     </div>

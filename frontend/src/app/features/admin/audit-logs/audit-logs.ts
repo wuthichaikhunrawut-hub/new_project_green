@@ -8,7 +8,7 @@ import { AuditLogsService, AuditLog } from '../../../core/services/audit-logs.se
   imports: [CommonModule],
   providers: [DatePipe],
   templateUrl: './audit-logs.html',
-  styleUrls: ['./audit-logs.css']
+  styleUrls: ['./audit-logs.css'],
 })
 export class AdminAuditLogsComponent implements OnInit {
   private auditLogsService = inject(AuditLogsService);
@@ -33,7 +33,7 @@ export class AdminAuditLogsComponent implements OnInit {
         console.error('Failed to load audit logs:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 }

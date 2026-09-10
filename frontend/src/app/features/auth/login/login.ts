@@ -8,9 +8,9 @@ import { timeout } from 'rxjs/operators';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './login.html',
-  styleUrl: './login.css'
+  styleUrl: './login.css',
 })
 export class LoginComponent {
   private authService = inject(AuthService);
@@ -61,7 +61,7 @@ export class LoginComponent {
         this.forgotLoading = false;
         this.forgotError = err.error?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -72,60 +72,62 @@ export class LoginComponent {
 
     const credentials = {
       email: this.username,
-      password: this.password
+      password: this.password,
     };
 
-    this.authService.login(credentials).pipe(timeout(15000)).subscribe({
-      next: (response: AuthResponse) => {
-        this.isLoading = false;
-        this.cdr.markForCheck();
-        try {
-          if (response && response.access_token) {
-            const role = response.user.role || '';
+    this.authService
+      .login(credentials)
+      .pipe(timeout(15000))
+      .subscribe({
+        next: (response: AuthResponse) => {
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          try {
+            if (response && response.access_token) {
+              const role = response.user.role || '';
 
-            // Normalize role check
-            const roleUpper = role.toUpperCase().trim().split(' ').join('_');
-            const isExecutive = roleUpper === 'EXECUTIVE';
-            const isAdmin = roleUpper === 'ADMIN'
-              || roleUpper === 'SYSTEM_ADMIN';
+              // Normalize role check
+              const roleUpper = role.toUpperCase().trim().split(' ').join('_');
+              const isExecutive = roleUpper === 'EXECUTIVE';
+              const isAdmin = roleUpper === 'ADMIN' || roleUpper === 'SYSTEM_ADMIN';
 
-            const isAssessor = roleUpper === 'ASSESSOR' || roleUpper === 'ASSESSOR_ADMIN';
+              const isAssessor = roleUpper === 'ASSESSOR' || roleUpper === 'ASSESSOR_ADMIN';
 
-            if (isAssessor) {
-              this.router.navigate(['/assessor/dashboard']);
-            } else if (isExecutive) {
-              this.router.navigate(['/executive/dashboard']);
-            } else if (roleUpper === 'ORGANIZATION_ADMIN' || roleUpper === 'ORG_ADMIN') {
-              this.router.navigate(['/dashboard']);
-            } else if (isAdmin) {
-              this.router.navigate(['/admin/dashboard']);
+              if (isAssessor) {
+                this.router.navigate(['/assessor/dashboard']);
+              } else if (isExecutive) {
+                this.router.navigate(['/executive/dashboard']);
+              } else if (roleUpper === 'ORGANIZATION_ADMIN' || roleUpper === 'ORG_ADMIN') {
+                this.router.navigate(['/dashboard']);
+              } else if (isAdmin) {
+                this.router.navigate(['/admin/dashboard']);
+              } else {
+                this.router.navigate(['/dashboard']);
+              }
             } else {
-              this.router.navigate(['/dashboard']);
+              this.errorMessage = 'การตอบรับจากเซิร์ฟเวอร์ไม่สมบูรณ์';
+              this.cdr.markForCheck();
             }
-          } else {
-            this.errorMessage = 'การตอบรับจากเซิร์ฟเวอร์ไม่สมบูรณ์';
+          } catch (e) {
+            console.error('Login processing error:', e);
+            this.errorMessage = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล';
             this.cdr.markForCheck();
           }
-        } catch (e) {
-          console.error('Login processing error:', e);
-          this.errorMessage = 'เกิดข้อผิดพลาดในการประมวลผลข้อมูล';
+        },
+        error: (err: any) => {
+          this.isLoading = false;
+          console.error('Login error:', err);
+          if (err.name === 'TimeoutError') {
+            this.errorMessage = 'เซิร์ฟเวอร์ตอบสนองช้าเกินไป กรุณาลองใหม่อีกครั้ง';
+          } else if (err.status === 401) {
+            this.errorMessage = 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง';
+          } else if (err.status === 0) {
+            this.errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อ';
+          } else {
+            this.errorMessage = 'เกิดข้อผิดพลาดทางเทคนิค กรุณาลองใหม่ภายหลัง';
+          }
           this.cdr.markForCheck();
-        }
-      },
-      error: (err: any) => {
-        this.isLoading = false;
-        console.error('Login error:', err);
-        if (err.name === 'TimeoutError') {
-          this.errorMessage = 'เซิร์ฟเวอร์ตอบสนองช้าเกินไป กรุณาลองใหม่อีกครั้ง';
-        } else if (err.status === 401) {
-          this.errorMessage = 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง';
-        } else if (err.status === 0) {
-          this.errorMessage = 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่อ';
-        } else {
-          this.errorMessage = 'เกิดข้อผิดพลาดทางเทคนิค กรุณาลองใหม่ภายหลัง';
-        }
-        this.cdr.markForCheck();
-      }
-    });
+        },
+      });
   }
 }

@@ -29,9 +29,15 @@
   height: 8px;
   border-radius: 50%;
 }
-.type-dot.Electricity { background: #eab308; }
-.type-dot.Water { background: #3b82f6; }
-.type-dot.Gasoline { background: #ef4444; }
+.type-dot.Electricity {
+  background: #eab308;
+}
+.type-dot.Water {
+  background: #3b82f6;
+}
+.type-dot.Gasoline {
+  background: #ef4444;
+}
 
 /* AI Upload Zone */
 .ai-upload-zone {
@@ -52,8 +58,14 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- PREMIUM DESIGN SYSTEM --- */
@@ -62,8 +74,14 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Glassmorphism Effect */
@@ -79,7 +97,7 @@
 /* Background Mesh */
 .bg-mesh {
   background-color: #f8fafc;
-  background-image: 
+  background-image:
     radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.04) 0px, transparent 50%),
     radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.04) 0px, transparent 50%);
   min-height: 100vh;
@@ -137,8 +155,12 @@
   padding: 16px 24px;
 }
 
-.premium-table td:first-child { border-radius: 12px 0 0 12px; }
-.premium-table td:last-child { border-radius: 0 12px 12px 0; }
+.premium-table td:first-child {
+  border-radius: 12px 0 0 12px;
+}
+.premium-table td:last-child {
+  border-radius: 0 12px 12px 0;
+}
 
 /* Badges */
 .badge-premium {
@@ -188,7 +210,9 @@
 
 /* Micro-interactions */
 .hover-translate {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .hover-translate:hover {
@@ -206,7 +230,7 @@
   background:
     radial-gradient(circle at 20% 20%, rgba(16, 185, 129, 0.18), transparent 45%),
     radial-gradient(circle at 80% 30%, rgba(59, 130, 246, 0.12), transparent 50%),
-    radial-gradient(circle at 60% 80%, rgba(16, 185, 129, 0.10), transparent 55%);
+    radial-gradient(circle at 60% 80%, rgba(16, 185, 129, 0.1), transparent 55%);
   filter: blur(28px);
   pointer-events: none;
 }
@@ -222,7 +246,7 @@
   border: 1px solid rgba(16, 185, 129, 0.25);
   color: #047857;
   font-size: 1.25rem;
-  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.10);
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
 }
 
 /* Empty State */

@@ -1,9 +1,10 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { NotificationService, NotificationType } from '../../core/services/notification.service';
 import { ToastService } from '../../core/services/toast.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-support',
@@ -16,11 +17,12 @@ export class SupportComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
+  private destroyRef = inject(DestroyRef);
 
   isAdmin = false;
   tickets: any[] = [];
   currentUserEmail = '';
-  
+
   // Native Angular Accordion State
   activeFaq: number | null = null;
 
@@ -34,18 +36,18 @@ export class SupportComponent implements OnInit {
       this.cdr.detectChanges();
     }, 0);
   }
-  
+
   ticket = {
     subject: '',
-    message: ''
+    message: '',
   };
-  
+
   selectedTicket: any = null;
   isSubmitting = false;
   submitted = false;
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((user) => {
       if (user) {
         this.currentUserEmail = user.email || '';
         const role = String(user.role).toUpperCase().trim().replace(' ', '_');
@@ -69,15 +71,17 @@ export class SupportComponent implements OnInit {
       next: (notifications) => {
         // Filter system notifications that are support tickets
         const mappedTickets = (notifications || [])
-          .filter(n => n && n.title && n.title.startsWith('[ตั๋วความช่วยเหลือ]'))
-          .map(n => {
+          .filter((n) => n && n.title && n.title.startsWith('[ตั๋วความช่วยเหลือ]'))
+          .map((n) => {
             let status = 'Pending';
             if (n.is_read) {
               status = 'Resolved';
             }
             // Parse subject and sender safely
-            const subject = n.title ? n.title.replace('[ตั๋วความช่วยเหลือ] - ', '') : 'ตั๋วความช่วยเหลือ';
-            
+            const subject = n.title
+              ? n.title.replace('[ตั๋วความช่วยเหลือ] - ', '')
+              : 'ตั๋วความช่วยเหลือ';
+
             return {
               id: `TKT-${String(n.id).padStart(3, '0')}`,
               subject: subject,
@@ -85,7 +89,7 @@ export class SupportComponent implements OnInit {
               status: status,
               date: n.created_at,
               message: n.message ? n.message.replace('รายละเอียด: ', '') : '',
-              rawId: n.id
+              rawId: n.id,
             };
           });
 
@@ -100,7 +104,7 @@ export class SupportComponent implements OnInit {
         setTimeout(() => {
           this.cdr.detectChanges();
         }, 0);
-      }
+      },
     });
   }
 
@@ -128,7 +132,7 @@ export class SupportComponent implements OnInit {
             setTimeout(() => {
               this.cdr.detectChanges();
             }, 0);
-          }
+          },
         });
       } else {
         // If pending/in progress, keep as pending
@@ -153,41 +157,43 @@ export class SupportComponent implements OnInit {
       technical: 'ปัญหาการใช้งานระบบ (Technical Issue)',
       billing: 'ปัญหาการชำระเงิน (Billing/Invoice)',
       feature: 'เสนอแนะฟีเจอร์ใหม่ (Feature Request)',
-      other: 'อื่นๆ (Other)'
+      other: 'อื่นๆ (Other)',
     };
     const cleanSubject = subjectMap[this.ticket.subject] || this.ticket.subject;
 
     // We pass recipient_id: 1 directly (the primary System Admin).
-    // This satisfies database foreign key constraints instantly and bypasses 
+    // This satisfies database foreign key constraints instantly and bypasses
     // any heavy sequential query bottlenecks in the backend.
     this.submitTicket(cleanSubject, 1);
   }
 
   private submitTicket(cleanSubject: string, recipientId: number) {
-    this.notificationService.sendNotification({
-      title: `[ตั๋วความช่วยเหลือ] - ${cleanSubject}`,
-      message: `รายละเอียด: ${this.ticket.message}`,
-      type: NotificationType.SYSTEM,
-      recipient_id: recipientId,
-      link: '/support'
-    }).subscribe({
-      next: () => {
-        setTimeout(() => {
-          this.isSubmitting = false;
-          this.submitted = true;
-          this.toast.success('ส่งตั๋วแจ้งปัญหาสำเร็จ!');
-          this.cdr.detectChanges();
-        }, 0);
-      },
-      error: (err) => {
-        console.error('Error submitting support ticket:', err);
-        setTimeout(() => {
-          this.isSubmitting = false;
-          this.toast.error('ไม่สามารถส่งตั๋วได้ กรุณาลองใหม่อีกครั้ง');
-          this.cdr.detectChanges();
-        }, 0);
-      }
-    });
+    this.notificationService
+      .sendNotification({
+        title: `[ตั๋วความช่วยเหลือ] - ${cleanSubject}`,
+        message: `รายละเอียด: ${this.ticket.message}`,
+        type: NotificationType.SYSTEM,
+        recipient_id: recipientId,
+        link: '/support',
+      })
+      .subscribe({
+        next: () => {
+          setTimeout(() => {
+            this.isSubmitting = false;
+            this.submitted = true;
+            this.toast.success('ส่งตั๋วแจ้งปัญหาสำเร็จ!');
+            this.cdr.detectChanges();
+          }, 0);
+        },
+        error: (err) => {
+          console.error('Error submitting support ticket:', err);
+          setTimeout(() => {
+            this.isSubmitting = false;
+            this.toast.error('ไม่สามารถส่งตั๋วได้ กรุณาลองใหม่อีกครั้ง');
+            this.cdr.detectChanges();
+          }, 0);
+        },
+      });
   }
 
   resetForm() {

@@ -17,7 +17,7 @@ interface CategorySummary {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './report.html',
-  styleUrl: './report.css'
+  styleUrl: './report.css',
 })
 export class AssessorReportComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -68,7 +68,7 @@ export class AssessorReportComponent implements OnInit {
         this.isLoading = false;
         this.toast.error('โหลดรายงานไม่สำเร็จ');
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -81,7 +81,7 @@ export class AssessorReportComponent implements OnInit {
       error: () => {
         // ข้อมูลคาร์บอนเป็นทางเลือก ไม่ต้องแจ้ง error
         this.carbonSummary = null;
-      }
+      },
     });
   }
 
@@ -105,7 +105,7 @@ export class AssessorReportComponent implements OnInit {
           categoryId: catNum,
           name: catName,
           maxScore: detail.criteria.max_score || 0,
-          score: detail.assessor_score || 0
+          score: detail.assessor_score || 0,
         });
       }
     }
@@ -144,7 +144,7 @@ export class AssessorReportComponent implements OnInit {
   /** คำนวณเปอร์เซ็นต์แถบ scope */
   getScopePercent(emission: number): number {
     if (!this.carbonSummary) return 0;
-    const max = Math.max(...this.carbonSummary.scopes.map(s => s.totalEmission), 1);
+    const max = Math.max(...this.carbonSummary.scopes.map((s) => s.totalEmission), 1);
     return Math.max((emission / max) * 100, 5);
   }
 
@@ -167,7 +167,9 @@ export class AssessorReportComponent implements OnInit {
   formatDate(dateStr: string | undefined): string {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('th-TH', {
-      year: 'numeric', month: 'long', day: 'numeric'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   }
 }

@@ -1,8 +1,9 @@
 <div class="min-h-screen bg-slate-50/50 px-4 sm:px-6 lg:px-8 py-8">
-
   <!-- Loading State -->
   <div *ngIf="isLoading" class="flex flex-col items-center justify-center py-32 gap-4">
-    <div class="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin"></div>
+    <div
+      class="w-12 h-12 rounded-full border-4 border-green-200 border-t-green-600 animate-spin"
+    ></div>
     <p class="text-slate-500 font-medium">กำลังโหลดเกณฑ์การประเมิน...</p>
   </div>
 
@@ -10,285 +11,375 @@
   <div *ngIf="!isLoading && errorMsg" class="flex flex-col items-center justify-center py-32 gap-4">
     <i class="fa-solid fa-circle-exclamation text-red-400 text-5xl"></i>
     <p class="text-slate-700 font-bold">{{ errorMsg }}</p>
-    <button (click)="loadCriteria()" class="px-6 py-2.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors">
+    <button
+      (click)="loadCriteria()"
+      class="px-6 py-2.5 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors"
+    >
       <i class="fa-solid fa-rotate-right mr-2"></i>ลองใหม่
     </button>
   </div>
 
   <ng-container *ngIf="!isLoading && !errorMsg">
-
-  <!-- ── Page Header ── -->
-  <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
-    <div>
-      <div class="flex items-center gap-3 mb-2">
-        <span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase tracking-wider">Green Office Assessment</span>
-        <span class="text-slate-300">|</span>
-        <span class="text-sm text-slate-500 font-medium">ประจำปีงบประมาณ 2569</span>
-      </div>
-      <h1 class="page-title">แบบประเมินตนเอง</h1>
-      <p class="page-subtitle">ประเมินความพร้อมขององค์กรตามเกณฑ์ Green Office ทั้ง 6 หมวดหลัก</p>
-    </div>
-    
-    <div class="flex flex-wrap gap-3 shrink-0">
-      <button
-        (click)="saveProgress()"
-        class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:-translate-y-0.5 transition-all active:translate-y-0">
-        <i class="fa-regular fa-floppy-disk mr-2 text-slate-400"></i> บันทึกฉบับร่าง
-      </button>
-      
-      <button
-        (click)="downloadPDF()"
-        class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:-translate-y-0.5 transition-all active:translate-y-0">
-        <i class="fa-regular fa-file-pdf mr-2 text-red-500"></i> ดาวน์โหลดรายงาน (PDF)
-      </button>
-      
-      <button
-        (click)="submitAssessment()"
-        class="inline-flex items-center rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-green-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0">
-        <i class="fa-solid fa-paper-plane mr-2"></i> ส่งแบบประเมิน
-      </button>
-    </div>
-  </div>
-
-  <!-- ── Main Layout Grid ── -->
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-    <!-- ── LEFT SIDEBAR (Sticky) ── -->
-    <div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-6">
-      
-      <!-- Overview Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="p-6 text-center border-b border-slate-50">
-          <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">คะแนนรวมทั้งหมด</p>
-          <div class="inline-flex items-center justify-center w-28 h-28 rounded-full border-8 border-slate-50 bg-white shadow-inner mb-4">
-            <span class="text-4xl font-black text-slate-900">{{ totalScore }}</span>
-          </div>
-          <div class="mb-4">
-            <span [class]="'px-4 py-1.5 rounded-full text-xs font-bold border ' + levelClass">
-              ระดับ: {{ assessmentLevel }}
-            </span>
-          </div>
-          <button (click)="analyzeAI()" class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors">
-            <i class="fa-solid fa-robot"></i> ให้ AI ช่วยวิเคราะห์
-          </button>
-        </div>
-        
-        <div class="p-6 bg-slate-50/30">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">Radar Score Chart</p>
-          <div class="h-56 flex justify-center items-center">
-            <canvas baseChart
-              [data]="radarChartData"
-              [options]="radarChartOptions"
-              [type]="radarChartType">
-            </canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- Category Navigation -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">หมวดการประเมิน</p>
-        </div>
-        <div class="p-2 flex flex-col gap-1">
-          <button
-            *ngFor="let cat of categories"
-            (click)="selectCategory(cat.id)"
-            class="w-full text-left px-4 py-3.5 rounded-xl transition-all group flex flex-col gap-2.5"
-            [class.bg-green-50]="activeCategory === cat.id"
-            [class.border-l-4]="activeCategory === cat.id"
-            [class.border-green-600]="activeCategory === cat.id"
-            [class.hover:bg-slate-50]="activeCategory !== cat.id"
+    <!-- ── Page Header ── -->
+    <div class="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6 mb-8">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span
+            class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded uppercase tracking-wider"
+            >Green Office Assessment</span
           >
-            <div class="flex items-center justify-between gap-3">
-              <span class="text-xs font-bold leading-tight"
-                    [class.text-green-700]="activeCategory === cat.id"
-                    [class.text-slate-600]="activeCategory !== cat.id">
-                {{ cat.title }}
-              </span>
-              <i *ngIf="cat.status === 'completed'" class="fa-solid fa-circle-check text-green-500 text-sm"></i>
-              <span *ngIf="cat.status === 'in-progress'" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-slate-300">|</span>
+          <span class="text-sm text-slate-500 font-medium">ประจำปีงบประมาณ 2569</span>
+        </div>
+        <h1 class="page-title">แบบประเมินตนเอง</h1>
+        <p class="page-subtitle">ประเมินความพร้อมขององค์กรตามเกณฑ์ Green Office ทั้ง 6 หมวดหลัก</p>
+      </div>
+
+      <div class="flex flex-wrap gap-3 shrink-0">
+        <button
+          (click)="saveProgress()"
+          class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:-translate-y-0.5 transition-all active:translate-y-0"
+        >
+          <i class="fa-regular fa-floppy-disk mr-2 text-slate-400"></i> บันทึกฉบับร่าง
+        </button>
+
+        <button
+          (click)="downloadPDF()"
+          class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 hover:-translate-y-0.5 transition-all active:translate-y-0"
+        >
+          <i class="fa-regular fa-file-pdf mr-2 text-red-500"></i> ดาวน์โหลดรายงาน (PDF)
+        </button>
+
+        <button
+          (click)="submitAssessment()"
+          class="inline-flex items-center rounded-xl bg-green-600 px-6 py-2.5 text-sm font-bold text-white shadow-md hover:bg-green-700 hover:shadow-lg hover:-translate-y-0.5 transition-all active:translate-y-0"
+        >
+          <i class="fa-solid fa-paper-plane mr-2"></i> ส่งแบบประเมิน
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Main Layout Grid ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- ── LEFT SIDEBAR (Sticky) ── -->
+      <div class="lg:col-span-4 xl:col-span-3 flex flex-col gap-6">
+        <!-- Overview Card -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="p-6 text-center border-b border-slate-50">
+            <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-4">
+              คะแนนรวมทั้งหมด
+            </p>
+            <div
+              class="inline-flex items-center justify-center w-28 h-28 rounded-full border-8 border-slate-50 bg-white shadow-inner mb-4"
+            >
+              <span class="text-4xl font-black text-slate-900">{{ totalScore }}</span>
             </div>
-            
-            <div class="flex items-center gap-3">
-              <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                <div class="h-full transition-all duration-500 rounded-full"
-                     [class.bg-green-600]="cat.progress === 100"
-                     [class.bg-amber-400]="cat.progress > 0 && cat.progress < 100"
-                     [class.bg-slate-200]="cat.progress === 0"
-                     [style.width.%]="cat.progress"></div>
+            <div class="mb-4">
+              <span [class]="'px-4 py-1.5 rounded-full text-xs font-bold border ' + levelClass">
+                ระดับ: {{ assessmentLevel }}
+              </span>
+            </div>
+            <button
+              (click)="analyzeAI()"
+              class="w-full py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-colors"
+            >
+              <i class="fa-solid fa-robot"></i> ให้ AI ช่วยวิเคราะห์
+            </button>
+          </div>
+
+          <div class="p-6 bg-slate-50/30">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4">
+              Radar Score Chart
+            </p>
+            <div class="h-56 flex justify-center items-center">
+              <div id="radarChart" class="w-full h-full"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Category Navigation -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+              หมวดการประเมิน
+            </p>
+          </div>
+          <div class="p-2 flex flex-col gap-1">
+            <button
+              *ngFor="let cat of categories"
+              (click)="selectCategory(cat.id)"
+              class="w-full text-left px-4 py-3.5 rounded-xl transition-all group flex flex-col gap-2.5"
+              [class.bg-green-50]="activeCategory === cat.id"
+              [class.border-l-4]="activeCategory === cat.id"
+              [class.border-green-600]="activeCategory === cat.id"
+              [class.hover:bg-slate-50]="activeCategory !== cat.id"
+            >
+              <div class="flex items-center justify-between gap-3">
+                <span
+                  class="text-xs font-bold leading-tight"
+                  [class.text-green-700]="activeCategory === cat.id"
+                  [class.text-slate-600]="activeCategory !== cat.id"
+                >
+                  {{ cat.title }}
+                </span>
+                <i
+                  *ngIf="cat.status === 'completed'"
+                  class="fa-solid fa-circle-check text-green-500 text-sm"
+                ></i>
+                <span
+                  *ngIf="cat.status === 'in-progress'"
+                  class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"
+                ></span>
               </div>
-              <span class="text-[10px] font-black"
-                    [class.text-green-600]="cat.progress === 100"
-                    [class.text-amber-600]="cat.progress > 0 && cat.progress < 100"
-                    [class.text-slate-400]="cat.progress === 0">
-                {{ cat.progress }}%
-              </span>
+
+              <div class="flex items-center gap-3">
+                <div class="flex-1 bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                  <div
+                    class="h-full transition-all duration-500 rounded-full"
+                    [class.bg-green-600]="cat.progress === 100"
+                    [class.bg-amber-400]="cat.progress > 0 && cat.progress < 100"
+                    [class.bg-slate-200]="cat.progress === 0"
+                    [style.width.%]="cat.progress"
+                  ></div>
+                </div>
+                <span
+                  class="text-[10px] font-black"
+                  [class.text-green-600]="cat.progress === 100"
+                  [class.text-amber-600]="cat.progress > 0 && cat.progress < 100"
+                  [class.text-slate-400]="cat.progress === 0"
+                >
+                  {{ cat.progress }}%
+                </span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── RIGHT CONTENT AREA ── -->
+      <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+        <!-- Current Category Header -->
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 px-8 py-6 flex items-center justify-between"
+        >
+          <div class="flex items-center gap-5">
+            <div
+              class="w-14 h-14 rounded-2xl bg-green-600 text-white flex items-center justify-center shadow-lg shadow-green-200"
+            >
+              <i class="fa-solid fa-list-check text-2xl"></i>
             </div>
+            <div>
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+                หมวดที่กำลังประเมิน
+              </p>
+              <h2 class="text-xl font-black text-slate-900 leading-tight">
+                {{ activeCategoryTitle }}
+              </h2>
+            </div>
+          </div>
+
+          <div class="text-right hidden sm:block">
+            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+              คะแนนหมวดนี้
+            </p>
+            <p class="text-2xl font-black text-green-600">
+              {{ activeCategoryData.currentScore }}
+              <span class="text-slate-300 text-sm font-bold"
+                >/ {{ activeCategoryData.totalWeight }}</span
+              >
+            </p>
+          </div>
+        </div>
+
+        <!-- Sub-Category Tabs -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <button
+            *ngFor="let sub of subCategories"
+            (click)="selectSubCategory(sub)"
+            [class]="
+              'px-6 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ' +
+              (activeSubCategory === sub
+                ? 'bg-green-600 text-white border-green-600 shadow-md shadow-green-100'
+                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')
+            "
+          >
+            หัวข้อที่ {{ sub }}
+          </button>
+        </div>
+
+        <!-- Assessment Question Cards -->
+        <div class="flex flex-col gap-6">
+          <app-assessment-card
+            *ngFor="let q of filteredQuestions; let i = index"
+            [questionId]="q.id"
+            [detailId]="q.detailId"
+            [title]="q.title"
+            [description]="q.description"
+            [implementationStatus]="q.implementationStatus"
+            [score]="q.score"
+            [details]="q.details"
+            [fileCount]="q.fileCount"
+            (changed)="onCardChanged(i, $event)"
+          ></app-assessment-card>
+        </div>
+
+        <!-- Pagination Navigation -->
+        <div
+          class="bg-white rounded-2xl shadow-sm border border-slate-200 px-8 py-6 flex items-center justify-between mt-4"
+        >
+          <button
+            (click)="prevSubCategory()"
+            [disabled]="activeCategory === 1 && subCategories.indexOf(activeSubCategory) === 0"
+            class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ
+          </button>
+
+          <div class="hidden xl:flex items-center gap-4">
+            <div class="flex flex-col items-center">
+              <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1"
+                >ความคืบหน้าภาพรวม</span
+              >
+              <div class="flex items-center gap-2">
+                <div
+                  *ngFor="let cat of categories"
+                  [class]="
+                    'w-2 h-2 rounded-full transition-all ' +
+                    (activeCategory === cat.id
+                      ? 'w-6 bg-green-600'
+                      : cat.status === 'completed'
+                        ? 'bg-green-200'
+                        : 'bg-slate-200')
+                  "
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <button
+            (click)="nextSubCategory()"
+            [disabled]="
+              activeCategory === categories.length &&
+              subCategories.indexOf(activeSubCategory) === subCategories.length - 1
+            "
+            class="inline-flex items-center rounded-xl bg-slate-900 px-8 py-3 text-sm font-bold text-white shadow-md hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            ถัดไป <i class="fa-solid fa-arrow-right ml-2"></i>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- ── RIGHT CONTENT AREA ── -->
-    <div class="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
-      
-      <!-- Current Category Header -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 px-8 py-6 flex items-center justify-between">
-        <div class="flex items-center gap-5">
-          <div class="w-14 h-14 rounded-2xl bg-green-600 text-white flex items-center justify-center shadow-lg shadow-green-200">
-            <i class="fa-solid fa-list-check text-2xl"></i>
-          </div>
-          <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">หมวดที่กำลังประเมิน</p>
-            <h2 class="text-xl font-black text-slate-900 leading-tight">{{ activeCategoryTitle }}</h2>
-          </div>
-        </div>
-        
-        <div class="text-right hidden sm:block">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">คะแนนหมวดนี้</p>
-          <p class="text-2xl font-black text-green-600">
-            {{ activeCategoryData.currentScore }} <span class="text-slate-300 text-sm font-bold">/ {{ activeCategoryData.totalWeight }}</span>
-          </p>
-        </div>
-      </div>
-
-      <!-- Sub-Category Tabs -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        <button 
-          *ngFor="let sub of subCategories"
-          (click)="selectSubCategory(sub)"
-          [class]="'px-6 py-2.5 rounded-xl text-sm font-bold whitespace-nowrap transition-all border ' + 
-                   (activeSubCategory === sub ? 'bg-green-600 text-white border-green-600 shadow-md shadow-green-100' : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50')">
-          หัวข้อที่ {{ sub }}
-        </button>
-      </div>
-
-      <!-- Assessment Question Cards -->
-      <div class="flex flex-col gap-6">
-        <app-assessment-card
-          *ngFor="let q of filteredQuestions; let i = index"
-          [questionId]="q.id"
-          [detailId]="q.detailId"
-          [title]="q.title"
-          [description]="q.description"
-          [implementationStatus]="q.implementationStatus"
-          [score]="q.score"
-          [details]="q.details"
-          [fileCount]="q.fileCount"
-          (changed)="onCardChanged(i, $event)"
-        ></app-assessment-card>
-      </div>
-
-      <!-- Pagination Navigation -->
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 px-8 py-6 flex items-center justify-between mt-4">
-        <button
-          (click)="prevSubCategory()"
-          [disabled]="activeCategory === 1 && subCategories.indexOf(activeSubCategory) === 0"
-          class="inline-flex items-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-          <i class="fa-solid fa-arrow-left mr-2"></i> ย้อนกลับ
-        </button>
-
-        <div class="hidden xl:flex items-center gap-4">
-          <div class="flex flex-col items-center">
-            <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">ความคืบหน้าภาพรวม</span>
-            <div class="flex items-center gap-2">
-              <div *ngFor="let cat of categories" 
-                   [class]="'w-2 h-2 rounded-full transition-all ' + 
-                            (activeCategory === cat.id ? 'w-6 bg-green-600' : 
-                            (cat.status === 'completed' ? 'bg-green-200' : 'bg-slate-200'))">
-              </div>
+    <!-- AI Analysis Modal -->
+    <div
+      *ngIf="showAIModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200"
+      >
+        <!-- Modal Header -->
+        <div
+          class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-emerald-50"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-100"
+            >
+              <i class="fa-solid fa-robot text-white"></i>
+            </div>
+            <div>
+              <h3 class="text-slate-900 font-black text-base leading-tight">
+                ผลการวิเคราะห์แนะนำโดย AI
+              </h3>
+              <p class="text-xs text-slate-500 font-medium mt-0.5">
+                วิเคราะห์ประเมินจากแบบร่างปัจจุบันของท่าน
+              </p>
             </div>
           </div>
+          <button
+            (click)="showAIModal = false"
+            class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors"
+          >
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
 
-        <button
-          (click)="nextSubCategory()"
-          [disabled]="activeCategory === categories.length && subCategories.indexOf(activeSubCategory) === subCategories.length - 1"
-          class="inline-flex items-center rounded-xl bg-slate-900 px-8 py-3 text-sm font-bold text-white shadow-md hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-all">
-          ถัดไป <i class="fa-solid fa-arrow-right ml-2"></i>
-        </button>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- AI Analysis Modal -->
-  <div *ngIf="showAIModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
-      
-      <!-- Modal Header -->
-      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-gradient-to-r from-indigo-50 to-emerald-50">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-100">
-            <i class="fa-solid fa-robot text-white"></i>
+        <!-- Modal Body -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+          <!-- Loading State -->
+          <div *ngIf="aiLoading" class="flex flex-col items-center justify-center py-12">
+            <div
+              class="w-12 h-12 rounded-full border-4 border-slate-100 border-t-indigo-600 animate-spin mb-4"
+            ></div>
+            <p class="text-sm font-bold text-slate-600">GreenSync AI กำลังวิเคราะห์จุดอ่อน...</p>
+            <p class="text-xs text-slate-400 mt-1">กรุณารอสักครู่ (อาจใช้เวลาประมาณ 5-10 วินาที)</p>
           </div>
-          <div>
-            <h3 class="text-slate-900 font-black text-base leading-tight">ผลการวิเคราะห์แนะนำโดย AI</h3>
-            <p class="text-xs text-slate-500 font-medium mt-0.5">วิเคราะห์ประเมินจากแบบร่างปัจจุบันของท่าน</p>
-          </div>
-        </div>
-        <button (click)="showAIModal = false" class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center transition-colors">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-      </div>
 
-      <!-- Modal Body -->
-      <div class="flex-1 overflow-y-auto p-6 space-y-6">
-        <!-- Loading State -->
-        <div *ngIf="aiLoading" class="flex flex-col items-center justify-center py-12">
-          <div class="w-12 h-12 rounded-full border-4 border-slate-100 border-t-indigo-600 animate-spin mb-4"></div>
-          <p class="text-sm font-bold text-slate-600">GreenSync AI กำลังวิเคราะห์จุดอ่อน...</p>
-          <p class="text-xs text-slate-400 mt-1">กรุณารอสักครู่ (อาจใช้เวลาประมาณ 5-10 วินาที)</p>
-        </div>
-
-        <!-- Result Content -->
-        <ng-container *ngIf="!aiLoading && aiResult">
-          <!-- Recommendations Section -->
-          <div>
-            <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-lightbulb text-amber-500"></i> แผนปฏิบัติการที่แนะนำ (Action Plan)
-            </h4>
-            <div class="space-y-3">
-              <div *ngFor="let rec of aiResult.recommendations" class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5">
-                <div class="flex items-start justify-between gap-3">
-                  <span class="font-bold text-slate-800 text-sm leading-tight">{{ rec.title }}</span>
-                  <span [class]="'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ' + 
-                                (rec.expectedImpact === 'High' ? 'bg-red-50 text-red-600 border border-red-100' : 
-                                 rec.expectedImpact === 'Medium' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 
-                                 'bg-blue-50 text-blue-600 border border-blue-100')">
-                    Impact: {{ rec.expectedImpact }}
-                  </span>
+          <!-- Result Content -->
+          <ng-container *ngIf="!aiLoading && aiResult">
+            <!-- Recommendations Section -->
+            <div>
+              <h4
+                class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-lightbulb text-amber-500"></i> แผนปฏิบัติการที่แนะนำ (Action
+                Plan)
+              </h4>
+              <div class="space-y-3">
+                <div
+                  *ngFor="let rec of aiResult.recommendations"
+                  class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col gap-1.5"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <span class="font-bold text-slate-800 text-sm leading-tight">{{
+                      rec.title
+                    }}</span>
+                    <span
+                      [class]="
+                        'px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ' +
+                        (rec.expectedImpact === 'High'
+                          ? 'bg-red-50 text-red-600 border border-red-100'
+                          : rec.expectedImpact === 'Medium'
+                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                            : 'bg-blue-50 text-blue-600 border border-blue-100')
+                      "
+                    >
+                      Impact: {{ rec.expectedImpact }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-600 leading-relaxed font-medium">{{ rec.action }}</p>
                 </div>
-                <p class="text-xs text-slate-600 leading-relaxed font-medium">{{ rec.action }}</p>
               </div>
             </div>
-          </div>
 
-          <!-- Missing Documents Section -->
-          <div *ngIf="aiResult.missingDocuments && aiResult.missingDocuments.length > 0">
-            <h4 class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
-              <i class="fa-solid fa-file-circle-exclamation text-indigo-500"></i> เอกสารหลักฐานที่ยังขาดอยู่
-            </h4>
-            <div class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100/50">
-              <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 font-medium">
-                <li *ngFor="let doc of aiResult.missingDocuments">{{ doc }}</li>
-              </ul>
+            <!-- Missing Documents Section -->
+            <div *ngIf="aiResult.missingDocuments && aiResult.missingDocuments.length > 0">
+              <h4
+                class="text-xs font-black uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2"
+              >
+                <i class="fa-solid fa-file-circle-exclamation text-indigo-500"></i>
+                เอกสารหลักฐานที่ยังขาดอยู่
+              </h4>
+              <div class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100/50">
+                <ul class="list-disc list-inside space-y-1.5 text-xs text-slate-600 font-medium">
+                  <li *ngFor="let doc of aiResult.missingDocuments">{{ doc }}</li>
+                </ul>
+              </div>
             </div>
-          </div>
-        </ng-container>
-      </div>
+          </ng-container>
+        </div>
 
-      <!-- Modal Footer -->
-      <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
-        <button (click)="showAIModal = false" class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition-colors">
-          เข้าใจแล้ว
-        </button>
+        <!-- Modal Footer -->
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+          <button
+            (click)="showAIModal = false"
+            class="px-6 py-2.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-md transition-colors"
+          >
+            เข้าใจแล้ว
+          </button>
+        </div>
       </div>
-
     </div>
-  </div>
-
   </ng-container>
 </div>
-

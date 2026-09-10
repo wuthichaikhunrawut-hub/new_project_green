@@ -35,18 +35,21 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials)
-      .pipe(tap(response => this.handleAuthResponse(response)));
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/login`, credentials)
+      .pipe(tap((response) => this.handleAuthResponse(response)));
   }
 
   register(payload: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, payload)
-      .pipe(tap(response => this.handleAuthResponse(response)));
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/register`, payload)
+      .pipe(tap((response) => this.handleAuthResponse(response)));
   }
 
   registerAssessor(payload: any): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register/assessor`, payload)
-      .pipe(tap(response => this.handleAuthResponse(response)));
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/register/assessor`, payload)
+      .pipe(tap((response) => this.handleAuthResponse(response)));
   }
 
   logout() {
@@ -96,7 +99,7 @@ export class AuthService {
       // Enrich user with organization name for sidebar display
       const enrichedUser = {
         ...response.user,
-        organizationName: response.organization?.name || response.user?.username || ''
+        organizationName: response.organization?.name || response.user?.username || '',
       };
       localStorage.setItem('access_token', response.access_token);
       localStorage.setItem('currentUser', JSON.stringify(enrichedUser));

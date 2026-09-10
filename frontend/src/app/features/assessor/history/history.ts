@@ -41,21 +41,25 @@ export class AssessorHistoryComponent implements OnInit {
   sortBy: 'date_desc' | 'date_asc' | 'score_desc' | 'score_asc' = 'date_desc';
 
   // Stats
-  get totalApproved(): number { return this.history.filter(h => h.status === 'APPROVED').length; }
-  get totalRejected(): number { return this.history.filter(h => h.status === 'REJECTED').length; }
+  get totalApproved(): number {
+    return this.history.filter((h) => h.status === 'APPROVED').length;
+  }
+  get totalRejected(): number {
+    return this.history.filter((h) => h.status === 'REJECTED').length;
+  }
   get avgScore(): number {
-    const scored = this.history.filter(h => h.totalScore > 0);
+    const scored = this.history.filter((h) => h.totalScore > 0);
     if (!scored.length) return 0;
     return Math.round(scored.reduce((s, h) => s + h.totalScore, 0) / scored.length);
   }
   get availableYears(): number[] {
-    return Array.from(new Set(this.history.map(h => h.assessmentYear))).sort((a, b) => b - a);
+    return Array.from(new Set(this.history.map((h) => h.assessmentYear))).sort((a, b) => b - a);
   }
 
   get filteredHistory(): AssessorAssignmentItem[] {
-    let items = this.history.filter(item => {
-      const matchSearch = !this.searchTerm ||
-        item.orgName.toLowerCase().includes(this.searchTerm.toLowerCase());
+    let items = this.history.filter((item) => {
+      const matchSearch =
+        !this.searchTerm || item.orgName.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchStatus = !this.statusFilter || item.status === this.statusFilter;
       const matchYear = !this.yearFilter || String(item.assessmentYear) === this.yearFilter;
       return matchSearch && matchStatus && matchYear;
@@ -63,12 +67,20 @@ export class AssessorHistoryComponent implements OnInit {
 
     switch (this.sortBy) {
       case 'date_asc':
-        items = items.slice().sort((a, b) =>
-          new Date(a.submittedAt ?? 0).getTime() - new Date(b.submittedAt ?? 0).getTime());
+        items = items
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(a.submittedAt ?? 0).getTime() - new Date(b.submittedAt ?? 0).getTime(),
+          );
         break;
       case 'date_desc':
-        items = items.slice().sort((a, b) =>
-          new Date(b.submittedAt ?? 0).getTime() - new Date(a.submittedAt ?? 0).getTime());
+        items = items
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(b.submittedAt ?? 0).getTime() - new Date(a.submittedAt ?? 0).getTime(),
+          );
         break;
       case 'score_desc':
         items = items.slice().sort((a, b) => b.totalScore - a.totalScore);
@@ -80,7 +92,9 @@ export class AssessorHistoryComponent implements OnInit {
     return items;
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.isLoading = true;
@@ -111,7 +125,15 @@ export class AssessorHistoryComponent implements OnInit {
 
   exportCsv(): void {
     const rows = [
-      ['ลำดับ', 'ชื่อองค์กร', 'ปีประเมิน', 'สถานะ', 'คะแนนรวม', 'ระดับการรับรอง', 'Carbon รวม (tCO₂e)'],
+      [
+        'ลำดับ',
+        'ชื่อองค์กร',
+        'ปีประเมิน',
+        'สถานะ',
+        'คะแนนรวม',
+        'ระดับการรับรอง',
+        'Carbon รวม (tCO₂e)',
+      ],
       ...this.filteredHistory.map((h, i) => [
         String(i + 1),
         h.orgName,
@@ -120,10 +142,10 @@ export class AssessorHistoryComponent implements OnInit {
         String(h.totalScore),
         this.certLevel(h.totalScore),
         String(h.carbonSummary?.totalEmission?.toFixed(2) ?? '0'),
-      ])
+      ]),
     ];
 
-    const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+    const csv = rows.map((r) => r.map((c) => `"${c}"`).join(',')).join('\n');
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -135,7 +157,8 @@ export class AssessorHistoryComponent implements OnInit {
 
   statusLabel(status: string): string {
     const map: Record<string, string> = {
-      APPROVED: 'อนุมัติแล้ว', REJECTED: 'ปฏิเสธ',
+      APPROVED: 'อนุมัติแล้ว',
+      REJECTED: 'ปฏิเสธ',
       REVISION_REQUESTED: 'รอแก้ไข',
     };
     return map[status] ?? status;
@@ -143,7 +166,8 @@ export class AssessorHistoryComponent implements OnInit {
 
   statusClass(status: string): string {
     const map: Record<string, string> = {
-      APPROVED: 'badge-approved', REJECTED: 'badge-rejected',
+      APPROVED: 'badge-approved',
+      REJECTED: 'badge-rejected',
       REVISION_REQUESTED: 'badge-revision',
     };
     return map[status] ?? '';
@@ -175,7 +199,9 @@ export class AssessorHistoryComponent implements OnInit {
   formatDate(dateStr: string | null): string {
     if (!dateStr) return '-';
     return new Date(dateStr).toLocaleDateString('th-TH', {
-      year: 'numeric', month: 'long', day: 'numeric'
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   }
 
@@ -199,7 +225,7 @@ export class AssessorHistoryComponent implements OnInit {
             const parts = cert.certificate_url.split('/');
             this.uploadedFileName = parts[parts.length - 1];
           }
-          
+
           if (cert.issued_at) {
             this.issuedAt = new Date(cert.issued_at).toISOString().split('T')[0];
           }
@@ -209,7 +235,7 @@ export class AssessorHistoryComponent implements OnInit {
           this.cdr.markForCheck();
         }
       },
-      error: (err) => console.error('Failed to load certificate details', err)
+      error: (err) => console.error('Failed to load certificate details', err),
     });
   }
 
@@ -237,7 +263,7 @@ export class AssessorHistoryComponent implements OnInit {
           this.isUploading = false;
           this.toast.error('อัปโหลดไฟล์ใบรับรองล้มเหลว');
           this.cdr.markForCheck();
-        }
+        },
       });
     }
   }
@@ -251,24 +277,25 @@ export class AssessorHistoryComponent implements OnInit {
   saveCertificate(): void {
     if (!this.certModalItem) return;
     this.isSavingCert = true;
-    this.assessorService.updateCertificate(this.certModalItem.id, {
-      certificate_no: this.certNo || undefined,
-      issued_at: this.issuedAt || undefined,
-      expired_at: this.expiredAt || undefined,
-      certificate_url: this.certFileUrl || undefined
-    }).subscribe({
-      next: () => {
-        this.toast.success('บันทึกข้อมูลใบรับรองเรียบร้อยแล้ว');
-        this.isSavingCert = false;
-        this.closeCertModal();
-        this.load(); // Refresh to update status
-      },
-      error: () => {
-        this.toast.error('ไม่สามารถบันทึกใบรับรองได้');
-        this.isSavingCert = false;
-        this.cdr.markForCheck();
-      }
-    });
+    this.assessorService
+      .updateCertificate(this.certModalItem.id, {
+        certificate_no: this.certNo || undefined,
+        issued_at: this.issuedAt || undefined,
+        expired_at: this.expiredAt || undefined,
+        certificate_url: this.certFileUrl || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success('บันทึกข้อมูลใบรับรองเรียบร้อยแล้ว');
+          this.isSavingCert = false;
+          this.closeCertModal();
+          this.load(); // Refresh to update status
+        },
+        error: () => {
+          this.toast.error('ไม่สามารถบันทึกใบรับรองได้');
+          this.isSavingCert = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 }
-

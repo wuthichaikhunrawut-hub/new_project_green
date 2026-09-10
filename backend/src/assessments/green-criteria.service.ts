@@ -8,6 +8,10 @@ import { AuditLogsService } from '../audit-logs/audit-logs.service';
 
 @Injectable()
 export class GreenCriteriaService {
+  private cachedCriteria: GreenCriteriaMaster[] | null = null;
+  private lastCriteriaFetchTime: number = 0;
+  private readonly CACHE_TTL_MS = 60 * 1000;
+
   constructor(
     @InjectRepository(GreenCriteriaMaster)
     private greenCriteriaRepository: Repository<GreenCriteriaMaster>,
@@ -18,6 +22,22 @@ export class GreenCriteriaService {
     private auditLogsService: AuditLogsService,
   ) {}
 
+  private async getMasterCriteria(): Promise<GreenCriteriaMaster[]> {
+    const now = Date.now();
+    if (
+      this.cachedCriteria &&
+      now - this.lastCriteriaFetchTime < this.CACHE_TTL_MS
+    ) {
+      return this.cachedCriteria;
+    }
+    const criteria = await this.greenCriteriaRepository.find({
+      order: { category_number: 'ASC', criteria_code: 'ASC' },
+    });
+    this.cachedCriteria = criteria;
+    this.lastCriteriaFetchTime = now;
+    return criteria;
+  }
+
   async findAll(orgId?: number) {
     let hasPassed = false;
     if (orgId && orgId > 0) {
@@ -27,9 +47,7 @@ export class GreenCriteriaService {
       hasPassed = !!passedAss;
     }
 
-    const criteria = await this.greenCriteriaRepository.find({
-      order: { category_number: 'ASC', criteria_code: 'ASC' },
-    });
+    const criteria = await this.getMasterCriteria();
 
     if (orgId && orgId > 0 && !hasPassed) {
       return criteria.filter((item) => item.category_number !== 7);
@@ -54,9 +72,7 @@ export class GreenCriteriaService {
       }
     }
 
-    const criteria = await this.greenCriteriaRepository.find({
-      order: { category_number: 'ASC', criteria_code: 'ASC' },
-    });
+    const criteria = await this.getMasterCriteria();
 
     const filtered =
       orgId && orgId > 0 && !hasPassed
@@ -85,6 +101,7 @@ export class GreenCriteriaService {
   }
 
   async create(data: Partial<GreenCriteriaMaster>) {
+    this.cachedCriteria = null;
     const item = this.greenCriteriaRepository.create(data);
     const saved = await this.greenCriteriaRepository.save(item);
     await this.auditLogsService.logAction(
@@ -96,6 +113,7 @@ export class GreenCriteriaService {
   }
 
   async update(id: number, data: Partial<GreenCriteriaMaster>) {
+    this.cachedCriteria = null;
     await this.greenCriteriaRepository.update(id, data);
     const updated = await this.greenCriteriaRepository.findOne({
       where: { id },
@@ -109,6 +127,7 @@ export class GreenCriteriaService {
   }
 
   async remove(id: number) {
+    this.cachedCriteria = null;
     const item = await this.greenCriteriaRepository.findOne({ where: { id } });
     await this.greenCriteriaRepository.delete(id);
     if (item) {

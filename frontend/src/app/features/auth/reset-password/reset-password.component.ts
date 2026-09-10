@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css'
+  styleUrl: './reset-password.component.css',
 })
 export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -61,7 +61,7 @@ export class ResetPasswordComponent implements OnInit {
       error: (err: any) => {
         this.isLoading = false;
         this.errorMessage = err.error?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
-      }
+      },
     });
   }
 }

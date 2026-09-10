@@ -91,6 +91,20 @@ export class UploadsController {
       throw new BadRequestException('No file uploaded');
     }
 
+    const allowedFolders = new Set([
+      'evidence',
+      'certificates',
+      'avatars',
+      'reports',
+      'general',
+    ]);
+    const cleanFolder = String(folder || 'evidence')
+      .trim()
+      .toLowerCase();
+    if (!allowedFolders.has(cleanFolder)) {
+      throw new BadRequestException('โฟลเดอร์สำหรับจัดเก็บไฟล์ไม่ถูกต้อง');
+    }
+
     const role = req?.user?.role;
     const normalizeRole = (r: string): string => {
       return String(r || '')
@@ -111,7 +125,7 @@ export class UploadsController {
 
     return await this.uploadsService.uploadFile(
       file,
-      folder,
+      cleanFolder,
       {
         assessmentDetailId: assessmentDetailId
           ? Number(assessmentDetailId)
@@ -145,8 +159,12 @@ export class UploadsController {
   @Get()
   @ApiOperation({ summary: 'ดึงไฟล์หลักฐานทั้งหมดที่เข้าถึงได้ขององค์กร' })
   @ApiResponse({ status: 200, description: 'โหลดข้อมูลรายการไฟล์สำเร็จ' })
-  async getFiles(@Req() req: any) {
-    return await this.uploadsService.findAll(req.user);
+  async getFiles(
+    @Req() req: any,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return await this.uploadsService.findAll(req.user, page, limit);
   }
 
   @Patch(':id')

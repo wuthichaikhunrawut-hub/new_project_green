@@ -39,11 +39,7 @@ export class RolesGuard implements CanActivate {
       const hasRole = requiredRoles.some((role) => {
         const reqRole = normalize(role);
         if (userRole === 'ASSESSORADMIN') {
-          return (
-            reqRole === 'ASSESSOR' ||
-            reqRole === 'ASSESSORADMIN' ||
-            reqRole === 'SYSTEMADMIN'
-          );
+          return reqRole === 'ASSESSOR' || reqRole === 'ASSESSORADMIN';
         }
         return reqRole === userRole;
       });

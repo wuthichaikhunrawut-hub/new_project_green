@@ -1,5 +1,14 @@
 import { Injectable } from '@angular/core';
-import { ChartConfiguration, ChartData } from 'chart.js';
+
+export interface GenericChartData {
+  labels: string[];
+  datasets: Array<{
+    label: string;
+    data: number[];
+    backgroundColor?: string;
+    borderRadius?: number;
+  }>;
+}
 
 export type GhgAspectKey =
   | 'electricity'
@@ -55,69 +64,68 @@ export class GhgAnalyticsService {
       landfillWasteKgCo2ePerKg: 1.9,
       wastewaterKgCo2ePerM3: 0.7,
       refrigerantKgCo2ePerKg: 1430,
-      fireExtinguisherKgCo2ePerKgCo2: 1
+      fireExtinguisherKgCo2ePerKgCo2: 1,
     };
   }
 
   computeEightAspects(
     input: GhgAspectUsageInput,
-    factors: GhgEmissionFactors = this.getDefaultFactors()
+    factors: GhgEmissionFactors = this.getDefaultFactors(),
   ): GhgEightAspectsResult {
     const aspects: GhgAspectEmissionOutput[] = [
       {
         key: 'electricity',
         label: 'ไฟฟ้า',
-        emissionKgCo2e: (input.electricityKwh ?? 0) * factors.electricityKgCo2ePerKwh
+        emissionKgCo2e: (input.electricityKwh ?? 0) * factors.electricityKgCo2ePerKwh,
       },
       {
         key: 'fuel',
         label: 'น้ำมันเชื้อเพลิง',
-        emissionKgCo2e: (input.fuelLiters ?? 0) * factors.fuelKgCo2ePerLiter
+        emissionKgCo2e: (input.fuelLiters ?? 0) * factors.fuelKgCo2ePerLiter,
       },
       {
         key: 'water',
         label: 'น้ำประปา',
-        emissionKgCo2e: (input.waterM3 ?? 0) * factors.waterKgCo2ePerM3
+        emissionKgCo2e: (input.waterM3 ?? 0) * factors.waterKgCo2ePerM3,
       },
       {
         key: 'paper',
         label: 'กระดาษ',
-        emissionKgCo2e: (input.paperKg ?? 0) * factors.paperKgCo2ePerKg
+        emissionKgCo2e: (input.paperKg ?? 0) * factors.paperKgCo2ePerKg,
       },
       {
         key: 'landfillWaste',
         label: 'ขยะฝังกลบ',
-        emissionKgCo2e: (input.landfillWasteKg ?? 0) * factors.landfillWasteKgCo2ePerKg
+        emissionKgCo2e: (input.landfillWasteKg ?? 0) * factors.landfillWasteKgCo2ePerKg,
       },
       {
         key: 'wastewater',
         label: 'น้ำเสีย',
-        emissionKgCo2e: (input.wastewaterM3 ?? 0) * factors.wastewaterKgCo2ePerM3
+        emissionKgCo2e: (input.wastewaterM3 ?? 0) * factors.wastewaterKgCo2ePerM3,
       },
       {
         key: 'refrigerant',
         label: 'สารทำความเย็น',
-        emissionKgCo2e: (input.refrigerantKg ?? 0) * factors.refrigerantKgCo2ePerKg
+        emissionKgCo2e: (input.refrigerantKg ?? 0) * factors.refrigerantKgCo2ePerKg,
       },
       {
         key: 'fireExtinguisher',
         label: 'ถังดับเพลิง (CO2)',
-        emissionKgCo2e:
-          (input.fireExtinguisherKgCo2 ?? 0) * factors.fireExtinguisherKgCo2ePerKgCo2
-      }
+        emissionKgCo2e: (input.fireExtinguisherKgCo2 ?? 0) * factors.fireExtinguisherKgCo2ePerKgCo2,
+      },
     ];
 
     const totalKgCo2e = aspects.reduce((sum, a) => sum + a.emissionKgCo2e, 0);
 
     return {
       aspects,
-      totalKgCo2e
+      totalKgCo2e,
     };
   }
 
-  toRadarChartData(result: GhgEightAspectsResult): ChartData<'radar'> {
-    const labels = result.aspects.map(a => a.label);
-    const data = result.aspects.map(a => this.round2(a.emissionKgCo2e));
+  toRadarChartData(result: GhgEightAspectsResult): GenericChartData {
+    const labels = result.aspects.map((a) => a.label);
+    const data = result.aspects.map((a) => this.round2(a.emissionKgCo2e));
 
     return {
       labels,
@@ -126,18 +134,12 @@ export class GhgAnalyticsService {
           data,
           label: 'kgCO2e',
           backgroundColor: 'rgba(16, 185, 129, 0.18)',
-          borderColor: '#10b981',
-          pointBackgroundColor: '#10b981',
-          pointBorderColor: '#ffffff',
-          pointHoverBackgroundColor: '#ffffff',
-          pointHoverBorderColor: '#10b981',
-          borderWidth: 2
-        }
-      ]
+        },
+      ],
     };
   }
 
-  radarChartOptions(): ChartConfiguration<'radar'>['options'] {
+  radarChartOptions(): any {
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -147,24 +149,24 @@ export class GhgAnalyticsService {
           grid: { color: 'rgba(15, 23, 42, 0.08)' },
           pointLabels: {
             color: '#64748b',
-            font: { family: "'IBM Plex Sans Thai', system-ui, sans-serif", size: 10 }
+            font: { family: "'IBM Plex Sans Thai', system-ui, sans-serif", size: 10 },
           },
           ticks: { display: false },
-          suggestedMin: 0
-        }
+          suggestedMin: 0,
+        },
       },
       plugins: {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            label: (ctx) => `${ctx.formattedValue} kgCO2e`
-          }
-        }
-      }
+            label: (ctx: any) => `${ctx.formattedValue} kgCO2e`,
+          },
+        },
+      },
     };
   }
 
-  toStackedBarChartData(result: GhgEightAspectsResult): ChartData<'bar'> {
+  toStackedBarChartData(result: GhgEightAspectsResult): GenericChartData {
     const labels = ['GHG'];
     const colors = [
       '#10b981',
@@ -174,7 +176,7 @@ export class GhgAnalyticsService {
       '#ef4444',
       '#0ea5e9',
       '#f97316',
-      '#22c55e'
+      '#22c55e',
     ];
 
     return {
@@ -183,12 +185,12 @@ export class GhgAnalyticsService {
         label: a.label,
         data: [this.round2(a.emissionKgCo2e)],
         backgroundColor: colors[idx % colors.length],
-        borderRadius: 10
-      }))
+        borderRadius: 10,
+      })),
     };
   }
 
-  stackedBarChartOptions(): ChartConfiguration<'bar'>['options'] {
+  stackedBarChartOptions(): any {
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -196,14 +198,14 @@ export class GhgAnalyticsService {
         legend: { position: 'bottom' },
         tooltip: {
           callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.formattedValue} kgCO2e`
-          }
-        }
+            label: (ctx: any) => `${ctx.dataset.label}: ${ctx.formattedValue} kgCO2e`,
+          },
+        },
       },
       scales: {
         x: { stacked: true, grid: { display: false } },
-        y: { stacked: true, ticks: { callback: (v) => `${v}` } }
-      }
+        y: { stacked: true, ticks: { callback: (v: any) => `${v}` } },
+      },
     };
   }
 

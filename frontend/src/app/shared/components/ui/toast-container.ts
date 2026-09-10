@@ -7,7 +7,9 @@ import { ToastService } from '../../services/toast.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+    <div
+      class="fixed top-4 right-4 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none"
+    >
       @for (toast of toastService.toasts(); track toast.id) {
         <div
           class="pointer-events-auto rounded-xl border shadow-lg px-4 py-3 toast-enter"
@@ -26,7 +28,9 @@ import { ToastService } from '../../services/toast.service';
               class="text-current opacity-60 hover:opacity-100 text-lg leading-none shrink-0"
               (click)="toastService.dismiss(toast.id)"
               aria-label="ปิด"
-            >×</button>
+            >
+              ×
+            </button>
           </div>
         </div>
       }
@@ -38,8 +42,14 @@ import { ToastService } from '../../services/toast.service';
         animation: toast-slide 0.35s ease-out;
       }
       @keyframes toast-slide {
-        from { transform: translateX(1rem); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
+        from {
+          transform: translateX(1rem);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
       }
     `,
   ],

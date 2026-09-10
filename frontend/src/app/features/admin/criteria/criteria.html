@@ -6,134 +6,223 @@
     </div>
     <div class="page-actions">
       <button class="btn btn-primary shadow-sm rounded-pill px-4" (click)="openModal()">
-      <i class="fa-solid fa-plus me-2"></i> เพิ่มเกณฑ์ประเมินใหม่
-    </button>
-  </div>
+        <i class="fa-solid fa-plus me-2"></i> เพิ่มเกณฑ์ประเมินใหม่
+      </button>
+    </div>
   </div>
 
   <div class="main-content-center w-100">
     <div class="card border-0 shadow-sm rounded-4">
-    <div class="card-body p-0">
-      <div *ngIf="isLoading" class="text-center py-5">
-        <div class="spinner-border text-primary"></div>
-        <p class="mt-2 text-muted">กำลังโหลดข้อมูลเกณฑ์...</p>
-      </div>
+      <div class="card-body p-0">
+        <div *ngIf="isLoading" class="text-center py-5">
+          <div class="spinner-border text-primary"></div>
+          <p class="mt-2 text-muted">กำลังโหลดข้อมูลเกณฑ์...</p>
+        </div>
 
-      <div class="table-responsive" *ngIf="!isLoading" style="max-height: calc(100vh - 220px); overflow-y: auto;">
-        <table class="table table-hover align-middle mb-0">
-          <thead class="bg-light" *ngIf="isAnyGroupExpanded()">
-            <tr>
-              <th scope="col" class="py-3 px-4">หมวดหมู่</th>
-              <th scope="col" class="py-3 px-4">รหัสข้อ</th>
-              <th scope="col" class="py-3 px-4">ชื่อเกณฑ์การประเมิน</th>
-              <th scope="col" class="py-3 px-4 text-center">คะแนนเต็ม</th>
-              <th scope="col" class="py-3 px-4 text-center">เวอร์ชั่น (ปี)</th>
-              <th scope="col" class="py-3 px-4 text-end">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody>
-            <ng-container *ngFor="let group of groupedCriteria">
-              <tr class="table-light border-top bg-slate-50" (click)="toggleGroup(group)">
-                <td colspan="6" class="px-4 py-3 fw-bold text-dark">
-                  <div class="d-flex align-items-center">
-                    <i class="fa-solid me-3 text-primary transition-all" [ngClass]="group.expanded ? 'fa-chevron-down' : 'fa-chevron-right'"></i>
-                    <span class="fs-6">หมวดที่ {{ group.category_number }}</span>
-                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle ms-3 rounded-pill px-3">{{ group.items.length }} เกณฑ์</span>
-                  </div>
-                </td>
+        <div
+          class="table-responsive"
+          *ngIf="!isLoading"
+          style="max-height: calc(100vh - 220px); overflow-y: auto"
+        >
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light" *ngIf="isAnyGroupExpanded()">
+              <tr>
+                <th scope="col" class="py-3 px-4">หมวดหมู่</th>
+                <th scope="col" class="py-3 px-4">รหัสข้อ</th>
+                <th scope="col" class="py-3 px-4">ชื่อเกณฑ์การประเมิน</th>
+                <th scope="col" class="py-3 px-4 text-center">คะแนนเต็ม</th>
+                <th scope="col" class="py-3 px-4 text-center">เวอร์ชั่น (ปี)</th>
+                <th scope="col" class="py-3 px-4 text-end">จัดการ</th>
               </tr>
-              <ng-container *ngIf="group.expanded">
-                <tr *ngFor="let item of group.items">
-                  <td class="px-4 py-3 text-center">
-                    <div class="w-[2px]"></div>
-                  </td>
-                  <td class="px-4 py-3 fw-bold text-primary">{{ item.criteria_code }}</td>
-                  <td class="px-4 py-3">
-                    <div class="fw-semibold text-truncate max-w-[300px]" [title]="item.criteria_name">
-                      {{ item.criteria_name }}
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let group of groupedCriteria">
+                <tr class="table-light border-top bg-slate-50" (click)="toggleGroup(group)">
+                  <td colspan="6" class="px-4 py-3 fw-bold text-dark">
+                    <div class="d-flex align-items-center">
+                      <i
+                        class="fa-solid me-3 text-primary transition-all"
+                        [ngClass]="group.expanded ? 'fa-chevron-down' : 'fa-chevron-right'"
+                      ></i>
+                      <span class="fs-6">หมวดที่ {{ group.category_number }}</span>
+                      <span
+                        class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle ms-3 rounded-pill px-3"
+                        >{{ group.items.length }} เกณฑ์</span
+                      >
                     </div>
-                    <div class="small text-muted text-truncate max-w-[300px]" [title]="item.description">
-                      {{ item.description || '-' }}
-                    </div>
-                  </td>
-                  <td class="px-4 py-3 text-center fw-bold text-success">{{ item.max_score }}</td>
-                  <td class="px-4 py-3 text-center text-muted">{{ item.year_version || '-' }}</td>
-                  <td class="px-4 py-3 text-end">
-                    <button class="btn btn-sm btn-outline-primary me-2 shadow-sm" (click)="openModal(item)">
-                      <i class="fa-solid fa-pen"></i> แก้ไข
-                    </button>
-                    <button *ngIf="isSystemAdmin" class="btn btn-sm btn-outline-danger shadow-sm" (click)="deleteCriteria(item.id)">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
                   </td>
                 </tr>
+                <ng-container *ngIf="group.expanded">
+                  <tr *ngFor="let item of group.items">
+                    <td class="px-4 py-3 text-center">
+                      <div class="w-[2px]"></div>
+                    </td>
+                    <td class="px-4 py-3 fw-bold text-primary">{{ item.criteria_code }}</td>
+                    <td class="px-4 py-3">
+                      <div
+                        class="fw-semibold text-truncate max-w-[300px]"
+                        [title]="item.criteria_name"
+                      >
+                        {{ item.criteria_name }}
+                      </div>
+                      <div
+                        class="small text-muted text-truncate max-w-[300px]"
+                        [title]="item.description"
+                      >
+                        {{ item.description || '-' }}
+                      </div>
+                    </td>
+                    <td class="px-4 py-3 text-center fw-bold text-success">{{ item.max_score }}</td>
+                    <td class="px-4 py-3 text-center text-muted">{{ item.year_version || '-' }}</td>
+                    <td class="px-4 py-3 text-end">
+                      <button
+                        class="btn btn-sm btn-outline-primary me-2 shadow-sm"
+                        (click)="openModal(item)"
+                      >
+                        <i class="fa-solid fa-pen"></i> แก้ไข
+                      </button>
+                      <button
+                        *ngIf="isSystemAdmin"
+                        class="btn btn-sm btn-outline-danger shadow-sm"
+                        (click)="deleteCriteria(item.id)"
+                      >
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </ng-container>
               </ng-container>
-            </ng-container>
-            <tr *ngIf="groupedCriteria.length === 0">
-              <td colspan="6" class="text-center py-5 text-muted">ไม่มีข้อมูลเกณฑ์ประเมิน</td>
-            </tr>
-          </tbody>
-        </table>
+              <tr *ngIf="groupedCriteria.length === 0">
+                <td colspan="6" class="text-center py-5 text-muted">ไม่มีข้อมูลเกณฑ์ประเมิน</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
-</div>
 
 <!-- Edit Modal -->
-<div #modalRef class="modal bg-black/50 backdrop-blur-sm" tabindex="-1" [class.d-block]="selectedCriteria" [class.d-none]="!selectedCriteria" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important;">
+<div
+  #modalRef
+  class="modal bg-black/50 backdrop-blur-sm"
+  tabindex="-1"
+  [class.d-block]="selectedCriteria"
+  [class.d-none]="!selectedCriteria"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+  "
+>
   <div class="modal-dialog modal-dialog-centered modal-lg" *ngIf="selectedCriteria">
     <div class="modal-content rounded-4 border-0 shadow">
       <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold">{{ isSystemAdmin ? (selectedCriteria.id ? 'แก้ไขเกณฑ์ประเมิน' : 'เพิ่มเกณฑ์การประเมิน') : 'ยื่นข้อเสนอคำร้องแก้ไขเกณฑ์ประเมิน' }}</h5>
+        <h5 class="modal-title fw-bold">
+          {{
+            isSystemAdmin
+              ? selectedCriteria.id
+                ? 'แก้ไขเกณฑ์ประเมิน'
+                : 'เพิ่มเกณฑ์การประเมิน'
+              : 'ยื่นข้อเสนอคำร้องแก้ไขเกณฑ์ประเมิน'
+          }}
+        </h5>
         <button type="button" class="btn-close" (click)="closeModal()"></button>
       </div>
       <div class="modal-body p-4">
-        
         <div class="row mb-3">
           <div class="col-md-4">
             <label class="form-label text-muted small fw-bold">หมวดหมู่ที่ (Category)</label>
-            <input type="number" class="form-control" [(ngModel)]="selectedCriteria.category_number">
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="selectedCriteria.category_number"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label text-muted small fw-bold">รหัสข้อ (Code)</label>
-            <input type="text" class="form-control" placeholder="เช่น 1.1.1" [(ngModel)]="selectedCriteria.criteria_code">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="เช่น 1.1.1"
+              [(ngModel)]="selectedCriteria.criteria_code"
+            />
           </div>
           <div class="col-md-4">
             <label class="form-label text-muted small fw-bold">เวอร์ชั่น (ปี)</label>
-            <input type="number" class="form-control" [(ngModel)]="selectedCriteria.year_version">
+            <input type="number" class="form-control" [(ngModel)]="selectedCriteria.year_version" />
           </div>
         </div>
 
         <div class="mb-3">
           <label class="form-label text-muted small fw-bold">เรื่อง / ชื่อเกณฑ์</label>
-          <textarea class="form-control" rows="2" [(ngModel)]="selectedCriteria.criteria_name"></textarea>
+          <textarea
+            class="form-control"
+            rows="2"
+            [(ngModel)]="selectedCriteria.criteria_name"
+          ></textarea>
         </div>
 
         <div class="mb-3">
           <label class="form-label text-muted small fw-bold">คำอธิบายเพิ่มเติมเกี่ยวกับเกณฑ์</label>
-          <textarea class="form-control" rows="3" [(ngModel)]="selectedCriteria.description"></textarea>
+          <textarea
+            class="form-control"
+            rows="3"
+            [(ngModel)]="selectedCriteria.description"
+          ></textarea>
         </div>
 
         <div class="mb-4">
-          <label class="form-label text-muted small fw-bold">คะแนนเต็มสำหรับข้อนี้ (Max Score)</label>
-          <input type="number" class="form-control w-25" [(ngModel)]="selectedCriteria.max_score">
+          <label class="form-label text-muted small fw-bold"
+            >คะแนนเต็มสำหรับข้อนี้ (Max Score)</label
+          >
+          <input type="number" class="form-control w-25" [(ngModel)]="selectedCriteria.max_score" />
         </div>
 
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-          <button class="btn btn-light me-md-2" (click)="closeModal()" [disabled]="isSaving">ยกเลิก</button>
-          <button class="btn btn-success shadow-sm fw-bold px-4" (click)="saveCriteria()" [disabled]="isSaving">
-            <i class="fa-solid fa-floppy-disk me-2"></i> {{ isSystemAdmin ? (selectedCriteria.id ? 'บันทึกการแก้ไข' : 'เพิ่มเกณฑ์') : 'ยื่นเสนอคำขออนุมัติ' }}
+          <button class="btn btn-light me-md-2" (click)="closeModal()" [disabled]="isSaving">
+            ยกเลิก
+          </button>
+          <button
+            class="btn btn-success shadow-sm fw-bold px-4"
+            (click)="saveCriteria()"
+            [disabled]="isSaving"
+          >
+            <i class="fa-solid fa-floppy-disk me-2"></i>
+            {{
+              isSystemAdmin
+                ? selectedCriteria.id
+                  ? 'บันทึกการแก้ไข'
+                  : 'เพิ่มเกณฑ์'
+                : 'ยื่นเสนอคำขออนุมัติ'
+            }}
           </button>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
 <!-- Delete Confirm Modal -->
-<div #deleteModalRef class="modal bg-black/60 backdrop-blur-sm" tabindex="-1" [class.d-block]="criteriaToDelete !== null" [class.d-none]="criteriaToDelete === null" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important;">
+<div
+  #deleteModalRef
+  class="modal bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  [class.d-block]="criteriaToDelete !== null"
+  [class.d-none]="criteriaToDelete === null"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+  "
+>
   <div class="modal-dialog modal-dialog-centered" *ngIf="criteriaToDelete !== null">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -141,13 +230,25 @@
         <button type="button" class="btn-close" (click)="criteriaToDelete = null"></button>
       </div>
       <div class="modal-body p-4 text-center">
-        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem"></i>
         <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบเกณฑ์การประเมินนี้?</p>
-        <p class="text-danger small mt-2">การลบอาจส่งผลกระทบต่อข้อมูลการประเมินที่มีอยู่แล้ว การกระทำนี้ไม่สามารถย้อนกลับได้</p>
+        <p class="text-danger small mt-2">
+          การลบอาจส่งผลกระทบต่อข้อมูลการประเมินที่มีอยู่แล้ว การกระทำนี้ไม่สามารถย้อนกลับได้
+        </p>
       </div>
       <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="criteriaToDelete = null">ยกเลิก</button>
-        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDelete()">
+        <button
+          type="button"
+          class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="criteriaToDelete = null"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="confirmDelete()"
+        >
           <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
         </button>
       </div>

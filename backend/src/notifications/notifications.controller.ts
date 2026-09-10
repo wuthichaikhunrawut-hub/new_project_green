@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -23,13 +24,20 @@ export class NotificationsController {
 
   @Get('system/history')
   @Roles('ADMIN', 'SYSTEM_ADMIN')
-  findAllSystemWide() {
-    return this.notificationsService.findAllSystemWide();
+  findAllSystemWide(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.notificationsService.findAllSystemWide(page, limit);
   }
 
   @Get()
-  findAll(@Request() req) {
-    return this.notificationsService.findAllForUser(req.user.sub);
+  findAll(
+    @Request() req,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.notificationsService.findAllForUser(req.user.sub, page, limit);
   }
 
   @Get('unread-count')
@@ -41,7 +49,6 @@ export class NotificationsController {
   @Roles(
     'ADMIN',
     'SYSTEM_ADMIN',
-    'ORGANIZATION_ADMIN',
     'ORG_ADMIN',
     'EXECUTIVE',
     'EMPLOYEE',
@@ -66,16 +73,7 @@ export class NotificationsController {
   }
 
   @Post('bulk')
-  @Roles(
-    'ADMIN',
-    'SYSTEM_ADMIN',
-    'ORGANIZATION_ADMIN',
-    'ORG_ADMIN',
-    'EXECUTIVE',
-    'EMPLOYEE',
-    'USER',
-    'ASSESSOR',
-  )
+  @Roles('ADMIN', 'SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR_ADMIN')
   createBulk(
     @Body()
     body: {

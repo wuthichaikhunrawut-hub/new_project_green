@@ -5,7 +5,6 @@ import { ExecutiveService } from '../../../core/services/executive.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 interface GoalItem {
-  id?: number;
   title: string;
   targetDate: string;
   targetPercent: number;
@@ -25,9 +24,8 @@ export class GoalSetting implements OnInit {
   private toast = inject(ToastService);
   private cdr = inject(ChangeDetectorRef);
 
-  title = '';
-  targetDate = '';
   targetPercent: number | null = null;
+  targetYear: number = 2030;
   isSaving = false;
   isLoading = true;
 
@@ -48,66 +46,34 @@ export class GoalSetting implements OnInit {
         this.targetReductionPercent = dashboard.targetReductionPercent;
         this.netZeroProgressPercent = dashboard.netZeroProgressPercent;
 
-        this.executiveService.getCustomGoals().subscribe({
-          next: (customGoals) => {
-            this.initializeGoals(customGoals);
-            this.isLoading = false;
-            this.cdr.markForCheck();
-          },
-          error: (err) => {
-            console.error('Failed to load custom goals from backend', err);
-            this.initializeGoals();
-            this.isLoading = false;
-            this.cdr.markForCheck();
-          }
-        });
+        this.targetPercent = this.targetReductionPercent || 50;
+        this.initializeGoals();
+        this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load executive dashboard', err);
         this.initializeGoals();
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
-  initializeGoals(backendGoals?: GoalItem[]) {
-    // 1. Primary Net Zero goal from database / dashboard
+  initializeGoals() {
     const primaryGoal: GoalItem = {
       title: 'Net Zero Target (Organization-wide)',
-      targetDate: '2030-12-31',
+      targetDate: `${this.targetYear}-12-31`,
       targetPercent: this.targetReductionPercent || 50,
       progress: this.netZeroProgressPercent || 0,
-      status: this.netZeroProgressPercent >= 40 ? 'On Track' : 'At Risk'
+      status: this.netZeroProgressPercent >= 40 ? 'On Track' : 'At Risk',
     };
 
-    let customGoals: GoalItem[] = backendGoals || [];
-
-    // Fallback mock goals if no custom goals saved yet
-    if (customGoals.length === 0) {
-      customGoals = [
-        {
-          title: 'Reduce Energy Consumption HQ',
-          targetDate: '2027-06-30',
-          targetPercent: 25,
-          progress: 12,
-          status: 'At Risk'
-        },
-        {
-          title: 'Paperless Office Campaign',
-          targetDate: '2026-12-31',
-          targetPercent: 80,
-          progress: 65,
-          status: 'On Track'
-        }
-      ];
-    }
-
-    this.goals = [primaryGoal, ...customGoals];
+    this.goals = [primaryGoal];
   }
 
   saveGoal() {
-    if (!this.title || !this.targetDate || this.targetPercent === null) {
+    if (this.targetPercent === null || !this.targetYear) {
       this.toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
       return;
     }
@@ -118,51 +84,21 @@ export class GoalSetting implements OnInit {
     }
 
     this.isSaving = true;
-    const targetYear = new Date(this.targetDate).getFullYear();
 
     // Call API to set organization wide target reduction
-    this.executiveService.setGoal(this.targetPercent, targetYear).subscribe({
+    this.executiveService.setGoal(this.targetPercent, this.targetYear).subscribe({
       next: (res) => {
-        // Add new goal to list
-        const newGoal: GoalItem = {
-          title: this.title,
-          targetDate: this.targetDate,
-          targetPercent: this.targetPercent!,
-          progress: 0, // start at 0% progress
-          status: 'On Track'
-        };
-
-        const customGoals = this.goals.slice(1); // omit the primary database goal
-        customGoals.unshift(newGoal);
-
-        // Save custom goals to backend
-        this.executiveService.saveCustomGoals(customGoals).subscribe({
-          next: () => {
-            this.toast.success('บันทึกเป้าหมายลดคาร์บอนสำเร็จ');
-            // Reload data to recalculate database targets
-            this.loadData();
-            
-            // Reset form
-            this.title = '';
-            this.targetDate = '';
-            this.targetPercent = null;
-            this.isSaving = false;
-            this.cdr.markForCheck();
-          },
-          error: (err) => {
-            console.error('Failed to save custom goals to backend', err);
-            this.toast.error('เกิดข้อผิดพลาดในการบันทึกเป้าหมายย่อย');
-            this.isSaving = false;
-            this.cdr.markForCheck();
-          }
-        });
+        this.toast.success('บันทึกเป้าหมายลดคาร์บอนหลักสำเร็จ');
+        this.loadData();
+        this.isSaving = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to save goal', err);
         this.toast.error('เกิดข้อผิดพลาดในการบันทึกเป้าหมาย');
         this.isSaving = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 

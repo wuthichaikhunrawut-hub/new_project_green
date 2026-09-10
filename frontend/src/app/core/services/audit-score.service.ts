@@ -36,7 +36,7 @@ export class AuditScoreService {
         code: input.code,
         title: input.title,
         score: 4,
-        statusLabel: 'ครบหลักฐาน + ลงนาม + เป็นปัจจุบัน'
+        statusLabel: 'ครบหลักฐาน + ลงนาม + เป็นปัจจุบัน',
       };
     }
 
@@ -51,7 +51,8 @@ export class AuditScoreService {
         code: input.code,
         title: input.title,
         score,
-        statusLabel: score >= 3 ? 'ต่ออายุ: ข้อมูลย้อนหลังเพียงพอ' : 'ต่ออายุ: ข้อมูลย้อนหลังยังไม่ครบ'
+        statusLabel:
+          score >= 3 ? 'ต่ออายุ: ข้อมูลย้อนหลังเพียงพอ' : 'ต่ออายุ: ข้อมูลย้อนหลังยังไม่ครบ',
       };
     }
 
@@ -64,12 +65,12 @@ export class AuditScoreService {
       code: input.code,
       title: input.title,
       score,
-      statusLabel: score === 0 ? 'ยังไม่เริ่ม' : 'กำลังจัดเตรียมหลักฐาน'
+      statusLabel: score === 0 ? 'ยังไม่เริ่ม' : 'กำลังจัดเตรียมหลักฐาน',
     };
   }
 
   summarize(inputs: ScoreIndicatorInput[]): ScorePredictionSummary {
-    const indicators = inputs.map(i => this.evaluateIndicator(i));
+    const indicators = inputs.map((i) => this.evaluateIndicator(i));
     const totalScore = indicators.reduce((sum, i) => sum + i.score, 0);
     const maxScore = inputs.length * 4;
     const percent = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
@@ -83,7 +84,7 @@ export class AuditScoreService {
       maxScore,
       percent,
       level,
-      readyForAudit
+      readyForAudit,
     };
   }
 

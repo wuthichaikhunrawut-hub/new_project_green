@@ -4,8 +4,9 @@ import {
   Put,
   Param,
   Body,
-  Headers,
   UseGuards,
+  Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -17,16 +18,24 @@ import { Roles } from '../auth/roles.decorator';
 export class GreenOfficeController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 
+  private getOrgId(req: any): number {
+    const role = req.user?.role;
+    if (['SYSTEM_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN'].includes(role)) {
+      const orgId = Number(req.headers['x-org-id'] ?? 0);
+      if (!orgId) throw new BadRequestException('กรุณาระบุองค์กร');
+      return orgId;
+    }
+    const orgId = Number(req.user?.orgId);
+    if (!orgId) throw new BadRequestException('ไม่พบข้อมูลองค์กรในบัญชีผู้ใช้');
+    return orgId;
+  }
+
   @Get()
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'ASSESSOR', 'ASSESSOR_ADMIN')
-  async findAll(@Headers('x-org-id') orgId?: string) {
-    let numericOrgId = 0;
-    if (orgId) {
-      numericOrgId = parseInt(orgId, 10);
-      if (isNaN(numericOrgId)) numericOrgId = 0;
-    }
-    const results =
-      await this.greenCriteriaService.findAllForFrontend(numericOrgId);
+  async findAll(@Req() req: any) {
+    const results = await this.greenCriteriaService.findAllForFrontend(
+      this.getOrgId(req),
+    );
     return results.map((r) => ({
       ...r,
       max_score: r.maxScore,
@@ -39,13 +48,12 @@ export class GreenOfficeController {
   updateScore(
     @Param('id') id: string,
     @Body('score') score: number,
-    @Headers('x-org-id') orgId?: string,
+    @Req() req?: any,
   ) {
-    let numericOrgId = 0;
-    if (orgId) {
-      numericOrgId = parseInt(orgId, 10);
-      if (isNaN(numericOrgId)) numericOrgId = 0;
-    }
-    return this.greenCriteriaService.updateScore(+id, score, numericOrgId);
+    return this.greenCriteriaService.updateScore(
+      +id,
+      score,
+      this.getOrgId(req),
+    );
   }
 }

@@ -1,6 +1,16 @@
 import { ToastService } from '../../../core/services/toast.service';
 import { environment } from '../../../../environments/environment';
-import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectorRef,
+  Renderer2,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -18,7 +28,7 @@ interface GroupedCriteria {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './criteria.html',
-  styleUrls: ['./criteria.css']
+  styleUrls: ['./criteria.css'],
 })
 export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
@@ -37,14 +47,17 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
   isLoading = true;
   isSaving = false;
   userRole = '';
-  
+
   selectedCriteria: Partial<GreenCriteria> | null = null;
-  
+
   // For Confirm Modal
   criteriaToDelete: number | null = null;
 
   get isSystemAdmin(): boolean {
-    const role = String(this.userRole || '').trim().toUpperCase().replace(/[\s_]/g, '');
+    const role = String(this.userRole || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[\s_]/g, '');
     return role === 'SYSTEMADMIN' || role === 'ADMIN';
   }
 
@@ -91,7 +104,7 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
         console.error('Failed to load criteria:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -104,14 +117,16 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
       }
       groups.get(cat)!.push(item);
     }
-    
+
     this.groupedCriteria = Array.from(groups.entries())
       .map(([category_number, items]) => {
-        const existingGroup = this.groupedCriteria.find(g => g.category_number === category_number);
+        const existingGroup = this.groupedCriteria.find(
+          (g) => g.category_number === category_number,
+        );
         return {
           category_number,
           items: items.sort((a, b) => (a.criteria_code || '').localeCompare(b.criteria_code || '')),
-          expanded: existingGroup ? existingGroup.expanded : false
+          expanded: existingGroup ? existingGroup.expanded : false,
         };
       })
       .sort((a, b) => a.category_number - b.category_number);
@@ -122,7 +137,7 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   isAnyGroupExpanded(): boolean {
-    return this.groupedCriteria.some(g => g.expanded);
+    return this.groupedCriteria.some((g) => g.expanded);
   }
 
   openModal(item?: GreenCriteria) {
@@ -135,7 +150,7 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
         criteria_name: '',
         max_score: 5,
         description: '',
-        year_version: new Date().getFullYear()
+        year_version: new Date().getFullYear(),
       };
     }
   }
@@ -150,8 +165,8 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
 
     if (!this.isSystemAdmin) {
       // ✅ Assessor Admin / Assessor -> Send Proposal Request instead of direct write
-      const originalValue = this.selectedCriteria.id 
-        ? String(this.criteriaList.find(c => c.id === this.selectedCriteria?.id)?.max_score || 0)
+      const originalValue = this.selectedCriteria.id
+        ? String(this.criteriaList.find((c) => c.id === this.selectedCriteria?.id)?.max_score || 0)
         : '0';
 
       const isNew = !this.selectedCriteria.id;
@@ -161,48 +176,56 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
         name: this.selectedCriteria.criteria_name || 'เพิ่มเกณฑ์การประเมินใหม่',
         oldValue: originalValue,
         newValue: String(this.selectedCriteria.max_score || 0),
-        reason: isNew 
+        reason: isNew
           ? 'เสนอเพิ่มเกณฑ์การประเมินข้อใหม่เข้าสู่ระบบ เพื่อปรับปรุงความครอบคลุมตามมาตรฐานสำนักงานสีเขียว'
           : 'เสนอแก้ไขปรับปรุงคะแนนเต็มของเกณฑ์ประเมินเดิม',
-        details: isNew ? {
-          category_number: Number(this.selectedCriteria.category_number || 1),
-          criteria_code: this.selectedCriteria.criteria_code || '',
-          year_version: Number(this.selectedCriteria.year_version || new Date().getFullYear()),
-          description: this.selectedCriteria.description || ''
-        } : null
+        details: isNew
+          ? {
+              category_number: Number(this.selectedCriteria.category_number || 1),
+              criteria_code: this.selectedCriteria.criteria_code || '',
+              year_version: Number(this.selectedCriteria.year_version || new Date().getFullYear()),
+              description: this.selectedCriteria.description || '',
+            }
+          : null,
       };
 
-      this.http.post(`${environment.apiUrl}/notifications/propose-academic`, proposePayload).subscribe({
-        next: () => {
-          this.toast.success('ยื่นข้อเสนอแก้ไขเกณฑ์สำนักงานสีเขียวต่อ System Admin เรียบร้อยแล้วครับ');
-          this.closeModal();
-          this.isSaving = false;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.error('เกิดข้อผิดพลาดในการยื่นส่งคำขออนุมัติ');
-          this.isSaving = false;
-          this.cdr.markForCheck();
-        }
-      });
+      this.http
+        .post(`${environment.apiUrl}/notifications/propose-academic`, proposePayload)
+        .subscribe({
+          next: () => {
+            this.toast.success(
+              'ยื่นข้อเสนอแก้ไขเกณฑ์สำนักงานสีเขียวต่อ System Admin เรียบร้อยแล้วครับ',
+            );
+            this.closeModal();
+            this.isSaving = false;
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            console.error(err);
+            this.toast.error('เกิดข้อผิดพลาดในการยื่นส่งคำขออนุมัติ');
+            this.isSaving = false;
+            this.cdr.markForCheck();
+          },
+        });
       return;
     }
 
     if (this.selectedCriteria.id) {
-      this.criteriaService.updateCriteria(this.selectedCriteria.id, this.selectedCriteria).subscribe({
-        next: () => {
-          this.toast.success('บันทึกข้อมูลสำเร็จ');
-          this.closeModal();
-          this.loadCriteria();
-          this.isSaving = false;
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-          this.isSaving = false;
-        }
-      });
+      this.criteriaService
+        .updateCriteria(this.selectedCriteria.id, this.selectedCriteria)
+        .subscribe({
+          next: () => {
+            this.toast.success('บันทึกข้อมูลสำเร็จ');
+            this.closeModal();
+            this.loadCriteria();
+            this.isSaving = false;
+          },
+          error: (err) => {
+            console.error(err);
+            this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+            this.isSaving = false;
+          },
+        });
     } else {
       this.criteriaService.createCriteria(this.selectedCriteria).subscribe({
         next: () => {
@@ -215,7 +238,7 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
           console.error(err);
           this.toast.error('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
           this.isSaving = false;
-        }
+        },
       });
     }
   }
@@ -235,7 +258,7 @@ export class AdminCriteriaComponent implements OnInit, AfterViewInit, OnDestroy 
       error: (err) => {
         console.error(err);
         this.toast.error('เกิดข้อผิดพลาดในการลบ');
-      }
+      },
     });
   }
 }

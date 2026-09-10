@@ -11,25 +11,32 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, SidebarComponent, HeaderComponent, AiChatComponent, ToastContainerComponent],
+  imports: [
+    CommonModule,
+    RouterOutlet,
+    SidebarComponent,
+    HeaderComponent,
+    AiChatComponent,
+    ToastContainerComponent,
+  ],
   templateUrl: './main-layout.html',
-  styleUrl: './main-layout.css'
+  styleUrl: './main-layout.css',
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
-  
+
   // ดึงข้อมูล User จาก Database Table 'users' (ผ่าน Service)
   user: any = null;
   private subscription: Subscription = new Subscription();
-  
+
   // สถานะ Sidebar (สำหรับ Desktop/Mobile)
   isCollapsed = false;
 
   ngOnInit() {
     this.subscription.add(
-      this.authService.currentUser$.subscribe(user => {
+      this.authService.currentUser$.subscribe((user) => {
         this.user = user;
-      })
+      }),
     );
   }
 

@@ -7,7 +7,10 @@ import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 import { OrgBranchesService, OrgBranch } from '../../core/services/org-branches.service';
 import { AuthService } from '../../core/services/auth.service';
-import { EmissionFactorsService, EmissionFactor } from '../../core/services/emission-factors.service';
+import {
+  EmissionFactorsService,
+  EmissionFactor,
+} from '../../core/services/emission-factors.service';
 import { UserSubscriptionsService } from '../../core/services/user-subscriptions.service';
 
 import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialog';
@@ -17,7 +20,7 @@ import { ConfirmDialogComponent } from '../../shared/components/ui/confirm-dialo
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink, ThaiDatePipe, ConfirmDialogComponent],
   templateUrl: './carbon-logs.html',
-  styleUrl: './carbon-logs.css'
+  styleUrl: './carbon-logs.css',
 })
 export class CarbonLogsComponent implements OnInit {
   private toast = inject(ToastService);
@@ -33,11 +36,11 @@ export class CarbonLogsComponent implements OnInit {
   lastUpdatedAt: Date | null = null;
   branches: OrgBranch[] = [];
   selectedUnitId: number | null = null;
-  
+
   factors: EmissionFactor[] = [];
   selectedFactorId: number | null = null;
   filteredFactorsForForm: EmissionFactor[] = [];
-  
+
   quotaWarnings: string[] = [];
 
   // Real Statistics
@@ -64,7 +67,7 @@ export class CarbonLogsComponent implements OnInit {
     year: new Date().getFullYear(),
     usage_amount: 0,
     evidence_file: null as File | null,
-    evidence_url: ''
+    evidence_url: '',
   };
 
   showManualModal = false;
@@ -86,8 +89,12 @@ export class CarbonLogsComponent implements OnInit {
     const orgId = this.authService.getOrganizationId();
     if (orgId) {
       this.branchService.getBranches(orgId).subscribe({
-        next: (res) => { this.branches = res; },
-        error: () => { /* ไม่บังคับ */ }
+        next: (res) => {
+          this.branches = res;
+        },
+        error: () => {
+          /* ไม่บังคับ */
+        },
       });
     }
 
@@ -96,7 +103,7 @@ export class CarbonLogsComponent implements OnInit {
         this.factors = res || [];
         this.onActivityTypeChanged();
       },
-      error: (err) => console.error('Failed to load emission factors', err)
+      error: (err) => console.error('Failed to load emission factors', err),
     });
 
     this.subscriptionService.getMyQuotas().subscribe({
@@ -110,27 +117,40 @@ export class CarbonLogsComponent implements OnInit {
             const usagePercent = (used / limit) * 100;
             if (usagePercent >= 80) {
               this.quotaWarnings.push(
-                `แจ้งเตือนสิทธิ์การใช้งาน: คุณใช้โควตาสำหรับ "${featName}" ไปแล้ว ${usagePercent.toFixed(0)}% (${used}/${limit})`
+                `แจ้งเตือนสิทธิ์การใช้งาน: คุณใช้โควตาสำหรับ "${featName}" ไปแล้ว ${usagePercent.toFixed(0)}% (${used}/${limit})`,
               );
             }
           }
         });
         this.cdr.markForCheck();
       },
-      error: (err) => console.error('Failed to load quotas for warning', err)
+      error: (err) => console.error('Failed to load quotas for warning', err),
     });
   }
 
   onActivityTypeChanged() {
     const type = this.newEntry.activity_type;
     this.selectedFactorId = null;
-    
+
     if (type === 'Electricity') {
-      this.filteredFactorsForForm = this.factors.filter(f => f.scope === 2 || f.unit?.toLowerCase() === 'kwh' || f.name?.includes('ไฟฟ้า'));
+      this.filteredFactorsForForm = this.factors.filter(
+        (f) => f.scope === 2 || f.unit?.toLowerCase() === 'kwh' || f.name?.includes('ไฟฟ้า'),
+      );
     } else if (type === 'Water') {
-      this.filteredFactorsForForm = this.factors.filter(f => f.unit?.toLowerCase().includes('m3') || f.unit?.includes('m³') || f.name?.includes('น้ำประปา'));
+      this.filteredFactorsForForm = this.factors.filter(
+        (f) =>
+          f.unit?.toLowerCase().includes('m3') ||
+          f.unit?.includes('m³') ||
+          f.name?.includes('น้ำประปา'),
+      );
     } else if (type === 'Gasoline') {
-      this.filteredFactorsForForm = this.factors.filter(f => f.scope === 1 || f.unit?.toLowerCase() === 'liter' || f.unit?.toLowerCase() === 'litre' || f.name?.includes('น้ำมัน'));
+      this.filteredFactorsForForm = this.factors.filter(
+        (f) =>
+          f.scope === 1 ||
+          f.unit?.toLowerCase() === 'liter' ||
+          f.unit?.toLowerCase() === 'litre' ||
+          f.name?.includes('น้ำมัน'),
+      );
     } else {
       this.filteredFactorsForForm = [];
     }
@@ -154,24 +174,40 @@ export class CarbonLogsComponent implements OnInit {
         const prevYear = prevMonthDate.getFullYear();
 
         this.monthlyElectricity = data
-          .filter(l => l.type === 'Electricity' && l.date.includes(`${currentYear}-${String(currentMonth).padStart(2, '0')}`))
+          .filter(
+            (l) =>
+              l.type === 'Electricity' &&
+              l.date.includes(`${currentYear}-${String(currentMonth).padStart(2, '0')}`),
+          )
           .reduce((sum, l) => sum + l.amount, 0);
 
         this.monthlyWater = data
-          .filter(l => l.type === 'Water' && l.date.includes(`${currentYear}-${String(currentMonth).padStart(2, '0')}`))
+          .filter(
+            (l) =>
+              l.type === 'Water' &&
+              l.date.includes(`${currentYear}-${String(currentMonth).padStart(2, '0')}`),
+          )
           .reduce((sum, l) => sum + l.amount, 0);
 
         this.prevMonthlyElectricity = data
-          .filter(l => l.type === 'Electricity' && l.date.includes(`${prevYear}-${String(prevMonth).padStart(2, '0')}`))
+          .filter(
+            (l) =>
+              l.type === 'Electricity' &&
+              l.date.includes(`${prevYear}-${String(prevMonth).padStart(2, '0')}`),
+          )
           .reduce((sum, l) => sum + l.amount, 0);
 
         this.prevMonthlyWater = data
-          .filter(l => l.type === 'Water' && l.date.includes(`${prevYear}-${String(prevMonth).padStart(2, '0')}`))
+          .filter(
+            (l) =>
+              l.type === 'Water' &&
+              l.date.includes(`${prevYear}-${String(prevMonth).padStart(2, '0')}`),
+          )
           .reduce((sum, l) => sum + l.amount, 0);
 
         this.totalEmission = data.reduce((sum, l) => sum + l.emission, 0);
         this.prevTotalEmission = data
-          .filter(l => l.date.includes(`${prevYear}-${String(prevMonth).padStart(2, '0')}`))
+          .filter((l) => l.date.includes(`${prevYear}-${String(prevMonth).padStart(2, '0')}`))
           .reduce((sum, l) => sum + l.emission, 0);
 
         this.activityCount = data.length;
@@ -184,7 +220,7 @@ export class CarbonLogsComponent implements OnInit {
         console.error('Failed to load logs', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -265,7 +301,8 @@ export class CarbonLogsComponent implements OnInit {
     const t = (type || '').toLowerCase();
     if (t.includes('electric')) return 'Electricity';
     if (t.includes('water')) return 'Water';
-    if (t.includes('gasoline') || t.includes('diesel') || t.includes('fuel') || t.includes('oil')) return 'Gasoline';
+    if (t.includes('gasoline') || t.includes('diesel') || t.includes('fuel') || t.includes('oil'))
+      return 'Gasoline';
     return 'ALL';
   }
 
@@ -292,7 +329,7 @@ export class CarbonLogsComponent implements OnInit {
         error: () => {
           this.isScanning = false;
           this.toast.error('เกิดข้อผิดพลาดในการแปลผล AI');
-        }
+        },
       });
     }
   }
@@ -309,7 +346,7 @@ export class CarbonLogsComponent implements OnInit {
         error: () => {
           this.isUploading = false;
           this.toast.error('ไม่สามารถอัพโหลดไฟล์หลักฐานได้');
-        }
+        },
       });
     }
   }
@@ -329,9 +366,17 @@ export class CarbonLogsComponent implements OnInit {
     }
 
     // Find the chosen factor
-    const factorObj = this.factors.find(f => Number(f.id) === this.selectedFactorId);
-    const factorVal = factorObj ? factorObj.factor_value : 0.5; // fallback
-    const unit = factorObj ? factorObj.unit : 'kWh';
+    const factorObj = this.factors.find((f) => Number(f.id) === this.selectedFactorId);
+    if (!factorObj) {
+      this.toast.warning('กรุณาเลือก Emission Factor จากฐานข้อมูลก่อนบันทึก');
+      return;
+    }
+    const factorVal = Number(factorObj.factor_value);
+    if (!Number.isFinite(factorVal)) {
+      this.toast.error('Emission Factor ในฐานข้อมูลไม่ถูกต้อง กรุณาติดต่อผู้ดูแลระบบ');
+      return;
+    }
+    const unit = factorObj.unit;
 
     const calculatedEmission = this.newEntry.usage_amount * factorVal;
 
@@ -344,7 +389,7 @@ export class CarbonLogsComponent implements OnInit {
       source: 'MANUAL',
       evidence_url: this.newEntry.evidence_url,
       org_unit_id: this.selectedUnitId ?? undefined,
-      emission_factor_id: this.selectedFactorId ?? undefined
+      emission_factor_id: this.selectedFactorId ?? undefined,
     };
 
     this.carbonService.addLog(payload).subscribe({
@@ -357,7 +402,7 @@ export class CarbonLogsComponent implements OnInit {
           year: new Date().getFullYear(),
           usage_amount: 0,
           evidence_file: null,
-          evidence_url: ''
+          evidence_url: '',
         };
         this.selectedUnitId = null;
         this.selectedFactorId = null;
@@ -365,7 +410,7 @@ export class CarbonLogsComponent implements OnInit {
       },
       error: () => {
         this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-      }
+      },
     });
   }
 
@@ -395,7 +440,7 @@ export class CarbonLogsComponent implements OnInit {
       },
       error: () => {
         this.toast.error('เกิดข้อผิดพลาด ไม่สามารถลบข้อมูลได้');
-      }
+      },
     });
     this.logIdToDelete = null;
   }

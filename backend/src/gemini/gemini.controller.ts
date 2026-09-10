@@ -68,6 +68,7 @@ export class GeminiController {
   }
 
   @Post('chat')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @FeatureCode('AI_ASSISTANCE')
   @UseInterceptors(FeatureQuotaInterceptor)
   async chat(

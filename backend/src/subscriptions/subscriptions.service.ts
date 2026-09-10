@@ -158,9 +158,12 @@ export class SubscriptionsService {
     }
 
     // Activate subscription in database
-    const planId = session.metadata?.planId
-      ? Number(session.metadata.planId)
-      : 36; // Default to Premium
+    const planId = Number(session.metadata?.planId);
+    if (!Number.isInteger(planId) || planId <= 0) {
+      throw new BadRequestException(
+        'Stripe checkout session is missing a valid planId',
+      );
+    }
     let activeSub = await this.orgSubRepository.findOne({
       where: { org_id: org.id },
     });
@@ -199,6 +202,7 @@ export class SubscriptionsService {
 
   findAllPlans() {
     return this.plansRepository.find({
+      where: { is_active: true },
       relations: ['features'],
       order: { price_per_month: 'ASC' },
     });
@@ -304,10 +308,16 @@ export class SubscriptionsService {
 
   // ---- Invoices ----
 
-  findAllInvoices() {
+  findAllInvoices(page?: number, limit?: number) {
+    const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 100;
+    const safePage = page ? Math.max(1, Number(page)) : 1;
+    const skip = (safePage - 1) * safeLimit;
+
     return this.invoicesRepository.find({
       relations: ['organization', 'plan'],
       order: { created_at: 'DESC' },
+      skip,
+      take: safeLimit,
     });
   }
 
@@ -382,18 +392,95 @@ export class SubscriptionsService {
       }
     }
 
-    // Default fallbacks if not defined:
-    if (featureCode.toUpperCase() === 'AI_SCAN') {
-      if (planId === 3) return 20;
-      if (planId === 36) return 50;
-      return 0; // Super/others unlimited
-    }
-    if (featureCode.toUpperCase() === 'AI_ASSISTANCE') {
-      if (planId === 3) return 5;
-      if (planId === 36) return 100;
-      return 0;
-    }
+    // An omitted quota is unlimited. Limits must be configured in the
+    // settings table; never infer business rules from environment-specific IDs.
     return 0;
+  }
+
+  async subscribeToPaidPlan(
+    orgId: number,
+    planId: number,
+    paymentMethodId: string,
+  ) {
+    const plan = await this.plansRepository.findOne({
+      where: { id: planId, is_active: true },
+    });
+    if (!plan) throw new BadRequestException('Plan not found');
+    if (!plan.price_per_month || plan.price_per_month <= 0) {
+      throw new BadRequestException('Use the free-plan subscription endpoint');
+    }
+    if (!plan.stripe_price_id) {
+      throw new BadRequestException(
+        'This paid plan is not linked to a Stripe Price',
+      );
+    }
+
+    const org = await this.orgRepository.findOne({ where: { id: orgId } });
+    if (!org?.stripe_customer_id) {
+      throw new BadRequestException('Stripe customer is not configured');
+    }
+
+    const paymentMethod =
+      await this.stripeService.getPaymentMethod(paymentMethodId);
+    if (paymentMethod.customer !== org.stripe_customer_id) {
+      throw new BadRequestException(
+        'Payment method does not belong to this organization',
+      );
+    }
+
+    const stripeSubscription = await this.stripeService.createSubscription(
+      org.stripe_customer_id,
+      plan.stripe_price_id,
+      paymentMethodId,
+      { planId: String(plan.id), orgId: String(org.id) },
+    );
+
+    org.stripe_subscription_id = stripeSubscription.id;
+    await this.orgRepository.save(org);
+
+    const existing = await this.orgSubRepository.findOne({
+      where: { org_id: orgId, status: 'ACTIVE' },
+    });
+    if (existing) {
+      existing.status = 'CANCELLED';
+      existing.auto_renew = false;
+      await this.orgSubRepository.save(existing);
+    }
+
+    const status = ['active', 'trialing'].includes(stripeSubscription.status)
+      ? 'ACTIVE'
+      : 'PENDING';
+    const localSubscription = await this.orgSubRepository.save(
+      this.orgSubRepository.create({
+        org_id: orgId,
+        plan_id: plan.id,
+        status,
+        start_date: new Date(),
+        end_date: stripeSubscription.current_period_end
+          ? new Date(stripeSubscription.current_period_end * 1000)
+          : undefined,
+        auto_renew: true,
+      }),
+    );
+
+    await this.auditLogsService.logAction(
+      undefined,
+      'SUBSCRIBE_PLAN_STRIPE',
+      `Organization ${orgId} started Stripe subscription ${stripeSubscription.id} for plan ${plan.id}`,
+    );
+
+    const invoice = stripeSubscription.latest_invoice;
+    const paymentIntent =
+      invoice && typeof invoice !== 'string' ? invoice.payment_intent : null;
+    return {
+      subscription: localSubscription,
+      stripeSubscriptionId: stripeSubscription.id,
+      status: stripeSubscription.status,
+      clientSecret:
+        paymentIntent && typeof paymentIntent !== 'string'
+          ? paymentIntent.client_secret
+          : null,
+    };
   }
 
   async checkFeatureQuota(

@@ -15,7 +15,7 @@ export interface OrgBranch {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class OrgBranchesService {
   private apiUrl = `${environment.apiUrl}/organizations`;
@@ -28,22 +28,27 @@ export class OrgBranchesService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-
       }
     }
     return headers;
   }
 
   getBranches(orgId: number): Observable<OrgBranch[]> {
-    return this.http.get<OrgBranch[]>(`${this.apiUrl}/${orgId}/units`, { headers: this.getHeaders() });
+    return this.http.get<OrgBranch[]>(`${this.apiUrl}/${orgId}/units`, {
+      headers: this.getHeaders(),
+    });
   }
 
   createBranch(orgId: number, data: Partial<OrgBranch>): Observable<OrgBranch> {
-    return this.http.post<OrgBranch>(`${this.apiUrl}/${orgId}/units`, data, { headers: this.getHeaders() });
+    return this.http.post<OrgBranch>(`${this.apiUrl}/${orgId}/units`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   updateBranch(unitId: number, data: Partial<OrgBranch>): Observable<OrgBranch> {
-    return this.http.patch<OrgBranch>(`${this.apiUrl}/units/${unitId}`, data, { headers: this.getHeaders() });
+    return this.http.patch<OrgBranch>(`${this.apiUrl}/units/${unitId}`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   deleteBranch(unitId: number): Observable<void> {

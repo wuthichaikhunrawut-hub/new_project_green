@@ -1,4 +1,11 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  ChangeDetectorRef,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
 import { Title } from '@angular/platform-browser';
@@ -9,7 +16,7 @@ import { forkJoin, Subscription } from 'rxjs';
   selector: 'app-quota-usage',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './quota-usage.html'
+  templateUrl: './quota-usage.html',
 })
 export class QuotaUsageComponent implements OnInit, OnDestroy {
   private subscriptionService = inject(UserSubscriptionsService);
@@ -47,14 +54,14 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
 
     forkJoin({
       subscription: this.subscriptionService.getMySubscription(),
-      quotas: this.subscriptionService.getMyQuotas()
+      quotas: this.subscriptionService.getMyQuotas(),
     }).subscribe({
       next: (res) => {
         this.subscription = res.subscription;
         this.logs = res.quotas || [];
         this.isLoading = false;
         this.cdr.markForCheck();
-        
+
         // Wait for DOM to update and render charts
         setTimeout(() => {
           this.renderCharts();
@@ -64,7 +71,7 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
         console.error('Error fetching dashboard data:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -73,8 +80,8 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
 
     import('apexcharts').then((module) => {
       const ApexCharts = module.default;
-      
-      const aiQuota = this.logs.find(q => q.feature_code?.toUpperCase() === 'AI_SCAN');
+
+      const aiQuota = this.logs.find((q) => q.feature_code?.toUpperCase() === 'AI_SCAN');
       if (aiQuota) {
         const used = aiQuota.used || 0;
         const limit = aiQuota.limit || 50; // default to 50 if 0/undefined
@@ -95,7 +102,7 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
       chart: {
         type: 'radialBar',
         height: 280,
-        sparkline: { enabled: true }
+        sparkline: { enabled: true },
       },
       plotOptions: {
         radialBar: {
@@ -111,8 +118,8 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
               top: 3,
               left: 0,
               blur: 4,
-              opacity: 0.1
-            }
+              opacity: 0.1,
+            },
           },
           track: {
             background: '#f1f5f9',
@@ -123,8 +130,8 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
               top: -3,
               left: 0,
               blur: 4,
-              opacity: 0.05
-            }
+              opacity: 0.05,
+            },
           },
           dataLabels: {
             show: true,
@@ -133,7 +140,7 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
               show: true,
               color: '#64748b',
               fontSize: '13px',
-              fontFamily: 'Outfit, Inter, sans-serif'
+              fontFamily: 'Outfit, Inter, sans-serif',
             },
             value: {
               formatter: () => `${used} / ${limit}`,
@@ -142,10 +149,10 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
               fontWeight: '900',
               fontFamily: 'Outfit, Inter, sans-serif',
               show: true,
-              offsetY: 5
-            }
-          }
-        }
+              offsetY: 5,
+            },
+          },
+        },
       },
       fill: {
         type: 'gradient',
@@ -157,13 +164,13 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
           inverseColors: true,
           opacityFrom: 1,
           opacityTo: 1,
-          stops: [0, 100]
-        }
+          stops: [0, 100],
+        },
       },
       stroke: {
-        dashArray: 4
+        dashArray: 4,
       },
-      labels: ['โควตาสแกนบิล AI']
+      labels: ['โควตาสแกนบิล AI'],
     };
 
     const element = document.querySelector('#aiRadialChart');
@@ -177,21 +184,21 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
     if (this.barChart) this.barChart.destroy();
 
     // Prepare features comparison bar chart
-    const categories = this.logs.map(q => q.feature_name || q.feature_code);
-    const usedData = this.logs.map(q => q.used);
+    const categories = this.logs.map((q) => q.feature_name || q.feature_code);
+    const usedData = this.logs.map((q) => q.used);
 
     const options = {
       series: [
         {
           name: 'ใช้งานแล้ว (Used)',
-          data: usedData
-        }
+          data: usedData,
+        },
       ],
       chart: {
         type: 'bar',
         height: 280,
         toolbar: { show: false },
-        fontFamily: 'Outfit, Inter, sans-serif'
+        fontFamily: 'Outfit, Inter, sans-serif',
       },
       colors: ['#10b981'],
       plotOptions: {
@@ -199,8 +206,8 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
           borderRadius: 6,
           horizontal: true,
           barHeight: '45%',
-          distributed: false
-        }
+          distributed: false,
+        },
       },
       dataLabels: {
         enabled: true,
@@ -208,30 +215,30 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
         offsetX: 10,
         style: {
           fontSize: '11px',
-          colors: ['#0f172a']
-        }
+          colors: ['#0f172a'],
+        },
       },
       grid: {
         borderColor: '#f1f5f9',
-        xaxis: { lines: { show: true } }
+        xaxis: { lines: { show: true } },
       },
       xaxis: {
         categories: categories,
         labels: {
           style: {
             colors: '#64748b',
-            fontSize: '12px'
-          }
-        }
+            fontSize: '12px',
+          },
+        },
       },
       yaxis: {
         labels: {
           style: {
             colors: '#334155',
             fontSize: '12px',
-            fontWeight: 600
-          }
-        }
+            fontWeight: 600,
+          },
+        },
       },
       tooltip: {
         theme: 'light',
@@ -242,9 +249,9 @@ export class QuotaUsageComponent implements OnInit, OnDestroy {
               return `ใช้งาน: ${val} ครั้ง (ไม่จำกัด)`;
             }
             return `ใช้งาน: ${val} / ${limit} ครั้ง`;
-          }
-        }
-      }
+          },
+        },
+      },
     };
 
     const element = document.querySelector('#quotaBarChart');

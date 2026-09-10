@@ -3,7 +3,9 @@
   <div class="page-header mb-4">
     <div class="page-header-left">
       <h2 class="page-title">ยื่นคำขอรับการตรวจประเมินจริง</h2>
-      <p class="page-subtitle mb-0">กรอกข้อมูลและขอบเขตการสำรวจเพื่อส่งเรื่องให้ผู้ตรวจประเมินเข้ามาประเมินจริง</p>
+      <p class="page-subtitle mb-0">
+        กรอกข้อมูลและขอบเขตการสำรวจเพื่อส่งเรื่องให้ผู้ตรวจประเมินเข้ามาประเมินจริง
+      </p>
     </div>
   </div>
 
@@ -13,8 +15,13 @@
       <div class="card p-0">
         <div class="card-body p-4">
           <!-- Organization Badge -->
-          <div class="d-flex align-items-center mb-4 p-3 bg-primary-subtle rounded-3 border border-primary-subtle">
-            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 45px; height: 45px; min-width: 45px; min-height: 45px; flex-shrink: 0;">
+          <div
+            class="d-flex align-items-center mb-4 p-3 bg-primary-subtle rounded-3 border border-primary-subtle"
+          >
+            <div
+              class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+              style="width: 45px; height: 45px; min-width: 45px; min-height: 45px; flex-shrink: 0"
+            >
               <i class="fa-solid fa-building"></i>
             </div>
             <div>
@@ -34,8 +41,16 @@
             </div>
             <!-- Year -->
             <div class="mb-4">
-              <label for="year" class="form-label text-dark fw-bold">รอบปีที่รับการประเมิน <span class="text-danger">*</span></label>
-              <select id="year" class="form-select custom-input" [(ngModel)]="request.assessment_year" name="assessment_year" required>
+              <label for="year" class="form-label text-dark fw-bold"
+                >รอบปีที่รับการประเมิน <span class="text-danger">*</span></label
+              >
+              <select
+                id="year"
+                class="form-select custom-input"
+                [(ngModel)]="request.assessment_year"
+                name="assessment_year"
+                required
+              >
                 <option *ngFor="let year of yearOptions" [value]="year">{{ year + 543 }}</option>
               </select>
               <div class="form-text">เลือกปีที่ต้องการทำเรื่องขอรับการตรวจประเมิน</div>
@@ -43,22 +58,45 @@
 
             <!-- Notes/Scope -->
             <div class="mb-4">
-              <label for="notes" class="form-label text-dark fw-bold">หมายเหตุ / ขอบเขตการประเมิน <span class="text-danger">*</span></label>
-              <textarea id="notes" class="form-control" rows="5" [(ngModel)]="request.notes" name="notes" placeholder="โปรดระบุรายละเอียดเพิ่มเติม หรือขอบเขตการประเมินที่ชัดเจน เช่น อาคาร, แผนก หรือข้อยกเว้นบางประการ" required></textarea>
+              <label for="notes" class="form-label text-dark fw-bold"
+                >หมายเหตุ / ขอบเขตการประเมิน <span class="text-danger">*</span></label
+              >
+              <textarea
+                id="notes"
+                class="form-control"
+                rows="5"
+                [(ngModel)]="request.notes"
+                name="notes"
+                placeholder="โปรดระบุรายละเอียดเพิ่มเติม หรือขอบเขตการประเมินที่ชัดเจน เช่น อาคาร, แผนก หรือข้อยกเว้นบางประการ"
+                required
+              ></textarea>
             </div>
 
             <!-- Info Box -->
             <div class="alert alert-soft-success py-3 small border-0 rounded-4 mb-4">
               <i class="fa-solid fa-circle-info me-2 text-success"></i>
-              หลังจากส่งคำขอรับรองแล้ว สถานะของคำขอจะเป็น <strong>"รอการตรวจประเมิน" (PENDING)</strong> ผู้ประเมินจะสามารถเข้ามาดูและเริ่มการประเมินได้
+              หลังจากส่งคำขอรับรองแล้ว สถานะของคำขอจะเป็น
+              <strong>"รอการตรวจประเมิน" (PENDING)</strong>
+              ผู้ประเมินจะสามารถเข้ามาดูและเริ่มการประเมินได้
             </div>
 
-            <hr>
+            <hr />
 
             <!-- Actions -->
             <div class="d-flex justify-content-end gap-3 mt-4">
-              <button type="button" class="btn btn-light fw-bold px-4" routerLink="/requests" [disabled]="isSubmitting">ยกเลิก</button>
-              <button type="submit" class="btn btn-primary fw-bold px-4 shadow-sm" [disabled]="!requestForm.form.valid || isSubmitting">
+              <button
+                type="button"
+                class="btn btn-light fw-bold px-4"
+                routerLink="/requests"
+                [disabled]="isSubmitting"
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary fw-bold px-4 shadow-sm"
+                [disabled]="!requestForm.form.valid || isSubmitting"
+              >
                 <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
                 <i *ngIf="!isSubmitting" class="fa-solid fa-paper-plane me-2"></i>
                 ยืนยันส่งคำขอ
@@ -68,17 +106,24 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Guidelines / Helper Content -->
     <div class="col-lg-4 mt-4 mt-lg-0">
       <div class="card bg-light border-0">
         <div class="card-body">
-          <h5 class="fw-bold mb-3"><i class="fa-solid fa-lightbulb text-warning me-2"></i> คำแนะนำ</h5>
-          <ul class="text-muted small ps-3 mb-0" style="line-height: 1.8;">
+          <h5 class="fw-bold mb-3">
+            <i class="fa-solid fa-lightbulb text-warning me-2"></i> คำแนะนำ
+          </h5>
+          <ul class="text-muted small ps-3 mb-0" style="line-height: 1.8">
             <li>ตรวจสอบปีที่ต้องการประเมินให้ถูกต้องก่อนกดส่งคำขอ</li>
             <li>ในช่องหมายเหตุ ควรระบุรายละเอียดองค์กรเบื้องต้นเพื่อความสะดวกในการจัดสรรผู้ตรวจ</li>
-            <li>องค์กรสามารถมีคำขอที่มีสถานะ <strong>รอการตรวจประเมิน</strong> ได้เพียง 1 รายการต่อปีเท่านั้น</li>
-            <li>หากส่งคำขอแล้ว พบข้อมูลผิดพลาด สามารถแจ้งแอดมินหรือรอผู้ประเมินตีกลับให้แก้ไขได้</li>
+            <li>
+              องค์กรสามารถมีคำขอที่มีสถานะ <strong>รอการตรวจประเมิน</strong> ได้เพียง 1
+              รายการต่อปีเท่านั้น
+            </li>
+            <li>
+              หากส่งคำขอแล้ว พบข้อมูลผิดพลาด สามารถแจ้งแอดมินหรือรอผู้ประเมินตีกลับให้แก้ไขได้
+            </li>
           </ul>
         </div>
       </div>

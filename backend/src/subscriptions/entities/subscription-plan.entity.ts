@@ -27,6 +27,9 @@ export class SubscriptionPlan {
   @Column({ type: 'double precision', nullable: true })
   price_per_month: number;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  stripe_price_id: string | null;
+
   @Column({ type: 'int', nullable: true })
   max_users: number;
 

@@ -1,14 +1,18 @@
 <div class="container-fluid p-4 p-lg-5 animate-in">
   <div class="text-center mb-4 max-w-2xl mx-auto">
-    <span class="badge bg-primary text-white px-4 py-2 rounded-pill fw-bold mb-3 shadow-sm d-inline-flex align-items-center text-sm" class="tracking-wide">
+    <span
+      class="badge bg-primary text-white px-4 py-2 rounded-pill fw-bold mb-3 shadow-sm d-inline-flex align-items-center text-sm"
+      class="tracking-wide"
+    >
       <i class="fa-solid fa-crown text-warning me-2" class="text-base"></i> GREEN SYNC SUBSCRIPTION
     </span>
     <h2 class="fw-bold mb-2">ยกระดับการจัดการคาร์บอนสู่มาตรฐานสากล</h2>
-    <p class="text-muted small">เลือกแพ็กเกจที่เหมาะสมกับขนาดองค์กร เพื่อประสิทธิภาพสูงสุดในการก้าวสู่ Net Zero</p>
+    <p class="text-muted small">
+      เลือกแพ็กเกจที่เหมาะสมกับขนาดองค์กร เพื่อประสิทธิภาพสูงสุดในการก้าวสู่ Net Zero
+    </p>
   </div>
 
   <div *ngIf="!isLoading" class="row justify-content-center">
-    
     <div *ngIf="currentPlan && getCurrentQuotaSummary()" class="col-12 mb-4">
       <div class="alert alert-info rounded-4 shadow-sm border border-info border-opacity-25">
         <div class="d-flex align-items-center justify-content-between flex-wrap">
@@ -26,166 +30,237 @@
     </div>
 
     <!-- Billing Cycle Toggle -->
-    <div class="d-flex justify-content-center mb-5 animate-in" >
+    <div class="d-flex justify-content-center mb-5 animate-in">
       <div class="billing-toggle-container shadow-sm">
-        <button 
+        <button
           class="btn rounded-pill px-4 py-2 toggle-btn fw-bold transition-all"
           [class.active]="billingCycle === 'monthly'"
-          (click)="billingCycle = 'monthly'">
+          (click)="billingCycle = 'monthly'"
+        >
           รายเดือน
         </button>
-        <button 
+        <button
           class="btn rounded-pill px-4 py-2 toggle-btn fw-bold transition-all d-flex align-items-center"
           [class.active]="billingCycle === 'yearly'"
-          (click)="billingCycle = 'yearly'">
-          รายปี <span class="badge bg-white text-primary ms-2 shadow-sm rounded-pill px-2 py-1 text-[0.65rem]">-20%</span>
+          (click)="billingCycle = 'yearly'"
+        >
+          รายปี
+          <span
+            class="badge bg-white text-primary ms-2 shadow-sm rounded-pill px-2 py-1 text-[0.65rem]"
+            >-20%</span
+          >
         </button>
       </div>
     </div>
 
-  <div class="row g-3 justify-content-center">
-    
-    <!-- Loading State -->
-    <div *ngIf="isLoading" class="text-center py-5 w-100">
-      <div class="spinner-border text-primary" role="status"></div>
-    </div>
+    <div class="row g-3 justify-content-center">
+      <!-- Loading State -->
+      <div *ngIf="isLoading" class="text-center py-5 w-100">
+        <div class="spinner-border text-primary" role="status"></div>
+      </div>
 
-    <!-- Pricing Cards -->
-    <div class="col-lg-4 col-md-6 mt-4 mt-lg-0" *ngFor="let plan of plans">
-      <div class="card h-100 pricing-card shadow position-relative transition-all"
-           [ngClass]="(currentPlan?.id === plan.id || plan.badge) ? 'border border-primary border-2' : 'border'"
-           [style.transform]="plan.badge ? 'translateY(-10px)' : ''"
-           [style.box-shadow]="plan.badge ? '0 20px 40px -10px rgba(16,185,129,0.25) !important' : ''">
-        
-        <!-- Premium Badge Ribbon -->
-        <div *ngIf="plan.badge" class="position-absolute top-0 start-50 translate-middle-x bg-primary text-white px-4 py-1 rounded-bottom fw-bold shadow text-xs" class="tracking-wide">
-          <i class="fa-solid fa-star me-1 text-warning" *ngIf="plan.badge === 'popular'"></i>
-          <i class="fa-solid fa-fire me-1 text-warning" *ngIf="plan.badge === 'recommended'"></i>
-          <i class="fa-solid fa-building me-1" *ngIf="plan.badge === 'enterprise'"></i>
-          {{ plan.badge === 'recommended' ? 'แนะนำ' : plan.badge === 'popular' ? 'ยอดนิยม' : 'สำหรับองค์กร' }}
-        </div>
-        
-        <div class="card-body p-4 d-flex flex-column" [class.pt-5]="plan.badge">
-          <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold m-0" [class.text-primary]="plan.badge">{{ plan.plan_name }}</h4>
-            <span *ngIf="currentPlan?.id === plan.id" class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-bold border border-primary border-opacity-10 text-[0.7rem]">
-              <i class="fa-solid fa-check me-1"></i> ปัจจุบัน
-            </span>
+      <!-- Pricing Cards -->
+      <div class="col-lg-4 col-md-6 mt-4 mt-lg-0" *ngFor="let plan of plans">
+        <div
+          class="card h-100 pricing-card shadow position-relative transition-all"
+          [ngClass]="
+            currentPlan?.id === plan.id || plan.badge ? 'border border-primary border-2' : 'border'
+          "
+          [style.transform]="plan.badge ? 'translateY(-10px)' : ''"
+          [style.box-shadow]="
+            plan.badge ? '0 20px 40px -10px rgba(16,185,129,0.25) !important' : ''
+          "
+        >
+          <!-- Premium Badge Ribbon -->
+          <div
+            *ngIf="plan.badge"
+            class="position-absolute top-0 start-50 translate-middle-x bg-primary text-white px-4 py-1 rounded-bottom fw-bold shadow text-xs"
+            class="tracking-wide"
+          >
+            <i class="fa-solid fa-star me-1 text-warning" *ngIf="plan.badge === 'popular'"></i>
+            <i class="fa-solid fa-fire me-1 text-warning" *ngIf="plan.badge === 'recommended'"></i>
+            <i class="fa-solid fa-building me-1" *ngIf="plan.badge === 'enterprise'"></i>
+            {{
+              plan.badge === 'recommended'
+                ? 'แนะนำ'
+                : plan.badge === 'popular'
+                  ? 'ยอดนิยม'
+                  : 'สำหรับองค์กร'
+            }}
           </div>
 
-          <p class="text-muted small mb-3">{{ plan.description }}</p>
-          
-          <div class="price-box mb-4">
-            <div class="d-flex align-items-baseline">
-              <span class="price-value fw-bold text-dark">
-                <ng-container *ngIf="plan.price_per_month === 0">ฟรี</ng-container>
-                <ng-container *ngIf="plan.price_per_month > 0">
-                  <span class="currency">฿</span>{{ (billingCycle === 'monthly' ? plan.price_per_month : plan.price_per_month * 12 * 0.8 / 12) | number:'1.0-0' }}
-                </ng-container>
+          <div class="card-body p-4 d-flex flex-column" [class.pt-5]="plan.badge">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="fw-bold m-0" [class.text-primary]="plan.badge">{{ plan.plan_name }}</h4>
+              <span
+                *ngIf="currentPlan?.id === plan.id"
+                class="badge bg-primary bg-opacity-10 text-primary px-2 py-1 rounded-pill fw-bold border border-primary border-opacity-10 text-[0.7rem]"
+              >
+                <i class="fa-solid fa-check me-1"></i> ปัจจุบัน
               </span>
-              <span class="text-muted ms-1 small" *ngIf="plan.price_per_month > 0">/ เดือน</span>
             </div>
-            
-            <div class="small text-primary fw-bold mt-1" *ngIf="billingCycle === 'yearly' && plan.price_per_month > 0" class="text-xs">
-              <i class="fa-solid fa-bolt me-1"></i> ประหยัด ฿{{ plan.price_per_month * 12 * 0.2 | number }} ต่อปี
+
+            <p class="text-muted small mb-3">{{ plan.description }}</p>
+
+            <div class="price-box mb-4">
+              <div class="d-flex align-items-baseline">
+                <span class="price-value fw-bold text-dark">
+                  <ng-container *ngIf="plan.price_per_month === 0">ฟรี</ng-container>
+                  <ng-container *ngIf="plan.price_per_month > 0">
+                    <span class="currency">฿</span
+                    >{{
+                      (billingCycle === 'monthly'
+                        ? plan.price_per_month
+                        : (plan.price_per_month * 12 * 0.8) / 12
+                      ) | number: '1.0-0'
+                    }}
+                  </ng-container>
+                </span>
+                <span class="text-muted ms-1 small" *ngIf="plan.price_per_month > 0">/ เดือน</span>
+              </div>
+
+              <div
+                class="small text-primary fw-bold mt-1"
+                *ngIf="billingCycle === 'yearly' && plan.price_per_month > 0"
+                class="text-xs"
+              >
+                <i class="fa-solid fa-bolt me-1"></i> ประหยัด ฿{{
+                  plan.price_per_month * 12 * 0.2 | number
+                }}
+                ต่อปี
+              </div>
             </div>
+
+            <button
+              class="btn btn-upgrade w-100 fw-bold mb-4 transition-all shadow-sm"
+              [class.btn-primary]="currentPlan?.id !== plan.id"
+              [class.btn-light]="currentPlan?.id === plan.id"
+              [disabled]="currentPlan?.id === plan.id"
+              (click)="selectPlan(plan)"
+            >
+              <span *ngIf="currentPlan?.id === plan.id">ใช้งานอยู่</span>
+              <span *ngIf="currentPlan?.id !== plan.id">
+                {{ plan.price_per_month === 0 ? 'เริ่มใช้งานฟรี' : 'อัปเกรดทันที' }}
+              </span>
+            </button>
+
+            <div class="mb-2 text-dark fw-bold text-xs" class="tracking-wide">
+              สิ่งที่รวมอยู่ในแพ็กเกจ:
+            </div>
+
+            <ul class="list-unstyled mb-0">
+              <li class="feature-item" *ngIf="plan.max_users">
+                <div class="feature-icon-wrapper text-primary bg-primary bg-opacity-10">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+                <span class="feature-text fw-medium"
+                  >สูงสุด <strong>{{ plan.max_users }}</strong> ผู้ใช้งาน</span
+                >
+              </li>
+              <li class="feature-item" *ngIf="plan.max_locations">
+                <div class="feature-icon-wrapper text-primary bg-primary bg-opacity-10">
+                  <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <span class="feature-text fw-medium"
+                  >สูงสุด <strong>{{ plan.max_locations }}</strong> สาขา</span
+                >
+              </li>
+              <li class="feature-item" *ngFor="let feature of plan.features">
+                <div class="feature-icon-wrapper text-success bg-success bg-opacity-10">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <span class="feature-text fw-medium">
+                  {{ feature.feature_name }}
+                  <span class="text-muted extra-small ms-1" style="font-size: 0.8em">{{
+                    getPlanFeatureQuota(plan.id, feature.feature_code)
+                  }}</span>
+                </span>
+              </li>
+            </ul>
           </div>
-          
-          <button class="btn btn-upgrade w-100 fw-bold mb-4 transition-all shadow-sm"
-                   [class.btn-primary]="currentPlan?.id !== plan.id"
-                   [class.btn-light]="currentPlan?.id === plan.id"
-                   [disabled]="currentPlan?.id === plan.id"
-                   (click)="selectPlan(plan)">
-            <span *ngIf="currentPlan?.id === plan.id">ใช้งานอยู่</span>
-            <span *ngIf="currentPlan?.id !== plan.id">
-              {{ plan.price_per_month === 0 ? 'เริ่มใช้งานฟรี' : 'อัปเกรดทันที' }}
-            </span>
-          </button>
-          
-          <div class="mb-2 text-dark fw-bold text-xs" class="tracking-wide">สิ่งที่รวมอยู่ในแพ็กเกจ:</div>
-          
-          <ul class="list-unstyled mb-0">
-            <li class="feature-item" *ngIf="plan.max_users">
-              <div class="feature-icon-wrapper text-primary bg-primary bg-opacity-10">
-                <i class="fa-solid fa-user"></i>
-              </div>
-              <span class="feature-text fw-medium">สูงสุด <strong>{{ plan.max_users }}</strong> ผู้ใช้งาน</span>
-            </li>
-            <li class="feature-item" *ngIf="plan.max_locations">
-              <div class="feature-icon-wrapper text-primary bg-primary bg-opacity-10">
-                <i class="fa-solid fa-map-location-dot"></i>
-              </div>
-              <span class="feature-text fw-medium">สูงสุด <strong>{{ plan.max_locations }}</strong> สาขา</span>
-            </li>
-            <li class="feature-item" *ngFor="let feature of plan.features">
-              <div class="feature-icon-wrapper text-success bg-success bg-opacity-10">
-                <i class="fa-solid fa-check"></i>
-              </div>
-              <span class="feature-text fw-medium">
-                {{ feature.feature_name }} 
-                <span class="text-muted extra-small ms-1" style="font-size: 0.8em;">{{ getPlanFeatureQuota(plan.id, feature.feature_code) }}</span>
-              </span>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
-  </div>
 
-  <div *ngIf="!isLoading" class="row justify-content-center mt-5 mb-4">
-    <div class="col-12">
-      <div class="card billing-history-card border-0">
-        <div class="card-body p-4">
-          <h5 class="card-title mb-4 d-flex align-items-center gap-2">
-            <i class="fa-solid fa-receipt text-primary"></i>
-            ประวัติการชำระเงินขององค์กร
-          </h5>
-          <div class="table-responsive border border-slate-100 rounded-3">
-            <table class="table premium-payment-table align-middle m-0">
-              <thead>
-                <tr>
-                  <th>วันที่จ่ายเงิน</th>
-                  <th>เลขที่บิล / รายการ</th>
-                  <th>ยอดชำระ</th>
-                  <th class="text-center">สถานะ</th>
-                  <th>ช่องทางชำระเงิน</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let payment of payments">
-                  <td class="font-semibold text-slate-700">
-                    {{ payment.paid_at ? (payment.paid_at | date:'dd MMM yyyy') : (payment.created_at | date:'dd MMM yyyy') }}
-                  </td>
-                  <td class="fw-bold text-dark">
-                    {{ payment.invoice_no || ('INV-' + (payment.id || '000')) }}
-                  </td>
-                  <td class="fw-black text-slate-900">
-                    ฿{{ payment.amount | number:'1.0-0' }}
-                  </td>
-                  <td class="text-center">
-                    <span class="inline-block" 
-                          [ngClass]="payment.payment_status === 'PAID' || payment.payment_status === 'paid' ? 'badge-paid' : 
-                                     payment.payment_status === 'PENDING' || payment.payment_status === 'pending' ? 'badge-pending' : 'badge-failed'">
-                      {{ payment.payment_status === 'PAID' || payment.payment_status === 'paid' ? 'สำเร็จ (Paid)' : 
-                         payment.payment_status === 'PENDING' || payment.payment_status === 'pending' ? 'รอชำระ (Pending)' : 'ล้มเหลว (Failed)' }}
-                    </span>
-                  </td>
-                  <td class="font-medium text-slate-500">
-                    <i class="fa-brands fa-stripe text-indigo-500 me-1" *ngIf="payment.payment_method?.toLowerCase() === 'stripe'"></i>
-                    <i class="fa-solid fa-credit-card text-slate-400 me-1" *ngIf="payment.payment_method?.toLowerCase() !== 'stripe'"></i>
-                    {{ payment.payment_method || 'บัตรเครดิต' }}
-                  </td>
-                </tr>
-                <tr *ngIf="payments.length === 0">
-                  <td colspan="5" class="text-center text-muted py-5">
-                    <div class="py-3">
-                      <i class="fa-solid fa-receipt text-slate-300 fs-1 mb-3"></i>
-                      <div class="fw-bold text-slate-400">ยังไม่มีประวัติการชำระเงินสำหรับบัญชีนี้</div>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+    <div *ngIf="!isLoading" class="row justify-content-center mt-5 mb-4">
+      <div class="col-12">
+        <div class="card billing-history-card border-0">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-4 d-flex align-items-center gap-2">
+              <i class="fa-solid fa-receipt text-primary"></i>
+              ประวัติการชำระเงินขององค์กร
+            </h5>
+            <div class="table-responsive border border-slate-100 rounded-3">
+              <table class="table premium-payment-table align-middle m-0">
+                <thead>
+                  <tr>
+                    <th>วันที่จ่ายเงิน</th>
+                    <th>เลขที่บิล / รายการ</th>
+                    <th>ยอดชำระ</th>
+                    <th class="text-center">สถานะ</th>
+                    <th>ช่องทางชำระเงิน</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let payment of payments">
+                    <td class="font-semibold text-slate-700">
+                      {{
+                        payment.paid_at
+                          ? (payment.paid_at | date: 'dd MMM yyyy')
+                          : (payment.created_at | date: 'dd MMM yyyy')
+                      }}
+                    </td>
+                    <td class="fw-bold text-dark">
+                      {{ payment.invoice_no || 'INV-' + (payment.id || '000') }}
+                    </td>
+                    <td class="fw-black text-slate-900">฿{{ payment.amount | number: '1.0-0' }}</td>
+                    <td class="text-center">
+                      <span
+                        class="inline-block"
+                        [ngClass]="
+                          payment.payment_status === 'PAID' || payment.payment_status === 'paid'
+                            ? 'badge-paid'
+                            : payment.payment_status === 'PENDING' ||
+                                payment.payment_status === 'pending'
+                              ? 'badge-pending'
+                              : 'badge-failed'
+                        "
+                      >
+                        {{
+                          payment.payment_status === 'PAID' || payment.payment_status === 'paid'
+                            ? 'สำเร็จ (Paid)'
+                            : payment.payment_status === 'PENDING' ||
+                                payment.payment_status === 'pending'
+                              ? 'รอชำระ (Pending)'
+                              : 'ล้มเหลว (Failed)'
+                        }}
+                      </span>
+                    </td>
+                    <td class="font-medium text-slate-500">
+                      <i
+                        class="fa-brands fa-stripe text-indigo-500 me-1"
+                        *ngIf="payment.payment_method?.toLowerCase() === 'stripe'"
+                      ></i>
+                      <i
+                        class="fa-solid fa-credit-card text-slate-400 me-1"
+                        *ngIf="payment.payment_method?.toLowerCase() !== 'stripe'"
+                      ></i>
+                      {{ payment.payment_method || 'บัตรเครดิต' }}
+                    </td>
+                  </tr>
+                  <tr *ngIf="payments.length === 0">
+                    <td colspan="5" class="text-center text-muted py-5">
+                      <div class="py-3">
+                        <i class="fa-solid fa-receipt text-slate-300 fs-1 mb-3"></i>
+                        <div class="fw-bold text-slate-400">
+                          ยังไม่มีประวัติการชำระเงินสำหรับบัญชีนี้
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

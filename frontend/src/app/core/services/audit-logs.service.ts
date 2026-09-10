@@ -16,7 +16,7 @@ export interface AuditLog {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuditLogsService {
   private http = inject(HttpClient);
@@ -25,7 +25,7 @@ export class AuditLogsService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
   }
 

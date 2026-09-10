@@ -1,7 +1,10 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AssessorsAdminService, AssessorUser } from '../../../core/services/assessors-admin.service';
+import {
+  AssessorsAdminService,
+  AssessorUser,
+} from '../../../core/services/assessors-admin.service';
 import { RequestsService } from '../../../core/services/requests.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Assessment } from '../../../core/models/assessment.model';
@@ -33,12 +36,12 @@ export class Dashboard implements OnInit {
 
   assessments: Assessment[] = [];
   assessors: AssessorUser[] = [];
-  
+
   // UI State
   isLoading = true;
   isProcessingAssign = false;
   isProcessingPayout = false;
-  
+
   // Assignment Modal/Selection state
   selectedAssessmentId: number | null = null;
   selectedAssessorId: number | null = null;
@@ -64,7 +67,7 @@ export class Dashboard implements OnInit {
       error: (err) => {
         console.error('Failed to load dashboard stats', err);
         this.toast.error('ไม่สามารถโหลดข้อมูลสถิติแดชบอร์ดได้');
-      }
+      },
     });
 
     // 2. Fetch Assessments
@@ -76,7 +79,7 @@ export class Dashboard implements OnInit {
       error: (err) => {
         console.error('Failed to load assessments', err);
         this.toast.error('ไม่สามารถโหลดรายการแบบประเมินได้');
-      }
+      },
     });
 
     // 3. Fetch Assessors
@@ -84,7 +87,7 @@ export class Dashboard implements OnInit {
       next: (data) => {
         this.assessors = data;
         // Initialize payout amount inputs
-        this.assessors.forEach(a => {
+        this.assessors.forEach((a) => {
           this.payoutAmounts[a.id] = 1000; // default payout amount
         });
         this.isLoading = false;
@@ -95,7 +98,7 @@ export class Dashboard implements OnInit {
         this.toast.error('ไม่สามารถโหลดข้อมูลผู้ประเมินได้');
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -134,7 +137,7 @@ export class Dashboard implements OnInit {
         this.toast.error('เกิดข้อผิดพลาดในการมอบหมายผู้ประเมิน');
         this.isProcessingAssign = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -150,7 +153,9 @@ export class Dashboard implements OnInit {
 
     this.adminService.processPayout(Number(assessorId), amount).subscribe({
       next: (res) => {
-        this.toast.success(`ทำรายการ Payout จำนวน ฿${amount.toLocaleString()} สำเร็จ! ID: ${res.id}`);
+        this.toast.success(
+          `ทำรายการ Payout จำนวน ฿${amount.toLocaleString()} สำเร็จ! ID: ${res.id}`,
+        );
         this.isProcessingPayout = false;
         this.loadAllData();
       },
@@ -160,7 +165,7 @@ export class Dashboard implements OnInit {
         this.toast.error(errorMsg);
         this.isProcessingPayout = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -173,12 +178,14 @@ export class Dashboard implements OnInit {
 
   getAssessorNameById(id: number | null | undefined): string {
     if (!id) return 'ยังไม่ได้มอบหมาย';
-    const assessor = this.assessors.find(a => Number(a.id) === id);
+    const assessor = this.assessors.find((a) => Number(a.id) === id);
     return assessor ? this.getAssessorName(assessor) : `Assessor ID: ${id}`;
   }
 
   getStripeAccountId(assessor: AssessorUser): string | null {
-    const stripeAccount = assessor.bank_accounts?.find(b => b.account_no && b.account_no.startsWith('acct_'));
+    const stripeAccount = assessor.bank_accounts?.find(
+      (b) => b.account_no && b.account_no.startsWith('acct_'),
+    );
     return stripeAccount ? stripeAccount.account_no : null;
   }
 
@@ -202,10 +209,14 @@ export class Dashboard implements OnInit {
   }
 
   getUnassignedAssessments() {
-    return this.assessments.filter(a => !a.assessor_user_id && ['PENDING', 'SUBMITTED'].includes(a.status));
+    return this.assessments.filter(
+      (a) => !a.assessor_user_id && ['PENDING', 'SUBMITTED'].includes(a.status),
+    );
   }
 
   getAssignedAssessments() {
-    return this.assessments.filter(a => a.assessor_user_id !== null && a.assessor_user_id !== undefined);
+    return this.assessments.filter(
+      (a) => a.assessor_user_id !== null && a.assessor_user_id !== undefined,
+    );
   }
 }

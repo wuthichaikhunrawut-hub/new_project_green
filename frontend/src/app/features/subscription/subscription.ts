@@ -10,7 +10,7 @@ import { forkJoin } from 'rxjs';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './subscription.html',
-  styleUrl: './subscription.css'
+  styleUrl: './subscription.css',
 })
 export class SubscriptionComponent implements OnInit {
   private userSubService = inject(UserSubscriptionsService);
@@ -22,7 +22,10 @@ export class SubscriptionComponent implements OnInit {
   billingCycle = 'monthly'; // 'monthly' | 'yearly'
   plans: any[] = [];
   permissionSettings: Record<string, string> = {};
-  quotaSummary: Record<string, { feature_name: string; used: number; limit: number; allowed: boolean }> = {};
+  quotaSummary: Record<
+    string,
+    { feature_name: string; used: number; limit: number; allowed: boolean }
+  > = {};
   payments: any[] = [];
   isLoading = true;
 
@@ -35,7 +38,7 @@ export class SubscriptionComponent implements OnInit {
 
     forkJoin({
       plans: this.userSubService.getPlans(),
-      settings: this.settingsService.getSettings()
+      settings: this.settingsService.getSettings(),
     }).subscribe({
       next: (res) => {
         this.plans = res.plans || [];
@@ -72,7 +75,7 @@ export class SubscriptionComponent implements OnInit {
         console.error('Data load error:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -116,13 +119,13 @@ export class SubscriptionComponent implements OnInit {
     if (this.currentPlan?.id === plan.id) {
       return;
     }
-    
+
     // Navigate to billing with plan info
-    this.router.navigate(['/subscription/billing'], { 
-      state: { 
+    this.router.navigate(['/subscription/billing'], {
+      state: {
         selectedPlan: plan,
-        billingCycle: this.billingCycle
-      } 
+        billingCycle: this.billingCycle,
+      },
     });
   }
 }

@@ -10,7 +10,7 @@ import { AuthService, AuthResponse } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './register.html',
-  styleUrl: './register.css'
+  styleUrl: './register.css',
 })
 export class RegisterComponent {
   private toast = inject(ToastService);
@@ -28,7 +28,7 @@ export class RegisterComponent {
     working_hours_per_year: 0,
     base_year: new Date().getFullYear(),
     target_reduction_percent: 0,
-    current_green_status: 'none'
+    current_green_status: 'none',
   };
 
   // ข้อมูลสำหรับ Table users
@@ -38,7 +38,7 @@ export class RegisterComponent {
     phone: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   };
 
   acceptTerms: boolean = false;
@@ -64,7 +64,7 @@ export class RegisterComponent {
     }
 
     this.isLoading = true;
-    
+
     const payload = {
       orgData: this.orgData,
       userData: {
@@ -72,8 +72,8 @@ export class RegisterComponent {
         lastName: this.userData.lastName,
         phone: this.userData.phone,
         email: this.userData.email,
-        password: this.userData.password
-      }
+        password: this.userData.password,
+      },
     };
 
     this.authService.register(payload).subscribe({
@@ -85,7 +85,7 @@ export class RegisterComponent {
       error: (err: any) => {
         this.isLoading = false;
         this.toast.error(err.error?.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
-      }
+      },
     });
   }
 }

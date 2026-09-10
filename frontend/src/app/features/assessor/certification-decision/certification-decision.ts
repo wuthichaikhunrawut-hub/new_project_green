@@ -43,7 +43,6 @@ export class AssessorCertificationDecisionComponent implements OnInit {
   passwordError = false;
   isVerifyingPassword = false;
 
-
   get totalScore(): number {
     return this.scoreItems.reduce((a, i) => a + (i.assessor_score || 0), 0);
   }
@@ -143,25 +142,26 @@ export class AssessorCertificationDecisionComponent implements OnInit {
     this.passwordError = false;
 
     // Verify password via login api
-    this.authService.login({
-      email: user.email,
-      password: this.passwordConfirmText
-    }).subscribe({
-      next: () => {
-        this.passwordConfirmOpen = false;
-        this.isVerifyingPassword = false;
-        this.executeApprove();
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.isVerifyingPassword = false;
-        this.passwordError = true;
-        this.toast.error('ยืนยันรหัสผ่านไม่สำเร็จ');
-        this.cdr.markForCheck();
-      }
-    });
+    this.authService
+      .login({
+        email: user.email,
+        password: this.passwordConfirmText,
+      })
+      .subscribe({
+        next: () => {
+          this.passwordConfirmOpen = false;
+          this.isVerifyingPassword = false;
+          this.executeApprove();
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.isVerifyingPassword = false;
+          this.passwordError = true;
+          this.toast.error('ยืนยันรหัสผ่านไม่สำเร็จ');
+          this.cdr.markForCheck();
+        },
+      });
   }
-
 
   private buildDetailsPayload() {
     return this.scoreItems.map((item) => ({
@@ -178,7 +178,7 @@ export class AssessorCertificationDecisionComponent implements OnInit {
         notes: this.overallComment,
         total_score: this.totalScore,
         certified_level: this.getCertificationLevel(),
-        details: this.buildDetailsPayload()
+        details: this.buildDetailsPayload(),
       })
       .subscribe({
         next: () => {

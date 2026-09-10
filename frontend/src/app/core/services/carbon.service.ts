@@ -24,20 +24,23 @@ export class CarbonService {
   private geminiUrl = `${environment.apiUrl}/gemini/ocr`;
   private platformId = inject(PLATFORM_ID);
 
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
     if (isPlatformBrowser(this.platformId)) {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-
-      }
-      const org = JSON.parse(localStorage.getItem('currentOrg') || '{}') as {
-        id?: number | string;
-      };
-      if (org.id) {
-        headers = headers.set('x-org-id', String(org.id));
+      try {
+        const org = JSON.parse(localStorage.getItem('currentOrg') || '{}') as {
+          id?: number | string;
+        };
+        if (org.id) {
+          headers = headers.set('x-org-id', String(org.id));
+        }
+      } catch {
+        // Safe fallback
       }
     }
     return headers;
@@ -46,17 +49,24 @@ export class CarbonService {
   // ดึงข้อมูลทั้งหมด
   getLogs(): Observable<CarbonLog[]> {
     return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
-      map(data => data.map(item => ({
-        id: String(item.id),
-        date: `${item.year}-${String(item.month).padStart(2, '0')}-01`,
-        type: item.activity_type,
-        amount: item.usage_amount,
-        unit: item.activity_type === 'Electricity' ? 'kWh' : (item.activity_type === 'Water' ? 'm3' : 'Litre'),
-        emission: item.total_emission,
-        source: item.data_source,
-        evidence_url: item.evidence_url,
-        org_unit_id: item.org_unit_id
-      })))
+      map((data) =>
+        data.map((item) => ({
+          id: String(item.id),
+          date: `${item.year}-${String(item.month).padStart(2, '0')}-01`,
+          type: item.activity_type,
+          amount: item.usage_amount,
+          unit:
+            item.activity_type === 'Electricity'
+              ? 'kWh'
+              : item.activity_type === 'Water'
+                ? 'm3'
+                : 'Litre',
+          emission: item.total_emission,
+          source: item.data_source,
+          evidence_url: item.evidence_url,
+          org_unit_id: item.org_unit_id,
+        })),
+      ),
     );
   }
 
@@ -71,7 +81,7 @@ export class CarbonService {
       total_emission: log.emission,
       data_source: log.source,
       evidence_url: log.evidence_url,
-      org_unit_id: log.org_unit_id
+      org_unit_id: log.org_unit_id,
     };
     return this.http.post<CarbonLog>(this.apiUrl, payload, { headers: this.getHeaders() });
   }
@@ -102,11 +112,17 @@ export class CarbonService {
   scanBill(image: File): Observable<Partial<CarbonLog>> {
     const formData = new FormData();
     formData.append('file', image);
-    return this.http.post<Partial<CarbonLog>>(this.geminiUrl, formData, { headers: this.getHeaders() });
+    return this.http.post<Partial<CarbonLog>>(this.geminiUrl, formData, {
+      headers: this.getHeaders(),
+    });
   }
 
   // อัพโหลดไฟล์ไปที่ Supabase ผ่าน Backend
-  uploadFile(file: File, folder: string = 'evidence', category?: string): Observable<{ url: string }> {
+  uploadFile(
+    file: File,
+    folder: string = 'evidence',
+    category?: string,
+  ): Observable<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
     let uploadUrl = `${environment.apiUrl}/uploads?folder=${folder}`;

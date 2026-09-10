@@ -5,7 +5,7 @@ import { Observable, Subject } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class UserSubscriptionsService {
   private http = inject(HttpClient);
@@ -19,7 +19,6 @@ export class UserSubscriptionsService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-
       }
     }
     return headers;
@@ -50,6 +49,18 @@ export class UserSubscriptionsService {
   }
 
   subscribeToPlan(planId: number): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/my/subscribe`, { planId }, { headers: this.getHeaders() });
+    return this.http.post<any>(
+      `${this.apiUrl}/my/subscribe`,
+      { planId },
+      { headers: this.getHeaders() },
+    );
+  }
+
+  subscribeToPaidPlan(planId: number, paymentMethodId: string): Observable<any> {
+    return this.http.post<any>(
+      `${this.apiUrl}/my/subscribe-paid`,
+      { planId, paymentMethodId },
+      { headers: this.getHeaders() },
+    );
   }
 }

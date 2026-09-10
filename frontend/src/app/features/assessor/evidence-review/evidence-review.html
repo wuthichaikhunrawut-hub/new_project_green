@@ -1,13 +1,25 @@
 <div class="max-w-5xl mx-auto space-y-6">
-  <button type="button" class="text-sm text-slate-600 hover:text-emerald-600 font-medium" (click)="goBack()">← กลับรายการ</button>
+  <button
+    type="button"
+    class="text-sm text-slate-600 hover:text-emerald-600 font-medium"
+    (click)="goBack()"
+  >
+    ← กลับรายการ
+  </button>
 
   @if (isLoading) {
-    <div class="flex justify-center py-20"><div class="h-10 w-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>
+    <div class="flex justify-center py-20">
+      <div
+        class="h-10 w-10 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"
+      ></div>
+    </div>
   } @else {
     <header class="page-header mb-6">
       <div class="page-header-left">
         <h2 class="page-title">ตรวจหลักฐาน — {{ requestName }}</h2>
-        <p class="page-subtitle mb-0">ผ่าน {{ passedCount }} · ไม่ผ่าน {{ failedCount }} · ค้าง {{ pendingCount }}</p>
+        <p class="page-subtitle mb-0">
+          ผ่าน {{ passedCount }} · ไม่ผ่าน {{ failedCount }} · ค้าง {{ pendingCount }}
+        </p>
       </div>
     </header>
 
@@ -15,13 +27,14 @@
       <section class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
         <div class="flex items-center justify-between mb-3">
           <h2 class="font-semibold text-slate-800 text-sm">สรุปคาร์บอนตาม Scope</h2>
-
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           @for (s of carbonSummary.scopes; track s.scope) {
             <div class="rounded-xl bg-white border border-slate-200 p-3">
               <p class="text-xs text-slate-500">Scope {{ s.scope }}</p>
-              <p class="text-lg font-bold text-emerald-700">{{ s.totalEmission | number:'1.1-2' }}</p>
+              <p class="text-lg font-bold text-emerald-700">
+                {{ s.totalEmission | number: '1.1-2' }}
+              </p>
               <p class="text-xs text-slate-400">tCO₂e · {{ s.logCount }} รายการ</p>
             </div>
           }
@@ -38,18 +51,46 @@
               <h3 class="font-semibold text-slate-900">{{ item.criteria_name }}</h3>
             </div>
             <div class="flex gap-2">
-              <button type="button" (click)="setResult(item, 'PASS')" [class]="item.result === 'PASS' ? 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium' : 'px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-sm'">ผ่าน</button>
-              <button type="button" (click)="setResult(item, 'FAIL')" [class]="item.result === 'FAIL' ? 'px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium' : 'px-3 py-1.5 rounded-lg border border-red-200 text-red-700 text-sm'">ไม่ผ่าน</button>
+              <button
+                type="button"
+                (click)="setResult(item, 'PASS')"
+                [class]="
+                  item.result === 'PASS'
+                    ? 'px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-medium'
+                    : 'px-3 py-1.5 rounded-lg border border-emerald-200 text-emerald-700 text-sm'
+                "
+              >
+                ผ่าน
+              </button>
+              <button
+                type="button"
+                (click)="setResult(item, 'FAIL')"
+                [class]="
+                  item.result === 'FAIL'
+                    ? 'px-3 py-1.5 rounded-lg bg-red-600 text-white text-sm font-medium'
+                    : 'px-3 py-1.5 rounded-lg border border-red-200 text-red-700 text-sm'
+                "
+              >
+                ไม่ผ่าน
+              </button>
             </div>
           </div>
 
           @if (item.evidence_files.length) {
             <ul class="space-y-2 mb-3">
               @for (file of item.evidence_files; track file.id) {
-                <li class="flex items-center justify-between text-sm bg-slate-50 rounded-lg px-3 py-2">
+                <li
+                  class="flex items-center justify-between text-sm bg-slate-50 rounded-lg px-3 py-2"
+                >
                   <span class="truncate text-slate-700">{{ file.file_name || 'ไฟล์แนบ' }}</span>
                   @if (file.file_url) {
-                    <button type="button" class="text-emerald-600 font-medium shrink-0 ml-2" (click)="openEvidence(file.file_url)">เปิดดู</button>
+                    <button
+                      type="button"
+                      class="text-emerald-600 font-medium shrink-0 ml-2"
+                      (click)="openEvidence(file.file_url)"
+                    >
+                      เปิดดู
+                    </button>
                   }
                 </li>
               }
@@ -69,13 +110,21 @@
     </div>
 
     <footer class="flex justify-end gap-3 pt-4 border-t border-slate-100">
-      <button type="button" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium" (click)="goBack()">ยกเลิก</button>
+      <button
+        type="button"
+        class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium"
+        (click)="goBack()"
+      >
+        ยกเลิก
+      </button>
       <button
         type="button"
         [disabled]="isSaving"
         class="px-5 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 disabled:opacity-50"
         (click)="saveEvidence()"
-      >{{ isSaving ? 'กำลังบันทึก...' : 'บันทึกและไปสรุปผล' }}</button>
+      >
+        {{ isSaving ? 'กำลังบันทึก...' : 'บันทึกและไปสรุปผล' }}
+      </button>
     </footer>
   }
 </div>

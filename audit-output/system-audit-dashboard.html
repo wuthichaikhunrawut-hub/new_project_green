@@ -1,0 +1,98 @@
+<div id="greensync-audit-dashboard">
+  <style>
+    #greensync-audit-dashboard { color: var(--foreground); display: grid; gap: 18px; }
+    #greensync-audit-dashboard .audit-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    #greensync-audit-dashboard .audit-progress-stack { display: grid; gap: 14px; }
+    #greensync-audit-dashboard .audit-progress-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+    #greensync-audit-dashboard .audit-risk-list { display: grid; gap: 8px; }
+    #greensync-audit-dashboard .audit-risk { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+    #greensync-audit-dashboard .audit-risk:last-child { border-bottom: 0; }
+    #greensync-audit-dashboard .audit-priority { font-weight: 500; }
+    #greensync-audit-dashboard .audit-critical { color: var(--destructive); }
+    #greensync-audit-dashboard .audit-high { color: var(--orange); }
+    #greensync-audit-dashboard .audit-medium { color: var(--yellow); }
+    #greensync-audit-dashboard .audit-status { color: var(--muted-foreground); }
+    #greensync-audit-dashboard .audit-section { display: grid; gap: 10px; }
+    @media (max-width: 620px) {
+      #greensync-audit-dashboard .audit-metrics { grid-template-columns: 1fr; }
+      #greensync-audit-dashboard .audit-risk { grid-template-columns: 36px minmax(0, 1fr); }
+      #greensync-audit-dashboard .audit-status { grid-column: 2; }
+    }
+  </style>
+
+  <h2>GreenSync — System Audit Dashboard</h2>
+
+  <div class="audit-metrics">
+    <div class="card viz-stat">
+      <div class="text-muted">Overall readiness</div>
+      <div class="viz-stat-value tabular-nums">84%</div>
+      <div class="text-small">Build ผ่านทั้ง Frontend และ Backend</div>
+    </div>
+    <div class="card viz-stat">
+      <div class="text-muted">Functions implemented</div>
+      <div class="viz-stat-value tabular-nums">1,148 / 1,152</div>
+      <div class="text-small">AST scan: 4 empty/stub methods</div>
+    </div>
+    <div class="card viz-stat">
+      <div class="text-muted">Automated tests</div>
+      <div class="viz-stat-value tabular-nums">60 / 60</div>
+      <div class="text-small">FE 7 · BE unit 49 · BE E2E 4</div>
+    </div>
+  </div>
+
+  <section class="audit-section" aria-labelledby="audit-completeness-title">
+    <h3 id="audit-completeness-title">ความสมบูรณ์ของระบบ</h3>
+    <div class="audit-progress-stack">
+      <div>
+        <div class="audit-progress-head"><span>Frontend · Angular</span><strong class="tabular-nums">86%</strong></div>
+        <div class="progress" role="progressbar" aria-label="Frontend completeness" aria-valuenow="86" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:86%"></div></div>
+      </div>
+      <div>
+        <div class="audit-progress-head"><span>Backend · NestJS</span><strong class="tabular-nums">82%</strong></div>
+        <div class="progress" role="progressbar" aria-label="Backend completeness" aria-valuenow="82" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width:82%"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="audit-section" aria-labelledby="audit-evidence-title">
+    <h3 id="audit-evidence-title">หลักฐานจากการตรวจ</h3>
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead><tr><th>มิติ</th><th>Frontend</th><th>Backend</th></tr></thead>
+        <tbody>
+          <tr><td>Build</td><td>ผ่าน · 2 CSS budget warnings</td><td>ผ่าน</td></tr>
+          <tr><td>Function scan</td><td class="tabular-nums">788 complete · 2 stub</td><td class="tabular-nums">360 complete · 2 stub</td></tr>
+          <tr><td>Tests</td><td class="tabular-nums">7 passed · coverage unavailable</td><td class="tabular-nums">53 passed · 27.07% statements</td></tr>
+          <tr><td>Static quality</td><td>Unused check ผ่าน</td><td>21 unused · lint 584 issues</td></tr>
+          <tr><td>Performance</td><td>Initial raw bundle 994.63 kB</td><td>หลาย list query ไม่มี pagination</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="audit-section" aria-labelledby="audit-risk-title">
+    <h3 id="audit-risk-title">ความเสี่ยงเร่งด่วน</h3>
+    <div class="audit-risk-list">
+      <div class="audit-risk"><span class="audit-priority audit-critical">P0</span><span>Bulk import ใช้ default password เดียวกัน</span><span class="audit-status">Account takeover</span></div>
+      <div class="audit-risk"><span class="audit-priority audit-critical">P0</span><span>Database migration up/down ว่าง</span><span class="audit-status">Deploy/rollback ไม่ได้</span></div>
+      <div class="audit-risk"><span class="audit-priority audit-high">P1</span><span>PDF generator เขียน dynamic HTML ด้วย innerHTML</span><span class="audit-status">DOM XSS</span></div>
+      <div class="audit-risk"><span class="audit-priority audit-high">P1</span><span>Backend coverage ต่ำ; business modules จำนวนมาก 0%</span><span class="audit-status">Regression</span></div>
+      <div class="audit-risk"><span class="audit-priority audit-high">P1</span><span>Admin settings อยู่ใน memory เท่านั้น</span><span class="audit-status">Config loss</span></div>
+      <div class="audit-risk"><span class="audit-priority audit-medium">P2</span><span>Frontend coverage dependency และ E2E pipeline ยังไม่ครบ</span><span class="audit-status">UI blind spot</span></div>
+    </div>
+  </section>
+
+  <section class="audit-section" aria-labelledby="audit-next-title">
+    <h3 id="audit-next-title">ลำดับดำเนินการ</h3>
+    <div class="table-responsive">
+      <table class="table table-sm">
+        <thead><tr><th>ช่วงเวลา</th><th>งานที่ต้องทำ</th></tr></thead>
+        <tbody>
+          <tr><td class="text-nowrap">24–48 ชม.</td><td>ยกเลิก default password · สร้าง migration จริง · ปิด PDF XSS</td></tr>
+          <tr><td class="text-nowrap">1 sprint</td><td>เพิ่ม coverage/RBAC tests · pagination · persistent encrypted settings</td></tr>
+          <tr><td class="text-nowrap">ก่อน Go-live</td><td>SCA/DAST · restore & rollback drill · load test · authorization matrix</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

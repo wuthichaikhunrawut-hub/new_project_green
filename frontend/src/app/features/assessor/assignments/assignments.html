@@ -1,5 +1,4 @@
 <div class="asgn-wrapper animate-in">
-
   <!-- ══ PAGE HEADER ══ -->
   <div class="page-header">
     <div class="page-header-left">
@@ -22,17 +21,33 @@
     <button class="stab" [class.stab-active]="statusFilter === ''" (click)="statusFilter = ''">
       ทั้งหมด <span class="stab-count">{{ assignments.length }}</span>
     </button>
-    <button class="stab stab-pending" [class.stab-active]="statusFilter === 'PENDING'" (click)="statusFilter = 'PENDING'">
-        รอประเมิน <span class="stab-count">{{ countByStatus['PENDING'] || 0 }}</span>
+    <button
+      class="stab stab-pending"
+      [class.stab-active]="statusFilter === 'PENDING'"
+      (click)="statusFilter = 'PENDING'"
+    >
+      รอประเมิน <span class="stab-count">{{ countByStatus['PENDING'] || 0 }}</span>
     </button>
-    <button class="stab stab-review" [class.stab-active]="statusFilter === 'IN_REVIEW'" (click)="statusFilter = 'IN_REVIEW'">
-        กำลังตรวจ <span class="stab-count">{{ countByStatus['IN_REVIEW'] || 0 }}</span>
+    <button
+      class="stab stab-review"
+      [class.stab-active]="statusFilter === 'IN_REVIEW'"
+      (click)="statusFilter = 'IN_REVIEW'"
+    >
+      กำลังตรวจ <span class="stab-count">{{ countByStatus['IN_REVIEW'] || 0 }}</span>
     </button>
-    <button class="stab stab-submitted" [class.stab-active]="statusFilter === 'SUBMITTED'" (click)="statusFilter = 'SUBMITTED'">
-        รอพิจารณา <span class="stab-count">{{ countByStatus['SUBMITTED'] || 0 }}</span>
+    <button
+      class="stab stab-submitted"
+      [class.stab-active]="statusFilter === 'SUBMITTED'"
+      (click)="statusFilter = 'SUBMITTED'"
+    >
+      รอพิจารณา <span class="stab-count">{{ countByStatus['SUBMITTED'] || 0 }}</span>
     </button>
-    <button class="stab stab-revision" [class.stab-active]="statusFilter === 'REVISION_REQUESTED'" (click)="statusFilter = 'REVISION_REQUESTED'">
-        รอแก้ไข <span class="stab-count">{{ countByStatus['REVISION_REQUESTED'] || 0 }}</span>
+    <button
+      class="stab stab-revision"
+      [class.stab-active]="statusFilter === 'REVISION_REQUESTED'"
+      (click)="statusFilter = 'REVISION_REQUESTED'"
+    >
+      รอแก้ไข <span class="stab-count">{{ countByStatus['REVISION_REQUESTED'] || 0 }}</span>
     </button>
   </div>
 
@@ -56,15 +71,29 @@
       <option *ngFor="let y of availableYears" [value]="y">ปี {{ y }}</option>
     </select>
 
-    <button *ngIf="searchTerm || statusFilter || yearFilter" class="clear-all-btn" (click)="clearFilters()">
+    <button
+      *ngIf="searchTerm || statusFilter || yearFilter"
+      class="clear-all-btn"
+      (click)="clearFilters()"
+    >
       <i class="fa-solid fa-filter-circle-xmark"></i> ล้างตัวกรอง
     </button>
 
     <div class="view-toggle">
-      <button class="vt-btn" [class.vt-active]="viewMode === 'list'" (click)="viewMode = 'list'" title="มุมมองรายการ">
+      <button
+        class="vt-btn"
+        [class.vt-active]="viewMode === 'list'"
+        (click)="viewMode = 'list'"
+        title="มุมมองรายการ"
+      >
         <i class="fa-solid fa-bars"></i>
       </button>
-      <button class="vt-btn" [class.vt-active]="viewMode === 'grid'" (click)="viewMode = 'grid'" title="มุมมอง Grid">
+      <button
+        class="vt-btn"
+        [class.vt-active]="viewMode === 'grid'"
+        (click)="viewMode = 'grid'"
+        title="มุมมอง Grid"
+      >
         <i class="fa-solid fa-grip"></i>
       </button>
     </div>
@@ -85,19 +114,26 @@
   <div class="empty-state" *ngIf="!isLoading && filteredAssignments.length === 0">
     <i class="fa-regular fa-folder-open"></i>
     <p>ไม่พบรายการ</p>
-    <span *ngIf="searchTerm || statusFilter || yearFilter">
-      ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง
-    </span>
-    <button *ngIf="searchTerm || statusFilter || yearFilter" class="clear-all-btn" (click)="clearFilters()">
+    <span *ngIf="searchTerm || statusFilter || yearFilter"> ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง </span>
+    <button
+      *ngIf="searchTerm || statusFilter || yearFilter"
+      class="clear-all-btn"
+      (click)="clearFilters()"
+    >
       ล้างตัวกรองทั้งหมด
     </button>
   </div>
 
   <!-- ══ LIST VIEW ══ -->
-  <div class="asgn-list" *ngIf="!isLoading && filteredAssignments.length > 0 && viewMode === 'list'">
-    <div class="asgn-card" *ngFor="let item of filteredAssignments"
-      [class.asgn-card-urgent]="isNearDeadline(item)">
-
+  <div
+    class="asgn-list"
+    *ngIf="!isLoading && filteredAssignments.length > 0 && viewMode === 'list'"
+  >
+    <div
+      class="asgn-card"
+      *ngFor="let item of filteredAssignments"
+      [class.asgn-card-urgent]="isNearDeadline(item)"
+    >
       <!-- Urgent ribbon -->
       <div class="urgent-ribbon" *ngIf="isNearDeadline(item)">
         <i class="fa-solid fa-fire-flame-curved"></i> ด่วน · รอ {{ getDaysWaiting(item) }} วัน
@@ -110,19 +146,23 @@
           <div class="org-detail">
             <div class="org-name-row">
               <span class="org-name">{{ item.orgName }}</span>
-              <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
-
+              <span class="badge-sm" [class]="statusClass(item.status)">{{
+                statusLabel(item.status)
+              }}</span>
             </div>
             <div class="org-meta">
-              <span><i class="fa-solid fa-calendar-alt"></i> ปีประเมิน {{ item.assessmentYear }}</span>
+              <span
+                ><i class="fa-solid fa-calendar-alt"></i> ปีประเมิน {{ item.assessmentYear }}</span
+              >
               <span class="dot">·</span>
               <span *ngIf="item.submittedAt">
                 <i class="fa-solid fa-clock"></i> ส่งมา {{ getDaysWaiting(item) }} วัน
               </span>
               <span class="dot" *ngIf="item.submittedAt">·</span>
               <span *ngIf="item.totalScore > 0">
-                <i class="fa-solid fa-star"></i> {{ item.totalScore | number:'1.0-1' }} คะแนน
-                ({{ getCertLevel(getScorePercent(item)) }})
+                <i class="fa-solid fa-star"></i> {{ item.totalScore | number: '1.0-1' }} คะแนน ({{
+                  getCertLevel(getScorePercent(item))
+                }})
               </span>
             </div>
           </div>
@@ -135,7 +175,9 @@
             Carbon Footprint
           </div>
           <div class="carbon-total-row">
-            <span class="carbon-total-num">{{ item.carbonSummary.totalEmission | number:'1.1-1' }}</span>
+            <span class="carbon-total-num">{{
+              item.carbonSummary.totalEmission | number: '1.1-1'
+            }}</span>
             <span class="carbon-unit">tCO₂e รวม</span>
           </div>
           <div class="scope-bar-list">
@@ -145,13 +187,16 @@
                 <span class="scope-name-sm">S{{ scope.scope }}</span>
               </div>
               <div class="scope-track">
-                <div class="scope-fill-bar"
-                  [style.width]="scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)"
+                <div
+                  class="scope-fill-bar"
+                  [style.width]="
+                    scopeBarWidth(scope.totalEmission, item.carbonSummary.totalEmission)
+                  "
                   [style.min-width]="scope.totalEmission > 0 ? '4px' : '0'"
-                  [style.background]="getScopeColor(scope.scope)">
-                </div>
+                  [style.background]="getScopeColor(scope.scope)"
+                ></div>
               </div>
-              <span class="scope-emit">{{ scope.totalEmission | number:'1.1-1' }}</span>
+              <span class="scope-emit">{{ scope.totalEmission | number: '1.1-1' }}</span>
             </div>
           </div>
         </div>
@@ -167,14 +212,21 @@
   </div>
 
   <!-- ══ GRID VIEW ══ -->
-  <div class="asgn-grid" *ngIf="!isLoading && filteredAssignments.length > 0 && viewMode === 'grid'">
-    <div class="asgn-grid-card" *ngFor="let item of filteredAssignments"
-      [class.asgn-grid-card-urgent]="isNearDeadline(item)">
-
+  <div
+    class="asgn-grid"
+    *ngIf="!isLoading && filteredAssignments.length > 0 && viewMode === 'grid'"
+  >
+    <div
+      class="asgn-grid-card"
+      *ngFor="let item of filteredAssignments"
+      [class.asgn-grid-card-urgent]="isNearDeadline(item)"
+    >
       <div class="grid-card-top">
         <div class="gc-org-avatar">{{ item.orgName.charAt(0) }}</div>
         <div class="gc-badges">
-          <span class="badge-sm" [class]="statusClass(item.status)">{{ statusLabel(item.status) }}</span>
+          <span class="badge-sm" [class]="statusClass(item.status)">{{
+            statusLabel(item.status)
+          }}</span>
           <span class="urgent-chip" *ngIf="isNearDeadline(item)">
             <i class="fa-solid fa-fire-flame-curved"></i> ด่วน
           </span>
@@ -187,13 +239,16 @@
       <div class="gc-carbon">
         <div class="gc-carbon-label">
           <i class="fa-solid fa-leaf"></i>
-          {{ item.carbonSummary.totalEmission | number:'1.1-1' }} tCO₂e
+          {{ item.carbonSummary.totalEmission | number: '1.1-1' }} tCO₂e
         </div>
         <div class="gc-scopes">
-          <span *ngFor="let s of item.carbonSummary.scopes" class="gc-scope-chip"
+          <span
+            *ngFor="let s of item.carbonSummary.scopes"
+            class="gc-scope-chip"
             [style.background]="getScopeColor(s.scope) + '20'"
-            [style.color]="getScopeColor(s.scope)">
-            S{{ s.scope }}: {{ s.totalEmission | number:'1.0-0' }}
+            [style.color]="getScopeColor(s.scope)"
+          >
+            S{{ s.scope }}: {{ s.totalEmission | number: '1.0-0' }}
           </span>
         </div>
       </div>
@@ -205,5 +260,4 @@
       </div>
     </div>
   </div>
-
 </div>

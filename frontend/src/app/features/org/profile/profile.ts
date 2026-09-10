@@ -15,7 +15,7 @@ import { forkJoin } from 'rxjs';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.html',
-  styleUrl: './profile.css'
+  styleUrl: './profile.css',
 })
 export class OrgProfileComponent implements OnInit {
   private toast = inject(ToastService);
@@ -32,33 +32,38 @@ export class OrgProfileComponent implements OnInit {
   userForm!: FormGroup;
   isEditingOrg = false;
   isEditingUser = false;
-  
+
   savedOrgData: any;
   savedUserData: any;
-  
+
   orgId: number | null = null;
   userId: number | null = null;
   currentUser: User | null = null;
   orgLogoUrl: string | null = null;
-  
+
   branches: OrgBranch[] = [];
   isLoading = true;
 
   get isOrgAdmin(): boolean {
-    return this.currentUser?.role === 'Organization Admin' || this.currentUser?.role === 'ORG_ADMIN' || this.currentUser?.role === 'System Admin' || this.currentUser?.role === 'SYSTEM_ADMIN';
+    return (
+      this.currentUser?.role === 'Organization Admin' ||
+      this.currentUser?.role === 'ORG_ADMIN' ||
+      this.currentUser?.role === 'System Admin' ||
+      this.currentUser?.role === 'SYSTEM_ADMIN'
+    );
   }
 
   ngOnInit() {
     this.orgId = this.authService.getOrganizationId();
     this.currentUser = this.authService.getUser();
     this.userId = this.currentUser?.id || null;
-    
+
     if (this.orgId) {
       this.orgLogoUrl = localStorage.getItem('org_logo_' + this.orgId);
     }
-    
+
     this.initForms();
-    
+
     if (this.orgId && this.userId) {
       this.loadAllData();
     } else {
@@ -78,14 +83,14 @@ export class OrgProfileComponent implements OnInit {
       working_hours_per_year: [0, [Validators.required, Validators.min(0)]],
       base_year: [new Date().getFullYear(), Validators.required],
       target_reduction_percent: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      current_green_status: ['none', Validators.required]
+      current_green_status: ['none', Validators.required],
     });
 
     this.userForm = this.fb.group({
       first_name: ['', Validators.required],
       last_name: ['', Validators.required],
       email: [{ value: '', disabled: true }],
-      org_unit_id: [null]
+      org_unit_id: [null],
     });
   }
 
@@ -94,7 +99,7 @@ export class OrgProfileComponent implements OnInit {
     forkJoin({
       org: this.orgService.getOrganization(this.orgId!),
       user: this.usersService.getUser(this.userId!),
-      branches: this.branchesService.getBranches(this.orgId!)
+      branches: this.branchesService.getBranches(this.orgId!),
     }).subscribe({
       next: (res) => {
         this.savedOrgData = res.org;
@@ -106,7 +111,7 @@ export class OrgProfileComponent implements OnInit {
           first_name: res.user.user_profile?.first_name || '',
           last_name: res.user.user_profile?.last_name || '',
           email: res.user.email,
-          org_unit_id: res.user.org_unit_id || ''
+          org_unit_id: res.user.org_unit_id || '',
         });
         this.userForm.disable();
 
@@ -119,12 +124,10 @@ export class OrgProfileComponent implements OnInit {
         console.error('Error loading profile data:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
-
-  
   toggleEditOrg() {
     this.isEditingOrg = !this.isEditingOrg;
     if (this.isEditingOrg) {
@@ -144,12 +147,12 @@ export class OrgProfileComponent implements OnInit {
       this.userForm.patchValue({
         first_name: this.savedUserData.user_profile?.first_name || '',
         last_name: this.savedUserData.user_profile?.last_name || '',
-        org_unit_id: this.savedUserData.org_unit_id || ''
+        org_unit_id: this.savedUserData.org_unit_id || '',
       });
       this.userForm.disable();
     }
   }
-  
+
   saveOrgProfile() {
     if (this.orgForm.valid && this.orgId) {
       this.isLoading = true;
@@ -168,7 +171,7 @@ export class OrgProfileComponent implements OnInit {
           this.isLoading = false;
           this.cdr.markForCheck();
           this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูลองค์กร');
-        }
+        },
       });
     } else {
       this.orgForm.markAllAsTouched();
@@ -183,8 +186,8 @@ export class OrgProfileComponent implements OnInit {
         org_unit_id: val.org_unit_id ? Number(val.org_unit_id) : null,
         user_profile: {
           first_name: val.first_name,
-          last_name: val.last_name
-        }
+          last_name: val.last_name,
+        },
       };
 
       this.usersService.updateUser(this.userId, payload).subscribe({
@@ -201,7 +204,7 @@ export class OrgProfileComponent implements OnInit {
           this.isLoading = false;
           this.cdr.markForCheck();
           this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูลส่วนตัว');
-        }
+        },
       });
     } else {
       this.userForm.markAllAsTouched();
@@ -217,7 +220,7 @@ export class OrgProfileComponent implements OnInit {
     if (file) {
       this.isLoading = true;
       this.cdr.markForCheck();
-      
+
       this.uploadService.uploadFile(file, 'logos', { userId: this.userId || undefined }).subscribe({
         next: (res) => {
           this.orgLogoUrl = res.file_url;
@@ -233,7 +236,7 @@ export class OrgProfileComponent implements OnInit {
           this.isLoading = false;
           this.cdr.markForCheck();
           this.toast.error('เกิดข้อผิดพลาดในการอัปโหลดโลโก้');
-        }
+        },
       });
     }
   }

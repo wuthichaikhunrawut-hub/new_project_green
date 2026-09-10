@@ -2,7 +2,13 @@
   <div class="page-header mb-4">
     <div class="page-header-left">
       <h2 class="page-title">จัดการสมาชิก{{ isOrgAdmin ? 'ในองค์กร' : '' }}</h2>
-      <p class="page-subtitle mb-0">{{ isOrgAdmin ? 'จัดการรายชื่อพนักงานและสิทธิ์การเข้าถึงในองค์กรของคุณ' : 'ค้นหา แก้ไขสิทธิ์ และจัดการรายชื่อผู้ใช้งานทั้งหมดในระบบ' }}</p>
+      <p class="page-subtitle mb-0">
+        {{
+          isOrgAdmin
+            ? 'จัดการรายชื่อพนักงานและสิทธิ์การเข้าถึงในองค์กรของคุณ'
+            : 'ค้นหา แก้ไขสิทธิ์ และจัดการรายชื่อผู้ใช้งานทั้งหมดในระบบ'
+        }}
+      </p>
     </div>
     <div class="page-actions d-flex gap-2">
       <button class="btn btn-outline-secondary shadow-sm rounded-pill px-4" (click)="exportToCSV()">
@@ -14,54 +20,104 @@
     </div>
   </div>
 
-  <div class="card border-0 shadow-sm rounded-4 d-flex flex-column" style="min-height: calc(100vh - 160px);">
+  <div
+    class="card border-0 shadow-sm rounded-4 d-flex flex-column"
+    style="min-height: calc(100vh - 160px)"
+  >
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
       <div class="row">
         <div class="col-md-4">
           <div class="input-group shadow-sm rounded-pill overflow-hidden">
-            <span class="input-group-text bg-light border-0"><i
-                class="fa-solid fa-magnifying-glass text-muted"></i></span>
-            <input type="text" class="form-control bg-light border-0 shadow-none ps-0"
-              [placeholder]="isOrgAdmin ? 'ค้นหาชื่อหรืออีเมลสมาชิก...' : 'ค้นหาชื่อ, อีเมล หรือองค์กร...'" [(ngModel)]="searchText">
+            <span class="input-group-text bg-light border-0"
+              ><i class="fa-solid fa-magnifying-glass text-muted"></i
+            ></span>
+            <input
+              type="text"
+              class="form-control bg-light border-0 shadow-none ps-0"
+              [placeholder]="
+                isOrgAdmin ? 'ค้นหาชื่อหรืออีเมลสมาชิก...' : 'ค้นหาชื่อ, อีเมล หรือองค์กร...'
+              "
+              [(ngModel)]="searchText"
+            />
           </div>
         </div>
       </div>
     </div>
-    
+
     <!-- Role Tabs -->
     <ul class="nav nav-tabs px-4 border-bottom-0 mt-3">
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ALL'" [class.fw-bold]="activeTab === 'ALL'" (click)="setTab('ALL')" class="cursor-pointer">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'ALL'"
+          [class.fw-bold]="activeTab === 'ALL'"
+          (click)="setTab('ALL')"
+          class="cursor-pointer"
+        >
           <i class="fa-solid fa-users me-2"></i>ทั้งหมด
-          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.all }}</span>
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{
+            countByRole.all
+          }}</span>
         </a>
       </li>
-      
+
       <!-- System Admin Tabs -->
       <li class="nav-item" *ngIf="isSystemAdmin">
-        <a class="nav-link" [class.active]="activeTab === 'ADMIN'" [class.fw-bold]="activeTab === 'ADMIN'" (click)="setTab('ADMIN')" class="cursor-pointer">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'ADMIN'"
+          [class.fw-bold]="activeTab === 'ADMIN'"
+          (click)="setTab('ADMIN')"
+          class="cursor-pointer"
+        >
           <i class="fa-solid fa-user-shield me-2"></i>แอดมินระบบ
-          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.admin }}</span>
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{
+            countByRole.admin
+          }}</span>
         </a>
       </li>
       <li class="nav-item" *ngIf="isSystemAdmin">
-        <a class="nav-link" [class.active]="activeTab === 'ASSESSOR'" [class.fw-bold]="activeTab === 'ASSESSOR'" (click)="setTab('ASSESSOR')" class="cursor-pointer">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'ASSESSOR'"
+          [class.fw-bold]="activeTab === 'ASSESSOR'"
+          (click)="setTab('ASSESSOR')"
+          class="cursor-pointer"
+        >
           <i class="fa-solid fa-user-check me-2"></i>ผู้ตรวจประเมิน
-          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.assessor }}</span>
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{
+            countByRole.assessor
+          }}</span>
         </a>
       </li>
 
       <!-- Shared / Org Tabs -->
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'ADMIN_ORG'" [class.fw-bold]="activeTab === 'ADMIN_ORG'" (click)="setTab('ADMIN_ORG')" class="cursor-pointer">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'ADMIN_ORG'"
+          [class.fw-bold]="activeTab === 'ADMIN_ORG'"
+          (click)="setTab('ADMIN_ORG')"
+          class="cursor-pointer"
+        >
           <i class="fa-solid fa-user-gear me-2"></i>Admin Org
-          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.adminOrg }}</span>
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{
+            countByRole.adminOrg
+          }}</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" [class.active]="activeTab === 'MEMBER'" [class.fw-bold]="activeTab === 'MEMBER'" (click)="setTab('MEMBER')" class="cursor-pointer">
+        <a
+          class="nav-link"
+          [class.active]="activeTab === 'MEMBER'"
+          [class.fw-bold]="activeTab === 'MEMBER'"
+          (click)="setTab('MEMBER')"
+          class="cursor-pointer"
+        >
           <i class="fa-solid fa-building-user me-2"></i>สมาชิกในองค์กร
-          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{ countByRole.member }}</span>
+          <span class="badge rounded-pill bg-secondary-subtle text-dark ms-2 border-0 fw-bold">{{
+            countByRole.member
+          }}</span>
         </a>
       </li>
     </ul>
@@ -88,11 +144,20 @@
             <tr *ngFor="let user of filteredUsers()">
               <td class="px-4 py-3">
                 <div class="d-flex align-items-center">
-                  <div class="avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold w-[40px]">
-                    {{ user.user_profile?.first_name ? user.user_profile?.first_name?.charAt(0) : user.email.charAt(0).toUpperCase() }}
+                  <div
+                    class="avatar-sm bg-primary-subtle text-primary rounded-circle me-3 d-flex align-items-center justify-content-center fw-bold w-[40px]"
+                  >
+                    {{
+                      user.user_profile?.first_name
+                        ? user.user_profile?.first_name?.charAt(0)
+                        : user.email.charAt(0).toUpperCase()
+                    }}
                   </div>
                   <div>
-                    <div class="fw-bold text-dark">{{ user.user_profile?.first_name || '-' }} {{ user.user_profile?.last_name || '' }}</div>
+                    <div class="fw-bold text-dark">
+                      {{ user.user_profile?.first_name || '-' }}
+                      {{ user.user_profile?.last_name || '' }}
+                    </div>
                     <div class="text-muted small">{{ user.email }}</div>
                   </div>
                 </div>
@@ -101,18 +166,33 @@
               <td class="px-4 py-3">
                 <div class="fw-medium text-primary">
                   {{ user.organization?.name || '-' }}
-                  <span *ngIf="user.organization_unit" class="text-muted small">({{ user.organization_unit.unit_name }})</span>
+                  <span *ngIf="user.organization_unit" class="text-muted small"
+                    >({{ user.organization_unit.unit_name }})</span
+                  >
                 </div>
-                <div class="text-muted smallest">ลงทะเบียน: {{ user.created_at | date:'dd/MM/yyyy' }}</div>
+                <div class="text-muted smallest">
+                  ลงทะเบียน: {{ user.created_at | date: 'dd/MM/yyyy' }}
+                </div>
               </td>
               <td class="px-4 py-3 text-center">
-                <span class="badge rounded-pill px-3 py-2 fw-medium"
+                <span
+                  class="badge rounded-pill px-3 py-2 fw-medium"
                   [ngClass]="{
-                    'bg-primary-subtle text-primary': ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(user.role), 
+                    'bg-primary-subtle text-primary': [
+                      'System Admin',
+                      'SYSTEM_ADMIN',
+                      'ADMIN',
+                    ].includes(user.role),
                     'bg-warning-subtle text-warning-emphasis': user.role === 'ASSESSOR',
                     'bg-info-subtle text-info': user.role === 'ORG_ADMIN',
-                    'bg-light text-dark border': !['ADMIN', 'SYSTEM_ADMIN', 'ASSESSOR', 'ORG_ADMIN'].includes(user.role)
-                  }">
+                    'bg-light text-dark border': ![
+                      'ADMIN',
+                      'SYSTEM_ADMIN',
+                      'ASSESSOR',
+                      'ORG_ADMIN',
+                    ].includes(user.role),
+                  }"
+                >
                   {{ user.role }}
                 </span>
               </td>
@@ -124,27 +204,44 @@
               </td>
               <td class="px-4 py-3 text-end">
                 <div class="dropdown d-inline-block">
-                  <button class="btn btn-sm btn-light border shadow-sm rounded-3" type="button"
-                    data-bs-toggle="dropdown" aria-expanded="false">
+                  <button
+                    class="btn btn-sm btn-light border shadow-sm rounded-3"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
                     <i class="fa-solid fa-ellipsis-vertical px-1"></i>
                   </button>
                   <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2">
-                    <li><button class="dropdown-item rounded-3 py-2" (click)="openEditModal(user)"><i
-                           class="fa-solid fa-pen-to-square text-primary me-2"></i> แก้ไขข้อมูล</button></li>
-                    <li><button class="dropdown-item rounded-3 py-2" (click)="resetPassword(user)"><i
-                           class="fa-solid fa-key text-warning me-2"></i> รีเซ็ตรหัสผ่าน</button></li>
                     <li>
-                      <hr class="dropdown-divider">
+                      <button class="dropdown-item rounded-3 py-2" (click)="openEditModal(user)">
+                        <i class="fa-solid fa-pen-to-square text-primary me-2"></i> แก้ไขข้อมูล
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dropdown-item rounded-3 py-2" (click)="resetPassword(user)">
+                        <i class="fa-solid fa-key text-warning me-2"></i> รีเซ็ตรหัสผ่าน
+                      </button>
+                    </li>
+                    <li>
+                      <hr class="dropdown-divider" />
                     </li>
                     <li>
                       <button class="dropdown-item rounded-3 py-2" (click)="suspendUser(user)">
-                        <i class="fa-solid me-2"
-                           [ngClass]="user.is_active ? 'fa-ban text-danger' : 'fa-check text-success'"></i>
+                        <i
+                          class="fa-solid me-2"
+                          [ngClass]="
+                            user.is_active ? 'fa-ban text-danger' : 'fa-check text-success'
+                          "
+                        ></i>
                         {{ user.is_active ? 'ระงับบัญชี' : 'เปิดใช้งานบัญชี' }}
                       </button>
                     </li>
                     <li>
-                      <button class="dropdown-item rounded-3 py-2 text-danger" (click)="deleteUser(user)">
+                      <button
+                        class="dropdown-item rounded-3 py-2 text-danger"
+                        (click)="deleteUser(user)"
+                      >
                         <i class="fa-solid fa-trash-can me-2"></i> ลบบัญชีผู้ใช้
                       </button>
                     </li>
@@ -168,13 +265,28 @@
 </div>
 
 <!-- Edit User Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedUser" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="selectedUser"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+  "
+>
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
         <div>
           <h5 class="modal-title fw-bold mb-0 text-primary">
-            <i class="fa-solid me-2" [ngClass]="selectedUser.id ? 'fa-user-pen' : 'fa-user-plus'"></i>
+            <i
+              class="fa-solid me-2"
+              [ngClass]="selectedUser.id ? 'fa-user-pen' : 'fa-user-plus'"
+            ></i>
             {{ selectedUser.id ? 'แก้ไขข้อมูลผู้ใช้งาน' : 'เพิ่มผู้ใช้งานใหม่' }}
           </h5>
           <p class="text-muted small mb-0">จัดการข้อมูลพื้นฐานและสิทธิ์การเข้าถึงระบบ</p>
@@ -182,24 +294,47 @@
         <button type="button" class="btn-close" (click)="closeEditModal()"></button>
       </div>
       <div class="modal-body p-4">
-        
         <div class="row g-3 mb-4">
           <div class="col-md-6">
             <label class="form-label text-muted small fw-bold">ชื่อ (First Name)</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="selectedUser.user_profile!.first_name" placeholder="ระบุชื่อ">
+            <input
+              type="text"
+              class="form-control rounded-3"
+              [(ngModel)]="selectedUser.user_profile!.first_name"
+              placeholder="ระบุชื่อ"
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label text-muted small fw-bold">นามสกุล (Last Name)</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="selectedUser.user_profile!.last_name" placeholder="ระบุนามสกุล">
+            <input
+              type="text"
+              class="form-control rounded-3"
+              [(ngModel)]="selectedUser.user_profile!.last_name"
+              placeholder="ระบุนามสกุล"
+            />
           </div>
           <div class="col-md-6">
-            <label class="form-label text-muted small fw-bold">อีเมลเข้าสู่ระบบ <span class="text-danger">*</span></label>
-            <input type="email" class="form-control rounded-3" [ngClass]="{'bg-light': selectedUser.id}"
-              [(ngModel)]="selectedUser.email" [readonly]="!!selectedUser.id" placeholder="example@email.com">
+            <label class="form-label text-muted small fw-bold"
+              >อีเมลเข้าสู่ระบบ <span class="text-danger">*</span></label
+            >
+            <input
+              type="email"
+              class="form-control rounded-3"
+              [ngClass]="{ 'bg-light': selectedUser.id }"
+              [(ngModel)]="selectedUser.email"
+              [readonly]="!!selectedUser.id"
+              placeholder="example@email.com"
+            />
           </div>
           <div class="col-md-6">
             <label class="form-label text-muted small fw-bold">เบอร์โทรศัพท์</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="selectedUser.user_profile!.phone" placeholder="ระบุเบอร์โทรศัพท์ เช่น 0812345678" autocomplete="off">
+            <input
+              type="text"
+              class="form-control rounded-3"
+              [(ngModel)]="selectedUser.user_profile!.phone"
+              placeholder="ระบุเบอร์โทรศัพท์ เช่น 0812345678"
+              autocomplete="off"
+            />
             <span class="text-xs text-muted">ตัวอย่างการกรอก: 0812345678 หรือ 081-234-5678</span>
           </div>
         </div>
@@ -213,13 +348,19 @@
               <option value="EMPLOYEE">EMPLOYEE (พนักงานประจำสาขา)</option>
               <option value="EXECUTIVE">EXECUTIVE (ผู้บริหาร)</option>
               <option value="ORG_ADMIN">ORG_ADMIN (แอดมินองค์กร)</option>
-              <option *ngIf="isSystemAdmin" value="SYSTEM_ADMIN">SYSTEM_ADMIN (ผู้ดูแลระบบหลัก)</option>
+              <option *ngIf="isSystemAdmin" value="SYSTEM_ADMIN">
+                SYSTEM_ADMIN (ผู้ดูแลระบบหลัก)
+              </option>
               <option *ngIf="isSystemAdmin" value="ASSESSOR">ASSESSOR (ผู้ตรวจประเมิน)</option>
             </select>
           </div>
           <div class="col-md-6" *ngIf="isSystemAdmin">
             <label class="form-label text-muted small fw-bold">สังกัดองค์กร</label>
-            <select class="form-select rounded-3" [(ngModel)]="selectedOrgId" (ngModelChange)="onOrgChange()">
+            <select
+              class="form-select rounded-3"
+              [(ngModel)]="selectedOrgId"
+              (ngModelChange)="onOrgChange()"
+            >
               <option [ngValue]="null">ไม่มีสังกัด</option>
               <option *ngFor="let org of organizations" [value]="org.id">{{ org.name }}</option>
             </select>
@@ -233,28 +374,62 @@
         </div>
 
         <div class="mb-4" *ngIf="!selectedUser.id">
-          <label class="form-label text-muted small fw-bold">รหัสผ่านเริ่มต้น <span class="text-danger">*</span></label>
+          <label class="form-label text-muted small fw-bold"
+            >รหัสผ่านเริ่มต้น <span class="text-danger">*</span></label
+          >
           <div class="input-group">
-            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-            <input type="text" class="form-control rounded-3 border-start-0" [(ngModel)]="selectedUser.password" placeholder="ระบุรหัสผ่านเริ่มต้น เช่น 123456 (แสดงเป็นตัวเลขชัดเจน)">
+            <span class="input-group-text bg-light border-end-0"
+              ><i class="fa-solid fa-lock text-muted"></i
+            ></span>
+            <input
+              type="text"
+              class="form-control rounded-3 border-start-0"
+              [(ngModel)]="selectedUser.password"
+              placeholder="ระบุรหัสผ่านเริ่มต้น เช่น 123456 (แสดงเป็นตัวเลขชัดเจน)"
+            />
           </div>
         </div>
 
         <div class="d-flex gap-2 justify-content-end mt-2">
-          <button class="btn btn-light px-4 rounded-pill fw-bold" (click)="closeEditModal()" [disabled]="isSaving">ยกเลิก</button>
-          <button class="btn btn-primary px-5 rounded-pill shadow-sm fw-bold" (click)="saveUser()"
-            [disabled]="isSaving || !selectedUser.email || (!selectedUser.id && !isOrgAdmin && !selectedUser.password)">
-            <i class="fa-solid fa-floppy-disk me-2"></i> {{ selectedUser.id ? 'บันทึกข้อมูล' : 'สร้างบัญชี' }}
+          <button
+            class="btn btn-light px-4 rounded-pill fw-bold"
+            (click)="closeEditModal()"
+            [disabled]="isSaving"
+          >
+            ยกเลิก
+          </button>
+          <button
+            class="btn btn-primary px-5 rounded-pill shadow-sm fw-bold"
+            (click)="saveUser()"
+            [disabled]="
+              isSaving ||
+              !selectedUser.email ||
+              (!selectedUser.id && !isOrgAdmin && !selectedUser.password)
+            "
+          >
+            <i class="fa-solid fa-floppy-disk me-2"></i>
+            {{ selectedUser.id ? 'บันทึกข้อมูล' : 'สร้างบัญชี' }}
           </button>
         </div>
-
       </div>
     </div>
   </div>
 </div>
 
 <!-- Suspend Confirm Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="userToSuspend" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="userToSuspend"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+  "
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -262,13 +437,28 @@
         <button type="button" class="btn-close" (click)="userToSuspend = null"></button>
       </div>
       <div class="modal-body p-4 text-center">
-        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem;"></i>
-        <p class="mb-0">คุณต้องการ<strong>{{ userToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน' }}</strong>บัญชีผู้ใช้นี้ใช่หรือไม่?</p>
+        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem"></i>
+        <p class="mb-0">
+          คุณต้องการ<strong>{{ userToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน' }}</strong
+          >บัญชีผู้ใช้นี้ใช่หรือไม่?
+        </p>
         <p class="text-muted small mt-2">{{ userToSuspend.email }}</p>
       </div>
       <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="userToSuspend = null" [disabled]="isSaving">ยกเลิก</button>
-        <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmSuspend()" [disabled]="isSaving">
+        <button
+          type="button"
+          class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="userToSuspend = null"
+          [disabled]="isSaving"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="confirmSuspend()"
+          [disabled]="isSaving"
+        >
           <i class="fa-solid fa-check me-2"></i> ยืนยัน
         </button>
       </div>
@@ -277,7 +467,19 @@
 </div>
 
 <!-- Delete Confirm Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="userToDelete" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="userToDelete"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+  "
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -285,13 +487,28 @@
         <button type="button" class="btn-close" (click)="userToDelete = null"></button>
       </div>
       <div class="modal-body p-4 text-center">
-        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem;"></i>
-        <p class="mb-0">คุณแน่ใจหรือไม่ที่จะลบบัญชีผู้ใช้ <strong>{{ userToDelete.email }}</strong>?</p>
+        <i class="fa-solid fa-triangle-exclamation text-danger mb-3" style="font-size: 3rem"></i>
+        <p class="mb-0">
+          คุณแน่ใจหรือไม่ที่จะลบบัญชีผู้ใช้ <strong>{{ userToDelete.email }}</strong
+          >?
+        </p>
         <p class="text-danger small mt-2">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
       </div>
       <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="userToDelete = null" [disabled]="isSaving">ยกเลิก</button>
-        <button type="button" class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmDelete()" [disabled]="isSaving">
+        <button
+          type="button"
+          class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="userToDelete = null"
+          [disabled]="isSaving"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="confirmDelete()"
+          [disabled]="isSaving"
+        >
           <i class="fa-solid fa-trash-can me-2"></i> ยืนยันการลบ
         </button>
       </div>
@@ -300,7 +517,19 @@
 </div>
 
 <!-- Reset Password Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="userToResetPass" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="userToResetPass"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+  "
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -310,18 +539,37 @@
         <button type="button" class="btn-close" (click)="userToResetPass = null"></button>
       </div>
       <div class="modal-body p-4">
-        <p class="text-muted small mb-3">กรุณากำหนดรหัสผ่านใหม่สำหรับ <strong>{{ userToResetPass.email }}</strong></p>
+        <p class="text-muted small mb-3">
+          กรุณากำหนดรหัสผ่านใหม่สำหรับ <strong>{{ userToResetPass.email }}</strong>
+        </p>
         <div class="mb-3">
           <label class="form-label text-dark small fw-bold">รหัสผ่านใหม่</label>
-          <input type="password" class="form-control rounded-3" [(ngModel)]="newPasswordInput" placeholder="กรอกรหัสผ่านอย่างน้อย 6 ตัวอักษร">
+          <input
+            type="password"
+            class="form-control rounded-3"
+            [(ngModel)]="newPasswordInput"
+            placeholder="กรอกรหัสผ่านอย่างน้อย 6 ตัวอักษร"
+          />
         </div>
       </div>
       <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="userToResetPass = null" [disabled]="isSaving">ยกเลิก</button>
-        <button type="button" class="btn btn-primary rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmResetPassword()" [disabled]="isSaving || !newPasswordInput.trim()">
+        <button
+          type="button"
+          class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="userToResetPass = null"
+          [disabled]="isSaving"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="confirmResetPassword()"
+          [disabled]="isSaving || !newPasswordInput.trim()"
+        >
           <i class="fa-solid fa-floppy-disk me-2"></i> บันทึกรหัสผ่านใหม่
         </button>
       </div>
     </div>
   </div>
-</div>
+</div>

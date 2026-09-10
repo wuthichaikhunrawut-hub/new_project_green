@@ -45,4 +45,27 @@ describe('UsersService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('uses a unique high-entropy bootstrap secret for every imported user', async () => {
+    jest.spyOn(service, 'findByEmail').mockResolvedValue(null);
+    const createSpy = jest
+      .spyOn(service, 'create')
+      .mockImplementation((data: any) => Promise.resolve(data as User));
+
+    const count = await service.bulkImportUsers(
+      7,
+      'email,firstName,lastName,phone\na@example.com,A,One,1\nb@example.com,B,Two,2',
+    );
+
+    expect(count).toBe(2);
+    const passwords = createSpy.mock.calls.map(([data]) => data.password);
+    expect(passwords[0]).not.toBe(passwords[1]);
+    expect(passwords.every((password) => password.length >= 43)).toBe(true);
+    expect(passwords).not.toContain('Password123!');
+    expect(
+      createSpy.mock.calls.every(
+        ([data]) => data.password_setup_required === true,
+      ),
+    ).toBe(true);
+  });
 });

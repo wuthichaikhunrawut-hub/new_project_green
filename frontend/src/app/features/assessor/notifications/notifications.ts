@@ -11,7 +11,7 @@ import { ToastService } from '../../../shared/services/toast.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './notifications.html',
-  styles: ``
+  styles: ``,
 })
 export class AssessorNotificationsComponent implements OnInit {
   private auth = inject(AuthService);
@@ -24,30 +24,36 @@ export class AssessorNotificationsComponent implements OnInit {
   notifications: Notification[] = [];
   isLoading = true;
 
-  get unreadCount() { return this.notifications.filter(n => !n.is_read).length; }
+  get unreadCount() {
+    return this.notifications.filter((n) => !n.is_read).length;
+  }
 
   get filteredNotifications() {
     return this.activeTab === 'unread'
-      ? this.notifications.filter(n => !n.is_read)
+      ? this.notifications.filter((n) => !n.is_read)
       : this.notifications;
   }
 
-  ngOnInit() { this.loadNotifications(); }
+  ngOnInit() {
+    this.loadNotifications();
+  }
 
   loadNotifications() {
     this.isLoading = true;
     this.notificationService.getNotifications().subscribe({
       next: (data) => {
         // Sort newest first
-        this.notifications = data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        this.notifications = data.sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
         this.isLoading = false;
         this.cdr.markForCheck();
       },
-      error: () => { 
+      error: () => {
         this.isLoading = false;
         this.toast.error('ไม่สามารถโหลดการแจ้งเตือนได้');
-        this.cdr.markForCheck(); 
-      }
+        this.cdr.markForCheck();
+      },
     });
   }
 
@@ -61,7 +67,7 @@ export class AssessorNotificationsComponent implements OnInit {
         n.is_read = true;
         this.cdr.markForCheck();
         if (n.link) this.navigateSafely(n.link);
-      }
+      },
     });
   }
 
@@ -75,12 +81,12 @@ export class AssessorNotificationsComponent implements OnInit {
     if (!targetLink.startsWith('/') && !targetLink.startsWith('http')) {
       targetLink = '/' + targetLink;
     }
-    
+
     if (!this.isRouteValid(targetLink)) {
       this.toast.warning('ไม่พบหน้ารายละเอียดดังกล่าวในระบบ หรือลิงก์ไม่ถูกต้อง');
       return;
     }
-    
+
     this.router.navigateByUrl(targetLink);
   }
 
@@ -88,7 +94,7 @@ export class AssessorNotificationsComponent implements OnInit {
     if (!link) return false;
     const cleanLink = link.split('?')[0].split('#')[0];
     const path = cleanLink.startsWith('/') ? cleanLink.slice(1) : cleanLink;
-    
+
     const patterns = [
       /^dashboard$/,
       /^admin\/dashboard$/,
@@ -123,25 +129,29 @@ export class AssessorNotificationsComponent implements OnInit {
       /^requests\/evaluate\/\d+$/,
       /^subscription$/,
       /^subscription\/billing$/,
-      /^notifications$/
+      /^notifications$/,
     ];
-    
-    return patterns.some(pattern => pattern.test(path));
+
+    return patterns.some((pattern) => pattern.test(path));
   }
 
   markAllRead() {
     this.notificationService.markAllAsRead().subscribe({
       next: () => {
-        this.notifications.forEach(n => n.is_read = true);
+        this.notifications.forEach((n) => (n.is_read = true));
         this.cdr.markForCheck();
         this.toast.success('ทำเครื่องหมายว่าอ่านทั้งหมดแล้ว');
-      }
+      },
     });
   }
 
   formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleString('th-TH', {
-      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
     });
   }
 }

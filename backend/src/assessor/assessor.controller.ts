@@ -9,6 +9,7 @@ import {
   Request,
   Res,
   UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { AssessorService } from './assessor.service';
@@ -70,8 +71,10 @@ export class AssessorController {
   @Roles('ASSESSOR', 'SYSTEM_ADMIN', 'ADMIN', 'ORG_ADMIN')
   async getCertificatePdf(
     @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: JwtUser },
     @Res() res: Response,
   ) {
+    await this.assertAssessmentReadAccess(id, req.user);
     const pdfBuffer = await this.assessorService.generateCertificatePdf(id);
     res.set({
       'Content-Type': 'application/pdf',
@@ -87,12 +90,35 @@ export class AssessorController {
     'SYSTEM_ADMIN',
     'ADMIN',
     'ORG_ADMIN',
-    'ORGANIZATION_ADMIN',
     'EXECUTIVE',
     'EMPLOYEE',
     'USER',
   )
-  getCarbonSummary(@Param('orgId', ParseIntPipe) orgId: number) {
+  async getCarbonSummary(
+    @Param('orgId', ParseIntPipe) orgId: number,
+    @Request() req: { user: JwtUser },
+  ) {
+    const role = String(req.user?.role || '')
+      .toUpperCase()
+      .replace(/[\s_]/g, '');
+    if (
+      role !== 'SYSTEMADMIN' &&
+      role !== 'ADMIN' &&
+      role !== 'ASSESSOR' &&
+      role !== 'ASSESSORADMIN'
+    ) {
+      if (Number(req.user?.orgId) !== orgId) {
+        throw new ForbiddenException(
+          'ไม่มีสิทธิ์เข้าถึงข้อมูลคาร์บอนขององค์กรอื่น',
+        );
+      }
+    }
+    if (role === 'ASSESSOR') {
+      await this.assessorService.assertAssessorOrganizationAccess(
+        this.userId(req),
+        orgId,
+      );
+    }
     return this.assessorService.getOrgCarbonSummary(orgId);
   }
 
@@ -102,12 +128,15 @@ export class AssessorController {
     'SYSTEM_ADMIN',
     'ADMIN',
     'ORG_ADMIN',
-    'ORGANIZATION_ADMIN',
     'EXECUTIVE',
     'EMPLOYEE',
     'USER',
   )
-  getAssessment(@Param('id', ParseIntPipe) id: number) {
+  async getAssessment(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req: { user: JwtUser },
+  ) {
+    await this.assertAssessmentReadAccess(id, req.user);
     return this.assessorService.getAssessmentDetail(id);
   }
 
@@ -149,5 +178,31 @@ export class AssessorController {
     @Request() req: { user: JwtUser },
   ) {
     return this.assessorService.requestRevision(id, this.userId(req), dto);
+  }
+
+  private async assertAssessmentReadAccess(
+    assessmentId: number,
+    user: JwtUser,
+  ): Promise<void> {
+    const assessment =
+      await this.assessorService.getAssessmentDetail(assessmentId);
+    const role = String(user.role || '')
+      .toUpperCase()
+      .replace(/[\s_]/g, '');
+    if (['SYSTEMADMIN', 'ADMIN', 'ASSESSORADMIN'].includes(role)) return;
+    if (role === 'ASSESSOR') {
+      if (
+        assessment.assessor_user_id &&
+        Number(assessment.assessor_user_id) !== Number(user.sub)
+      ) {
+        throw new ForbiddenException(
+          'ไม่มีสิทธิ์เข้าถึงการประเมินที่มอบหมายให้ผู้ตรวจคนอื่น',
+        );
+      }
+      return;
+    }
+    if (Number(assessment.org_id) !== Number(user.orgId)) {
+      throw new ForbiddenException('ไม่มีสิทธิ์เข้าถึงการประเมินขององค์กรอื่น');
+    }
   }
 }

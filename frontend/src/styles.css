@@ -1,36 +1,38 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   /* Elevate typography for a corporate look */
-  --font-sans: 'IBM Plex Sans Thai', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  
+  --font-sans:
+    'IBM Plex Sans Thai', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+
   /* Core Colors - Premium Emerald Tech Theme */
   --color-primary: #059669; /* Premium Emerald */
   --color-primary-hover: #047857;
-  --color-primary-light: #D1FAE5;
-  
+  --color-primary-light: #d1fae5;
+
   --color-secondary: #334155; /* Slate 700 */
-  --color-bg-app: #F8FAFC; /* Slate 50 */
+  --color-bg-app: #f8fafc; /* Slate 50 */
   --color-bg-card: rgba(255, 255, 255, 0.95);
-  
-  --color-text-main: #0F172A; /* Slate 900 */
-  --color-text-muted: #64748B; /* Slate 500 */
-  
-  --color-border: #E2E8F0; /* Slate 200 */
-  
+
+  --color-text-main: #0f172a; /* Slate 900 */
+  --color-text-muted: #64748b; /* Slate 500 */
+
+  --color-border: #e2e8f0; /* Slate 200 */
+
   /* Status Colors */
   --color-success: #059669; /* Premium Emerald */
   --color-success-hover: #047857;
-  --color-success-light: #D1FAE5;
-  --color-warning: #D97706;
-  --color-danger: #DC2626;
-  --color-info: #0284C7; /* Sky 600 */
+  --color-success-light: #d1fae5;
+  --color-warning: #d97706;
+  --color-danger: #dc2626;
+  --color-info: #0284c7; /* Sky 600 */
 
   /* Shadows - Modern and Premium */
   --shadow-sm: 0 1px 2px 0 rgb(5 150 105 / 0.05);
   --shadow-md: 0 4px 12px -2px rgb(5 150 105 / 0.08), 0 2px 4px -2px rgb(5 150 105 / 0.04);
   --shadow-lg: 0 12px 24px -4px rgb(5 150 105 / 0.12), 0 4px 8px -4px rgb(5 150 105 / 0.08);
-  
+
   /* Radii */
   --radius-sm: 0.5rem;
   --radius-md: 0.75rem;
@@ -47,7 +49,12 @@ body {
   font-size: 14px; /* Standardize base font size to 14px for proper widget density */
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-sans);
   font-weight: 600; /* Slightly less heavy than 700 for a cleaner look */
   color: var(--color-text-main);
@@ -55,12 +62,24 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.75rem;
 }
 
-h1 { font-size: 1.75rem; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.25rem; }
-h4 { font-size: 1.1rem; }
-h5 { font-size: 1rem; }
-h6 { font-size: 0.9rem; }
+h1 {
+  font-size: 1.75rem;
+}
+h2 {
+  font-size: 1.5rem;
+}
+h3 {
+  font-size: 1.25rem;
+}
+h4 {
+  font-size: 1.1rem;
+}
+h5 {
+  font-size: 1rem;
+}
+h6 {
+  font-size: 0.9rem;
+}
 
 /* ==========================================
    GLOBAL COMPONENT OVERRIDES
@@ -72,7 +91,9 @@ h6 { font-size: 0.9rem; }
   border: 1px solid var(--color-border) !important;
   border-radius: var(--radius-lg) !important;
   box-shadow: var(--shadow-sm) !important;
-  transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+  transition:
+    box-shadow 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
 }
 
 .card:hover {
@@ -140,8 +161,8 @@ h6 { font-size: 0.9rem; }
 }
 
 .btn-light {
-  background-color: #F1F5F9 !important;
-  border-color: #E2E8F0 !important;
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
   color: var(--color-secondary) !important;
 }
 
@@ -150,22 +171,26 @@ h6 { font-size: 0.9rem; }
 }
 
 .btn-light:hover {
-  background-color: #E2E8F0 !important;
+  background-color: #e2e8f0 !important;
   color: var(--color-text-main) !important;
 }
 
 /* Inputs & Form Controls */
-.form-control, .form-select {
+.form-control,
+.form-select {
   border: 1px solid var(--color-border) !important;
   border-radius: var(--radius-md) !important;
   padding: 0.625rem 1rem !important;
   font-size: 0.95rem !important;
   color: var(--color-text-main) !important;
-  background-color: #FFFFFF !important;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  background-color: #ffffff !important;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease !important;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
   border-color: var(--color-primary) !important;
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
   outline: none !important;
@@ -192,7 +217,7 @@ h6 { font-size: 0.9rem; }
   letter-spacing: 0.05em;
   border-bottom: 2px solid var(--color-border) !important;
   padding: 1rem !important;
-  background-color: #F8FAFC !important; /* Subtle header bg */
+  background-color: #f8fafc !important; /* Subtle header bg */
 }
 
 .table td {
@@ -202,7 +227,7 @@ h6 { font-size: 0.9rem; }
 }
 
 .table-hover tbody tr:hover {
-  background-color: #F1F5F9 !important;
+  background-color: #f1f5f9 !important;
 }
 
 /* Badges */
@@ -271,27 +296,27 @@ h6 { font-size: 0.9rem; }
 }
 
 .bg-success {
-  background-color: #DEF7EC !important;
-  color: #03543F !important;
-  border: 1px solid #31C48D;
+  background-color: #def7ec !important;
+  color: #03543f !important;
+  border: 1px solid #31c48d;
 }
 
 .bg-warning {
-  background-color: #FEF3C7 !important;
-  color: #92400E !important;
-  border: 1px solid #FCD34D;
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d;
 }
 
 .bg-danger {
-  background-color: #FDE8E8 !important;
-  color: #9B1C1C !important;
-  border: 1px solid #F8B4B4;
+  background-color: #fde8e8 !important;
+  color: #9b1c1c !important;
+  border: 1px solid #f8b4b4;
 }
 
 .bg-info {
-  background-color: #E1EFFE !important;
-  color: #1E429F !important;
-  border: 1px solid #A4CAFE;
+  background-color: #e1effe !important;
+  color: #1e429f !important;
+  border: 1px solid #a4cafe;
 }
 
 /* Animations */
@@ -316,7 +341,9 @@ h6 { font-size: 0.9rem; }
 
 /* Stat Cards globally available */
 .stat-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
   overflow: hidden;
   position: relative;
 }
@@ -378,12 +405,36 @@ h6 { font-size: 0.9rem; }
   white-space: nowrap;
 }
 
-.status-approved { background-color: #DEF7EC !important; color: #03543F !important; border: 1px solid #31C48D !important; }
-.status-pending { background-color: #FEF3C7 !important; color: #92400E !important; border: 1px solid #FCD34D !important; }
-.status-rejected { background-color: #FDE8E8 !important; color: #9B1C1C !important; border: 1px solid #F8B4B4 !important; }
-.status-submitted { background-color: #E1EFFE !important; color: #1E429F !important; border: 1px solid #A4CAFE !important; }
-.status-revision { background-color: #F1F5F9 !important; color: #475569 !important; border: 1px solid #CBD5E1 !important; }
-.status-draft { background-color: #F8FAFC !important; color: #64748B !important; border: 1px solid #E2E8F0 !important; }
+.status-approved {
+  background-color: #def7ec !important;
+  color: #03543f !important;
+  border: 1px solid #31c48d !important;
+}
+.status-pending {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d !important;
+}
+.status-rejected {
+  background-color: #fde8e8 !important;
+  color: #9b1c1c !important;
+  border: 1px solid #f8b4b4 !important;
+}
+.status-submitted {
+  background-color: #e1effe !important;
+  color: #1e429f !important;
+  border: 1px solid #a4cafe !important;
+}
+.status-revision {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+.status-draft {
+  background-color: #f8fafc !important;
+  color: #64748b !important;
+  border: 1px solid #e2e8f0 !important;
+}
 
 /* ==========================================
    GLOBAL STRIPE ASSISTANT SUPPRESSION (NUCLEAR OPTION)
@@ -421,10 +472,12 @@ div[data-testid="stripe-assistant-widget"] {
    ========================================== */
 @media (min-width: 992px) {
   /* Lower the sidebar z-index on desktop */
-  .sidebar, app-sidebar .sidebar, app-sidebar {
+  .sidebar,
+  app-sidebar .sidebar,
+  app-sidebar {
     z-index: 40 !important;
   }
-  
+
   /* Elevate main-wrapper to overlap sidebar if needed */
   .main-wrapper {
     z-index: 50 !important;
@@ -435,8 +488,11 @@ div[data-testid="stripe-assistant-widget"] {
    PREVENT any layout elements from acting as a containing block 
    so position: fixed modals can escape to the viewport!
 */
-.app-layout, .main-wrapper, .content-view, 
-app-admin-criteria, app-admin-emission-factors,
+.app-layout,
+.main-wrapper,
+.content-view,
+app-admin-criteria,
+app-admin-emission-factors,
 router-outlet {
   transform: none !important;
   filter: none !important;
@@ -446,7 +502,8 @@ router-outlet {
 }
 
 /* Ensure all modals with fixed positioning stay on top globally */
-.modal[style*="position: fixed"], .modal.d-block {
+.modal[style*='position: fixed'],
+.modal.d-block {
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -454,5 +511,3 @@ router-outlet {
   height: 100vh !important;
   z-index: 99999 !important;
 }
-
-

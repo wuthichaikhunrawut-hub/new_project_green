@@ -5,7 +5,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SettingsService {
   private http = inject(HttpClient);
@@ -18,10 +18,9 @@ export class SettingsService {
       token = localStorage.getItem('access_token');
     }
     let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
     if (token) {
-
     }
     return headers;
   }

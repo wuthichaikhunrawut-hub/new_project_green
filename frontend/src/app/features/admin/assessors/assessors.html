@@ -2,7 +2,9 @@
   <div class="page-header mb-4">
     <div class="page-header-left">
       <h2 class="page-title">ตรวจสอบและอนุมัติผู้ตรวจประเมิน</h2>
-      <p class="page-subtitle mb-0">รายชื่อผู้ที่มีบัญชีประเภท ASSESSOR ในระบบ พร้อมสถานะการอนุมัติ</p>
+      <p class="page-subtitle mb-0">
+        รายชื่อผู้ที่มีบัญชีประเภท ASSESSOR ในระบบ พร้อมสถานะการอนุมัติ
+      </p>
     </div>
     <div class="page-actions">
       <button class="btn btn-outline-secondary rounded-pill px-4" (click)="loadAssessors()">
@@ -17,12 +19,24 @@
       <div class="row g-3">
         <div class="col-md-6">
           <div class="input-group">
-            <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-search text-muted"></i></span>
-            <input type="text" class="form-control bg-light border-start-0" placeholder="ค้นหาชื่อผู้ใช้งาน หรือ อีเมล..." [(ngModel)]="searchText" (ngModelChange)="applyFilters()">
+            <span class="input-group-text bg-light border-end-0"
+              ><i class="fa-solid fa-search text-muted"></i
+            ></span>
+            <input
+              type="text"
+              class="form-control bg-light border-start-0"
+              placeholder="ค้นหาชื่อผู้ใช้งาน หรือ อีเมล..."
+              [(ngModel)]="searchText"
+              (ngModelChange)="applyFilters()"
+            />
           </div>
         </div>
         <div class="col-md-6">
-          <select class="form-select bg-light" [(ngModel)]="filterStatus" (ngModelChange)="applyFilters()">
+          <select
+            class="form-select bg-light"
+            [(ngModel)]="filterStatus"
+            (ngModelChange)="applyFilters()"
+          >
             <option value="ALL">สถานะทั้งหมด</option>
             <option value="PENDING">รอการอนุมัติ</option>
             <option value="APPROVED">อนุมัติแล้ว</option>
@@ -63,19 +77,35 @@
                 </span>
               </td>
               <td class="px-4 py-3 text-center">
-                <span class="badge" [ngClass]="assessor.assessor_verified ? 'bg-primary' : 'bg-warning text-dark'">
-                  <i class="fa-solid me-1" [ngClass]="assessor.assessor_verified ? 'fa-shield-check' : 'fa-clock'"></i>
+                <span
+                  class="badge"
+                  [ngClass]="assessor.assessor_verified ? 'bg-primary' : 'bg-warning text-dark'"
+                >
+                  <i
+                    class="fa-solid me-1"
+                    [ngClass]="assessor.assessor_verified ? 'fa-shield-check' : 'fa-clock'"
+                  ></i>
                   {{ assessor.assessor_verified ? 'อนุมัติแล้ว' : 'รอการอนุมัติ' }}
                 </span>
               </td>
               <td class="px-4 py-3 text-end">
-                <button class="btn btn-sm btn-outline-info me-2 shadow-sm" (click)="openModal(assessor)">
+                <button
+                  class="btn btn-sm btn-outline-info me-2 shadow-sm"
+                  (click)="openModal(assessor)"
+                >
                   <i class="fa-solid fa-eye me-1"></i> ดูข้อมูล
                 </button>
-                <button class="btn btn-sm shadow-sm"
-                  [ngClass]="assessor.assessor_verified ? 'btn-outline-warning' : 'btn-outline-primary'"
-                  (click)="verify(assessor)">
-                  <i class="fa-solid me-1" [ngClass]="assessor.assessor_verified ? 'fa-times' : 'fa-shield-check'"></i>
+                <button
+                  class="btn btn-sm shadow-sm"
+                  [ngClass]="
+                    assessor.assessor_verified ? 'btn-outline-warning' : 'btn-outline-primary'
+                  "
+                  (click)="verify(assessor)"
+                >
+                  <i
+                    class="fa-solid me-1"
+                    [ngClass]="assessor.assessor_verified ? 'fa-times' : 'fa-shield-check'"
+                  ></i>
                   {{ assessor.assessor_verified ? 'เพิกถอน' : 'อนุมัติด่วน' }}
                 </button>
               </td>
@@ -91,7 +121,12 @@
 </div>
 
 <!-- Assessor Details Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedAssessor" style="z-index: 1055;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="selectedAssessor"
+  style="z-index: 1055"
+>
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -103,14 +138,16 @@
         </div>
         <button type="button" class="btn-close" (click)="closeModal()"></button>
       </div>
-      
+
       <div class="modal-body p-4 bg-light bg-opacity-50">
         <div class="row g-4">
           <!-- Account Info -->
           <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100 rounded-4">
               <div class="card-body p-4">
-                <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-user me-2"></i>ข้อมูลบัญชีทั่วไป</h6>
+                <h6 class="fw-bold text-muted mb-3">
+                  <i class="fa-solid fa-user me-2"></i>ข้อมูลบัญชีทั่วไป
+                </h6>
                 <table class="table table-borderless table-sm mb-0">
                   <tbody>
                     <tr>
@@ -127,62 +164,102 @@
                     </tr>
                     <tr>
                       <td class="text-muted">วันที่สมัคร:</td>
-                      <td class="fw-semibold">{{ selectedAssessor.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                      <td class="fw-semibold">
+                        {{ selectedAssessor.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
-          
+
           <!-- Professional Info -->
           <div class="col-md-6">
             <div class="card border-0 shadow-sm h-100 rounded-4">
               <div class="card-body p-4">
-                <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-id-card me-2"></i>ข้อมูลคุณสมบัติ</h6>
+                <h6 class="fw-bold text-muted mb-3">
+                  <i class="fa-solid fa-id-card me-2"></i>ข้อมูลคุณสมบัติ
+                </h6>
                 <table class="table table-borderless table-sm mb-0">
                   <tbody>
                     <tr>
                       <td class="text-muted w-[120px]">เลขใบอนุญาต:</td>
-                      <td class="fw-bold text-primary">{{ selectedAssessor.assessor_profile?.license_number || '-' }}</td>
+                      <td class="fw-bold text-primary">
+                        {{ selectedAssessor.assessor_profile?.license_number || '-' }}
+                      </td>
                     </tr>
                     <tr>
                       <td class="text-muted">ประสบการณ์:</td>
-                      <td class="fw-semibold">{{ selectedAssessor.assessor_profile?.years_experience || 0 }} ปี</td>
+                      <td class="fw-semibold">
+                        {{ selectedAssessor.assessor_profile?.years_experience || 0 }} ปี
+                      </td>
                     </tr>
                     <tr>
                       <td class="text-muted">ประวัติการศึกษา:</td>
-                      <td class="fw-semibold">{{ selectedAssessor.assessor_profile?.education_background || '-' }}</td>
+                      <td class="fw-semibold">
+                        {{ selectedAssessor.assessor_profile?.education_background || '-' }}
+                      </td>
                     </tr>
                     <tr>
                       <td class="text-muted">สถานะการตรวจสอบ:</td>
                       <td class="fw-semibold">
-                        <span class="badge bg-secondary" *ngIf="!selectedAssessor.assessor_profile?.verification_status">N/A</span>
-                        <span class="badge" 
-                              [ngClass]="{'bg-success': selectedAssessor.assessor_profile?.verification_status === 'Verified', 
-                                         'bg-warning text-dark': selectedAssessor.assessor_profile?.verification_status === 'Pending',
-                                         'bg-danger': selectedAssessor.assessor_profile?.verification_status === 'Rejected'}"
-                              *ngIf="selectedAssessor.assessor_profile?.verification_status">
+                        <span
+                          class="badge bg-secondary"
+                          *ngIf="!selectedAssessor.assessor_profile?.verification_status"
+                          >N/A</span
+                        >
+                        <span
+                          class="badge"
+                          [ngClass]="{
+                            'bg-success':
+                              selectedAssessor.assessor_profile?.verification_status === 'Verified',
+                            'bg-warning text-dark':
+                              selectedAssessor.assessor_profile?.verification_status === 'Pending',
+                            'bg-danger':
+                              selectedAssessor.assessor_profile?.verification_status === 'Rejected',
+                          }"
+                          *ngIf="selectedAssessor.assessor_profile?.verification_status"
+                        >
                           {{ selectedAssessor.assessor_profile?.verification_status }}
                         </span>
                       </td>
                     </tr>
                     <tr *ngIf="selectedAssessor.assessor_profile?.verified_at">
                       <td class="text-muted">วันที่ตรวจสอบ:</td>
-                      <td class="fw-semibold">{{ selectedAssessor.assessor_profile?.verified_at | date:'dd/MM/yyyy HH:mm' }}</td>
+                      <td class="fw-semibold">
+                        {{
+                          selectedAssessor.assessor_profile?.verified_at | date: 'dd/MM/yyyy HH:mm'
+                        }}
+                      </td>
                     </tr>
                     <tr>
                       <td class="text-muted">สถานะปัจจุบัน:</td>
                       <td>
-                        <span class="badge" [ngClass]="selectedAssessor.assessor_verified ? 'bg-success' : 'bg-warning text-dark'">
-                          {{ selectedAssessor.assessor_verified ? 'ได้รับการอนุมัติแล้ว' : 'รอการพิจารณา' }}
+                        <span
+                          class="badge"
+                          [ngClass]="
+                            selectedAssessor.assessor_verified
+                              ? 'bg-success'
+                              : 'bg-warning text-dark'
+                          "
+                        >
+                          {{
+                            selectedAssessor.assessor_verified
+                              ? 'ได้รับการอนุมัติแล้ว'
+                              : 'รอการพิจารณา'
+                          }}
                         </span>
                       </td>
                     </tr>
                     <tr *ngIf="selectedAssessor.assessor_profile?.qualification_file_url">
                       <td class="text-muted">ไฟล์หลักฐาน:</td>
                       <td>
-                        <a [href]="selectedAssessor.assessor_profile?.qualification_file_url" target="_blank" class="btn btn-xs btn-primary py-0 px-2 small">
+                        <a
+                          [href]="selectedAssessor.assessor_profile?.qualification_file_url"
+                          target="_blank"
+                          class="btn btn-xs btn-primary py-0 px-2 small"
+                        >
                           <i class="fa-solid fa-file-pdf me-1"></i> เปิดดูไฟล์หลักฐาน
                         </a>
                       </td>
@@ -197,9 +274,17 @@
           <div class="col-12">
             <div class="card border-0 shadow-sm rounded-4">
               <div class="card-body p-4">
-                <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-building-columns me-2"></i>ข้อมูลการรับเงิน (บัญชีธนาคาร)</h6>
-                
-                <div class="table-responsive" *ngIf="selectedAssessor.bank_accounts && selectedAssessor.bank_accounts.length > 0; else noBankData">
+                <h6 class="fw-bold text-muted mb-3">
+                  <i class="fa-solid fa-building-columns me-2"></i>ข้อมูลการรับเงิน (บัญชีธนาคาร)
+                </h6>
+
+                <div
+                  class="table-responsive"
+                  *ngIf="
+                    selectedAssessor.bank_accounts && selectedAssessor.bank_accounts.length > 0;
+                    else noBankData
+                  "
+                >
                   <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light">
                       <tr>
@@ -215,7 +300,10 @@
                         <td class="px-3 py-2 fw-semibold">{{ bank.account_no || '-' }}</td>
                         <td class="px-3 py-2">{{ bank.account_name || '-' }}</td>
                         <td class="px-3 py-2 text-center">
-                          <span class="badge" [ngClass]="bank.is_primary ? 'bg-success' : 'bg-secondary'">
+                          <span
+                            class="badge"
+                            [ngClass]="bank.is_primary ? 'bg-success' : 'bg-secondary'"
+                          >
                             {{ bank.is_primary ? 'บัญชีหลัก' : 'บัญชีรอง' }}
                           </span>
                         </td>
@@ -223,29 +311,48 @@
                     </tbody>
                   </table>
                 </div>
-                
+
                 <ng-template #noBankData>
                   <div class="text-center p-3 bg-light rounded border border-dashed">
-                    <p class="text-muted mb-0 small"><i class="fa-solid fa-circle-exclamation me-2"></i>ผู้ใช้งานรายนี้ยังไม่ได้เพิ่มข้อมูลบัญชีธนาคาร</p>
+                    <p class="text-muted mb-0 small">
+                      <i class="fa-solid fa-circle-exclamation me-2"></i
+                      >ผู้ใช้งานรายนี้ยังไม่ได้เพิ่มข้อมูลบัญชีธนาคาร
+                    </p>
                   </div>
                 </ng-template>
-
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+
       <div class="modal-footer border-top-0 p-4">
-        <button type="button" class="btn btn-light px-4 border" (click)="closeModal()">ปิดหน้าต่าง</button>
+        <button type="button" class="btn btn-light px-4 border" (click)="closeModal()">
+          ปิดหน้าต่าง
+        </button>
         <div class="d-flex gap-2">
-          <button type="button" class="btn btn-danger px-4 shadow-sm" *ngIf="!selectedAssessor.assessor_verified" (click)="verifyFromModal(false)">
+          <button
+            type="button"
+            class="btn btn-danger px-4 shadow-sm"
+            *ngIf="!selectedAssessor.assessor_verified"
+            (click)="verifyFromModal(false)"
+          >
             <i class="fa-solid fa-xmark me-2"></i>ปฏิเสธการอนุมัติ
           </button>
-          <button type="button" class="btn btn-success px-5 shadow-sm fw-bold" *ngIf="!selectedAssessor.assessor_verified" (click)="verifyFromModal(true)">
+          <button
+            type="button"
+            class="btn btn-success px-5 shadow-sm fw-bold"
+            *ngIf="!selectedAssessor.assessor_verified"
+            (click)="verifyFromModal(true)"
+          >
             <i class="fa-solid fa-check me-2"></i>อนุมัติผู้ตรวจ
           </button>
-          <button type="button" class="btn btn-warning px-5 shadow-sm fw-bold" *ngIf="selectedAssessor.assessor_verified" (click)="verifyFromModal(false)">
+          <button
+            type="button"
+            class="btn btn-warning px-5 shadow-sm fw-bold"
+            *ngIf="selectedAssessor.assessor_verified"
+            (click)="verifyFromModal(false)"
+          >
             <i class="fa-solid fa-ban me-2"></i>ระงับสิทธิ์ผู้ตรวจ
           </button>
         </div>
@@ -255,7 +362,12 @@
 </div>
 
 <!-- Verify Confirm Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="assessorToVerify" style="z-index: 1055;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="assessorToVerify"
+  style="z-index: 1055"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -263,13 +375,28 @@
         <button type="button" class="btn-close" (click)="assessorToVerify = null"></button>
       </div>
       <div class="modal-body p-4 text-center">
-        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem;"></i>
-        <p class="mb-0">คุณต้องการ<strong>{{ verifyActionTargetState ? 'อนุมัติ' : 'เพิกถอนหรือปฏิเสธ' }}</strong>สถานะผู้ตรวจประเมินของบุคคลนี้ใช่หรือไม่?</p>
-        <p class="text-muted small mt-2">{{ assessorToVerify.username }} ({{ assessorToVerify.email }})</p>
+        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem"></i>
+        <p class="mb-0">
+          คุณต้องการ<strong>{{ verifyActionTargetState ? 'อนุมัติ' : 'เพิกถอนหรือปฏิเสธ' }}</strong
+          >สถานะผู้ตรวจประเมินของบุคคลนี้ใช่หรือไม่?
+        </p>
+        <p class="text-muted small mt-2">
+          {{ assessorToVerify.username }} ({{ assessorToVerify.email }})
+        </p>
       </div>
       <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="assessorToVerify = null">ยกเลิก</button>
-        <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmVerify()">
+        <button
+          type="button"
+          class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="assessorToVerify = null"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="confirmVerify()"
+        >
           <i class="fa-solid fa-check me-2"></i> ยืนยัน
         </button>
       </div>
@@ -278,7 +405,12 @@
 </div>
 
 <!-- Suspend Confirm Modal -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="assessorToSuspend" style="z-index: 1055;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="assessorToSuspend"
+  style="z-index: 1055"
+>
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -286,13 +418,28 @@
         <button type="button" class="btn-close" (click)="assessorToSuspend = null"></button>
       </div>
       <div class="modal-body p-4 text-center">
-        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem;"></i>
-        <p class="mb-0">คุณต้องการ<strong>{{ assessorToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน' }}</strong>บัญชีผู้ใช้งานนี้ใช่หรือไม่?</p>
-        <p class="text-muted small mt-2">{{ assessorToSuspend.username }} ({{ assessorToSuspend.email }})</p>
+        <i class="fa-solid fa-circle-exclamation text-warning mb-3" style="font-size: 3rem"></i>
+        <p class="mb-0">
+          คุณต้องการ<strong>{{ assessorToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน' }}</strong
+          >บัญชีผู้ใช้งานนี้ใช่หรือไม่?
+        </p>
+        <p class="text-muted small mt-2">
+          {{ assessorToSuspend.username }} ({{ assessorToSuspend.email }})
+        </p>
       </div>
       <div class="modal-footer border-0 p-4 pt-0 d-flex gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold" (click)="assessorToSuspend = null">ยกเลิก</button>
-        <button type="button" class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold" (click)="confirmSuspend()">
+        <button
+          type="button"
+          class="btn btn-light rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="assessorToSuspend = null"
+        >
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-warning rounded-pill px-4 flex-grow-1 fw-bold"
+          (click)="confirmSuspend()"
+        >
           <i class="fa-solid fa-check me-2"></i> ยืนยัน
         </button>
       </div>

@@ -3,18 +3,19 @@ import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { forkJoin } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { SubscriptionsAdminService, SubscriptionPlan, Feature } from '../../../core/services/subscriptions-admin.service';
+import {
+  SubscriptionsAdminService,
+  SubscriptionPlan,
+  Feature,
+} from '../../../core/services/subscriptions-admin.service';
 import { SettingsService } from '../../../core/services/settings.service';
 
 @Component({
   selector: 'app-admin-subscriptions',
   standalone: true,
-  imports: [
-    CommonModule, 
-    FormsModule
-  ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './subscriptions.html',
-  styleUrls: ['./subscriptions.css']
+  styleUrls: ['./subscriptions.css'],
 })
 export class AdminSubscriptionsComponent implements OnInit {
   private toast = inject(ToastService);
@@ -30,53 +31,45 @@ export class AdminSubscriptionsComponent implements OnInit {
   isSaving = false;
 
   // Permissions state
-  roles = [
-    'System Admin',
-    'Organization Admin',
-    'Executive',
-    'User',
-    'Assessor'
-  ];
+  roles = ['System Admin', 'Organization Admin', 'Executive', 'User', 'Assessor'];
 
   permissionSettings: Record<string, string> = {};
-  
+
   permissionGroups = [
     {
       category: 'จัดการข้อกำหนดโควตา',
-      items: [
-        { key: 'permission.manage_quota', label: 'จำกัดจำนวนผู้ใช้งาน' }
-      ]
+      items: [{ key: 'permission.manage_quota', label: 'จำกัดจำนวนผู้ใช้งาน' }],
     },
     {
       category: 'จัดการสิทธิ์การเข้าถึงฟีเจอร์',
       items: [
         { key: 'permission.ai_scan', label: 'เปิด/ปิด AI Scan' },
-        { key: 'permission.green_office', label: 'เปิด/ปิด Green Office Module' }
-      ]
-    }
+        { key: 'permission.green_office', label: 'เปิด/ปิด Green Office Module' },
+      ],
+    },
   ];
 
   selectedPlan: Partial<SubscriptionPlan> | null = null;
   selectedFeature: Partial<Feature> | null = null;
   selectedFeatureIds: number[] = [];
   selectedPlanQuotas: Record<string, number> = {}; // { feature_code: quota }
-  
+
   planToDelete: number | null = null;
   featureToDelete: number | null = null;
 
   private platformId = inject(PLATFORM_ID);
 
-  ngOnInit() { 
+  ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
       // Use setTimeout to ensure initial load happens after component is fully ready
       setTimeout(() => {
-        this.loadData(); 
+        this.loadData();
       }, 0);
     }
   }
 
   getPlanUsageCount(featureId: number): number {
-    return this.plans.filter(p => p.features?.some(f => f.id === featureId)).length;
+    return this.plans.filter((p) => p.features?.some((f) => f.id === featureId)).length;
   }
 
   loadData() {
@@ -87,7 +80,7 @@ export class AdminSubscriptionsComponent implements OnInit {
     forkJoin({
       plans: this.svc.getPlans(),
       features: this.svc.getFeatures(),
-      permissions: this.settingsService.getSettings()
+      permissions: this.settingsService.getSettings(),
     }).subscribe({
       next: (result) => {
         this.plans = result.plans;
@@ -100,7 +93,7 @@ export class AdminSubscriptionsComponent implements OnInit {
         console.error('Failed to load subscription data:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -130,7 +123,7 @@ export class AdminSubscriptionsComponent implements OnInit {
     const settingKey = `permission.${code.toLowerCase()}`;
     const value = this.permissionSettings[settingKey];
     if (!value) return false;
-    
+
     try {
       if (value.startsWith('[') || value.startsWith('{')) {
         const roles = JSON.parse(value);
@@ -181,21 +174,27 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.isSaving = false;
         this.toast.error('เกิดข้อผิดพลาดในการบันทึกสิทธิ์');
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
   openModal(plan?: SubscriptionPlan) {
-    this.selectedPlan = plan ? { ...plan } : {
-      plan_name: '', description: '', price_per_month: 0,
-      max_users: 5, max_locations: 1, is_active: true
-    };
-    this.selectedFeatureIds = plan?.features?.map(f => f.id) || [];
-    
+    this.selectedPlan = plan
+      ? { ...plan }
+      : {
+          plan_name: '',
+          description: '',
+          price_per_month: 0,
+          max_users: 5,
+          max_locations: 1,
+          is_active: true,
+        };
+    this.selectedFeatureIds = plan?.features?.map((f) => f.id) || [];
+
     // Load quotas for this plan
     this.selectedPlanQuotas = {};
     if (plan?.id) {
-      plan.features?.forEach(f => {
+      plan.features?.forEach((f) => {
         const key = this.getQuotaKey(plan.id, f.feature_code);
         const val = this.permissionSettings[key];
         this.selectedPlanQuotas[f.feature_code] = val ? Number(val) : 0;
@@ -203,16 +202,20 @@ export class AdminSubscriptionsComponent implements OnInit {
     }
   }
 
-  closeModal() { 
-    this.selectedPlan = null; 
+  closeModal() {
+    this.selectedPlan = null;
     this.selectedFeatureIds = [];
     this.selectedPlanQuotas = {};
   }
 
   openFeatureModal(feature?: Feature) {
-    this.selectedFeature = feature ? { ...feature } : {
-      feature_code: '', feature_name: '', description: ''
-    };
+    this.selectedFeature = feature
+      ? { ...feature }
+      : {
+          feature_code: '',
+          feature_name: '',
+          description: '',
+        };
   }
 
   closeFeatureModal() {
@@ -238,7 +241,7 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.toast.error('ไม่สามารถบันทึกฟีเจอร์ได้');
         this.isSaving = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -253,7 +256,7 @@ export class AdminSubscriptionsComponent implements OnInit {
         this.toast.success('ลบฟีเจอร์สำเร็จ');
         this.featureToDelete = null;
         this.loadData();
-      }
+      },
     });
   }
 
@@ -276,7 +279,7 @@ export class AdminSubscriptionsComponent implements OnInit {
 
     const payload = {
       ...this.selectedPlan,
-      feature_ids: this.selectedFeatureIds
+      feature_ids: this.selectedFeatureIds,
     };
 
     const obs = this.selectedPlan.id
@@ -284,11 +287,11 @@ export class AdminSubscriptionsComponent implements OnInit {
       : this.svc.createPlan(payload as any);
 
     obs.subscribe({
-      next: (res: any) => { 
+      next: (res: any) => {
         // Save quotas
         if (res.id) {
           const quotaPayload: Record<string, any> = {};
-          this.allFeatures.forEach(f => {
+          this.allFeatures.forEach((f) => {
             if (this.isFeatureSelected(f.id)) {
               const key = this.getQuotaKey(res.id, f.feature_code);
               quotaPayload[key] = this.selectedPlanQuotas[f.feature_code] || 0;
@@ -297,17 +300,17 @@ export class AdminSubscriptionsComponent implements OnInit {
           this.settingsService.updateSettings(quotaPayload).subscribe();
         }
 
-        this.closeModal(); 
-        this.loadData(); 
-        this.isSaving = false; 
+        this.closeModal();
+        this.loadData();
+        this.isSaving = false;
         this.toast.success('บันทึกแพ็กเกจสำเร็จ');
         this.cdr.markForCheck();
       },
-      error: () => { 
+      error: () => {
         this.toast.error('ไม่สามารถบันทึกแพ็กเกจได้');
-        this.isSaving = false; 
+        this.isSaving = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -317,12 +320,12 @@ export class AdminSubscriptionsComponent implements OnInit {
 
   confirmDeletePlan() {
     if (this.planToDelete === null) return;
-    this.svc.deletePlan(this.planToDelete).subscribe({ 
+    this.svc.deletePlan(this.planToDelete).subscribe({
       next: () => {
         this.toast.success('ลบแพ็กเกจสำเร็จ');
         this.planToDelete = null;
         this.loadData();
-      }
+      },
     });
   }
 }

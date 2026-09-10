@@ -27,7 +27,7 @@ export interface AdminStats {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AdminAnalyticsService {
   private http = inject(HttpClient);

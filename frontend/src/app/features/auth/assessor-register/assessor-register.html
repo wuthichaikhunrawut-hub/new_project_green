@@ -11,7 +11,7 @@
     <!-- Header -->
     <div class="card-header text-center">
       <div class="logo-wrapper">
-        <img src="assets/image/Green_office_imge.png" alt="Project Green Logo" class="brand-logo">
+        <img src="assets/image/Green_office_imge.png" alt="Project Green Logo" class="brand-logo" />
       </div>
       <h1 class="register-title">ลงทะเบียนเป็นผู้ตรวจประเมิน Green Office</h1>
       <p class="register-subtitle">เข้าร่วมเครือข่ายผู้เชี่ยวชาญด้านการประเมินความยั่งยืน</p>
@@ -65,8 +65,15 @@
           <label class="form-label">อีเมล</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-envelope input-icon"></i>
-            <input type="email" class="form-input" [(ngModel)]="userData.email" name="email"
-              placeholder="example@email.com" required autocomplete="email">
+            <input
+              type="email"
+              class="form-input"
+              [(ngModel)]="userData.email"
+              name="email"
+              placeholder="example@email.com"
+              required
+              autocomplete="email"
+            />
           </div>
         </div>
 
@@ -75,16 +82,30 @@
             <label class="form-label">รหัสผ่าน</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-lock input-icon"></i>
-              <input type="password" class="form-input" [(ngModel)]="userData.password" name="password"
-                placeholder="••••••••" required autocomplete="new-password">
+              <input
+                type="password"
+                class="form-input"
+                [(ngModel)]="userData.password"
+                name="password"
+                placeholder="••••••••"
+                required
+                autocomplete="new-password"
+              />
             </div>
           </div>
           <div class="form-group flex-1 compact">
             <label class="form-label">ยืนยันรหัสผ่าน</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-lock input-icon"></i>
-              <input type="password" class="form-input" [(ngModel)]="userData.confirmPassword" name="confirmPassword"
-                placeholder="••••••••" required autocomplete="new-password">
+              <input
+                type="password"
+                class="form-input"
+                [(ngModel)]="userData.confirmPassword"
+                name="confirmPassword"
+                placeholder="••••••••"
+                required
+                autocomplete="new-password"
+              />
             </div>
           </div>
         </div>
@@ -102,16 +123,28 @@
             <label class="form-label">ชื่อจริง</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-user input-icon"></i>
-              <input type="text" class="form-input" [(ngModel)]="userData.firstName" name="firstName"
-                placeholder="ชื่อ" required>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="userData.firstName"
+                name="firstName"
+                placeholder="ชื่อ"
+                required
+              />
             </div>
           </div>
           <div class="form-group flex-1 compact">
             <label class="form-label">นามสกุล</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-user input-icon"></i>
-              <input type="text" class="form-input" [(ngModel)]="userData.lastName" name="lastName"
-                placeholder="นามสกุล" required>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="userData.lastName"
+                name="lastName"
+                placeholder="นามสกุล"
+                required
+              />
             </div>
           </div>
         </div>
@@ -120,8 +153,14 @@
           <label class="form-label">เบอร์โทรศัพท์</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-phone input-icon"></i>
-            <input type="tel" class="form-input" [(ngModel)]="userData.phone" name="phone"
-              placeholder="08X-XXX-XXXX" required>
+            <input
+              type="tel"
+              class="form-input"
+              [(ngModel)]="userData.phone"
+              name="phone"
+              placeholder="08X-XXX-XXXX"
+              required
+            />
           </div>
         </div>
       </div>
@@ -138,16 +177,29 @@
             <label class="form-label">เลขที่ใบอนุญาต</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-certificate input-icon"></i>
-              <input type="text" class="form-input" [(ngModel)]="profileData.license_number" name="license"
-                placeholder="AS-XXXX-XXXX" required>
+              <input
+                type="text"
+                class="form-input"
+                [(ngModel)]="profileData.license_number"
+                name="license"
+                placeholder="AS-XXXX-XXXX"
+                required
+              />
             </div>
           </div>
           <div class="form-group flex-1 compact">
             <label class="form-label">ประสบการณ์ (ปี)</label>
             <div class="input-wrapper">
               <i class="fa-solid fa-clock input-icon"></i>
-              <input type="number" class="form-input" [(ngModel)]="profileData.years_experience" name="years"
-                placeholder="5" required min="0">
+              <input
+                type="number"
+                class="form-input"
+                [(ngModel)]="profileData.years_experience"
+                name="years"
+                placeholder="5"
+                required
+                min="0"
+              />
             </div>
           </div>
         </div>
@@ -155,9 +207,18 @@
         <div class="form-group compact">
           <label class="form-label">อัปโหลดไฟล์หลักฐานคุณสมบัติ</label>
           <div class="file-upload-wrapper" [class.uploaded]="profileData.qualification_file_url">
-            <input type="file" id="evidenceFile" (change)="onFileSelected($event)" class="file-input-hidden" accept=".pdf,.jpg,.jpeg,.png">
+            <input
+              type="file"
+              id="evidenceFile"
+              (change)="onFileSelected($event)"
+              class="file-input-hidden"
+              accept=".pdf,.jpg,.jpeg,.png"
+            />
             <label for="evidenceFile" class="file-upload-label">
-              <div class="upload-content" *ngIf="!isUploading && !profileData.qualification_file_url">
+              <div
+                class="upload-content"
+                *ngIf="!isUploading && !profileData.qualification_file_url"
+              >
                 <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
                 <span>เลือกไฟล์หลักฐาน (PDF, Image)</span>
               </div>
@@ -165,7 +226,10 @@
                 <span class="spinner-border spinner-border-sm me-2"></span>
                 <span>กำลังอัปโหลด...</span>
               </div>
-              <div class="upload-content success" *ngIf="profileData.qualification_file_url && !isUploading">
+              <div
+                class="upload-content success"
+                *ngIf="profileData.qualification_file_url && !isUploading"
+              >
                 <i class="fa-solid fa-circle-check me-2"></i>
                 <span>อัปโหลดสำเร็จแล้ว</span>
               </div>
@@ -180,8 +244,13 @@
           <label class="form-label">ประวัติการศึกษา / ผลงาน</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-graduation-cap input-icon"></i>
-            <textarea class="form-input textarea" [(ngModel)]="profileData.education_background" name="edu" rows="2"
-              placeholder="ข้อมูลการศึกษา..."></textarea>
+            <textarea
+              class="form-input textarea"
+              [(ngModel)]="profileData.education_background"
+              name="edu"
+              rows="2"
+              placeholder="ข้อมูลการศึกษา..."
+            ></textarea>
           </div>
         </div>
       </div>
@@ -213,8 +282,14 @@
           <label class="form-label">เลขที่บัญชี</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-credit-card input-icon"></i>
-            <input type="text" class="form-input" [(ngModel)]="profileData.bank_account_no" name="bankNo"
-              placeholder="XXX-X-XXXXX-X" required>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="profileData.bank_account_no"
+              name="bankNo"
+              placeholder="XXX-X-XXXXX-X"
+              required
+            />
           </div>
         </div>
 
@@ -222,8 +297,14 @@
           <label class="form-label">ชื่อบัญชี (ภาษาไทย/อังกฤษ ตามหน้าสมุด)</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-signature input-icon"></i>
-            <input type="text" class="form-input" [(ngModel)]="profileData.bank_account_name" name="bankAccName"
-              placeholder="นาย กรีน ออฟฟิศ" required>
+            <input
+              type="text"
+              class="form-input"
+              [(ngModel)]="profileData.bank_account_name"
+              name="bankAccName"
+              placeholder="นาย กรีน ออฟฟิศ"
+              required
+            />
           </div>
         </div>
       </div>
@@ -240,15 +321,32 @@
 
       <!-- Action Buttons -->
       <div class="form-actions">
-        <button type="button" class="btn-secondary" (click)="prevStep()" *ngIf="step > 1" [disabled]="isLoading || isUploading">
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="prevStep()"
+          *ngIf="step > 1"
+          [disabled]="isLoading || isUploading"
+        >
           <i class="fa-solid fa-arrow-left"></i> กลับ
         </button>
 
-        <button type="button" class="btn-primary" (click)="nextStep()" *ngIf="step < 4" [disabled]="isLoading || isUploading">
+        <button
+          type="button"
+          class="btn-primary"
+          (click)="nextStep()"
+          *ngIf="step < 4"
+          [disabled]="isLoading || isUploading"
+        >
           ถัดไป <i class="fa-solid fa-arrow-right"></i>
         </button>
 
-        <button type="submit" class="btn-primary" *ngIf="step === 4" [disabled]="isLoading || isUploading">
+        <button
+          type="submit"
+          class="btn-primary"
+          *ngIf="step === 4"
+          [disabled]="isLoading || isUploading"
+        >
           <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
           <span *ngIf="!isLoading">ยืนยันการลงทะเบียน</span>
         </button>

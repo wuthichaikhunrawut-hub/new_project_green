@@ -1,13 +1,18 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-const genAI = new GoogleGenerativeAI('AIzaSyCwYMWXmc1wgqIAfpTttQR47ZIeVPcwh6Q');
+const apiKey = String(process.env.GEMINI_API_KEY || '').trim();
+if (!apiKey) {
+  console.error('GEMINI_API_KEY is required');
+  process.exit(1);
+}
+const genAI = new GoogleGenerativeAI(apiKey);
 
 async function testModel(modelName) {
   try {
-    await genAI.getGenerativeModel({ model: modelName }).generateContent("hello");
-    console.log("Success with", modelName);
+    await genAI.getGenerativeModel({ model: modelName }).generateContent('hello');
+    console.log('Success with', modelName);
   } catch (e) {
-    console.error("Error with", modelName, ":", e.message.substring(0, 50));
+    console.error('Error with', modelName, ':', e.message.substring(0, 50));
   }
 }
 

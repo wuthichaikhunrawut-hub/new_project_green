@@ -6,11 +6,10 @@ import {
   Patch,
   Param,
   Delete,
-  Headers,
   ParseIntPipe,
   UseGuards,
-  UseInterceptors,
   Req,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AssessmentsService } from './assessments.service';
 import { CreateAssessmentDto } from './dto/create-assessment.dto';
@@ -23,25 +22,6 @@ import { Roles } from '../auth/roles.decorator';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class AssessmentsController {
   constructor(private readonly assessmentsService: AssessmentsService) {}
-
-  private getOrgId(headers: any): number {
-    const orgIdStr = headers['x-org-id'];
-    if (!orgIdStr) return 0;
-    const orgId = parseInt(orgIdStr, 10);
-    if (isNaN(orgId)) return 0;
-    return orgId;
-  }
-
-  private normalizeRole(role: string): string {
-    return String(role || '')
-      .trim()
-      .toUpperCase()
-      .replace(/\s+/g, '_');
-  }
-
-  private getUserRole(headers: Record<string, string | undefined>): string {
-    return this.normalizeRole(headers['x-user-role'] ?? '');
-  }
 
   @Post()
   @Roles('SYSTEM_ADMIN', 'ORG_ADMIN')
@@ -92,7 +72,15 @@ export class AssessmentsController {
     ].includes(role)
       ? 0
       : req.user.orgId;
-    return this.assessmentsService.findOne(+id, orgId);
+    return this.assessmentsService.findOne(+id, orgId).then((assessment) => {
+      if (
+        role === 'ASSESSOR' &&
+        assessment.assessor_user_id !== Number(req.user.sub)
+      ) {
+        throw new ForbiddenException('ไม่มีสิทธิ์เข้าถึงการประเมินนี้');
+      }
+      return assessment;
+    });
   }
 
   @Patch(':id')
@@ -111,6 +99,14 @@ export class AssessmentsController {
     ].includes(role)
       ? 0
       : req.user.orgId;
+    if (role === 'ASSESSOR') {
+      return this.assessmentsService.findOne(+id, 0).then((assessment) => {
+        if (assessment.assessor_user_id !== Number(req.user.sub)) {
+          throw new ForbiddenException('ไม่มีสิทธิ์แก้ไขการประเมินนี้');
+        }
+        return this.assessmentsService.update(+id, updateAssessmentDto, orgId);
+      });
+    }
     return this.assessmentsService.update(+id, updateAssessmentDto, orgId);
   }
 

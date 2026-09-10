@@ -9,14 +9,11 @@ import { Assessment } from '../assessments/entities/assessment.entity';
 import { CarbonLog } from '../carbon-logs/entities/carbon-log.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import { SettingsService } from '../settings/settings.service';
-import { OrganizationGoal } from './entities/organization-goal.entity';
 import {
   CarbonScopePoint,
   CarbonUnitPoint,
   ExecutiveDashboardResponse,
 } from './interfaces/executive.types';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class ExecutiveService {
@@ -27,8 +24,6 @@ export class ExecutiveService {
     private readonly carbonRepo: Repository<CarbonLog>,
     @InjectRepository(Organization)
     private readonly orgRepo: Repository<Organization>,
-    @InjectRepository(OrganizationGoal)
-    private readonly goalRepo: Repository<OrganizationGoal>,
     private readonly settingsService: SettingsService,
   ) {}
 
@@ -42,14 +37,16 @@ export class ExecutiveService {
         throw new NotFoundException('ไม่พบข้อมูลองค์กร');
       }
 
-      const approvedAssessments = await this.assessmentRepo.find({
-        where: { org_id: orgId, status: 'APPROVED' },
-        relations: ['certificates'],
-        order: { updated_at: 'DESC' },
-      });
-
-      const carbonByScope = await this.getCarbonByScope(orgId, filters);
-      const carbonByUnit = await this.getCarbonByUnit(orgId, filters);
+      const [approvedAssessments, carbonByScope, carbonByUnit] =
+        await Promise.all([
+          this.assessmentRepo.find({
+            where: { org_id: orgId, status: 'APPROVED' },
+            relations: ['certificates'],
+            order: { updated_at: 'DESC' },
+          }),
+          this.getCarbonByScope(orgId, filters),
+          this.getCarbonByUnit(orgId, filters),
+        ]);
       const approvedCount = approvedAssessments.length;
       const avgApprovedScore =
         approvedCount > 0
@@ -140,7 +137,7 @@ export class ExecutiveService {
       query.andWhere('log.date <= :endDate', { endDate: filters.endDate });
     }
     if (filters?.branchId) {
-      query.andWhere('log.organization_unit_id = :branchId', {
+      query.andWhere('log.org_unit_id = :branchId', {
         branchId: filters.branchId,
       });
     }
@@ -202,7 +199,7 @@ export class ExecutiveService {
       query.andWhere('log.date <= :endDate', { endDate: filters.endDate });
     }
     if (filters?.branchId) {
-      query.andWhere('log.organization_unit_id = :branchId', {
+      query.andWhere('log.org_unit_id = :branchId', {
         branchId: filters.branchId,
       });
     }
@@ -223,9 +220,9 @@ export class ExecutiveService {
     const allBranchesEmissions = await this.carbonRepo
       .createQueryBuilder('log')
       .where('log.org_id = :orgId', { orgId })
-      .select('log.organization_unit_id', 'branchId')
+      .select('log.org_unit_id', 'branchId')
       .addSelect('SUM(log.total_emission)', 'totalEmission')
-      .groupBy('log.organization_unit_id')
+      .groupBy('log.org_unit_id')
       .getRawMany<{ branchId: number; totalEmission: string }>();
 
     const allEmissionsList = allBranchesEmissions
@@ -260,8 +257,7 @@ export class ExecutiveService {
     if (!org) throw new NotFoundException('Organization not found');
 
     org.target_reduction_percent = targetReductionPercent;
-    // Assuming base_year might be updated or a separate goals table exists.
-    // Here we update the organization's current target.
+    org.target_year = year;
     await this.orgRepo.save(org);
 
     return { success: true, targetReductionPercent, year };
@@ -354,7 +350,7 @@ export class ExecutiveService {
                 ) / approvedAssessments.length
               ).toFixed(2),
             )
-          : 85;
+          : 0;
 
       return items.map((item, index) => ({
         rank: index + 1,
@@ -399,160 +395,5 @@ export class ExecutiveService {
     const actualReductionPercent = ((baseline - latest) / baseline) * 100;
     const progress = (actualReductionPercent / targetReductionPercent) * 100;
     return Number(Math.max(0, Math.min(100, progress)).toFixed(2));
-  }
-
-  async getCustomGoals(orgId: number): Promise<any[]> {
-    try {
-      const org = await this.orgRepo.findOne({ where: { id: orgId } });
-      const baseYear = org?.base_year || new Date().getFullYear() - 1;
-
-      const goals = await this.goalRepo.find({
-        where: { org_id: orgId },
-        order: { id: 'ASC' },
-      });
-
-      const logs = await this.carbonRepo.find({
-        where: { org_id: orgId },
-      });
-
-      return goals.map((g) => {
-        const title = g.title.toLowerCase();
-        let filteredLogs = logs;
-
-        // 1. Filter logs based on keywords in title
-        if (
-          title.includes('ไฟฟ้า') ||
-          title.includes('electricity') ||
-          title.includes('power') ||
-          title.includes('พลังงาน')
-        ) {
-          filteredLogs = logs.filter(
-            (l) =>
-              l.activity_type?.toLowerCase().includes('electricity') ||
-              l.activity_type?.toLowerCase().includes('electric'),
-          );
-        } else if (
-          title.includes('น้ำ') ||
-          title.includes('water') ||
-          title.includes('ประปา')
-        ) {
-          filteredLogs = logs.filter((l) =>
-            l.activity_type?.toLowerCase().includes('water'),
-          );
-        } else if (
-          title.includes('น้ำมัน') ||
-          title.includes('fuel') ||
-          title.includes('gasoline') ||
-          title.includes('diesel') ||
-          title.includes('ดีเซล') ||
-          title.includes('ยานพาหนะ')
-        ) {
-          filteredLogs = logs.filter(
-            (l) =>
-              l.activity_type?.toLowerCase().includes('fuel') ||
-              l.activity_type?.toLowerCase().includes('gasoline') ||
-              l.activity_type?.toLowerCase().includes('diesel'),
-          );
-        } else if (title.includes('กระดาษ') || title.includes('paper')) {
-          filteredLogs = logs.filter((l) =>
-            l.activity_type?.toLowerCase().includes('paper'),
-          );
-        }
-
-        // 2. Sum by year
-        const byYear = new Map<number, number>();
-        for (const log of filteredLogs) {
-          const logYear = log.year || new Date(log.created_at).getFullYear();
-          byYear.set(
-            logYear,
-            (byYear.get(logYear) || 0) + Number(log.total_emission || 0),
-          );
-        }
-
-        const baseline = byYear.get(baseYear);
-        const latestYear =
-          byYear.size > 0
-            ? Math.max(...Array.from(byYear.keys()))
-            : new Date().getFullYear();
-        const latest = byYear.get(latestYear);
-
-        let progress = g.progress || 0;
-        let status = g.status || 'On Track';
-
-        if (
-          baseline &&
-          latest &&
-          baseline > 0 &&
-          g.target_reduction_percent > 0
-        ) {
-          const actualReductionPercent = ((baseline - latest) / baseline) * 100;
-          progress = Number(
-            (
-              (actualReductionPercent / g.target_reduction_percent) *
-              100
-            ).toFixed(2),
-          );
-          progress = Math.max(0, Math.min(100, progress));
-
-          if (progress >= 100) {
-            status = 'Completed';
-          } else if (progress >= 70) {
-            status = 'On Track';
-          } else if (progress >= 40) {
-            status = 'Behind';
-          } else {
-            status = 'At Risk';
-          }
-        } else if (g.target_reduction_percent > 0) {
-          progress = 0;
-          status = 'On Track';
-        }
-
-        return {
-          id: g.id,
-          title: g.title,
-          targetDate: g.target_date
-            ? g.target_date.toISOString().split('T')[0]
-            : '',
-          targetPercent: g.target_reduction_percent,
-          progress,
-          status,
-        };
-      });
-    } catch (error) {
-      console.error('getCustomGoals error:', error);
-      return [];
-    }
-  }
-
-  async saveCustomGoals(
-    orgId: number,
-    goals: any[],
-  ): Promise<{ success: boolean }> {
-    try {
-      // Delete existing goals for this organization
-      await this.goalRepo.delete({ org_id: orgId });
-
-      // Insert new goals
-      for (const goal of goals) {
-        const targetDate = goal.targetDate
-          ? new Date(goal.targetDate)
-          : undefined;
-        await this.goalRepo.save(
-          this.goalRepo.create({
-            org_id: orgId,
-            title: goal.title,
-            target_reduction_percent: goal.targetPercent,
-            target_date: targetDate,
-            status: goal.status || 'Active',
-            progress: goal.progress || 0,
-          }),
-        );
-      }
-      return { success: true };
-    } catch (error) {
-      console.error('saveCustomGoals error:', error);
-      throw new InternalServerErrorException('ไม่สามารถบันทึกเป้าหมายย่อยได้');
-    }
   }
 }

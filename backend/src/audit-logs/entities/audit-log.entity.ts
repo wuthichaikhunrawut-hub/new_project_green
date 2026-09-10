@@ -5,9 +5,12 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
+@Index(['action_by_user_id', 'created_at'])
+@Index(['assessment_detail_id'])
 @Entity('assessment_audit_logs')
 export class AuditLog {
   @PrimaryGeneratedColumn('increment', { name: 'audit_log_id' })

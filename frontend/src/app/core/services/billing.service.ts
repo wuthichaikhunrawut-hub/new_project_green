@@ -15,7 +15,7 @@ export interface PaymentMethod {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class BillingService {
   private http = inject(HttpClient);
@@ -24,19 +24,22 @@ export class BillingService {
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-
       }
     }
     return headers;
   }
 
   createSetupIntent(): Observable<{ clientSecret: string }> {
-    return this.http.post<{ clientSecret: string }>(`${this.apiUrl}/setup-intent`, {}, { headers: this.getHeaders() });
+    return this.http.post<{ clientSecret: string }>(
+      `${this.apiUrl}/setup-intent`,
+      {},
+      { headers: this.getHeaders() },
+    );
   }
 
   getPaymentMethods(): Observable<PaymentMethod[]> {

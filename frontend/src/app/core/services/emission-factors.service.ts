@@ -15,7 +15,7 @@ export interface EmissionFactor {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class EmissionFactorsService {
   private http = inject(HttpClient);
@@ -23,7 +23,7 @@ export class EmissionFactorsService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
   }
 
@@ -36,7 +36,9 @@ export class EmissionFactorsService {
   }
 
   updateFactor(id: string, data: Partial<EmissionFactor>): Observable<EmissionFactor> {
-    return this.http.put<EmissionFactor>(`${this.apiUrl}/${id}`, data, { headers: this.getHeaders() });
+    return this.http.put<EmissionFactor>(`${this.apiUrl}/${id}`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   deleteFactor(id: string): Observable<void> {

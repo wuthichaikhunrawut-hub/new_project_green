@@ -11,7 +11,7 @@ import { Assessment } from '../../../core/models/assessment.model';
   selector: 'app-create-request',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './create-request.html'
+  templateUrl: './create-request.html',
 })
 export class CreateRequestComponent implements OnInit {
   private toast = inject(ToastService);
@@ -30,7 +30,7 @@ export class CreateRequestComponent implements OnInit {
   request: Partial<Assessment> = {
     status: 'PENDING',
     assessment_year: this.currentYear,
-    notes: ''
+    notes: '',
   };
 
   ngOnInit() {
@@ -49,7 +49,7 @@ export class CreateRequestComponent implements OnInit {
     const newRequest: Partial<Assessment> = {
       status: 'PENDING',
       assessment_year: this.request.assessment_year,
-      notes: this.request.notes
+      notes: this.request.notes,
     };
 
     this.requestsService.createRequest(newRequest).subscribe({
@@ -62,7 +62,7 @@ export class CreateRequestComponent implements OnInit {
         console.error('Failed to submit request', err);
         this.toast.error('เกิดข้อผิดพลาดในการส่งคำขอ');
         this.isSubmitting = false;
-      }
+      },
     });
   }
 }

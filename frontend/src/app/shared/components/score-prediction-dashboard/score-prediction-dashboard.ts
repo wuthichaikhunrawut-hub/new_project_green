@@ -1,13 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
-import { AuditScoreService, ScoreIndicatorInput, ScorePredictionSummary } from '../../../core/services/audit-score.service';
+import {
+  AuditScoreService,
+  ScoreIndicatorInput,
+  ScorePredictionSummary,
+} from '../../../core/services/audit-score.service';
 
 @Component({
   selector: 'app-score-prediction-dashboard',
   standalone: true,
   imports: [CommonModule],
   templateUrl: './score-prediction-dashboard.html',
-  styleUrls: ['./score-prediction-dashboard.css']
+  styleUrls: ['./score-prediction-dashboard.css'],
 })
 export class ScorePredictionDashboardComponent {
   @Input({ required: true }) indicators: ScoreIndicatorInput[] = [];

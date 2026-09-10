@@ -28,7 +28,8 @@ export class FeatureGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     if (!user || !user.org_id) {
       // System Admins might not have an org_id but they should bypass package checks
-      if (user?.role === 'System Admin') return true;
+      if (user?.role === 'System Admin' || user?.role === 'SYSTEM_ADMIN')
+        return true;
       throw new ForbiddenException('User organization context missing');
     }
 

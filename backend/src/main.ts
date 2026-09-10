@@ -47,17 +47,32 @@ async function bootstrap() {
 
   // ✅ Monitoring: Sentry Error Tracking (Only if DSN is provided)
   if (process.env.SENTRY_DSN) {
+    const tracesSampleRate = process.env.SENTRY_TRACES_SAMPLE_RATE
+      ? parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE)
+      : process.env.NODE_ENV === 'production'
+        ? 0.1
+        : 1.0;
+    const profilesSampleRate = process.env.SENTRY_PROFILES_SAMPLE_RATE
+      ? parseFloat(process.env.SENTRY_PROFILES_SAMPLE_RATE)
+      : process.env.NODE_ENV === 'production'
+        ? 0.1
+        : 1.0;
+
     Sentry.init({
       dsn: process.env.SENTRY_DSN,
       integrations: [nodeProfilingIntegration()],
-      tracesSampleRate: 1.0, //  Capture 100% of the transactions
-      profilesSampleRate: 1.0,
+      tracesSampleRate,
+      profilesSampleRate,
     });
     app.useGlobalInterceptors(new SentryInterceptor());
   }
 
   // ✅ Security: ปรับ CORS ให้เหมาะสมกับ Production
-  let allowedOrigins: string | string[] = '*';
+  let allowedOrigins: string[] = [
+    'http://localhost:4200',
+    'http://localhost:4000',
+    'http://localhost:3000',
+  ];
   if (process.env.ALLOWED_ORIGINS) {
     allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
   } else if (process.env.NODE_ENV === 'production') {
@@ -73,15 +88,21 @@ async function bootstrap() {
       'Content-Type, Accept, Authorization, x-org-id, x-user-role, x-user-id',
   });
 
-  // ✅ Documentation: Swagger API Docs
-  const config = new DocumentBuilder()
-    .setTitle('Green Sync API')
-    .setDescription('The official API documentation for Green Sync.')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, documentFactory);
+  // ✅ Documentation: disabled by default in production. It can be enabled
+  // explicitly for a protected/internal environment when required.
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.ENABLE_SWAGGER === 'true'
+  ) {
+    const config = new DocumentBuilder()
+      .setTitle('Green Sync API')
+      .setDescription('The official API documentation for Green Sync.')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const documentFactory = () => SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api/docs', app, documentFactory);
+  }
 
   const port = process.env.PORT || 3001;
   await app.listen(port, '0.0.0.0');

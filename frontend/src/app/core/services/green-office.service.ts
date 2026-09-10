@@ -17,7 +17,6 @@ export class GreenOfficeService {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-
       }
       const org = JSON.parse(localStorage.getItem('currentOrg') || '{}');
       if (org.id) {
@@ -29,29 +28,31 @@ export class GreenOfficeService {
 
   // ดึงเกณฑ์ทั้งหมด
   getCriteriaList(): Observable<GreenCriteria[]> {
-    return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() })
-      .pipe(
-        // Transform backend data to frontend format
-        map((criteria: any[]) => criteria.map((item: any) => ({
+    return this.http.get<any[]>(this.apiUrl, { headers: this.getHeaders() }).pipe(
+      // Transform backend data to frontend format
+      map((criteria: any[]) =>
+        criteria.map((item: any) => ({
           id: item.id,
           category_number: item.category_number,
           criteria_code: item.criteria_code,
           criteria_name: item.criteria_name,
           max_score: item.max_score,
           current_score: item.current_score || 0,
-          status: 'Pending' as const
-        }))),
-        // If backend is not available, we throw error so caller can handle
-        catchError(err => throwError(() => err))
-      );
+          status: 'Pending' as const,
+        })),
+      ),
+      // If backend is not available, we throw error so caller can handle
+      catchError((err) => throwError(() => err)),
+    );
   }
 
   // อัปเดตคะแนนประเมินตนเอง
   updateScore(criteriaId: number, score: number): Observable<boolean> {
-    return this.http.put<any>(`${this.apiUrl}/${criteriaId}/score`, { score }, { headers: this.getHeaders() })
+    return this.http
+      .put<any>(`${this.apiUrl}/${criteriaId}/score`, { score }, { headers: this.getHeaders() })
       .pipe(
-        map(res => res.success || true),
-        catchError(err => throwError(() => err))
+        map((res) => res.success || true),
+        catchError((err) => throwError(() => err)),
       );
   }
 
@@ -59,10 +60,11 @@ export class GreenOfficeService {
   uploadEvidence(file: File): Observable<string> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<any>(`${this.apiUrl}/upload`, formData, { headers: this.getHeaders() })
+    return this.http
+      .post<any>(`${this.apiUrl}/upload`, formData, { headers: this.getHeaders() })
       .pipe(
-        map(res => res.url || 'https://fake-storage.com/' + file.name),
-        catchError(err => throwError(() => err))
+        map((res) => res.url || 'https://fake-storage.com/' + file.name),
+        catchError((err) => throwError(() => err)),
       );
   }
 }

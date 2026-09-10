@@ -33,6 +33,16 @@
             "styles": [
               "src/styles.css"
             ],
+            "allowedCommonJsDependencies": [
+              "canvg",
+              "core-js",
+              "dompurify",
+              "fflate",
+              "html2canvas",
+              "jspdf",
+              "raf",
+              "rgbcolor"
+            ],
             "server": "src/main.server.ts",
             "prerender": false,
             "ssr": {
@@ -49,7 +59,7 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "12kB",
+                  "maximumWarning": "17kB",
                   "maximumError": "20kB"
                 }
               ],

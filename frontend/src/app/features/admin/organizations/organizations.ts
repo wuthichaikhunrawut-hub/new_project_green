@@ -9,7 +9,7 @@ import { Organization, OrgType } from '../../../core/models/organization.model';
   selector: 'app-admin-organizations',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './organizations.html'
+  templateUrl: './organizations.html',
 })
 export class AdminOrganizationsComponent implements OnInit {
   toast = inject(ToastService);
@@ -29,7 +29,7 @@ export class AdminOrganizationsComponent implements OnInit {
     { value: 'EDUCATION', label: 'สถาบันการศึกษา (Education)' },
     { value: 'INDUSTRIAL_OFFICE', label: 'สำนักงานในโรงงาน (Industrial Office)' },
     { value: 'LOCAL_ADMIN', label: 'องค์กรปกครองส่วนท้องถิ่น (Local Admin)' },
-    { value: 'OTHERS', label: 'อื่นๆ (Others)' }
+    { value: 'OTHERS', label: 'อื่นๆ (Others)' },
   ];
 
   selectedOrg: Partial<Organization> | null = null;
@@ -54,7 +54,7 @@ export class AdminOrganizationsComponent implements OnInit {
         console.error('Failed to load orgs:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -67,10 +67,10 @@ export class AdminOrganizationsComponent implements OnInit {
 
     // Filter by Tab
     if (this.activeTab !== 'ALL') {
-      filtered = filtered.filter(o => {
+      filtered = filtered.filter((o) => {
         const type = String(o.industry_type || '').toUpperCase();
         if (this.activeTab === 'OTHERS') {
-          return !this.industryTypes.some(it => it.value === type && it.value !== 'OTHERS');
+          return !this.industryTypes.some((it) => it.value === type && it.value !== 'OTHERS');
         }
         return type === this.activeTab;
       });
@@ -81,10 +81,11 @@ export class AdminOrganizationsComponent implements OnInit {
       return filtered;
     }
     const lowerSearch = this.searchText.toLowerCase();
-    return filtered.filter((o: any) => 
-      o.name.toLowerCase().includes(lowerSearch) ||
-      (o.industry_type && o.industry_type.toLowerCase().includes(lowerSearch)) ||
-      (o.tax_id && o.tax_id.toLowerCase().includes(lowerSearch))
+    return filtered.filter(
+      (o: any) =>
+        o.name.toLowerCase().includes(lowerSearch) ||
+        (o.industry_type && o.industry_type.toLowerCase().includes(lowerSearch)) ||
+        (o.tax_id && o.tax_id.toLowerCase().includes(lowerSearch)),
     );
   }
 
@@ -101,7 +102,7 @@ export class AdminOrganizationsComponent implements OnInit {
         base_year: new Date().getFullYear(),
         target_reduction_percent: 0,
         current_green_status: 'NONE',
-        is_active: true
+        is_active: true,
       };
     }
   }
@@ -124,37 +125,37 @@ export class AdminOrganizationsComponent implements OnInit {
       base_year: this.selectedOrg.base_year,
       target_reduction_percent: this.selectedOrg.target_reduction_percent,
       current_green_status: this.selectedOrg.current_green_status,
-      is_active: this.selectedOrg.is_active
+      is_active: this.selectedOrg.is_active,
     };
 
     if (this.selectedOrg.id) {
-       this.orgService.updateOrganization(this.selectedOrg.id, payload).subscribe({
-         next: () => {
-           this.toast.success('บันทึกข้อมูลสำเร็จ');
-           this.isSaving = false;
-           this.closeEditModal();
-           this.loadOrganizations();
-         },
-         error: (err: any) => {
-           console.error('Failed to update org:', err);
-           this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
-           this.isSaving = false;
-         }
-       });
+      this.orgService.updateOrganization(this.selectedOrg.id, payload).subscribe({
+        next: () => {
+          this.toast.success('บันทึกข้อมูลสำเร็จ');
+          this.isSaving = false;
+          this.closeEditModal();
+          this.loadOrganizations();
+        },
+        error: (err: any) => {
+          console.error('Failed to update org:', err);
+          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+          this.isSaving = false;
+        },
+      });
     } else {
-       this.orgService.create(payload).subscribe({
-         next: () => {
-           this.toast.success('สร้างองค์กรใหม่สำเร็จ');
-           this.isSaving = false;
-           this.closeEditModal();
-           this.loadOrganizations();
-         },
-         error: (err: any) => {
-           console.error('Failed to create org:', err);
-           this.toast.error('เกิดข้อผิดพลาดในการสร้างองค์กร');
-           this.isSaving = false;
-         }
-       });
+      this.orgService.create(payload).subscribe({
+        next: () => {
+          this.toast.success('สร้างองค์กรใหม่สำเร็จ');
+          this.isSaving = false;
+          this.closeEditModal();
+          this.loadOrganizations();
+        },
+        error: (err: any) => {
+          console.error('Failed to create org:', err);
+          this.toast.error('เกิดข้อผิดพลาดในการสร้างองค์กร');
+          this.isSaving = false;
+        },
+      });
     }
   }
 
@@ -167,7 +168,7 @@ export class AdminOrganizationsComponent implements OnInit {
     const org = this.orgToSuspend;
     const action = org.is_active ? 'ระงับ' : 'เปิดใช้งาน';
     this.isSaving = true;
-    
+
     this.orgService.updateOrganization(org.id, { is_active: !org.is_active }).subscribe({
       next: () => {
         this.toast.success(`${action}องค์กรเรียบร้อยแล้ว`);
@@ -179,13 +180,13 @@ export class AdminOrganizationsComponent implements OnInit {
         console.error('Failed to toggle active status:', err);
         this.toast.error('เกิดข้อผิดพลาดในการดำเนินการ');
         this.isSaving = false;
-      }
+      },
     });
   }
 
   getIndustryLabel(value: string): string {
-    const type = this.industryTypes.find(t => t.value === String(value).toUpperCase());
-    return type ? type.label.split(' (')[0] : (value || 'ไม่ระบุ');
+    const type = this.industryTypes.find((t) => t.value === String(value).toUpperCase());
+    return type ? type.label.split(' (')[0] : value || 'ไม่ระบุ';
   }
 
   exportToCSV() {
@@ -206,7 +207,7 @@ export class AdminOrganizationsComponent implements OnInit {
         `"${org.industry_type || '-'}"`,
         `"${org.number_of_employees}"`,
         `"${org.target_reduction_percent || 0}"`,
-        `"${org.is_active ? 'Active' : 'Suspended'}"`
+        `"${org.is_active ? 'Active' : 'Suspended'}"`,
       ];
       csvRows.push(row.join(','));
     }

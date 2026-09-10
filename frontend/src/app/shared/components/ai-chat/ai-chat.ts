@@ -1,4 +1,11 @@
-import { Component, inject, PLATFORM_ID, OnInit, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  inject,
+  PLATFORM_ID,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -16,9 +23,9 @@ interface ChatMessage {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './ai-chat.html',
-  styleUrls: ['./ai-chat.css']
+  styleUrls: ['./ai-chat.css'],
 })
-export class AiChatComponent implements OnInit {
+export class AiChatComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
@@ -31,7 +38,7 @@ export class AiChatComponent implements OnInit {
   messages: ChatMessage[] = [];
   sessions: { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] = [];
   activeSessionId: number | null = null;
-  
+
   // Custom Modal States
   showDeleteConfirmModal = false;
   showDeleteAllConfirmModal = false;
@@ -46,6 +53,8 @@ export class AiChatComponent implements OnInit {
   startY = 0;
   startWidth = 0;
   startHeight = 0;
+  private readonly mouseMoveHandler = (event: MouseEvent) => this.onMouseMove(event);
+  private readonly mouseUpHandler = () => this.stopResizing();
 
   onResizeStart(event: MouseEvent, direction: string) {
     event.preventDefault();
@@ -56,31 +65,36 @@ export class AiChatComponent implements OnInit {
     this.startWidth = this.chatWidth;
     this.startHeight = this.chatHeight;
 
-    const mouseMoveHandler = (e: MouseEvent) => this.onMouseMove(e);
-    const mouseUpHandler = () => {
-      this.isResizing = false;
-      document.removeEventListener('mousemove', mouseMoveHandler);
-      document.removeEventListener('mouseup', mouseUpHandler);
-      this.cdr.markForCheck();
-    };
+    document.addEventListener('mousemove', this.mouseMoveHandler);
+    document.addEventListener('mouseup', this.mouseUpHandler);
+  }
 
-    document.addEventListener('mousemove', mouseMoveHandler);
-    document.addEventListener('mouseup', mouseUpHandler);
+  private stopResizing() {
+    this.isResizing = false;
+    if (isPlatformBrowser(this.platformId)) {
+      document.removeEventListener('mousemove', this.mouseMoveHandler);
+      document.removeEventListener('mouseup', this.mouseUpHandler);
+    }
+    this.cdr.markForCheck();
+  }
+
+  ngOnDestroy() {
+    this.stopResizing();
   }
 
   onMouseMove(event: MouseEvent) {
     if (!this.isResizing) return;
-    
+
     if (this.resizeDirection.includes('left')) {
       const dx = this.startX - event.clientX;
       this.chatWidth = Math.max(300, Math.min(800, this.startWidth + dx));
     }
-    
+
     if (this.resizeDirection.includes('top')) {
       const dy = this.startY - event.clientY;
       this.chatHeight = Math.max(400, Math.min(800, this.startHeight + dy));
     }
-    
+
     this.cdr.markForCheck();
   }
 
@@ -94,7 +108,6 @@ export class AiChatComponent implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       if (token) {
-
       }
     }
     return headers;
@@ -105,49 +118,53 @@ export class AiChatComponent implements OnInit {
     const token = localStorage.getItem('access_token');
     if (!token) return;
 
-    this.http.get<any[]>(`${environment.apiUrl}/gemini/history`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (logs) => {
-        if (logs && logs.length > 0) {
-          this.sessions = this.groupMessagesIntoSessions(logs);
-          if (this.sessions.length > 0) {
-            // Load the latest session by default
-            this.selectSession(this.sessions[0]);
+    this.http
+      .get<any[]>(`${environment.apiUrl}/gemini/history`, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (logs) => {
+          if (logs && logs.length > 0) {
+            this.sessions = this.groupMessagesIntoSessions(logs);
+            if (this.sessions.length > 0) {
+              // Load the latest session by default
+              this.selectSession(this.sessions[0]);
+            }
           }
-        }
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        console.error('Failed to load chat history:', err);
-        this.cdr.markForCheck();
-      }
-    });
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Failed to load chat history:', err);
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   loadHistoryAfterMessage() {
-    this.http.get<any[]>(`${environment.apiUrl}/gemini/history`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (logs) => {
-        if (logs && logs.length > 0) {
-          const oldActiveId = this.activeSessionId;
-          this.sessions = this.groupMessagesIntoSessions(logs);
-          if (oldActiveId !== null) {
-            const found = this.sessions.find(s => s.id === oldActiveId);
-            if (found) {
-              this.activeSessionId = found.id;
-              this.cdr.markForCheck();
-              return;
+    this.http
+      .get<any[]>(`${environment.apiUrl}/gemini/history`, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (logs) => {
+          if (logs && logs.length > 0) {
+            const oldActiveId = this.activeSessionId;
+            this.sessions = this.groupMessagesIntoSessions(logs);
+            if (oldActiveId !== null) {
+              const found = this.sessions.find((s) => s.id === oldActiveId);
+              if (found) {
+                this.activeSessionId = found.id;
+                this.cdr.markForCheck();
+                return;
+              }
+            }
+            if (this.sessions.length > 0) {
+              this.activeSessionId = this.sessions[0].id;
             }
           }
-          if (this.sessions.length > 0) {
-            this.activeSessionId = this.sessions[0].id;
-          }
-        }
-        this.cdr.markForCheck();
-      }
-    });
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   setDefaultMessage() {
@@ -155,31 +172,39 @@ export class AiChatComponent implements OnInit {
       {
         role: 'bot',
         text: 'สวัสดีครับ! ผม GreenBot ผู้ช่วย AI ด้านสำนักงานสีเขียวและ Carbon Footprint 🌿 ถามอะไรก็ได้เลยครับ',
-        time: new Date()
-      }
+        time: new Date(),
+      },
     ];
     this.activeSessionId = null;
   }
 
-  groupMessagesIntoSessions(logs: any[]): { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] {
-    const sessionsList: { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] = [];
-    let currentSession: { id: number; title: string; messages: ChatMessage[]; logIds: number[] } | null = null;
+  groupMessagesIntoSessions(
+    logs: any[],
+  ): { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] {
+    const sessionsList: { id: number; title: string; messages: ChatMessage[]; logIds: number[] }[] =
+      [];
+    let currentSession: {
+      id: number;
+      title: string;
+      messages: ChatMessage[];
+      logIds: number[];
+    } | null = null;
     let lastTime = 0;
 
     logs.forEach((log, index) => {
       const logTime = new Date(log.created_at).getTime();
-      const isNewSession = !currentSession || (logTime - lastTime > 30 * 60 * 1000); // 30 minutes gap
+      const isNewSession = !currentSession || logTime - lastTime > 30 * 60 * 1000; // 30 minutes gap
 
       const userMsg: ChatMessage = {
         role: 'user',
         text: log.question,
-        time: new Date(log.created_at)
+        time: new Date(log.created_at),
       };
 
       const botMsg: ChatMessage = {
         role: 'bot',
         text: log.answer,
-        time: new Date(log.created_at)
+        time: new Date(log.created_at),
       };
 
       if (isNewSession) {
@@ -187,7 +212,7 @@ export class AiChatComponent implements OnInit {
           id: log.id || log.chat_log_id,
           title: log.question.substring(0, 24) + (log.question.length > 24 ? '...' : ''),
           messages: [userMsg, botMsg],
-          logIds: [log.id || log.chat_log_id]
+          logIds: [log.id || log.chat_log_id],
         };
         sessionsList.push(currentSession);
       } else if (currentSession) {
@@ -234,30 +259,32 @@ export class AiChatComponent implements OnInit {
     this.isLoading = true;
     this.cdr.markForCheck();
 
-    this.http.post<{ reply: string }>(
-      `${environment.apiUrl}/gemini/chat`,
-      { message: text },
-      { headers: this.getHeaders() }
-    ).subscribe({
-      next: (res) => {
-        this.messages.push({ role: 'bot', text: res.reply, time: new Date() });
-        this.isLoading = false;
-        this.cdr.markForCheck();
-        this.scrollToBottom();
-        this.loadHistoryAfterMessage();
-        this.subscriptionService.quotaUpdated$.next();
-      },
-      error: (err) => {
-        const isApiKeyError = err?.error?.message?.includes('GEMINI_API_KEY');
-        const errorText = isApiKeyError
-          ? '⚠️ ยังไม่ได้ตั้งค่า GEMINI_API_KEY ในระบบ กรุณาแจ้งผู้ดูแลระบบ'
-          : '❌ ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
-        this.messages.push({ role: 'bot', text: errorText, time: new Date() });
-        this.isLoading = false;
-        this.cdr.markForCheck();
-        this.scrollToBottom();
-      }
-    });
+    this.http
+      .post<{ reply: string }>(
+        `${environment.apiUrl}/gemini/chat`,
+        { message: text },
+        { headers: this.getHeaders() },
+      )
+      .subscribe({
+        next: (res) => {
+          this.messages.push({ role: 'bot', text: res.reply, time: new Date() });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          this.scrollToBottom();
+          this.loadHistoryAfterMessage();
+          this.subscriptionService.quotaUpdated$.next();
+        },
+        error: (err) => {
+          const isApiKeyError = err?.error?.message?.includes('GEMINI_API_KEY');
+          const errorText = isApiKeyError
+            ? '⚠️ ยังไม่ได้ตั้งค่า GEMINI_API_KEY ในระบบ กรุณาแจ้งผู้ดูแลระบบ'
+            : '❌ ไม่สามารถเชื่อมต่อ AI ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง';
+          this.messages.push({ role: 'bot', text: errorText, time: new Date() });
+          this.isLoading = false;
+          this.cdr.markForCheck();
+          this.scrollToBottom();
+        },
+      });
 
     this.scrollToBottom();
   }
@@ -293,36 +320,40 @@ export class AiChatComponent implements OnInit {
 
     if (this.showDeleteConfirmModal && this.sessionToDelete) {
       const idsStr = this.sessionToDelete.logIds.join(',');
-      this.http.delete(`${environment.apiUrl}/gemini/history/${idsStr}`, {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: () => {
-          this.loadHistory();
-          if (this.activeSessionId === this.sessionToDelete.id) {
-            this.setDefaultMessage();
-          }
-          this.cancelDelete();
-        },
-        error: (err) => {
-          console.error('Failed to delete session:', err);
-          this.cancelDelete();
-        }
-      });
+      this.http
+        .delete(`${environment.apiUrl}/gemini/history/${idsStr}`, {
+          headers: this.getHeaders(),
+        })
+        .subscribe({
+          next: () => {
+            this.loadHistory();
+            if (this.activeSessionId === this.sessionToDelete.id) {
+              this.setDefaultMessage();
+            }
+            this.cancelDelete();
+          },
+          error: (err) => {
+            console.error('Failed to delete session:', err);
+            this.cancelDelete();
+          },
+        });
     } else if (this.showDeleteAllConfirmModal) {
-      this.http.delete(`${environment.apiUrl}/gemini/history`, {
-        headers: this.getHeaders()
-      }).subscribe({
-        next: () => {
-          this.sessions = [];
-          this.setDefaultMessage();
-          this.showHistory = false;
-          this.cancelDelete();
-        },
-        error: (err) => {
-          console.error('Failed to clear chat history:', err);
-          this.cancelDelete();
-        }
-      });
+      this.http
+        .delete(`${environment.apiUrl}/gemini/history`, {
+          headers: this.getHeaders(),
+        })
+        .subscribe({
+          next: () => {
+            this.sessions = [];
+            this.setDefaultMessage();
+            this.showHistory = false;
+            this.cancelDelete();
+          },
+          error: (err) => {
+            console.error('Failed to clear chat history:', err);
+            this.cancelDelete();
+          },
+        });
     }
   }
 

@@ -9,6 +9,9 @@ import {
   ParseIntPipe,
   UseGuards,
   Res,
+  Req,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import {
@@ -31,6 +34,12 @@ import { UpdateOrganizationDto } from './dto/update-organization.dto';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class OrganizationsController {
   constructor(private readonly organizationsService: OrganizationsService) {}
+
+  private assertOrgAdminAccess(req: any, orgId: number) {
+    if (req.user?.role === 'ORG_ADMIN' && req.user.orgId !== orgId) {
+      throw new ForbiddenException('ไม่มีสิทธิ์เข้าถึงข้อมูลองค์กรอื่น');
+    }
+  }
 
   @Post()
   @Roles('SYSTEM_ADMIN')
@@ -84,7 +93,8 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'ดึงรายละเอียดข้อมูลองค์กรด้วยรหัส ID' })
   @ApiParam({ name: 'id', description: 'รหัสประจำองค์กร' })
   @ApiResponse({ status: 200, description: 'โหลดข้อมูลองค์กรสำเร็จ' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    this.assertOrgAdminAccess(req, id);
     return this.organizationsService.findOne(id);
   }
 
@@ -96,7 +106,9 @@ export class OrganizationsController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateData: UpdateOrganizationDto,
+    @Req() req: any,
   ) {
+    this.assertOrgAdminAccess(req, id);
     return this.organizationsService.update(id, updateData);
   }
 
@@ -105,7 +117,8 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'ดึงรายงานสรุปคาร์บอนประจำปีขององค์กร' })
   @ApiParam({ name: 'id', description: 'รหัสประจำองค์กร' })
   @ApiResponse({ status: 200, description: 'โหลดข้อมูลรายงานสำเร็จ' })
-  getAnnualReport(@Param('id', ParseIntPipe) id: number) {
+  getAnnualReport(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    this.assertOrgAdminAccess(req, id);
     return this.organizationsService.getAnnualReport(id);
   }
 
@@ -119,7 +132,9 @@ export class OrganizationsController {
   createUnit(
     @Param('orgId', ParseIntPipe) orgId: number,
     @Body() unitData: any,
+    @Req() req: any,
   ) {
+    this.assertOrgAdminAccess(req, orgId);
     return this.organizationsService.createUnit(orgId, unitData);
   }
 
@@ -128,7 +143,8 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'ดึงข้อมูลรายการหน่วยงานย่อย/สาขาทั้งหมดขององค์กร' })
   @ApiParam({ name: 'orgId', description: 'รหัสประจำองค์กร' })
   @ApiResponse({ status: 200, description: 'โหลดข้อมูลหน่วยงานย่อยสำเร็จ' })
-  findUnits(@Param('orgId', ParseIntPipe) orgId: number) {
+  findUnits(@Param('orgId', ParseIntPipe) orgId: number, @Req() req: any) {
+    this.assertOrgAdminAccess(req, orgId);
     return this.organizationsService.findUnitsByOrg(orgId);
   }
 
@@ -137,7 +153,14 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'แก้ไขข้อมูลหน่วยงานย่อย/สาขา' })
   @ApiParam({ name: 'id', description: 'รหัสของหน่วยงานย่อยที่ต้องการแก้ไข' })
   @ApiResponse({ status: 200, description: 'อัปเดตหน่วยงานย่อยสำเร็จ' })
-  updateUnit(@Param('id', ParseIntPipe) id: number, @Body() updateData: any) {
+  async updateUnit(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateData: any,
+    @Req() req: any,
+  ) {
+    const unit = await this.organizationsService.findUnit(id);
+    if (!unit) throw new NotFoundException('ไม่พบหน่วยงานย่อย');
+    this.assertOrgAdminAccess(req, unit.org_id);
     return this.organizationsService.updateUnit(id, updateData);
   }
 
@@ -146,7 +169,10 @@ export class OrganizationsController {
   @ApiOperation({ summary: 'ลบหน่วยงานย่อย/สาขาออกจากระบบ' })
   @ApiParam({ name: 'id', description: 'รหัสของหน่วยงานย่อยที่ต้องการลบ' })
   @ApiResponse({ status: 200, description: 'ลบหน่วยงานย่อยสำเร็จ' })
-  removeUnit(@Param('id', ParseIntPipe) id: number) {
+  async removeUnit(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+    const unit = await this.organizationsService.findUnit(id);
+    if (!unit) throw new NotFoundException('ไม่พบหน่วยงานย่อย');
+    this.assertOrgAdminAccess(req, unit.org_id);
     return this.organizationsService.removeUnit(id);
   }
 }

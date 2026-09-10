@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class RoleGuard implements CanActivate {
   private authService = inject(AuthService);
@@ -17,7 +17,7 @@ export class RoleGuard implements CanActivate {
     }
 
     const user = this.authService.getUser();
-    
+
     // Not authenticated, let authGuard (if any) or login page handle it
     if (!user) {
       this.router.navigate(['/login']);
@@ -55,7 +55,10 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    if (userRole === 'ASSESSORADMIN' && (allowed.includes('ASSESSOR') || allowed.includes('SYSTEMADMIN'))) {
+    if (
+      userRole === 'ASSESSORADMIN' &&
+      (allowed.includes('ASSESSOR') || allowed.includes('SYSTEMADMIN'))
+    ) {
       return true;
     }
 

@@ -25,13 +25,17 @@ import { CommonModule } from '@angular/common';
               type="button"
               class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 font-medium hover:bg-slate-50 transition-colors"
               (click)="cancel.emit()"
-            >{{ cancelLabel }}</button>
+            >
+              {{ cancelLabel }}
+            </button>
             <button
               type="button"
               class="px-4 py-2.5 rounded-xl font-semibold text-white transition-colors"
               [class]="confirmClass"
               (click)="confirm.emit()"
-            >{{ confirmLabel }}</button>
+            >
+              {{ confirmLabel }}
+            </button>
           </div>
         </div>
       </div>
@@ -39,12 +43,29 @@ import { CommonModule } from '@angular/common';
   `,
   styles: [
     `
-      .modal-backdrop { animation: fade-in 0.2s ease-out; }
-      .modal-panel { animation: scale-in 0.25s ease-out; }
-      @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+      .modal-backdrop {
+        animation: fade-in 0.2s ease-out;
+      }
+      .modal-panel {
+        animation: scale-in 0.25s ease-out;
+      }
+      @keyframes fade-in {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
       @keyframes scale-in {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
       }
     `,
   ],

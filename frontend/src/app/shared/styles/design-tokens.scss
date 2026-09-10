@@ -1,27 +1,27 @@
 :root {
   /* Accent */
-  --brand-green: #16A34A;
-  --brand-green-soft: #DCFCE7;
+  --brand-green: #16a34a;
+  --brand-green-soft: #dcfce7;
 
   /* Neutral palette */
-  --neutral-bg: #F8FAFC;
+  --neutral-bg: #f8fafc;
   --neutral-bg-dark: #111827;
 
   /* Text */
-  --text-primary: #0F172A;
-  --text-primary-dark: #F9FAFB;
-  --text-muted: #64748B;
-  --text-muted-dark: #9CA3AF;
+  --text-primary: #0f172a;
+  --text-primary-dark: #f9fafb;
+  --text-muted: #64748b;
+  --text-muted-dark: #9ca3af;
 
   /* Card */
-  --card-bg: #FFFFFF;
-  --card-bg-dark: #1F2937;
-  --card-shadow: 0 4px 12px rgba(0,0,0,.06);
-  --card-shadow-hover: 0 8px 20px rgba(0,0,0,.12);
+  --card-bg: #ffffff;
+  --card-bg-dark: #1f2937;
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.12);
   --card-radius: 1rem;
 
   /* Gradient background for the page */
-  --bg-gradient: linear-gradient(135deg, #F5F7FA 0%, #E2E8F0 100%);
+  --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
 }
 
 @media (prefers-color-scheme: dark) {

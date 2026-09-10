@@ -1,18 +1,31 @@
 import { ToastService } from '../../../core/services/toast.service';
 import { environment } from '../../../../environments/environment';
-import { Component, OnInit, inject, ChangeDetectorRef, Renderer2, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  ChangeDetectorRef,
+  Renderer2,
+  ViewChild,
+  ElementRef,
+  AfterViewInit,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
-import { EmissionFactorsService, EmissionFactor } from '../../../core/services/emission-factors.service';
+import {
+  EmissionFactorsService,
+  EmissionFactor,
+} from '../../../core/services/emission-factors.service';
 
 @Component({
   selector: 'app-admin-emission-factors',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './emission-factors.html',
-  styleUrls: ['./emission-factors.css']
+  styleUrls: ['./emission-factors.css'],
 })
 export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnDestroy {
   private toast = inject(ToastService);
@@ -37,7 +50,10 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
   activeTab: 'ALL' | 1 | 2 | 3 = 'ALL';
 
   get isSystemAdmin(): boolean {
-    const role = String(this.userRole || '').trim().toUpperCase().replace(/[\s_]/g, '');
+    const role = String(this.userRole || '')
+      .trim()
+      .toUpperCase()
+      .replace(/[\s_]/g, '');
     return role === 'SYSTEMADMIN' || role === 'ADMIN';
   }
 
@@ -84,7 +100,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
         console.error('Failed to load emission factors:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -97,7 +113,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
 
     // Filter by Tab
     if (this.activeTab !== 'ALL') {
-      filtered = filtered.filter(f => f.scope === Number(this.activeTab));
+      filtered = filtered.filter((f) => f.scope === Number(this.activeTab));
     }
 
     // Filter by Search Text
@@ -105,9 +121,10 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
       return filtered;
     }
     const lowerSearch = this.searchText.toLowerCase();
-    return filtered.filter(f => 
-      f.name.toLowerCase().includes(lowerSearch) ||
-      (f.source && f.source.toLowerCase().includes(lowerSearch))
+    return filtered.filter(
+      (f) =>
+        f.name.toLowerCase().includes(lowerSearch) ||
+        (f.source && f.source.toLowerCase().includes(lowerSearch)),
     );
   }
 
@@ -121,7 +138,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
         unit: 'kWh',
         factor_value: 0.0,
         source: 'TGO',
-        year: 2569
+        year: 2569,
       };
     }
   }
@@ -136,8 +153,8 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
 
     if (!this.isSystemAdmin) {
       // ✅ Assessor Admin / Assessor -> Send Proposal Request instead of direct write
-      const originalValue = this.selectedFactor.id 
-        ? String(this.factors.find(f => f.id === this.selectedFactor?.id)?.factor_value || 0)
+      const originalValue = this.selectedFactor.id
+        ? String(this.factors.find((f) => f.id === this.selectedFactor?.id)?.factor_value || 0)
         : '0';
 
       const isNew = !this.selectedFactor.id;
@@ -150,28 +167,32 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
         reason: isNew
           ? 'เสนอเพิ่มค่าสัมประสิทธิ์ตัวคูณคาร์บอนฟุตพริ้นท์ใหม่ เพื่อเพิ่มขีดความสามารถการคำนวณการใช้ทรัพยากร'
           : 'เสนอแก้ไขปรับปรุงตัวคูณคาร์บอนฟุตพริ้นท์เดิม',
-        details: isNew ? {
-          scope: Number(this.selectedFactor.scope || 1),
-          unit: this.selectedFactor.unit || 'kWh',
-          source: this.selectedFactor.source || 'TGO',
-          year: Number(this.selectedFactor.year || new Date().getFullYear())
-        } : null
+        details: isNew
+          ? {
+              scope: Number(this.selectedFactor.scope || 1),
+              unit: this.selectedFactor.unit || 'kWh',
+              source: this.selectedFactor.source || 'TGO',
+              year: Number(this.selectedFactor.year || new Date().getFullYear()),
+            }
+          : null,
       };
 
-      this.http.post(`${environment.apiUrl}/notifications/propose-academic`, proposePayload).subscribe({
-        next: () => {
-          this.toast.success('ยื่นข้อเสนอแก้ไขสูตรคาร์บอนต่อ System Admin เรียบร้อยแล้วครับ');
-          this.closeModal();
-          this.isSaving = false;
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          console.error(err);
-          this.toast.error('เกิดข้อผิดพลาดในการยื่นส่งคำขออนุมัติ');
-          this.isSaving = false;
-          this.cdr.markForCheck();
-        }
-      });
+      this.http
+        .post(`${environment.apiUrl}/notifications/propose-academic`, proposePayload)
+        .subscribe({
+          next: () => {
+            this.toast.success('ยื่นข้อเสนอแก้ไขสูตรคาร์บอนต่อ System Admin เรียบร้อยแล้วครับ');
+            this.closeModal();
+            this.isSaving = false;
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            console.error(err);
+            this.toast.error('เกิดข้อผิดพลาดในการยื่นส่งคำขออนุมัติ');
+            this.isSaving = false;
+            this.cdr.markForCheck();
+          },
+        });
       return;
     }
 
@@ -187,7 +208,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
           console.error(err);
           this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
           this.isSaving = false;
-        }
+        },
       });
     } else {
       this.factorsService.createFactor(this.selectedFactor).subscribe({
@@ -201,7 +222,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
           console.error(err);
           this.toast.error('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
           this.isSaving = false;
-        }
+        },
       });
     }
   }
@@ -221,7 +242,7 @@ export class AdminEmissionFactorsComponent implements OnInit, AfterViewInit, OnD
       error: (err) => {
         console.error(err);
         this.toast.error('เกิดข้อผิดพลาดในการลบ');
-      }
+      },
     });
   }
 }

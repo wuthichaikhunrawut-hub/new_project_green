@@ -6,7 +6,6 @@ import { Organization } from '../organizations/entities/organization.entity';
 import { Invoice } from '../subscriptions/entities/invoice.entity';
 import { Assessment } from '../assessments/entities/assessment.entity';
 import { OrganizationSubscription } from '../subscriptions/entities/organization-subscription.entity';
-import { SubscriptionPlan } from '../subscriptions/entities/subscription-plan.entity';
 import {
   AssessorProfile,
   VerificationStatus,
@@ -27,8 +26,6 @@ export class AnalyticsService {
     private assessmentRepo: Repository<Assessment>,
     @InjectRepository(OrganizationSubscription)
     private orgSubRepo: Repository<OrganizationSubscription>,
-    @InjectRepository(SubscriptionPlan)
-    private planRepo: Repository<SubscriptionPlan>,
     @InjectRepository(AssessorProfile)
     private assessorRepo: Repository<AssessorProfile>,
     @InjectRepository(CarbonLog)

@@ -1,4 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { SettingsService } from '../settings/settings.service';
 import Stripe from 'stripe';
 
@@ -20,15 +24,26 @@ export class StripeService implements OnModuleInit {
     }
   }
 
-  async constructEvent(payload: Buffer, signature: string) {
+  private async getStripe(): Promise<any> {
     if (!this.stripe) await this.initStripe();
-    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_test';
-    try {
-      return this.stripe.webhooks.constructEvent(
-        payload,
-        signature,
-        webhookSecret,
+    if (!this.stripe) {
+      throw new ServiceUnavailableException(
+        'Stripe is not configured for this environment',
       );
+    }
+    return this.stripe;
+  }
+
+  async constructEvent(payload: Buffer, signature: string) {
+    const stripe = await this.getStripe();
+    const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      throw new ServiceUnavailableException(
+        'Stripe webhook secret is not configured',
+      );
+    }
+    try {
+      return stripe.webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (error) {
       console.error('Webhook signature verification failed:', error);
       throw error;
@@ -36,10 +51,10 @@ export class StripeService implements OnModuleInit {
   }
 
   async createCustomer(email: string, name: string) {
-    if (!this.stripe) await this.initStripe();
+    const stripe = await this.getStripe();
     try {
       console.log('Creating Stripe Customer for:', email);
-      const customer = await this.stripe.customers.create({
+      const customer = await stripe.customers.create({
         email,
         name,
       });
@@ -52,10 +67,10 @@ export class StripeService implements OnModuleInit {
   }
 
   async createSetupIntent(customerId: string) {
-    if (!this.stripe) await this.initStripe();
+    const stripe = await this.getStripe();
     try {
       console.log('Creating SetupIntent for customer:', customerId);
-      const intent = await this.stripe.setupIntents.create({
+      const intent = await stripe.setupIntents.create({
         customer: customerId,
         payment_method_types: ['card'],
       });
@@ -68,9 +83,9 @@ export class StripeService implements OnModuleInit {
   }
 
   async listPaymentMethods(customerId: string) {
-    if (!this.stripe) await this.initStripe();
+    const stripe = await this.getStripe();
     try {
-      return await this.stripe.paymentMethods.list({
+      return await stripe.paymentMethods.list({
         customer: customerId,
       });
     } catch (error) {
@@ -80,25 +95,38 @@ export class StripeService implements OnModuleInit {
   }
 
   async detachPaymentMethod(paymentMethodId: string) {
-    if (!this.stripe) await this.initStripe();
-    return this.stripe.paymentMethods.detach(paymentMethodId);
+    const stripe = await this.getStripe();
+    return stripe.paymentMethods.detach(paymentMethodId);
   }
 
-  async createSubscription(customerId: string, priceId: string) {
-    if (!this.stripe) await this.initStripe();
-    return this.stripe.subscriptions.create({
+  async createSubscription(
+    customerId: string,
+    priceId: string,
+    paymentMethodId: string,
+    metadata: Record<string, string>,
+  ) {
+    const stripe = await this.getStripe();
+    return stripe.subscriptions.create({
       customer: customerId,
       items: [{ price: priceId }],
+      default_payment_method: paymentMethodId,
       payment_behavior: 'default_incomplete',
+      payment_settings: { save_default_payment_method: 'on_subscription' },
+      metadata,
       expand: ['latest_invoice.payment_intent'],
     });
   }
 
+  async getPaymentMethod(paymentMethodId: string) {
+    const stripe = await this.getStripe();
+    return stripe.paymentMethods.retrieve(paymentMethodId);
+  }
+
   async cancelSubscription(subscriptionId: string) {
-    if (!this.stripe) await this.initStripe();
+    const stripe = await this.getStripe();
     try {
       console.log(`Canceling Stripe Subscription: ${subscriptionId}`);
-      return await this.stripe.subscriptions.cancel(subscriptionId);
+      return await stripe.subscriptions.cancel(subscriptionId);
     } catch (error) {
       console.error(
         `Stripe Cancel Subscription Error (${subscriptionId}):`,
@@ -115,6 +143,11 @@ export class StripeService implements OnModuleInit {
     userId?: number,
   ) {
     if (!this.stripe) await this.initStripe();
+    if (!this.stripe && process.env.NODE_ENV === 'production') {
+      throw new ServiceUnavailableException(
+        'Stripe is not configured for production payouts',
+      );
+    }
     const metadata = userId ? { user_id: userId.toString() } : undefined;
     if (this.stripe) {
       try {
@@ -126,7 +159,7 @@ export class StripeService implements OnModuleInit {
             description: `Assessor Payout for User ${userId}`,
             metadata,
           });
-        } else {
+        } else if (process.env.NODE_ENV !== 'production') {
           return {
             id: 'tr_' + Math.random().toString(36).substring(2, 15),
             object: 'transfer',
@@ -144,6 +177,11 @@ export class StripeService implements OnModuleInit {
         console.error('Stripe Transfer Error:', error);
         throw error;
       }
+    }
+    if (process.env.NODE_ENV === 'production') {
+      throw new ServiceUnavailableException(
+        'A valid Stripe destination is required for production payouts',
+      );
     }
     return {
       id: 'tr_mock_' + Math.random().toString(36).substring(2, 15),

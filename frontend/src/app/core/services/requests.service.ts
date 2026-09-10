@@ -16,18 +16,17 @@ export class RequestsService {
 
   private getHeaders(): HttpHeaders {
     let headers = new HttpHeaders();
-    
+
     if (isPlatformBrowser(this.platformId)) {
       const token = localStorage.getItem('access_token');
       const currentUser = this.authService.getUser();
       const orgId = this.authService.getOrganizationId();
 
-
       if (orgId) headers = headers.set('x-org-id', String(orgId));
       if (currentUser?.role) headers = headers.set('x-user-role', String(currentUser.role));
       if (currentUser?.id) headers = headers.set('x-user-id', String(currentUser.id));
     }
-    
+
     return headers;
   }
 
@@ -44,7 +43,9 @@ export class RequestsService {
   }
 
   updateRequest(id: number | string, request: Partial<Assessment>): Observable<Assessment> {
-    return this.http.patch<Assessment>(`${this.apiUrl}/${id}`, request, { headers: this.getHeaders() });
+    return this.http.patch<Assessment>(`${this.apiUrl}/${id}`, request, {
+      headers: this.getHeaders(),
+    });
   }
 
   deleteRequest(id: number | string): Observable<void> {

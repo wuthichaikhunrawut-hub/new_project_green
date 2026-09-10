@@ -27,7 +27,7 @@ import { SettingsService } from '../../../core/services/settings.service';
       height: 100%;
       object-fit: contain;
     }
-  `
+  `,
 })
 export class AdminSettingsComponent implements OnInit {
   private toast = inject(ToastService);
@@ -51,7 +51,7 @@ export class AdminSettingsComponent implements OnInit {
     'smtp.user': '',
     'smtp.pass': '',
     'smtp.sender': 'Green Office System <no-reply@greensync.com>',
-    'smtp.fallback_email': 'admin@greensync.com'
+    'smtp.fallback_email': 'admin@greensync.com',
   };
 
   isLoading = true;
@@ -67,7 +67,7 @@ export class AdminSettingsComponent implements OnInit {
       next: (data) => {
         if (data) {
           // Force update each key to be sure
-          Object.keys(data).forEach(key => {
+          Object.keys(data).forEach((key) => {
             (this.settings as any)[key] = data[key];
           });
           // Also spread for safety
@@ -80,7 +80,7 @@ export class AdminSettingsComponent implements OnInit {
         console.error('Failed to load settings:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -98,7 +98,7 @@ export class AdminSettingsComponent implements OnInit {
         this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
         this.isSaving = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 

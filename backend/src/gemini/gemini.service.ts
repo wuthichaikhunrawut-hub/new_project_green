@@ -3,8 +3,6 @@ import { GoogleGenAI } from '@google/genai';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { ChatLog } from './entities/gemini.entity';
-import { ChatSession } from './entities/chat-session.entity';
-import { ChatMessage } from './entities/chat-message.entity';
 import { User } from '../users/entities/user.entity';
 import { Organization } from '../organizations/entities/organization.entity';
 import * as crypto from 'crypto';
@@ -53,10 +51,6 @@ export class GeminiService {
   constructor(
     @InjectRepository(ChatLog)
     private readonly chatLogRepo: Repository<ChatLog>,
-    @InjectRepository(ChatSession)
-    private readonly chatSessionRepo: Repository<ChatSession>,
-    @InjectRepository(ChatMessage)
-    private readonly chatMessageRepo: Repository<ChatMessage>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     @InjectRepository(Organization)
@@ -223,35 +217,68 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     }
   }
 
-  async getSessions(userId: number): Promise<ChatSession[]> {
-    return this.chatSessionRepo.find({
-      where: { user_id: userId },
-      order: { updated_at: 'DESC' },
-    });
+  async getSessions(userId: number): Promise<any[]> {
+    const sessions = await this.chatLogRepo
+      .createQueryBuilder('log')
+      .select('log.session_id', 'id')
+      .addSelect('MAX(log.session_title)', 'title')
+      .addSelect('MAX(log.created_at)', 'updated_at')
+      .where('log.user_id = :userId AND log.session_id IS NOT NULL', { userId })
+      .groupBy('log.session_id')
+      .orderBy('MAX(log.created_at)', 'DESC')
+      .getRawMany();
+
+    return sessions.map((s) => ({
+      id: Number(s.id),
+      title: s.title,
+      user_id: userId,
+      created_at: s.updated_at,
+      updated_at: s.updated_at,
+    }));
   }
 
-  async getSessionMessages(
-    sessionId: number,
-    userId: number,
-  ): Promise<ChatMessage[]> {
-    const session = await this.chatSessionRepo.findOne({
-      where: { id: sessionId, user_id: userId },
-      relations: ['messages'],
-      order: { updated_at: 'DESC' },
+  async getSessionMessages(sessionId: number, userId: number): Promise<any[]> {
+    const logs = await this.chatLogRepo.find({
+      where: { session_id: sessionId, user_id: userId },
+      order: { created_at: 'ASC' },
     });
-    if (!session) throw new InternalServerErrorException('Session not found');
-    return session.messages.sort(
-      (a, b) => a.created_at.getTime() - b.created_at.getTime(),
-    );
+
+    const messages: any[] = [];
+    for (const log of logs) {
+      if (log.question) {
+        messages.push({
+          id: `q-${log.id}`,
+          role: 'user',
+          content: log.question,
+          created_at: log.created_at,
+        });
+      }
+      if (log.answer) {
+        messages.push({
+          id: `a-${log.id}`,
+          role: 'assistant',
+          content: log.answer,
+          created_at: log.created_at,
+        });
+      }
+    }
+    return messages;
   }
 
-  async createSession(userId: number, title: string): Promise<ChatSession> {
-    const session = this.chatSessionRepo.create({ user_id: userId, title });
-    return this.chatSessionRepo.save(session);
+  createSession(userId: number, title: string): Promise<any> {
+    const sessionId =
+      Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 1000);
+    return Promise.resolve({
+      id: sessionId,
+      title: title,
+      user_id: userId,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
   }
 
   async deleteSession(sessionId: number, userId: number): Promise<void> {
-    await this.chatSessionRepo.delete({ id: sessionId, user_id: userId });
+    await this.chatLogRepo.delete({ session_id: sessionId, user_id: userId });
   }
 
   async chat(
@@ -259,8 +286,6 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
     userId?: number,
     sessionId?: number,
   ): Promise<ChatResult> {
-    const ai = this.getClient();
-
     try {
       let orgContext = '';
       if (userId) {
@@ -271,26 +296,49 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
           });
           const org = user?.organization;
           if (org) {
-            const branches = await this.orgRepo.manager
-              .query(
-                'SELECT name, location FROM organization_units WHERE org_id = $1',
-                [org.id],
-              )
-              .catch(() => []);
+            const branches = (await this.orgRepo.manager
+              .find('OrganizationUnit', {
+                where: { org_id: org.id },
+              })
+              .catch(() => [])) as any[];
 
-            const carbonSummary = await this.orgRepo.manager
-              .query(
-                'SELECT type, SUM(amount) as total_amount, SUM(emission) as total_emission, unit FROM carbon_logs WHERE org_id = $1 GROUP BY type, unit',
-                [org.id],
-              )
-              .catch(() => []);
+            const carbonLogs = (await this.orgRepo.manager
+              .find('CarbonLog', {
+                where: { org_id: org.id },
+                relations: ['emission_factor'],
+              })
+              .catch(() => [])) as any[];
 
-            const assessments = await this.orgRepo.manager
-              .query(
-                'SELECT status, count(*) as count FROM assessments WHERE org_id = $1 GROUP BY status',
-                [org.id],
-              )
-              .catch(() => []);
+            const carbonMap = new Map<
+              string,
+              { total_amount: number; total_emission: number; unit: string }
+            >();
+            for (const log of carbonLogs) {
+              const type = log.activity_type || 'ทั่วไป';
+              const unit = log.emission_factor?.unit || 'หน่วย';
+              const existing = carbonMap.get(type) || {
+                total_amount: 0,
+                total_emission: 0,
+                unit,
+              };
+              existing.total_amount += Number(log.usage_amount || 0);
+              existing.total_emission += Number(log.total_emission || 0);
+              carbonMap.set(type, existing);
+            }
+            const carbonSummary = Array.from(carbonMap.entries()).map(
+              ([type, val]) => ({
+                type,
+                total_amount: val.total_amount,
+                total_emission: val.total_emission,
+                unit: val.unit,
+              }),
+            );
+
+            const assessments = (await this.orgRepo.manager
+              .find('Assessment', {
+                where: { org_id: org.id },
+              })
+              .catch(() => [])) as any[];
 
             orgContext = `--- ข้อมูลสภาพแวดล้อมและพลังงานขององค์กรปัจจุบัน (${org.name}) ---
 อุตสาหกรรม: ${org.industry_type || '-'}
@@ -300,13 +348,13 @@ If you cannot determine a value, use a sensible default (0 for numbers, "ไม�
 เป้าหมายการลดคาร์บอน: ${org.target_reduction_percent || 0}%
 
 สาขาขององค์กร (${branches.length} สาขา):
-${branches.length === 0 ? '- ยังไม่มีข้อมูลสาขา' : branches.map((b: any) => `- สาขา ${b.name} (ที่ตั้ง: ${b.location || 'ไม่ระบุ'})`).join('\n')}
+${branches.length === 0 ? '- ยังไม่มีข้อมูลสาขา' : branches.map((b: any) => `- สาขา ${b.unit_name} (ประเภท: ${b.unit_type || 'สำนักงาน'}, พื้นที่: ${b.area || 0} ตร.ม.)`).join('\n')}
 
 ข้อมูลการใช้พลังงานและการปล่อยคาร์บอนสะสม (Carbon Footprint Summary):
 ${carbonSummary.length === 0 ? '- ยังไม่มีข้อมูลการใช้พลังงานใดๆ บันทึกในระบบ' : carbonSummary.map((c: any) => `- ${c.type}: ใช้ไปสะสมรวม ${Number(c.total_amount).toFixed(2)} ${c.unit} (คิดเป็นการปล่อยคาร์บอนสะสม ${Number(c.total_emission).toFixed(2)} kgCO2e)`).join('\n')}
 
 ความคืบหน้าแบบประเมินหลักเกณฑ์สำนักงานสีเขียว (Green Office Assessment Progress):
-${assessments.length === 0 ? '- ยังไม่มีความคืบหน้าแบบประเมิน' : assessments.map((a: any) => `- สถานะการประเมิน [${a.status}]: ${a.count} ข้อ`).join('\n')}
+${assessments.length === 0 ? '- ยังไม่มีความคืบหน้าแบบประเมิน' : assessments.map((a: any) => `- การประเมินปี ${a.assessment_year || 2026}: สถานะ [${a.status}] (คะแนนรวม: ${a.total_score || 0})`).join('\n')}
 ------------------------------------------------------
 `;
           }
@@ -321,7 +369,7 @@ ${assessments.length === 0 ? '- ยังไม่มีความคืบห
       const systemContext = `คุณคือ GreenBot ผู้ช่วย AI ของระบบ Green Sync ที่เชี่ยวชาญด้าน:
 1. การประเมินสำนักงานสีเขียว (Green Office) ตามมาตรฐานกระทรวงทรัพยากรธรรมชาติและสิ่งแวดล้อม
 2. การคำนวณและลดการปล่อยก๊าซเรือนกระจก (Carbon Footprint)
-3. เกณฑ์การประเมินสำนักงานสีเขียว 8 หมวด
+3. เกณฑ์การประเมินสำนักงานสีเขียว (Green Office Criteria 6 หมวดหลัก)
 4. แนวทางการจัดการพลังงาน น้ำ ขยะ และสิ่งแวดล้อมในสำนักงาน
 
 คำสั่งสำคัญ: 
@@ -335,26 +383,25 @@ ${assessments.length === 0 ? '- ยังไม่มีความคืบห
 ${orgContext}`;
 
       let historyContext = '';
-      let session: ChatSession | null = null;
+      let sessionTitle = 'New Conversation';
 
       if (userId && sessionId) {
-        session = await this.chatSessionRepo.findOne({
-          where: { id: sessionId, user_id: userId },
-          relations: ['messages'],
+        // Query previous messages from ChatLog for this session
+        const prevLogs = await this.chatLogRepo.find({
+          where: { session_id: sessionId, user_id: userId },
+          order: { created_at: 'DESC' },
+          take: 5,
         });
 
-        if (session && session.messages.length > 0) {
-          const recentMessages = session.messages
-            .sort((a, b) => b.created_at.getTime() - a.created_at.getTime())
-            .slice(0, 10)
-            .reverse();
+        if (prevLogs.length > 0) {
+          // Use the latest logged session title
+          sessionTitle = prevLogs[0].session_title || 'New Conversation';
+
+          const recentMessages = prevLogs.reverse();
           historyContext =
             '--- ประวัติการสนทนาก่อนหน้า ---\n' +
             recentMessages
-              .map(
-                (m) =>
-                  `${m.role === 'user' ? 'ผู้ใช้' : 'GreenBot'}: ${m.content}`,
-              )
+              .map((m) => `ผู้ใช้: ${m.question}\nGreenBot: ${m.answer}`)
               .join('\n\n') +
             '\n------------------------------\n\n';
         }
@@ -373,31 +420,13 @@ ${orgContext}`;
         response.text?.trim() || 'ขออภัย ไม่สามารถตอบกลับได้ในขณะนี้';
 
       try {
-        if (session) {
-          const userMsg = this.chatMessageRepo.create({
-            role: 'user',
-            content: message,
-            session,
-          });
-          const botMsg = this.chatMessageRepo.create({
-            role: 'assistant',
-            content: reply,
-            session,
-          });
-          await this.chatMessageRepo.save([userMsg, botMsg]);
-
-          if (
-            session.messages.length === 0 ||
-            session.title === 'New Conversation'
-          ) {
-            session.title =
-              message.substring(0, 30) + (message.length > 30 ? '...' : '');
-            await this.chatSessionRepo.save(session);
-          }
-        }
-
         // Always save to flat ChatLog history table so it instantly shows up in history drawer
         if (userId) {
+          if (sessionId && sessionTitle === 'New Conversation') {
+            sessionTitle =
+              message.substring(0, 30) + (message.length > 30 ? '...' : '');
+          }
+
           const flatLog = this.chatLogRepo.create({
             user_id: userId,
             question: message,
@@ -405,6 +434,8 @@ ${orgContext}`;
             intent: 'Chat',
             related_module: 'gemini',
             confidence_score: 1.0,
+            session_id: sessionId || null,
+            session_title: sessionId ? sessionTitle : null,
           });
           await this.chatLogRepo.save(flatLog);
         }
@@ -424,8 +455,6 @@ ${orgContext}`;
     mimeType: string,
     categoryId: string,
   ): Promise<any> {
-    const ai = this.getClient();
-
     try {
       const prompt = `คุณคือผู้เชี่ยวชาญการตรวจประเมินสำนักงานสีเขียว (Green Office)
 กรุณาวิเคราะห์เอกสารหลักฐานที่แนบมานี้ ว่ามีความสอดคล้องกับเกณฑ์การประเมินหมวดที่ ${categoryId} หรือไม่
@@ -522,8 +551,6 @@ ${orgContext}`;
         lastAnalyzedAt: org.last_summary_analyzed_at,
       };
     }
-
-    const ai = this.getClient();
 
     try {
       const prompt = `คุณคือ AI ผู้เชี่ยวชาญด้าน Sustainability (ESG) ระดับองค์กร
@@ -638,8 +665,6 @@ ${orgContext}`;
         );
       }
     }
-
-    const ai = this.getClient();
 
     try {
       const prompt = `คุณคือ AI Recommendation Engine ด้าน Green Office

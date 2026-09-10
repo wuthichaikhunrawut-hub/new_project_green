@@ -7,7 +7,8 @@ import {
   Body,
   Param,
   UseGuards,
-  Headers,
+  Req,
+  BadRequestException,
 } from '@nestjs/common';
 import { GreenCriteriaService } from './green-criteria.service';
 import { GreenCriteriaMaster } from './entities/green-criteria-master.entity';
@@ -20,26 +21,25 @@ import { Roles } from '../auth/roles.decorator';
 export class GreenCriteriaController {
   constructor(private readonly greenCriteriaService: GreenCriteriaService) {}
 
-  @Get()
-  findAll(@Headers() headers: any) {
-    const orgIdStr = headers['x-org-id'];
-    let orgId = 0;
-    if (orgIdStr) {
-      orgId = parseInt(orgIdStr, 10);
-      if (isNaN(orgId)) orgId = 0;
+  private getOrgId(req: any): number {
+    if (req.user?.role !== 'SYSTEM_ADMIN') {
+      const orgId = Number(req.user?.orgId);
+      if (!orgId)
+        throw new BadRequestException('ไม่พบข้อมูลองค์กรในบัญชีผู้ใช้');
+      return orgId;
     }
-    return this.greenCriteriaService.findAll(orgId);
+    const orgId = Number(req.headers['x-org-id'] ?? 0);
+    return Number.isFinite(orgId) ? orgId : 0;
+  }
+
+  @Get()
+  findAll(@Req() req: any) {
+    return this.greenCriteriaService.findAll(this.getOrgId(req));
   }
 
   @Get('list')
-  findAllForFrontend(@Headers() headers: any) {
-    const orgIdStr = headers['x-org-id'];
-    let orgId = 0;
-    if (orgIdStr) {
-      orgId = parseInt(orgIdStr, 10);
-      if (isNaN(orgId)) orgId = 0;
-    }
-    return this.greenCriteriaService.findAllForFrontend(orgId);
+  findAllForFrontend(@Req() req: any) {
+    return this.greenCriteriaService.findAllForFrontend(this.getOrgId(req));
   }
 
   @Post()
@@ -59,14 +59,13 @@ export class GreenCriteriaController {
   updateScore(
     @Param('id') id: string,
     @Body('score') score: number,
-    @Headers('x-org-id') orgIdStr?: string,
+    @Req() req?: any,
   ) {
-    let orgId = 0;
-    if (orgIdStr) {
-      orgId = parseInt(orgIdStr, 10);
-      if (isNaN(orgId)) orgId = 0;
-    }
-    return this.greenCriteriaService.updateScore(+id, score, orgId);
+    return this.greenCriteriaService.updateScore(
+      +id,
+      score,
+      this.getOrgId(req),
+    );
   }
 
   @Delete(':id')

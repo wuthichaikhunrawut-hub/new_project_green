@@ -4,7 +4,7 @@ export enum AssessmentStatus {
   IN_REVIEW = 'IN_REVIEW',
   REVISION_REQUESTED = 'REVISION_REQUESTED',
   APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
 }
 
 export interface AssessmentCriteria {

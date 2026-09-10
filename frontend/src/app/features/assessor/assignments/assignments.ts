@@ -26,14 +26,14 @@ export class AssessorAssignmentsComponent implements OnInit {
   viewMode: 'list' | 'grid' = 'list';
 
   get availableYears(): number[] {
-    const years = new Set(this.assignments.map(a => a.assessmentYear));
+    const years = new Set(this.assignments.map((a) => a.assessmentYear));
     return Array.from(years).sort((a, b) => b - a);
   }
 
   get filteredAssignments(): AssessorAssignmentItem[] {
-    return this.assignments.filter(item => {
-      const matchSearch = !this.searchTerm ||
-        item.orgName.toLowerCase().includes(this.searchTerm.toLowerCase());
+    return this.assignments.filter((item) => {
+      const matchSearch =
+        !this.searchTerm || item.orgName.toLowerCase().includes(this.searchTerm.toLowerCase());
       const matchStatus = !this.statusFilter || item.status === this.statusFilter;
       const matchYear = !this.yearFilter || String(item.assessmentYear) === this.yearFilter;
       return matchSearch && matchStatus && matchYear;
@@ -48,7 +48,9 @@ export class AssessorAssignmentsComponent implements OnInit {
     return counts;
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+  }
 
   load(): void {
     this.isLoading = true;
@@ -74,18 +76,24 @@ export class AssessorAssignmentsComponent implements OnInit {
 
   statusLabel(status: string): string {
     const map: Record<string, string> = {
-      PENDING: 'รอดำเนินการ', SUBMITTED: 'ส่งแล้ว',
-      IN_REVIEW: 'กำลังตรวจ', REVISION_REQUESTED: 'รอแก้ไข',
-      APPROVED: 'อนุมัติ', REJECTED: 'ปฏิเสธ',
+      PENDING: 'รอดำเนินการ',
+      SUBMITTED: 'ส่งแล้ว',
+      IN_REVIEW: 'กำลังตรวจ',
+      REVISION_REQUESTED: 'รอแก้ไข',
+      APPROVED: 'อนุมัติ',
+      REJECTED: 'ปฏิเสธ',
     };
     return map[status] ?? status;
   }
 
   statusClass(status: string): string {
     const map: Record<string, string> = {
-      PENDING: 'badge-pending', SUBMITTED: 'badge-submitted',
-      IN_REVIEW: 'badge-review', REVISION_REQUESTED: 'badge-revision',
-      APPROVED: 'badge-approved', REJECTED: 'badge-rejected',
+      PENDING: 'badge-pending',
+      SUBMITTED: 'badge-submitted',
+      IN_REVIEW: 'badge-review',
+      REVISION_REQUESTED: 'badge-revision',
+      APPROVED: 'badge-approved',
+      REJECTED: 'badge-rejected',
     };
     return map[status] ?? 'badge-pending';
   }

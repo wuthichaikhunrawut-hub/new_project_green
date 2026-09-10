@@ -52,10 +52,9 @@ export class AssessorService {
   }
 
   getCarbonSummary(orgId: number): Observable<OrgCarbonSummary> {
-    return this.http.get<OrgCarbonSummary>(
-      `${this.apiUrl}/organizations/${orgId}/carbon-summary`,
-      { headers: this.getHeaders() },
-    );
+    return this.http.get<OrgCarbonSummary>(`${this.apiUrl}/organizations/${orgId}/carbon-summary`, {
+      headers: this.getHeaders(),
+    });
   }
 
   getAssessment(id: number): Observable<AssessorAssessment> {
@@ -75,10 +74,7 @@ export class AssessorService {
     );
   }
 
-  approve(
-    id: number,
-    payload: ApproveAssessmentPayload,
-  ): Observable<AssessorAssessment> {
+  approve(id: number, payload: ApproveAssessmentPayload): Observable<AssessorAssessment> {
     return this.http.patch<AssessorAssessment>(
       `${this.apiUrl}/assessments/${id}/approve`,
       payload,
@@ -86,10 +82,7 @@ export class AssessorService {
     );
   }
 
-  requestRevision(
-    id: number,
-    payload: RequestRevisionPayload,
-  ): Observable<AssessorAssessment> {
+  requestRevision(id: number, payload: RequestRevisionPayload): Observable<AssessorAssessment> {
     return this.http.patch<AssessorAssessment>(
       `${this.apiUrl}/assessments/${id}/request-revision`,
       payload,
@@ -104,12 +97,12 @@ export class AssessorService {
       issued_at?: string;
       expired_at?: string;
       certificate_url?: string;
-    }
+    },
   ): Observable<AssessorAssessment> {
     return this.http.patch<AssessorAssessment>(
       `${this.apiUrl}/assessments/${id}/certificate`,
       payload,
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders() },
     );
   }
 

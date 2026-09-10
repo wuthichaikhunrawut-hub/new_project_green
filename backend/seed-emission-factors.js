@@ -6,25 +6,25 @@ const client = new Client({
   port: parseInt(process.env.DB_PORT || '5432'),
   user: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || 'project_green',
+  database: process.env.DB_NAME || 'project-green',
 });
 
 const emissionFactors = [
-  { category: 'Fuel', type_name: 'น้ำมันดีเซล (Diesel)', unit: 'Liter', factor_value: 2.7446 },
-  { category: 'Fuel', type_name: 'น้ำมันเบนซิน (Gasoline)', unit: 'Liter', factor_value: 2.1887 },
-  { category: 'Fuel', type_name: 'น้ำมันแก๊สโซฮอล์ 95 (Gasohol 95)', unit: 'Liter', factor_value: 2.1558 },
-  { category: 'Fuel', type_name: 'น้ำมันแก๊สโซฮอล์ 91 (Gasohol 91)', unit: 'Liter', factor_value: 2.1384 },
-  { category: 'Fuel', type_name: 'น้ำมันแก๊สโซฮอล์ E20 (Gasohol E20)', unit: 'Liter', factor_value: 1.7061 },
-  { category: 'Fuel', type_name: 'ก๊าซหุงต้ม (LPG)', unit: 'kg', factor_value: 3.1114 },
-  { category: 'Refrigerants', type_name: 'สารทำความเย็น R-32', unit: 'kg', factor_value: 675 },
-  { category: 'Refrigerants', type_name: 'สารทำความเย็น R-410a', unit: 'kg', factor_value: 2088 },
-  { category: 'Refrigerants', type_name: 'สารทำความเย็น R-22', unit: 'kg', factor_value: 1760 },
-  { category: 'Fire Extinguishers', type_name: 'ถังดับเพลิง CO2', unit: 'kg', factor_value: 1 },
-  { category: 'Electricity', type_name: 'พลังงานไฟฟ้า (Grid Mix)', unit: 'kWh', factor_value: 0.4999 },
-  { category: 'Water', type_name: 'น้ำประปา', unit: 'm3', factor_value: 0.2642 },
-  { category: 'Office Supplies', type_name: 'กระดาษ', unit: 'kg', factor_value: 0.941 },
-  { category: 'Waste', type_name: 'ขยะทั่วไป (ส่งฝังกลบ - Landfill)', unit: 'kg', factor_value: 0.835 },
-  { category: 'Wastewater', type_name: 'น้ำเสีย (ระบบไม่เติมอากาศ)', unit: 'm3', factor_value: 0.528 },
+  { name: 'น้ำมันดีเซล (Diesel)', scope: 1, unit: 'Liter', factor_value: 2.7446 },
+  { name: 'น้ำมันเบนซิน (Gasoline)', scope: 1, unit: 'Liter', factor_value: 2.1887 },
+  { name: 'น้ำมันแก๊สโซฮอล์ 95 (Gasohol 95)', scope: 1, unit: 'Liter', factor_value: 2.1558 },
+  { name: 'น้ำมันแก๊สโซฮอล์ 91 (Gasohol 91)', scope: 1, unit: 'Liter', factor_value: 2.1384 },
+  { name: 'น้ำมันแก๊สโซฮอล์ E20 (Gasohol E20)', scope: 1, unit: 'Liter', factor_value: 1.7061 },
+  { name: 'ก๊าซหุงต้ม (LPG)', scope: 1, unit: 'kg', factor_value: 3.1114 },
+  { name: 'สารทำความเย็น R-32', scope: 1, unit: 'kg', factor_value: 675 },
+  { name: 'สารทำความเย็น R-410a', scope: 1, unit: 'kg', factor_value: 2088 },
+  { name: 'สารทำความเย็น R-22', scope: 1, unit: 'kg', factor_value: 1760 },
+  { name: 'ถังดับเพลิง CO2', scope: 1, unit: 'kg', factor_value: 1 },
+  { name: 'พลังงานไฟฟ้า (Grid Mix)', scope: 2, unit: 'kWh', factor_value: 0.4999 },
+  { name: 'น้ำประปา', scope: 3, unit: 'm3', factor_value: 0.2642 },
+  { name: 'กระดาษ', scope: 3, unit: 'kg', factor_value: 0.941 },
+  { name: 'ขยะทั่วไป (ส่งฝังกลบ - Landfill)', scope: 3, unit: 'kg', factor_value: 0.835 },
+  { name: 'น้ำเสีย (ระบบไม่เติมอากาศ)', scope: 3, unit: 'm3', factor_value: 0.528 },
 ];
 
 async function seed() {
@@ -37,8 +37,8 @@ async function seed() {
   
   for (const ef of emissionFactors) {
     await client.query(
-      "INSERT INTO emission_factors (id, category, type_name, unit, factor_value, gwp_version, is_active) VALUES (gen_random_uuid(), $1, $2, $3, $4, '2569 TGO', true)",
-      [ef.category, ef.type_name, ef.unit, ef.factor_value]
+      "INSERT INTO emission_factors (name, scope, unit, factor_value, year, source) VALUES ($1, $2, $3, $4, 2026, '2569 TGO')",
+      [ef.name, ef.scope, ef.unit, ef.factor_value]
     );
   }
 

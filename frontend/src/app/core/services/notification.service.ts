@@ -40,9 +40,9 @@ export class NotificationService {
   }
 
   getUnreadCount(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/unread-count`).pipe(
-      tap((count) => this.unreadCountSubject.next(count))
-    );
+    return this.http
+      .get<number>(`${this.apiUrl}/unread-count`)
+      .pipe(tap((count) => this.unreadCountSubject.next(count)));
   }
 
   sendNotification(data: {
@@ -72,7 +72,7 @@ export class NotificationService {
         if (currentCount > 0) {
           this.unreadCountSubject.next(currentCount - 1);
         }
-      })
+      }),
     );
   }
 
@@ -81,9 +81,9 @@ export class NotificationService {
   }
 
   markAllAsRead(): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/read-all`, {}).pipe(
-      tap(() => this.unreadCountSubject.next(0))
-    );
+    return this.http
+      .patch<void>(`${this.apiUrl}/read-all`, {})
+      .pipe(tap(() => this.unreadCountSubject.next(0)));
   }
 
   updateUnreadCount(): void {

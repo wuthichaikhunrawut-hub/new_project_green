@@ -1,12 +1,17 @@
-<button 
+<button
   [type]="type"
   [class]="buttonClasses"
   (click)="onClick.emit($event)"
-  [disabled]="disabled || isLoading">
-  
-  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2 btn-spinner" role="status" aria-hidden="true"></span>
+  [disabled]="disabled || isLoading"
+>
+  <span
+    *ngIf="isLoading"
+    class="spinner-border spinner-border-sm me-2 btn-spinner"
+    role="status"
+    aria-hidden="true"
+  ></span>
   <i *ngIf="iconClass && !isLoading" [class]="iconClass + ' me-2 btn-icon'"></i>
-  
+
   <span class="btn-content" [class.opacity-0]="isLoading && !iconClass">
     <ng-content></ng-content>
   </span>

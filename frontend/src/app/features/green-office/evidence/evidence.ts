@@ -14,7 +14,7 @@ import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-di
   standalone: true,
   imports: [CommonModule, FormsModule, ConfirmDialogComponent],
   templateUrl: './evidence.html',
-  styleUrl: './evidence.css'
+  styleUrl: './evidence.css',
 })
 export class GreenOfficeEvidenceComponent implements OnInit {
   private toast = inject(ToastService);
@@ -43,60 +43,66 @@ export class GreenOfficeEvidenceComponent implements OnInit {
     this.loadFiles();
     this.greenOfficeService.getCriteriaList().subscribe({
       next: (criteria) => {
-        this.hasCategory7 = criteria.some(c => c.category_number === 7);
+        this.hasCategory7 = criteria.some((c) => c.category_number === 7);
         this.cdr.markForCheck();
       },
       error: () => {
         this.hasCategory7 = false;
-      }
+      },
     });
   }
 
   loadFiles() {
     this.uploadService.getFiles().subscribe({
       next: (res) => {
-        this.files = res.map(f => ({
+        this.files = res.map((f) => ({
           id: f.evidence_file_id || f.id,
           name: f.file_name || f.original_name || 'ไฟล์ไม่มีชื่อ',
           size: f.file_size ? (Number(f.file_size) / 1024 / 1024).toFixed(2) + ' MB' : '0 MB',
-          uploadDate: f.uploaded_at ? new Date(f.uploaded_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) : 'ไม่ระบุวันที่',
+          uploadDate: f.uploaded_at
+            ? new Date(f.uploaded_at).toLocaleDateString('th-TH', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })
+            : 'ไม่ระบุวันที่',
           category: f.category || 'หมวดที่ยังไม่ระบุ',
           status: 'pending',
-          url: f.file_url
+          url: f.file_url,
         }));
         this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('❌ Failed to load files:', err);
-      }
+      },
     });
   }
 
   get filteredFiles() {
     if (!this.files || this.files.length === 0) return [];
-    
-    return this.files.filter(f => {
+
+    return this.files.filter((f) => {
       // If search term is empty, always match name
       const search = this.searchTerm ? this.searchTerm.toLowerCase().trim() : '';
       const nameMatch = !search || (f.name && f.name.toLowerCase().includes(search));
-      
+
       // If category filter is empty, always match category
       const categoryMatch = !this.filterCategory || f.category === this.filterCategory;
-      
+
       return nameMatch && categoryMatch;
     });
   }
-  
+
   onDragOver(event: DragEvent) {
     event.preventDefault();
     this.isDragging = true;
   }
-  
+
   onDragLeave(event: DragEvent) {
     event.preventDefault();
     this.isDragging = false;
   }
-  
+
   onDrop(event: DragEvent) {
     event.preventDefault();
     this.isDragging = false;
@@ -104,11 +110,11 @@ export class GreenOfficeEvidenceComponent implements OnInit {
       this.pendingFile = event.dataTransfer.files[0];
     }
   }
-  
+
   triggerFileInput() {
     document.getElementById('fileInput')?.click();
   }
-  
+
   onFileSelect(event: any) {
     if (event.target.files?.length) {
       this.pendingFile = event.target.files[0];
@@ -136,18 +142,22 @@ export class GreenOfficeEvidenceComponent implements OnInit {
           id: res.id,
           name: res.file_name,
           size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-          uploadDate: new Date(res.uploaded_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }),
+          uploadDate: new Date(res.uploaded_at).toLocaleDateString('th-TH', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric',
+          }),
           category: this.selectedCategory || 'หมวดที่ยังไม่ระบุ',
           status: 'pending',
           url: res.file_url,
-          rawFile: file // Add rawFile for AI validation
+          rawFile: file, // Add rawFile for AI validation
         };
         this.files.unshift(newFile);
         this.isUploading = false;
         this.pendingFile = null; // Clear after success
         this.cdr.markForCheck(); // Force UI update
         this.toast.success('อัปโหลดไฟล์สำเร็จ!');
-        
+
         // Auto-validate if category is known
         if (newFile.category !== 'หมวดที่ยังไม่ระบุ') {
           this.validateFile(newFile);
@@ -157,7 +167,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         console.error('Upload error:', err);
         this.isUploading = false;
         this.toast.error('เกิดข้อผิดพลาดในการอัปโหลดไฟล์');
-      }
+      },
     });
   }
 
@@ -166,7 +176,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
       this.toast.error('กรุณาระบุหมวดหมู่ก่อนทำการตรวจสอบด้วย AI');
       return;
     }
-    
+
     if (!fileObj.rawFile) {
       this.toast.error('ไม่สามารถตรวจสอบไฟล์เดิมได้ในขณะนี้ กรุณาอัปโหลดใหม่เพื่อตรวจสอบ');
       return;
@@ -192,7 +202,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         fileObj.isValidating = false;
         this.cdr.markForCheck();
         this.toast.error('การตรวจสอบด้วย AI ล้มเหลว');
-      }
+      },
     });
   }
 
@@ -213,10 +223,10 @@ export class GreenOfficeEvidenceComponent implements OnInit {
 
     this.isUploading = true;
     this.cdr.markForCheck();
-    
+
     this.uploadService.deleteFile(id).subscribe({
       next: () => {
-        this.files = this.files.filter(f => f.id !== id);
+        this.files = this.files.filter((f) => f.id !== id);
         this.isUploading = false;
         this.cdr.markForCheck();
         this.toast.success('ลบไฟล์เรียบร้อยแล้วครับ!');
@@ -225,7 +235,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         console.error('Delete error:', err);
         this.isUploading = false;
         this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
-      }
+      },
     });
   }
 
@@ -279,7 +289,7 @@ export class GreenOfficeEvidenceComponent implements OnInit {
         console.error('Update error:', err);
         this.isUploading = false;
         this.toast.error('เกิดข้อผิดพลาดในการอัปเดตหมวดหมู่');
-      }
+      },
     });
   }
 

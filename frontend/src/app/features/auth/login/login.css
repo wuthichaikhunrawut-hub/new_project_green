@@ -49,7 +49,9 @@
 }
 
 /* Suppress old mesh since bg is now image */
-.left-bg-mesh { display: none; }
+.left-bg-mesh {
+  display: none;
+}
 
 .left-content {
   position: relative;
@@ -74,11 +76,16 @@
   color: white;
   text-decoration: none;
   letter-spacing: -0.3px;
-  text-shadow: 0 1px 8px rgba(0,0,0,0.4);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
 }
 
-.brand-logo i { color: #10b981; font-size: 1.1rem; }
-.brand-logo span { color: #10b981; }
+.brand-logo i {
+  color: #10b981;
+  font-size: 1.1rem;
+}
+.brand-logo span {
+  color: #10b981;
+}
 
 /* Bottom text overlay — sits on top of image at the bottom */
 .left-bottom-overlay {
@@ -123,21 +130,25 @@
   letter-spacing: -1.5px;
   color: white;
   margin: 0;
-  text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .left-bottom-overlay p {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.65;
   margin: 0;
   max-width: 340px;
 }
 
-.text-em { color: #10b981; }
+.text-em {
+  color: #10b981;
+}
 
 /* Remove old glass card */
-.glass-content-card { display: none; }
+.glass-content-card {
+  display: none;
+}
 
 /* Stats row */
 .left-stats {
@@ -175,7 +186,9 @@
 }
 
 /* Hide the separate image box — bg is now full panel */
-.left-image-box { display: none; }
+.left-image-box {
+  display: none;
+}
 
 /* ============================================================
    RIGHT PANEL — Clean White Form
@@ -197,8 +210,8 @@
   border-radius: 20px;
   padding: 2.5rem;
   box-shadow:
-    0 1px 3px rgba(0,0,0,0.05),
-    0 10px 40px rgba(0,0,0,0.08);
+    0 1px 3px rgba(0, 0, 0, 0.05),
+    0 10px 40px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
 }
 
@@ -253,7 +266,9 @@
   transition: color 0.2s;
 }
 
-.forgot-link:hover { color: #059669; }
+.forgot-link:hover {
+  color: #059669;
+}
 
 .input-wrapper {
   position: relative;
@@ -287,7 +302,9 @@
   font-family: 'Inter', sans-serif;
 }
 
-.input-wrapper input::placeholder { color: #cbd5e1; }
+.input-wrapper input::placeholder {
+  color: #cbd5e1;
+}
 
 .input-wrapper input:focus {
   border-color: #10b981;
@@ -312,7 +329,7 @@
   user-select: none;
 }
 
-.remember-me input[type="checkbox"] {
+.remember-me input[type='checkbox'] {
   width: 14px;
   height: 14px;
   accent-color: #10b981;
@@ -360,7 +377,9 @@
   box-shadow: 0 8px 25px rgba(16, 185, 129, 0.35);
 }
 
-.btn-login-submit:active { transform: translateY(0); }
+.btn-login-submit:active {
+  transform: translateY(0);
+}
 
 .btn-login-submit:disabled {
   background: #a7f3d0;
@@ -386,7 +405,9 @@
   transition: color 0.2s;
 }
 
-.form-footer a:hover { color: #059669; }
+.form-footer a:hover {
+  color: #059669;
+}
 
 .form-footer .copyright {
   font-size: 0.7rem;
@@ -403,8 +424,14 @@
 }
 
 @keyframes loginFadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* ============================================================
@@ -418,7 +445,9 @@
     overflow-y: auto;
   }
 
-  .login-left { display: none; }
+  .login-left {
+    display: none;
+  }
 
   .login-right {
     min-height: 100vh;
@@ -457,8 +486,8 @@
   width: 100%;
   max-width: 420px;
   box-shadow:
-    0 25px 60px rgba(0,0,0,0.15),
-    0 0 0 1px rgba(0,0,0,0.05);
+    0 25px 60px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
 }
 
 .forgot-modal-header {
@@ -617,11 +646,21 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes bounceIn {
-  from { transform: scale(0.5); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

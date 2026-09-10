@@ -53,4 +53,19 @@ export class UserSubscriptionsController {
     const org = await this.subscriptionsService.getOrganizationByUserId(userId);
     return this.subscriptionsService.subscribeToPlan(org.id, planId);
   }
+
+  @Post('my/subscribe-paid')
+  async subscribeToPaidPlan(
+    @Req() req,
+    @Body('planId') planId: number,
+    @Body('paymentMethodId') paymentMethodId: string,
+  ) {
+    const userId = req.user.sub || req.user.userId;
+    const org = await this.subscriptionsService.getOrganizationByUserId(userId);
+    return this.subscriptionsService.subscribeToPaidPlan(
+      org.id,
+      Number(planId),
+      paymentMethodId,
+    );
+  }
 }

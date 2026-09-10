@@ -95,6 +95,12 @@ export class AuthService {
       throw new UnauthorizedException('อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     }
 
+    if (user.password_setup_required) {
+      throw new UnauthorizedException(
+        'บัญชีนี้ต้องตั้งรหัสผ่านก่อนใช้งาน กรุณาเลือก “ลืมรหัสผ่าน” เพื่อรับลิงก์ตั้งรหัสผ่าน',
+      );
+    }
+
     const role = await this.usersService.getPrimaryRoleForUser(user.id);
     const payload = {
       sub: user.id,
@@ -213,18 +219,22 @@ export class AuthService {
       };
     }
 
-    // Generate secure token
-    const token = crypto.randomBytes(32).toString('hex');
+    // Generate secure random token
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
     const expires = new Date();
     expires.setHours(expires.getHours() + 1); // 1 hour expiry
 
-    // Save token to user
-    await this.usersService.updateResetToken(user.id, token, expires);
+    // Save hashed token to user
+    await this.usersService.updateResetToken(user.id, tokenHash, expires);
 
-    // Build reset link
+    // Build reset link with raw token
     const frontendUrl =
       this.configService.get<string>('FRONTEND_URL') || 'http://localhost:4200';
-    const resetLink = `${frontendUrl}/auth/reset-password?token=${token}`;
+    const resetLink = `${frontendUrl}/auth/reset-password?token=${rawToken}`;
 
     // Get user name for email
     const fullUser = await this.usersService.findOne(user.id);
@@ -250,9 +260,6 @@ export class AuthService {
       );
     }
 
-    // Always log the link for development convenience
-    this.logger.debug(`🔗 Password reset link for ${user.email}: ${resetLink}`);
-
     return {
       message:
         'หากอีเมลนี้มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ',
@@ -264,11 +271,16 @@ export class AuthService {
       throw new BadRequestException('กรุณาระบุ Token และรหัสผ่านใหม่');
     }
 
-    if (newPassword.length < 6) {
-      throw new BadRequestException('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+    if (newPassword.length < 8) {
+      throw new BadRequestException('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
     }
 
-    const user = await this.usersService.findByResetToken(token);
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    let user = await this.usersService.findByResetToken(tokenHash);
+    if (!user) {
+      // Fallback check for legacy unhashed tokens
+      user = await this.usersService.findByResetToken(token);
+    }
     if (!user) {
       throw new BadRequestException(
         'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุแล้ว',
@@ -323,8 +335,6 @@ export class AuthService {
         `Failed to send verification email to ${email}: ${error.message}`,
       );
     }
-
-    this.logger.debug(`🔗 Verification link for ${email}: ${verifyLink}`);
   }
 
   async verifyEmail(token: string) {

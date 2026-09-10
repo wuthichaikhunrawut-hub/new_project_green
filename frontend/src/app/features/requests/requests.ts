@@ -10,13 +10,12 @@ import { ToastService } from '../../core/services/toast.service';
 import { Assessment, AssessmentStatus } from '../../core/models/assessment.model';
 import { ThaiDatePipe } from '../../shared/pipes/thai-date-pipe';
 
-
 @Component({
   selector: 'app-requests',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, ThaiDatePipe],
   templateUrl: './requests.html',
-  styleUrl: './requests.css'
+  styleUrl: './requests.css',
 })
 export class RequestsComponent implements OnInit, OnDestroy {
   private requestsService = inject(RequestsService);
@@ -38,10 +37,10 @@ export class RequestsComponent implements OnInit, OnDestroy {
     if (role === 'ASSESSOR' || role === 'ASSESSOR_ADMIN') return 'ASSESSOR';
     return role;
   }
-  
+
   searchTerm: string = '';
   statusFilter: string = '';
-  
+
   assessorsList: any[] = [];
   selectedReqForAssign: Assessment | null = null;
   targetAssessorId: string = '';
@@ -64,13 +63,13 @@ export class RequestsComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.authService.currentUser$.subscribe(user => {
+      this.authService.currentUser$.subscribe((user) => {
         this.user = user;
         this.loadRequests();
         if (this.isAssigner) {
           this.loadAssessors();
         }
-      })
+      }),
     );
   }
 
@@ -84,7 +83,7 @@ export class RequestsComponent implements OnInit, OnDestroy {
         this.assessorsList = data || [];
         this.cdr.markForCheck();
       },
-      error: (err) => console.error('Failed to load assessors', err)
+      error: (err) => console.error('Failed to load assessors', err),
     });
   }
 
@@ -103,25 +102,27 @@ export class RequestsComponent implements OnInit, OnDestroy {
   confirmAssign() {
     if (!this.selectedReqForAssign) return;
     this.isAssigning = true;
-    
+
     const assessorId = this.targetAssessorId ? Number(this.targetAssessorId) : null;
-    
-    this.requestsService.updateRequest(this.selectedReqForAssign.id, {
-      assessor_user_id: assessorId as any
-    }).subscribe({
-      next: () => {
-        this.isAssigning = false;
-        this.toast.success('มอบหมายงานตรวจประเมินเรียบร้อยแล้ว');
-        this.closeAssignModal();
-        this.loadRequests();
-      },
-      error: (err) => {
-        console.error('Failed to assign assessor', err);
-        this.toast.error('เกิดข้อผิดพลาดในการมอบหมายงาน');
-        this.isAssigning = false;
-        this.cdr.markForCheck();
-      }
-    });
+
+    this.requestsService
+      .updateRequest(this.selectedReqForAssign.id, {
+        assessor_user_id: assessorId as any,
+      })
+      .subscribe({
+        next: () => {
+          this.isAssigning = false;
+          this.toast.success('มอบหมายงานตรวจประเมินเรียบร้อยแล้ว');
+          this.closeAssignModal();
+          this.loadRequests();
+        },
+        error: (err) => {
+          console.error('Failed to assign assessor', err);
+          this.toast.error('เกิดข้อผิดพลาดในการมอบหมายงาน');
+          this.isAssigning = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   loadRequests() {
@@ -138,40 +139,51 @@ export class RequestsComponent implements OnInit, OnDestroy {
         this.requests = [];
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
   get filteredRequests(): Assessment[] {
-    return this.requests.filter(req => {
+    return this.requests.filter((req) => {
       const matchStatus = this.statusFilter ? req.status === this.statusFilter : true;
       const orgName = req['organization']?.name || '';
-      const matchSearch = this.searchTerm ? orgName.toLowerCase().includes(this.searchTerm.toLowerCase()) : true;
+      const matchSearch = this.searchTerm
+        ? orgName.toLowerCase().includes(this.searchTerm.toLowerCase())
+        : true;
       return matchStatus && matchSearch;
     });
   }
 
-
-
   getStatusBadgeClass(status: string): string {
     const base = 'status-badge ';
     switch (status) {
-      case 'APPROVED': return base + 'status-approved';
-      case 'PENDING': return base + 'status-pending';
-      case 'SUBMITTED': return base + 'status-submitted';
-      case 'REVISION_REQUESTED': return base + 'status-revision';
-      case 'REJECTED': return base + 'status-rejected';
-      default: return base + 'status-draft';
+      case 'APPROVED':
+        return base + 'status-approved';
+      case 'PENDING':
+        return base + 'status-pending';
+      case 'SUBMITTED':
+        return base + 'status-submitted';
+      case 'REVISION_REQUESTED':
+        return base + 'status-revision';
+      case 'REJECTED':
+        return base + 'status-rejected';
+      default:
+        return base + 'status-draft';
     }
   }
 
   getStatusLabel(status: string): string {
     switch (status) {
-      case 'APPROVED': return 'ผ่านการรับรอง';
-      case 'PENDING': return 'รอการตรวจประเมิน';
-      case 'REVISION_REQUESTED': return 'ข้อมูลไม่สมบูรณ์ (รอแก้ไข)';
-      case 'REJECTED': return 'ไม่ผ่านเกณฑ์';
-      default: return 'แบบร่าง';
+      case 'APPROVED':
+        return 'ผ่านการรับรอง';
+      case 'PENDING':
+        return 'รอการตรวจประเมิน';
+      case 'REVISION_REQUESTED':
+        return 'ข้อมูลไม่สมบูรณ์ (รอแก้ไข)';
+      case 'REJECTED':
+        return 'ไม่ผ่านเกณฑ์';
+      default:
+        return 'แบบร่าง';
     }
   }
 }

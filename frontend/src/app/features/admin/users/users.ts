@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsersService, Role } from '../../../core/services/users.service';
@@ -7,13 +7,14 @@ import { User } from '../../../core/models/user.model';
 import { OrgService } from '../../../core/services/org.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { OrgBranchesService, OrgBranch } from '../../../core/services/org-branches.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-admin-users',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './users.html',
-  styleUrls: ['./users.css']
+  styleUrls: ['./users.css'],
 })
 export class AdminUsersComponent implements OnInit {
   private toast = inject(ToastService);
@@ -23,6 +24,7 @@ export class AdminUsersComponent implements OnInit {
   private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
   private branchService = inject(OrgBranchesService);
+  private destroyRef = inject(DestroyRef);
 
   isSystemAdmin = false;
   isOrgAdmin = false;
@@ -36,17 +38,33 @@ export class AdminUsersComponent implements OnInit {
   get countByRole() {
     return {
       all: this.users.length,
-      admin: this.users.filter(u => ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim())).length,
-      assessor: this.users.filter(u => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim())).length,
-      adminOrg: this.users.filter(u => ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim())).length,
-      member: this.users.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR', 'Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim())).length
+      admin: this.users.filter((u) =>
+        ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim()),
+      ).length,
+      assessor: this.users.filter((u) => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim()))
+        .length,
+      adminOrg: this.users.filter((u) =>
+        ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim()),
+      ).length,
+      member: this.users.filter(
+        (u) =>
+          ![
+            'System Admin',
+            'SYSTEM_ADMIN',
+            'ADMIN',
+            'Assessor',
+            'ASSESSOR',
+            'Organization Admin',
+            'ORG_ADMIN',
+            'ORGANIZATION_ADMIN',
+          ].includes(String(u.role).trim()),
+      ).length,
     };
   }
 
   // For Edit Modal
   selectedUser: Partial<User> | null = null;
   isSaving = false;
-
 
   // For Confirm Modals
   userToSuspend: User | null = null;
@@ -61,7 +79,7 @@ export class AdminUsersComponent implements OnInit {
   selectedBranchId: number | null = null;
 
   ngOnInit() {
-    this.authService.currentUser$.subscribe(user => {
+    this.authService.currentUser$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((user) => {
       if (user) {
         this.checkRoles();
         this.loadUsers();
@@ -76,11 +94,11 @@ export class AdminUsersComponent implements OnInit {
   checkRoles() {
     const user = this.authService.getUser();
     const role = (user?.role || '').toUpperCase().trim().split(' ').join('_');
-    
+
     // Exact match to prevent Organization Admin from being identified as System Admin
     this.isSystemAdmin = role === 'SYSTEM_ADMIN' || role === 'ADMIN';
     this.isOrgAdmin = role === 'ORGANIZATION_ADMIN' || role === 'ORG_ADMIN';
-    
+
     this.currentOrgId = this.authService.getOrganizationId();
   }
 
@@ -90,7 +108,7 @@ export class AdminUsersComponent implements OnInit {
         this.organizations = data;
         this.cdr.markForCheck();
       },
-      error: (err) => console.error('Failed to load organizations:', err)
+      error: (err) => console.error('Failed to load organizations:', err),
     });
   }
 
@@ -99,14 +117,15 @@ export class AdminUsersComponent implements OnInit {
       next: (data) => {
         this.branches = data;
         if (!this.selectedBranchId && this.branches.length > 0) {
-          const central = this.branches.find(b => b.unit_name === 'หน่วยงานกลาง') || this.branches[0];
+          const central =
+            this.branches.find((b) => b.unit_name === 'หน่วยงานกลาง') || this.branches[0];
           if (central) {
             this.selectedBranchId = central.id!;
           }
         }
         this.cdr.markForCheck();
       },
-      error: (err) => console.error('Failed to load branches:', err)
+      error: (err) => console.error('Failed to load branches:', err),
     });
   }
 
@@ -127,7 +146,7 @@ export class AdminUsersComponent implements OnInit {
       },
       error: (err) => {
         console.error('Failed to load roles:', err);
-      }
+      },
     });
   }
 
@@ -143,7 +162,7 @@ export class AdminUsersComponent implements OnInit {
         console.error('Failed to load users:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -176,7 +195,7 @@ export class AdminUsersComponent implements OnInit {
         password: '',
         role: 'USER',
         is_active: true,
-        user_profile: { first_name: '', last_name: '', phone: '' }
+        user_profile: { first_name: '', last_name: '', phone: '' },
       };
     }
   }
@@ -187,9 +206,13 @@ export class AdminUsersComponent implements OnInit {
 
   saveUser() {
     if (!this.selectedUser) return;
-    
+
     // Validate phone number format (must be 10 digits Thai phone format if provided)
-    if (this.selectedUser.user_profile?.phone && this.selectedUser.user_profile.phone.trim() !== '' && this.selectedUser.user_profile.phone !== '-') {
+    if (
+      this.selectedUser.user_profile?.phone &&
+      this.selectedUser.user_profile.phone.trim() !== '' &&
+      this.selectedUser.user_profile.phone !== '-'
+    ) {
       const phoneClean = this.selectedUser.user_profile.phone.replace(/[-\s]/g, '');
       const phoneRegex = /^0[0-9]{9}$/;
       if (!phoneRegex.test(phoneClean)) {
@@ -203,7 +226,7 @@ export class AdminUsersComponent implements OnInit {
     const payload: any = {
       email: this.selectedUser.email,
       role: this.selectedUser.role,
-      is_active: this.selectedUser.is_active
+      is_active: this.selectedUser.is_active,
     };
 
     if (this.selectedUser.user_profile) {
@@ -223,7 +246,7 @@ export class AdminUsersComponent implements OnInit {
     }
 
     if (!this.selectedBranchId && this.branches.length > 0) {
-      const central = this.branches.find(b => b.unit_name === 'หน่วยงานกลาง') || this.branches[0];
+      const central = this.branches.find((b) => b.unit_name === 'หน่วยงานกลาง') || this.branches[0];
       if (central) {
         this.selectedBranchId = central.id!;
       }
@@ -245,10 +268,12 @@ export class AdminUsersComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to update user:', err);
-          this.toast.error('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (err.error?.message || err.message));
+          this.toast.error(
+            'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + (err.error?.message || err.message),
+          );
           this.isSaving = false;
           this.cdr.detectChanges();
-        }
+        },
       });
     } else {
       // Create new (System Admin or Org Admin)
@@ -262,14 +287,15 @@ export class AdminUsersComponent implements OnInit {
         },
         error: (err) => {
           console.error('Failed to create user:', err);
-          this.toast.error('เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน: ' + (err.error?.message || err.message));
+          this.toast.error(
+            'เกิดข้อผิดพลาดในการเพิ่มผู้ใช้งาน: ' + (err.error?.message || err.message),
+          );
           this.isSaving = false;
           this.cdr.detectChanges();
-        }
+        },
       });
     }
   }
-
 
   suspendUser(user: User) {
     this.userToSuspend = user;
@@ -292,7 +318,7 @@ export class AdminUsersComponent implements OnInit {
         console.error('Failed to toggle active status:', err);
         this.toast.error('เกิดข้อผิดพลาดในการดำเนินการ');
         this.isSaving = false;
-      }
+      },
     });
   }
 
@@ -314,7 +340,7 @@ export class AdminUsersComponent implements OnInit {
         console.error('Failed to delete user:', err);
         this.toast.error('เกิดข้อผิดพลาดในการลบผู้ใช้งาน');
         this.isSaving = false;
-      }
+      },
     });
   }
 
@@ -327,18 +353,20 @@ export class AdminUsersComponent implements OnInit {
     if (!this.userToResetPass || !this.newPasswordInput.trim()) return;
     this.isSaving = true;
 
-    this.usersService.updateUser(this.userToResetPass.id, { password: this.newPasswordInput }).subscribe({
-      next: () => {
-        this.toast.success('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว สำรองรหัสผ่านใหม่ให้ผู้ใช้งานด้วยครับ');
-        this.userToResetPass = null;
-        this.isSaving = false;
-      },
-      error: (err) => {
-        console.error('Failed to reset password:', err);
-        this.toast.error('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
-        this.isSaving = false;
-      }
-    });
+    this.usersService
+      .updateUser(this.userToResetPass.id, { password: this.newPasswordInput })
+      .subscribe({
+        next: () => {
+          this.toast.success('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว สำรองรหัสผ่านใหม่ให้ผู้ใช้งานด้วยครับ');
+          this.userToResetPass = null;
+          this.isSaving = false;
+        },
+        error: (err) => {
+          console.error('Failed to reset password:', err);
+          this.toast.error('เกิดข้อผิดพลาดในการรีเซ็ตรหัสผ่าน');
+          this.isSaving = false;
+        },
+      });
   }
 
   setTab(tab: 'ALL' | 'ADMIN' | 'ASSESSOR' | 'ADMIN_ORG' | 'MEMBER') {
@@ -348,28 +376,46 @@ export class AdminUsersComponent implements OnInit {
   filteredUsers(): User[] {
     // First apply tab filter
     let filtered = this.users;
-    
+
     if (this.activeTab === 'ADMIN') {
-      filtered = filtered.filter(u => ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim()));
+      filtered = filtered.filter((u) =>
+        ['System Admin', 'SYSTEM_ADMIN', 'ADMIN'].includes(String(u.role).trim()),
+      );
     } else if (this.activeTab === 'ASSESSOR') {
-      filtered = filtered.filter(u => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim()));
+      filtered = filtered.filter((u) => ['Assessor', 'ASSESSOR'].includes(String(u.role).trim()));
     } else if (this.activeTab === 'ADMIN_ORG') {
-      filtered = filtered.filter(u => ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim()));
+      filtered = filtered.filter((u) =>
+        ['Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim()),
+      );
     } else if (this.activeTab === 'MEMBER') {
-      filtered = filtered.filter(u => !['System Admin', 'SYSTEM_ADMIN', 'ADMIN', 'Assessor', 'ASSESSOR', 'Organization Admin', 'ORG_ADMIN', 'ORGANIZATION_ADMIN'].includes(String(u.role).trim()));
+      filtered = filtered.filter(
+        (u) =>
+          ![
+            'System Admin',
+            'SYSTEM_ADMIN',
+            'ADMIN',
+            'Assessor',
+            'ASSESSOR',
+            'Organization Admin',
+            'ORG_ADMIN',
+            'ORGANIZATION_ADMIN',
+          ].includes(String(u.role).trim()),
+      );
     }
 
     // Then apply text filter
     if (!this.searchText) {
       return filtered;
     }
-    
+
     const lowerSearch = this.searchText.toLowerCase();
-    return filtered.filter(u => 
-      (u.email && u.email.toLowerCase().includes(lowerSearch)) ||
-      (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch)) ||
-      (u.user_profile?.first_name && u.user_profile.first_name.toLowerCase().includes(lowerSearch)) ||
-      (u.user_profile?.last_name && u.user_profile.last_name.toLowerCase().includes(lowerSearch))
+    return filtered.filter(
+      (u) =>
+        (u.email && u.email.toLowerCase().includes(lowerSearch)) ||
+        (u.organization?.name && u.organization.name.toLowerCase().includes(lowerSearch)) ||
+        (u.user_profile?.first_name &&
+          u.user_profile.first_name.toLowerCase().includes(lowerSearch)) ||
+        (u.user_profile?.last_name && u.user_profile.last_name.toLowerCase().includes(lowerSearch)),
     );
   }
 
@@ -390,7 +436,7 @@ export class AdminUsersComponent implements OnInit {
         `"${user.created_at}"`,
         `"${user.organization?.name || '-'}"`,
         `"${user.role}"`,
-        `"${user.is_active ? 'Active' : 'Suspended'}"`
+        `"${user.is_active ? 'Active' : 'Suspended'}"`,
       ];
       csvRows.push(row.join(','));
     }
@@ -416,6 +462,4 @@ export class AdminUsersComponent implements OnInit {
   getStatusLabel(active: boolean): string {
     return active ? 'เปิดใช้งาน' : 'ระงับการใช้งาน';
   }
-
-
 }

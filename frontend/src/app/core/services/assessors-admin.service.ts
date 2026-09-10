@@ -36,15 +36,25 @@ export class AssessorsAdminService {
   private headers = () => new HttpHeaders({ 'Content-Type': 'application/json' });
 
   getAssessors(): Observable<AssessorUser[]> {
-    return this.http.get<AssessorUser[]>(`${this.apiUrl}?role=ASSESSOR`, { headers: this.headers() });
+    return this.http.get<AssessorUser[]>(`${this.apiUrl}?role=ASSESSOR`, {
+      headers: this.headers(),
+    });
   }
 
   verifyAssessor(id: string, verified: boolean): Observable<AssessorUser> {
-    return this.http.put<AssessorUser>(`${this.apiUrl}/${id}`, { assessor_verified: verified }, { headers: this.headers() });
+    return this.http.put<AssessorUser>(
+      `${this.apiUrl}/${id}`,
+      { assessor_verified: verified },
+      { headers: this.headers() },
+    );
   }
 
   suspendAssessor(id: string, isActive: boolean): Observable<AssessorUser> {
-    return this.http.put<AssessorUser>(`${this.apiUrl}/${id}`, { is_active: isActive }, { headers: this.headers() });
+    return this.http.put<AssessorUser>(
+      `${this.apiUrl}/${id}`,
+      { is_active: isActive },
+      { headers: this.headers() },
+    );
   }
 
   getDashboardStats(): Observable<any> {
@@ -52,10 +62,18 @@ export class AssessorsAdminService {
   }
 
   assignAssessor(assessmentId: number, assessorId: number): Observable<any> {
-    return this.http.post<any>(`${this.adminApiUrl}/assignments`, { assessmentId, assessorId }, { headers: this.headers() });
+    return this.http.post<any>(
+      `${this.adminApiUrl}/assignments`,
+      { assessmentId, assessorId },
+      { headers: this.headers() },
+    );
   }
 
   processPayout(assessorId: number, amount: number): Observable<any> {
-    return this.http.post<any>(`${this.adminApiUrl}/payouts`, { assessorId, amount }, { headers: this.headers() });
+    return this.http.post<any>(
+      `${this.adminApiUrl}/payouts`,
+      { assessorId, amount },
+      { headers: this.headers() },
+    );
   }
 }

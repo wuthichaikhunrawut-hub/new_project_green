@@ -4,15 +4,15 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN npm ci --legacy-peer-deps
 
 COPY . .
 
-# Build Angular (skip for dev mode to save time)
-# RUN npm run build -- --configuration production
+RUN npm run build -- --configuration production
 
 # Stage 2: Serve with Nginx
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine
+USER root
 
 # Remove default nginx config and copy ours
 RUN rm /etc/nginx/conf.d/default.conf
@@ -22,9 +22,10 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 RUN rm -rf /usr/share/nginx/html/*
 
 # Copy built Angular files to nginx html folder
-COPY --from=builder /app/dist/project-green/browser /usr/share/nginx/html
+COPY --chown=101:101 --from=builder /app/dist/project-green/browser /usr/share/nginx/html
 
 # Rename index.csr.html to index.html if it exists (Angular SSR builder output)
 RUN if [ -f /usr/share/nginx/html/index.csr.html ]; then mv /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html; fi
 
-EXPOSE 80
+EXPOSE 8080
+USER 101

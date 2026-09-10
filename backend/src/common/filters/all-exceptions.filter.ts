@@ -35,12 +35,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
       }
     }
 
-    // Log the actual error stack trace for server monitoring
+    // Log the actual error stack trace for server monitoring (Sanitized: omit sensitive request.body)
     const logData = {
       path: request.url,
       method: request.method,
       statusCode: status,
-      body: request.body,
       query: request.query,
       message:
         exception instanceof Error ? exception.message : String(exception),

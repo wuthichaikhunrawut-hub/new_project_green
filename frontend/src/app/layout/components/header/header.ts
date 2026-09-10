@@ -10,7 +10,7 @@ import { NotificationService } from '../../../core/services/notification.service
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './header.html',
-  styleUrls: ['./header.css']
+  styleUrls: ['./header.css'],
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
@@ -26,7 +26,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private subscription: Subscription = new Subscription();
 
   get roleKey(): string {
-    const r = String(this.role || '').trim().toUpperCase().split(' ').join('_');
+    const r = String(this.role || '')
+      .trim()
+      .toUpperCase()
+      .split(' ')
+      .join('_');
     if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
     if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
     if (r === 'ASSESSOR' || r === 'ASSESSOR_ADMIN') return 'ASSESSOR';
@@ -38,7 +42,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.subscription.add(
-      this.authService.currentUser$.subscribe(user => {
+      this.authService.currentUser$.subscribe((user) => {
         console.log('[DEBUG] Header currentUser updated:', user);
         this.user = user;
         this.username = user?.username || 'Guest';
@@ -47,13 +51,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (user) {
           this.fetchUnreadCount();
         }
-      })
+      }),
     );
 
     this.subscription.add(
-      this.notificationService.unreadCount$.subscribe(count => {
+      this.notificationService.unreadCount$.subscribe((count) => {
         this.unreadNotifications = count;
-      })
+      }),
     );
   }
 

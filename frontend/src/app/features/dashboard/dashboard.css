@@ -11,18 +11,36 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Base Body Styles for Dashboard */
 #dashboard-wrapper {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family:
+    'Inter',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   background-color: #f9fafb; /* Stripe's minimal light background */
   color: #111827; /* Darker, high-contrast text */
   min-height: 100vh;
@@ -35,14 +53,20 @@
   background: #ffffff;
   border-radius: 8px; /* Sharper corners */
   border: 1px solid #e5e7eb; /* Thin, subtle border */
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Standard subtle shadow */
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Standard subtle shadow */
   padding: 1.5rem;
   position: relative;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .dashboard-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1); /* Slightly lifted on hover */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1); /* Slightly lifted on hover */
   border-color: #d1d5db; /* Border subtly darkens */
 }
 
@@ -232,11 +256,13 @@
   cursor: pointer;
   transition: all 0.1s;
 }
-.filter-btn:hover { color: #374151; }
-.filter-btn.active { 
-  background: #ffffff; 
-  color: #111827; 
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Stripe pill button effect */
+.filter-btn:hover {
+  color: #374151;
+}
+.filter-btn.active {
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); /* Stripe pill button effect */
 }
 
 /* Radial Gauge Titles */
@@ -328,18 +354,30 @@
 }
 
 @media (max-width: 1200px) {
-  .grid-4-cols { grid-template-columns: repeat(2, 1fr); }
-  .grid-main-charts { grid-template-columns: 1fr; }
-  .grid-3-cols { grid-template-columns: repeat(2, 1fr); }
+  .grid-4-cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid-main-charts {
+    grid-template-columns: 1fr;
+  }
+  .grid-3-cols {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .grid-4-cols { grid-template-columns: 1fr 1fr; }
-  .grid-3-cols { grid-template-columns: 1fr; }
+  .grid-4-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-3-cols {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 480px) {
-  .grid-4-cols { grid-template-columns: 1fr; }
+  .grid-4-cols {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- PREMIUM ACHIEVEMENT MEDALS & CELEBRATION BANNERS --- */
@@ -348,7 +386,9 @@
   border: 1px solid #b9f6ca;
   border-radius: 16px;
   padding: 1.75rem 2rem;
-  box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.08), 0 2px 8px -1px rgba(0, 0, 0, 0.02);
+  box-shadow:
+    0 4px 20px -2px rgba(16, 185, 129, 0.08),
+    0 2px 8px -1px rgba(0, 0, 0, 0.02);
   position: relative;
   overflow: hidden;
   display: flex;
@@ -359,7 +399,9 @@
 }
 
 .celebration-banner:hover {
-  box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.15), 0 4px 12px -2px rgba(0, 0, 0, 0.03);
+  box-shadow:
+    0 10px 30px -5px rgba(16, 185, 129, 0.15),
+    0 4px 12px -2px rgba(0, 0, 0, 0.03);
   transform: translateY(-2px);
 }
 
@@ -393,13 +435,17 @@
 }
 .medal-in-progress {
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25), inset 0 2px 4px rgba(255,255,255,0.4);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.20);
+  box-shadow:
+    0 8px 24px rgba(16, 185, 129, 0.25),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 .medal-failed {
   background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3), inset 0 2px 4px rgba(255,255,255,0.4);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.20);
+  box-shadow:
+    0 8px 24px rgba(239, 68, 68, 0.3),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .medal-container {
@@ -424,7 +470,7 @@
   font-weight: 900;
   color: #ffffff;
   position: relative;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   border: 4px solid #ffffff;
   overflow: hidden;
   animation: floatMedal 3s ease-in-out infinite;
@@ -432,8 +478,13 @@
 
 /* Float Animation */
 @keyframes floatMedal {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(-5px) rotate(2deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(2deg);
+  }
 }
 
 /* Shiny Sweep Effect */
@@ -450,29 +501,40 @@
 }
 
 @keyframes shineSweep {
-  0% { left: -60%; }
-  25%, 100% { left: 130%; }
+  0% {
+    left: -60%;
+  }
+  25%,
+  100% {
+    left: 130%;
+  }
 }
 
 /* Gold Medal */
 .medal-gold {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%);
-  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.35), inset 0 2px 4px rgba(255,255,255,0.4);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  box-shadow:
+    0 8px 24px rgba(217, 119, 6, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 /* Silver Medal */
 .medal-silver {
   background: linear-gradient(135deg, #94a3b8 0%, #64748b 50%, #475569 100%);
-  box-shadow: 0 8px 24px rgba(100, 116, 139, 0.35), inset 0 2px 4px rgba(255,255,255,0.4);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  box-shadow:
+    0 8px 24px rgba(100, 116, 139, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 /* Bronze Medal */
 .medal-bronze {
   background: linear-gradient(135deg, #ea580c 0%, #ca8a04 50%, #854d0e 100%);
-  box-shadow: 0 8px 24px rgba(133, 77, 14, 0.35), inset 0 2px 4px rgba(255,255,255,0.4);
-  text-shadow: 0 2px 4px rgba(0,0,0,0.25);
+  box-shadow:
+    0 8px 24px rgba(133, 77, 14, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 }
 
 .medal-sparkles {

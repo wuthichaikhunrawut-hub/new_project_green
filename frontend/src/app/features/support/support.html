@@ -3,7 +3,9 @@
   <div class="row mb-4">
     <div class="col-12 text-center text-md-start">
       <h2 class="fw-bold text-success mb-2">ศูนย์ช่วยเหลือ</h2>
-      <p style="color: #64748b !important;">ค้นหาคำตอบจากคำถามที่พบบ่อย หรือติดต่อทีมงาน Green Sync โดยตรง</p>
+      <p style="color: #64748b !important">
+        ค้นหาคำตอบจากคำถามที่พบบ่อย หรือติดต่อทีมงาน Green Sync โดยตรง
+      </p>
     </div>
   </div>
 
@@ -13,38 +15,89 @@
       <div class="card border-0 shadow-sm rounded-4 h-100">
         <div class="card-body p-4 p-md-5">
           <h4 class="fw-bold mb-4">คำถามที่พบบ่อย (FAQ)</h4>
-          
+
           <div class="faq-list">
             <!-- FAQ 1 -->
             <div class="border-bottom py-3">
-              <div class="d-flex align-items-center justify-content-between py-2" (click)="toggleFaq(1)" style="cursor: pointer; user-select: none;">
-                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors">การประเมินคาร์บอนฟุตพริ้นท์ต้องใช้ข้อมูลอะไรบ้าง?</span>
-                <i class="fa-solid" [class.fa-chevron-up]="activeFaq === 1" [class.fa-chevron-down]="activeFaq !== 1" style="color: #059669; font-size: 0.95rem; transition: transform 0.2s;"></i>
+              <div
+                class="d-flex align-items-center justify-content-between py-2"
+                (click)="toggleFaq(1)"
+                style="cursor: pointer; user-select: none"
+              >
+                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors"
+                  >การประเมินคาร์บอนฟุตพริ้นท์ต้องใช้ข้อมูลอะไรบ้าง?</span
+                >
+                <i
+                  class="fa-solid"
+                  [class.fa-chevron-up]="activeFaq === 1"
+                  [class.fa-chevron-down]="activeFaq !== 1"
+                  style="color: #059669; font-size: 0.95rem; transition: transform 0.2s"
+                ></i>
               </div>
-              <div *ngIf="activeFaq === 1" class="py-2" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
-                ระบบต้องการข้อมูลพื้นฐาน 3 ส่วนหลัก ได้แก่ (1) บิลค่าไฟฟ้า (2) บิลค่าน้ำประปา และ (3) ข้อมูลการใช้น้ำมันเชื้อเพลิงของยานพาหนะองค์กร โดยคุณสามารถอัปโหลดรูปถ่ายบิลให้ระบบ AI ช่วยดึงข้อมูลได้อัตโนมัติ
+              <div
+                *ngIf="activeFaq === 1"
+                class="py-2"
+                style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6"
+              >
+                ระบบต้องการข้อมูลพื้นฐาน 3 ส่วนหลัก ได้แก่ (1) บิลค่าไฟฟ้า (2) บิลค่าน้ำประปา และ
+                (3) ข้อมูลการใช้น้ำมันเชื้อเพลิงของยานพาหนะองค์กร
+                โดยคุณสามารถอัปโหลดรูปถ่ายบิลให้ระบบ AI ช่วยดึงข้อมูลได้อัตโนมัติ
               </div>
             </div>
 
             <!-- FAQ 2 -->
             <div class="border-bottom py-3">
-              <div class="d-flex align-items-center justify-content-between py-2" (click)="toggleFaq(2)" style="cursor: pointer; user-select: none;">
-                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors">ข้อมูลที่อัปโหลดเข้าสู่ระบบมีความปลอดภัยแค่ไหน?</span>
-                <i class="fa-solid" [class.fa-chevron-up]="activeFaq === 2" [class.fa-chevron-down]="activeFaq !== 2" style="color: #059669; font-size: 0.95rem; transition: transform 0.2s;"></i>
+              <div
+                class="d-flex align-items-center justify-content-between py-2"
+                (click)="toggleFaq(2)"
+                style="cursor: pointer; user-select: none"
+              >
+                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors"
+                  >ข้อมูลที่อัปโหลดเข้าสู่ระบบมีความปลอดภัยแค่ไหน?</span
+                >
+                <i
+                  class="fa-solid"
+                  [class.fa-chevron-up]="activeFaq === 2"
+                  [class.fa-chevron-down]="activeFaq !== 2"
+                  style="color: #059669; font-size: 0.95rem; transition: transform 0.2s"
+                ></i>
               </div>
-              <div *ngIf="activeFaq === 2" class="py-2" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
-                Green Sync ให้ความสำคัญกับความปลอดภัยระดับองค์กร (Enterprise-grade Security) ข้อมูลเอกสารทุกชิ้นจะถูกเข้ารหัส และการทำงานของระบบ AI ของเราจะไม่มีการนำข้อมูลของคุณไปใช้ฝึกฝนโมเดลสาธารณะ (No Public Training)
+              <div
+                *ngIf="activeFaq === 2"
+                class="py-2"
+                style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6"
+              >
+                Green Sync ให้ความสำคัญกับความปลอดภัยระดับองค์กร (Enterprise-grade Security)
+                ข้อมูลเอกสารทุกชิ้นจะถูกเข้ารหัส และการทำงานของระบบ AI
+                ของเราจะไม่มีการนำข้อมูลของคุณไปใช้ฝึกฝนโมเดลสาธารณะ (No Public Training)
               </div>
             </div>
 
             <!-- FAQ 3 -->
             <div class="py-3">
-              <div class="d-flex align-items-center justify-content-between py-2" (click)="toggleFaq(3)" style="cursor: pointer; user-select: none;">
-                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors">ต้องการเพิ่มแอดมินหรือพนักงานเข้าสู่ระบบ ต้องทำอย่างไร?</span>
-                <i class="fa-solid" [class.fa-chevron-up]="activeFaq === 3" [class.fa-chevron-down]="activeFaq !== 3" style="color: #059669; font-size: 0.95rem; transition: transform 0.2s;"></i>
+              <div
+                class="d-flex align-items-center justify-content-between py-2"
+                (click)="toggleFaq(3)"
+                style="cursor: pointer; user-select: none"
+              >
+                <span class="fw-bold text-dark fs-6 hover:text-success transition-colors"
+                  >ต้องการเพิ่มแอดมินหรือพนักงานเข้าสู่ระบบ ต้องทำอย่างไร?</span
+                >
+                <i
+                  class="fa-solid"
+                  [class.fa-chevron-up]="activeFaq === 3"
+                  [class.fa-chevron-down]="activeFaq !== 3"
+                  style="color: #059669; font-size: 0.95rem; transition: transform 0.2s"
+                ></i>
               </div>
-              <div *ngIf="activeFaq === 3" class="py-2" style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6;">
-                หากคุณเป็น Organization Admin (ผู้ดูแลระดับองค์กร) คุณสามารถเข้าไปที่เมนู "จัดการผู้ใช้งาน" ที่แถบเมนูด้านซ้าย และกดปุ่ม "เพิ่มผู้ใช้งาน" เพื่อสร้างบัญชีให้พนักงานในองค์กรได้ทันที
+              <div
+                *ngIf="activeFaq === 3"
+                class="py-2"
+                style="color: #475569 !important; font-size: 0.95rem; line-height: 1.6"
+              >
+                หากคุณเป็น Organization Admin (ผู้ดูแลระดับองค์กร) คุณสามารถเข้าไปที่เมนู
+                "จัดการผู้ใช้งาน" ที่แถบเมนูด้านซ้าย และกดปุ่ม "เพิ่มผู้ใช้งาน"
+                เพื่อสร้างบัญชีให้พนักงานในองค์กรได้ทันที
               </div>
             </div>
           </div>
@@ -54,19 +107,36 @@
 
     <!-- Contact Form Section -->
     <div class="col-lg-5">
-      <div class="card border-0 shadow-sm rounded-4 text-white h-100" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); border: none !important;">
+      <div
+        class="card border-0 shadow-sm rounded-4 text-white h-100"
+        style="
+          background: linear-gradient(135deg, #059669 0%, #047857 100%);
+          border: none !important;
+        "
+      >
         <div class="card-body p-4 p-md-5">
           <h4 class="fw-bold mb-2 text-white">ติดต่อทีมงาน</h4>
-          <p class="text-white-50 mb-4 small">เราพร้อมช่วยเหลือคุณในเวลาทำการ จันทร์-ศุกร์ (09:00 - 18:00 น.)</p>
+          <p class="text-white-50 mb-4 small">
+            เราพร้อมช่วยเหลือคุณในเวลาทำการ จันทร์-ศุกร์ (09:00 - 18:00 น.)
+          </p>
 
           <!-- Success Alert -->
           <div *ngIf="submitted" class="text-center py-4 animate-in">
-            <div class="bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow" style="width: 50px; height: 50px;">
+            <div
+              class="bg-white text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3 shadow"
+              style="width: 50px; height: 50px"
+            >
               <i class="fa-solid fa-circle-check fs-3"></i>
             </div>
             <h5 class="fw-bold text-white mb-1">ส่งตั๋วแจ้งปัญหาสำเร็จ!</h5>
-            <p class="text-white-50 small mb-4">ทีมงานได้รับเรื่องเรียบร้อยแล้ว และจะติดต่อกลับโดยเร็วที่สุด</p>
-            <button type="button" class="btn btn-light text-success fw-bold px-4 py-2 rounded-pill shadow-sm" (click)="resetForm()">
+            <p class="text-white-50 small mb-4">
+              ทีมงานได้รับเรื่องเรียบร้อยแล้ว และจะติดต่อกลับโดยเร็วที่สุด
+            </p>
+            <button
+              type="button"
+              class="btn btn-light text-success fw-bold px-4 py-2 rounded-pill shadow-sm"
+              (click)="resetForm()"
+            >
               <i class="fa-solid fa-plus me-2"></i>ส่งตั๋วใบใหม่
             </button>
           </div>
@@ -74,7 +144,13 @@
           <form (ngSubmit)="onSubmit()" *ngIf="!submitted">
             <div class="mb-3">
               <label class="form-label text-white small fw-bold mb-1">หัวข้อปัญหา (Subject)</label>
-              <select class="form-select rounded-3 border-0 shadow-sm" style="background-color: rgba(255,255,255,0.95); color: #333;" [(ngModel)]="ticket.subject" name="subject" required>
+              <select
+                class="form-select rounded-3 border-0 shadow-sm"
+                style="background-color: rgba(255, 255, 255, 0.95); color: #333"
+                [(ngModel)]="ticket.subject"
+                name="subject"
+                required
+              >
                 <option value="" disabled>-- เลือกหัวข้อ --</option>
                 <option value="technical">ปัญหาการใช้งานระบบ (Technical Issue)</option>
                 <option value="billing">ปัญหาการชำระเงิน (Billing/Invoice)</option>
@@ -84,20 +160,35 @@
             </div>
             <div class="mb-4">
               <label class="form-label text-white small fw-bold mb-1">รายละเอียด (Message)</label>
-              <textarea class="form-control rounded-3 border-0 shadow-sm" rows="5" style="background-color: rgba(255,255,255,0.95); color: #333;"
-                [(ngModel)]="ticket.message" name="message" required placeholder="อธิบายปัญหาที่คุณพบ..."></textarea>
+              <textarea
+                class="form-control rounded-3 border-0 shadow-sm"
+                rows="5"
+                style="background-color: rgba(255, 255, 255, 0.95); color: #333"
+                [(ngModel)]="ticket.message"
+                name="message"
+                required
+                placeholder="อธิบายปัญหาที่คุณพบ..."
+              ></textarea>
             </div>
-            <button type="submit" class="btn w-100 fw-bold py-2 rounded-3 shadow" style="background-color: #fff; color: #198754; font-size: 1rem;" [disabled]="isSubmitting || !ticket.subject || !ticket.message">
+            <button
+              type="submit"
+              class="btn w-100 fw-bold py-2 rounded-3 shadow"
+              style="background-color: #fff; color: #198754; font-size: 1rem"
+              [disabled]="isSubmitting || !ticket.subject || !ticket.message"
+            >
               <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
               <i *ngIf="!isSubmitting" class="fa-solid fa-paper-plane me-2"></i>
               {{ isSubmitting ? 'กำลังส่งข้อมูล...' : 'ส่งตั๋วแจ้งปัญหา' }}
             </button>
           </form>
-          
-          <hr class="border-white opacity-25 my-4">
-          
+
+          <hr class="border-white opacity-25 my-4" />
+
           <div class="d-flex align-items-center gap-3">
-            <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+            <div
+              class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center"
+              style="width: 48px; height: 48px"
+            >
               <i class="fa-solid fa-envelope fs-5"></i>
             </div>
             <div>
@@ -128,14 +219,26 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let ticket of tickets" (click)="viewTicket(ticket)" style="cursor: pointer;">
+                <tr
+                  *ngFor="let ticket of tickets"
+                  (click)="viewTicket(ticket)"
+                  style="cursor: pointer"
+                >
                   <td class="px-4 py-3 fw-bold">{{ ticket.id }}</td>
                   <td class="px-4 py-3 text-dark">{{ ticket.subject }}</td>
-                  <td class="px-4 py-3" style="color: #64748b !important;">{{ ticket.sender }}</td>
+                  <td class="px-4 py-3" style="color: #64748b !important">{{ ticket.sender }}</td>
                   <td class="px-4 py-3">
-                    <span class="badge" [ngClass]="ticket.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'">{{ ticket.status }}</span>
+                    <span
+                      class="badge"
+                      [ngClass]="
+                        ticket.status === 'Pending' ? 'bg-warning text-dark' : 'bg-success'
+                      "
+                      >{{ ticket.status }}</span
+                    >
                   </td>
-                  <td class="px-4 py-3 small" style="color: #64748b !important;">{{ ticket.date | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td class="px-4 py-3 small" style="color: #64748b !important">
+                    {{ ticket.date | date: 'dd/MM/yyyy HH:mm' }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -147,7 +250,19 @@
 </div>
 
 <!-- Ticket Details Modal (Admin) -->
-<div class="modal d-block bg-black/60 backdrop-blur-sm" tabindex="-1" *ngIf="selectedTicket" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 9999 !important;">
+<div
+  class="modal d-block bg-black/60 backdrop-blur-sm"
+  tabindex="-1"
+  *ngIf="selectedTicket"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999 !important;
+  "
+>
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content rounded-4 border-0 shadow-lg">
       <div class="modal-header border-bottom p-4">
@@ -159,31 +274,53 @@
       <div class="modal-body p-4">
         <div class="row mb-4">
           <div class="col-md-6">
-            <p class="small fw-bold mb-1" style="color: #64748b !important;">ผู้ส่ง</p>
+            <p class="small fw-bold mb-1" style="color: #64748b !important">ผู้ส่ง</p>
             <p class="mb-0">{{ selectedTicket.sender }}</p>
           </div>
           <div class="col-md-6">
-            <p class="small fw-bold mb-1" style="color: #64748b !important;">วันที่ส่ง</p>
-            <p class="mb-0">{{ selectedTicket.date | date:'dd/MM/yyyy HH:mm' }}</p>
+            <p class="small fw-bold mb-1" style="color: #64748b !important">วันที่ส่ง</p>
+            <p class="mb-0">{{ selectedTicket.date | date: 'dd/MM/yyyy HH:mm' }}</p>
           </div>
         </div>
         <div class="mb-4">
-          <p class="small fw-bold mb-1" style="color: #64748b !important;">หัวข้อปัญหา</p>
+          <p class="small fw-bold mb-1" style="color: #64748b !important">หัวข้อปัญหา</p>
           <p class="fs-5 fw-medium">{{ selectedTicket.subject }}</p>
         </div>
         <div class="mb-4">
-          <p class="small fw-bold mb-1" style="color: #64748b !important;">รายละเอียด</p>
+          <p class="small fw-bold mb-1" style="color: #64748b !important">รายละเอียด</p>
           <div class="p-3 bg-light rounded-3">
             <p class="mb-0">{{ selectedTicket.message || 'ไม่มีรายละเอียดเพิ่มเติม' }}</p>
           </div>
         </div>
-        
+
         <div class="d-flex align-items-center justify-content-between p-3 bg-light rounded-3 mt-4">
           <div class="d-flex align-items-center gap-3">
-            <span class="fw-bold small" style="color: #64748b !important;">อัปเดตสถานะ:</span>
-            <button class="btn btn-sm" [ngClass]="selectedTicket.status === 'Pending' ? 'btn-warning' : 'btn-outline-warning'" (click)="updateTicketStatus('Pending')">รอตรวจสอบ</button>
-            <button class="btn btn-sm" [ngClass]="selectedTicket.status === 'In Progress' ? 'btn-info' : 'btn-outline-info'" (click)="updateTicketStatus('In Progress')">กำลังดำเนินการ</button>
-            <button class="btn btn-sm" [ngClass]="selectedTicket.status === 'Resolved' ? 'btn-success' : 'btn-outline-success'" (click)="updateTicketStatus('Resolved')">แก้ไขแล้ว</button>
+            <span class="fw-bold small" style="color: #64748b !important">อัปเดตสถานะ:</span>
+            <button
+              class="btn btn-sm"
+              [ngClass]="
+                selectedTicket.status === 'Pending' ? 'btn-warning' : 'btn-outline-warning'
+              "
+              (click)="updateTicketStatus('Pending')"
+            >
+              รอตรวจสอบ
+            </button>
+            <button
+              class="btn btn-sm"
+              [ngClass]="selectedTicket.status === 'In Progress' ? 'btn-info' : 'btn-outline-info'"
+              (click)="updateTicketStatus('In Progress')"
+            >
+              กำลังดำเนินการ
+            </button>
+            <button
+              class="btn btn-sm"
+              [ngClass]="
+                selectedTicket.status === 'Resolved' ? 'btn-success' : 'btn-outline-success'
+              "
+              (click)="updateTicketStatus('Resolved')"
+            >
+              แก้ไขแล้ว
+            </button>
           </div>
         </div>
       </div>

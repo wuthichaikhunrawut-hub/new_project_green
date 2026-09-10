@@ -6,7 +6,11 @@
         <p class="page-subtitle mb-0">ตรวจสอบสถานะใบแจ้งหนี้และประวัติการชำระเงินขององค์กร</p>
       </div>
       <div class="page-actions">
-        <button class="btn btn-white shadow-sm border-0 rounded-pill px-4 text-muted fw-bold" (click)="loadInvoices()" class="text-sm">
+        <button
+          class="btn btn-white shadow-sm border-0 rounded-pill px-4 text-muted fw-bold"
+          (click)="loadInvoices()"
+          class="text-sm"
+        >
           <i class="fa-solid fa-rotate-right me-2"></i> รีเฟรชข้อมูล
         </button>
       </div>
@@ -17,9 +21,9 @@
         <div *ngIf="isLoading" class="text-center py-5">
           <div class="spinner-border text-success spinner-border-sm" role="status"></div>
         </div>
-        
+
         <div class="table-responsive" *ngIf="!isLoading">
-          <table class="table table-premium table-hover mb-0" style="table-layout: fixed;">
+          <table class="table table-premium table-hover mb-0" style="table-layout: fixed">
             <thead>
               <tr>
                 <th class="ps-5 w-[18%]">เลขที่อ้างอิง (Ref No.)</th>
@@ -34,23 +38,43 @@
             <tbody>
               <tr *ngFor="let inv of invoices">
                 <td class="ps-5">
-                  <span class="invoice-ref fw-bold text-emerald-600">{{ inv.reference_number || '-' }}</span>
+                  <span class="invoice-ref fw-bold text-emerald-600">{{
+                    inv.reference_number || '-'
+                  }}</span>
                 </td>
-                <td class="text-muted text-sm">{{ inv.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
-                <td class="fw-bold text-slate-800">{{ inv.organization ? inv.organization.name : '-' }}</td>
+                <td class="text-muted text-sm">{{ inv.created_at | date: 'dd/MM/yyyy HH:mm' }}</td>
+                <td class="fw-bold text-slate-800">
+                  {{ inv.organization ? inv.organization.name : '-' }}
+                </td>
                 <td>
-                  <span class="badge bg-light text-muted border px-3 py-1">{{ inv.plan ? inv.plan.plan_name : 'N/A' }}</span>
+                  <span class="badge bg-light text-muted border px-3 py-1">{{
+                    inv.plan ? inv.plan.plan_name : 'N/A'
+                  }}</span>
                 </td>
-                <td class="text-end fw-bold text-emerald-600">฿{{ inv.amount | number:'1.2-2' }}</td>
+                <td class="text-end fw-bold text-emerald-600">
+                  ฿{{ inv.amount | number: '1.2-2' }}
+                </td>
                 <td class="text-center">
-                  <span class="status-badge" [ngClass]="statusColors[inv.status]">{{ statusLabels[inv.status] || inv.status }}</span>
+                  <span class="status-badge" [ngClass]="statusColors[inv.status]">{{
+                    statusLabels[inv.status] || inv.status
+                  }}</span>
                 </td>
                 <td class="text-end pe-5">
                   <div class="d-flex gap-2 justify-content-end">
-                    <button class="btn btn-sm px-3 rounded-pill fw-bold text-success transition-all" *ngIf="inv.status === 'PENDING'" (click)="markAsPaid(inv.id)" class="text-xs bg-emerald-50 border border-emerald-200">
+                    <button
+                      class="btn btn-sm px-3 rounded-pill fw-bold text-success transition-all"
+                      *ngIf="inv.status === 'PENDING'"
+                      (click)="markAsPaid(inv.id)"
+                      class="text-xs bg-emerald-50 border border-emerald-200"
+                    >
                       <i class="fa-solid fa-check me-1"></i> ยืนยันชำระเงิน
                     </button>
-                    <button class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all" *ngIf="inv.status === 'PENDING'" (click)="cancel(inv.id)" class="text-xs bg-red-50 border border-red-300">
+                    <button
+                      class="btn btn-sm px-3 rounded-pill fw-bold text-danger transition-all"
+                      *ngIf="inv.status === 'PENDING'"
+                      (click)="cancel(inv.id)"
+                      class="text-xs bg-red-50 border border-red-300"
+                    >
                       <i class="fa-solid fa-xmark me-1"></i> ยกเลิกบิล
                     </button>
                   </div>
@@ -61,7 +85,9 @@
                   <div class="py-5 opacity-50">
                     <i class="fa-solid fa-receipt fs-1 mb-3 text-muted"></i>
                     <p class="mb-0 fw-bold text-muted">ยังไม่มีประวัติการชำระเงินในขณะนี้</p>
-                    <small class="text-muted">ใบแจ้งหนี้จะปรากฏที่นี่เมื่อมีการสั่งซื้อแพ็กเกจเกิดขึ้น</small>
+                    <small class="text-muted"
+                      >ใบแจ้งหนี้จะปรากฏที่นี่เมื่อมีการสั่งซื้อแพ็กเกจเกิดขึ้น</small
+                    >
                   </div>
                 </td>
               </tr>

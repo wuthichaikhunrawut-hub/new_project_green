@@ -3,10 +3,22 @@
   <div class="page-header mb-4">
     <div class="page-header-left">
       <h2 class="page-title">
-        {{ isAssigner ? 'มอบหมายงานตรวจประเมิน' : (userRoleKey === 'ASSESSOR' ? 'รายการตรวจประเมิน' : 'ผลการรับรอง Green Office') }}
+        {{
+          isAssigner
+            ? 'มอบหมายงานตรวจประเมิน'
+            : userRoleKey === 'ASSESSOR'
+              ? 'รายการตรวจประเมิน'
+              : 'ผลการรับรอง Green Office'
+        }}
       </h2>
       <p class="page-subtitle mb-0">
-        {{ isAssigner ? 'มอบหมายผู้ตรวจประเมินให้กับคำขอรับรอง Green Office ของแต่ละหน่วยงาน' : (userRoleKey === 'ASSESSOR' ? 'จัดการและบันทึกคะแนนการตรวจประเมินเกณฑ์ Green Office ของหน่วยงาน' : 'จัดการประวัติการส่งคำขอและติดตามสถานะการรับรองเกณฑ์การประเมิน') }}
+        {{
+          isAssigner
+            ? 'มอบหมายผู้ตรวจประเมินให้กับคำขอรับรอง Green Office ของแต่ละหน่วยงาน'
+            : userRoleKey === 'ASSESSOR'
+              ? 'จัดการและบันทึกคะแนนการตรวจประเมินเกณฑ์ Green Office ของหน่วยงาน'
+              : 'จัดการประวัติการส่งคำขอและติดตามสถานะการรับรองเกณฑ์การประเมิน'
+        }}
       </p>
     </div>
   </div>
@@ -17,8 +29,15 @@
       <div class="row g-3">
         <div class="col-md-8">
           <div class="input-group">
-            <span class="input-group-text bg-white"><i class="fa-solid fa-search text-muted"></i></span>
-            <input type="text" class="form-control" placeholder="ค้นหาตามชื่อองค์กร..." [(ngModel)]="searchTerm">
+            <span class="input-group-text bg-white"
+              ><i class="fa-solid fa-search text-muted"></i
+            ></span>
+            <input
+              type="text"
+              class="form-control"
+              placeholder="ค้นหาตามชื่อองค์กร..."
+              [(ngModel)]="searchTerm"
+            />
           </div>
         </div>
         <div class="col-md-4">
@@ -37,7 +56,6 @@
   <!-- Main Card -->
   <div class="card p-0 shadow-sm border-0">
     <div class="card-body p-0">
-      
       <!-- Loading State -->
       <div *ngIf="isLoading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
@@ -48,11 +66,15 @@
 
       <!-- Empty State -->
       <div *ngIf="!isLoading && requests.length === 0" class="text-center py-5">
-        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3 w-[80px]">
+        <div
+          class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3 w-[80px]"
+        >
           <i class="fa-solid fa-folder-open fs-1 text-muted opacity-50"></i>
         </div>
         <h5 class="fw-bold text-dark">ไม่มีประวัติคำขอรับรอง</h5>
-        <p class="text-muted mb-4">ระบบยังไม่พบข้อมูลคำขอ กรุณาสร้างคำขอประเมินใหม่เพื่อเริ่มขั้นตอนการตรวจประเมิน</p>
+        <p class="text-muted mb-4">
+          ระบบยังไม่พบข้อมูลคำขอ กรุณาสร้างคำขอประเมินใหม่เพื่อเริ่มขั้นตอนการตรวจประเมิน
+        </p>
       </div>
 
       <!-- Data Table -->
@@ -61,7 +83,12 @@
           <thead>
             <tr>
               <th scope="col" class="ps-4">No. / วันที่ส่ง</th>
-              <th scope="col" *ngIf="userRoleKey === 'SYSTEM_ADMIN' || userRoleKey === 'ASSESSOR' || isAssigner">หน่วยงานผู้ขอ</th>
+              <th
+                scope="col"
+                *ngIf="userRoleKey === 'SYSTEM_ADMIN' || userRoleKey === 'ASSESSOR' || isAssigner"
+              >
+                หน่วยงานผู้ขอ
+              </th>
               <th scope="col" *ngIf="isAssigner">ผู้ตรวจประเมิน</th>
               <th scope="col">สถานะ</th>
               <th scope="col" class="text-center">คะแนน</th>
@@ -76,27 +103,45 @@
                 <div class="fw-bold text-dark">Req-{{ req.id }}</div>
                 <div class="small text-muted">{{ req.submitted_at | thaiDate }}</div>
               </td>
-              
+
               <!-- Organization -->
-              <td class="py-3" *ngIf="userRoleKey === 'SYSTEM_ADMIN' || userRoleKey === 'ASSESSOR' || isAssigner">
-                <div class="fw-semibold text-dark">{{ req['organization']?.name || 'ไม่พบข้อมูล' }}</div>
+              <td
+                class="py-3"
+                *ngIf="userRoleKey === 'SYSTEM_ADMIN' || userRoleKey === 'ASSESSOR' || isAssigner"
+              >
+                <div class="fw-semibold text-dark">
+                  {{ req['organization']?.name || 'ไม่พบข้อมูล' }}
+                </div>
               </td>
-              
+
               <!-- Assessor assignment -->
               <td class="py-3" *ngIf="isAssigner">
                 <div class="d-flex align-items-center gap-2">
-                  <span *ngIf="!req.assessor_user_id" class="badge bg-light text-muted border py-1 px-2 d-inline-flex align-items-center">
+                  <span
+                    *ngIf="!req.assessor_user_id"
+                    class="badge bg-light text-muted border py-1 px-2 d-inline-flex align-items-center"
+                  >
                     <i class="fa-solid fa-user-slash me-1 small"></i>ยังไม่ระบุ
                   </span>
-                  <span *ngIf="req.assessor_user_id" class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center">
-                    <i class="fa-solid fa-user-check me-1 small"></i>{{ req.assessor?.user_profile?.first_name || 'ผู้ตรวจ #' + req.assessor_user_id }}
+                  <span
+                    *ngIf="req.assessor_user_id"
+                    class="badge bg-success-subtle text-success border border-success-subtle py-1 px-2 d-inline-flex align-items-center"
+                  >
+                    <i class="fa-solid fa-user-check me-1 small"></i
+                    >{{
+                      req.assessor?.user_profile?.first_name || 'ผู้ตรวจ #' + req.assessor_user_id
+                    }}
                   </span>
-                  <button class="btn btn-xs btn-outline-primary py-1 px-2" (click)="openAssignModal(req)" title="เปลี่ยนผู้ตรวจ">
+                  <button
+                    class="btn btn-xs btn-outline-primary py-1 px-2"
+                    (click)="openAssignModal(req)"
+                    title="เปลี่ยนผู้ตรวจ"
+                  >
                     <i class="fa-solid fa-user-pen"></i>
                   </button>
                 </div>
               </td>
-              
+
               <!-- Status -->
               <td class="py-3">
                 <span class="badge" [ngClass]="getStatusBadgeClass(req.status)">
@@ -116,35 +161,54 @@
                   ไปที่ Revision Center
                 </a>
               </td>
-              
+
               <!-- Score -->
               <td class="py-3 text-center">
-                <span class="fw-bold fs-6" [ngClass]="{'text-success': (req.total_score || 0) >= 60, 'text-muted': !req.total_score}">
-                  {{ req.total_score ? (req.total_score | number:'1.2-2') : '-' }}
+                <span
+                  class="fw-bold fs-6"
+                  [ngClass]="{
+                    'text-success': (req.total_score || 0) >= 60,
+                    'text-muted': !req.total_score,
+                  }"
+                >
+                  {{ req.total_score ? (req.total_score | number: '1.2-2') : '-' }}
                 </span>
               </td>
-              
+
               <!-- Certification Level -->
               <td class="py-3 text-center">
                 <span *ngIf="req.certified_level" class="badge bg-light text-dark border">
-                  <i class="fa-solid fa-medal me-1" 
+                  <i
+                    class="fa-solid fa-medal me-1"
                     [ngClass]="{
-                      'text-warning': req.certified_level.includes('ทอง') || req.certified_level.includes('G'),
-                      'text-secondary': req.certified_level.includes('เงิน') || req.certified_level.includes('S'),
-                      'text-danger': req.certified_level.includes('ทองแดง') || req.certified_level.includes('B')
-                    }">
+                      'text-warning':
+                        req.certified_level.includes('ทอง') || req.certified_level.includes('G'),
+                      'text-secondary':
+                        req.certified_level.includes('เงิน') || req.certified_level.includes('S'),
+                      'text-danger':
+                        req.certified_level.includes('ทองแดง') || req.certified_level.includes('B'),
+                    }"
+                  >
                   </i>
                   {{ req.certified_level }}
                 </span>
                 <span *ngIf="!req.certified_level" class="text-muted small">-</span>
               </td>
-              
+
               <!-- Actions -->
               <td class="py-3 text-end pe-4">
-                <button [routerLink]="['/assessor/report', req.id]" class="btn btn-sm btn-light btn-icon me-2" title="รายละเอียดรายงานการประเมิน">
+                <button
+                  [routerLink]="['/assessor/report', req.id]"
+                  class="btn btn-sm btn-light btn-icon me-2"
+                  title="รายละเอียดรายงานการประเมิน"
+                >
                   <i class="fa-solid fa-eye text-primary"></i>
                 </button>
-                <button *ngIf="userRoleKey === 'ASSESSOR'" [routerLink]="['/requests/evaluate', req.id]" class="btn btn-sm btn-primary">
+                <button
+                  *ngIf="userRoleKey === 'ASSESSOR'"
+                  [routerLink]="['/requests/evaluate', req.id]"
+                  class="btn btn-sm btn-primary"
+                >
                   <i class="fa-solid fa-clipboard-check me-1"></i> ประเมิน
                 </button>
               </td>
@@ -157,9 +221,26 @@
 </div>
 
 <!-- มอบหมายงานตรวจประเมิน Modal -->
-<div class="modal bg-black/50 backdrop-blur-sm" tabindex="-1" [class.d-block]="selectedReqForAssign" [class.d-none]="!selectedReqForAssign" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important;">
-  <div class="modal-dialog modal-dialog-centered" *ngIf="selectedReqForAssign" style="width: 100%; max-width: 500px;">
-    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+<div
+  class="modal bg-black/50 backdrop-blur-sm"
+  tabindex="-1"
+  [class.d-block]="selectedReqForAssign"
+  [class.d-none]="!selectedReqForAssign"
+  style="
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+  "
+>
+  <div
+    class="modal-dialog modal-dialog-centered"
+    *ngIf="selectedReqForAssign"
+    style="width: 100%; max-width: 500px"
+  >
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px">
       <!-- Modal Header -->
       <div class="modal-header border-0 pb-0 pt-4 px-4">
         <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
@@ -168,35 +249,57 @@
         </h5>
         <button type="button" class="btn-close shadow-none" (click)="closeAssignModal()"></button>
       </div>
-      
+
       <!-- Modal Body -->
       <div class="modal-body px-4 py-3">
         <div class="mb-3 bg-light p-3 rounded-3 border">
           <div class="small text-muted mb-1">รายละเอียดคำขอ</div>
-          <div class="fw-bold text-dark mb-1">Req-{{ selectedReqForAssign.id }} - {{ selectedReqForAssign['organization']?.name || 'ไม่ระบุองค์กร' }}</div>
-          <div class="small text-secondary">ประจำปีประเมิน: {{ selectedReqForAssign.assessment_year }}</div>
+          <div class="fw-bold text-dark mb-1">
+            Req-{{ selectedReqForAssign.id }} -
+            {{ selectedReqForAssign['organization']?.name || 'ไม่ระบุองค์กร' }}
+          </div>
+          <div class="small text-secondary">
+            ประจำปีประเมิน: {{ selectedReqForAssign.assessment_year }}
+          </div>
         </div>
-        
+
         <div class="mb-3">
           <label class="form-label fw-semibold text-secondary small">เลือกผู้ตรวจประเมิน</label>
-          <select class="form-select border shadow-sm p-2.5" [(ngModel)]="targetAssessorId" style="border-radius: 8px;">
+          <select
+            class="form-select border shadow-sm p-2.5"
+            [(ngModel)]="targetAssessorId"
+            style="border-radius: 8px"
+          >
             <option value="">-- ยังไม่มอบหมาย / ยกเลิกการมอบหมาย --</option>
             <option *ngFor="let assessor of assessorsList" [value]="assessor.id">
-              {{ assessor.user_profile?.first_name }} {{ assessor.user_profile?.last_name }} ({{ assessor.email }})
+              {{ assessor.user_profile?.first_name }} {{ assessor.user_profile?.last_name }} ({{
+                assessor.email
+              }})
             </option>
           </select>
         </div>
       </div>
-      
+
       <!-- Modal Footer -->
       <div class="modal-footer border-0 pt-0 pb-4 px-4 justify-content-end gap-2">
-        <button type="button" class="btn btn-light rounded-pill px-4" (click)="closeAssignModal()">ยกเลิก</button>
-        <button type="button" class="btn btn-primary rounded-pill px-4" [disabled]="isAssigning" (click)="confirmAssign()">
-          <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true" *ngIf="isAssigning"></span>
+        <button type="button" class="btn btn-light rounded-pill px-4" (click)="closeAssignModal()">
+          ยกเลิก
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary rounded-pill px-4"
+          [disabled]="isAssigning"
+          (click)="confirmAssign()"
+        >
+          <span
+            class="spinner-border spinner-border-sm me-1"
+            role="status"
+            aria-hidden="true"
+            *ngIf="isAssigning"
+          ></span>
           บันทึกการมอบหมาย
         </button>
       </div>
     </div>
   </div>
 </div>
-

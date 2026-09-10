@@ -1,205 +1,296 @@
 <div class="container-fluid p-4 animate-in">
-    <div class="page-header mb-4">
-      <div class="page-header-left">
-        <h2 class="page-title">ตั้งค่าสถานะระบบ </h2>
-        <p class="page-subtitle mb-0">ปรับแต่งค่ากำหนดหลัก กฎการคำนวณคาร์บอน และเทมเพลตอีเมล</p>
+  <div class="page-header mb-4">
+    <div class="page-header-left">
+      <h2 class="page-title">ตั้งค่าสถานะระบบ</h2>
+      <p class="page-subtitle mb-0">ปรับแต่งค่ากำหนดหลัก กฎการคำนวณคาร์บอน และเทมเพลตอีเมล</p>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- General Settings -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 border-bottom pb-2">
+            <i class="fa-solid fa-gears me-2 text-primary"></i>การตั้งค่าทั่วไป
+          </h5>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted"
+              >ปีฐานเริ่มต้น (Default Base Year)</label
+            >
+            <input type="number" class="form-control" [(ngModel)]="settings.defaultBaseYear" />
+            <div class="form-text">ปีที่ใช้เป็นมาตรฐานในการเปรียบเทียบการลดคาร์บอน</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">ชื่อระบบ (System Name)</label>
+            <input type="text" class="form-control" [(ngModel)]="settings.systemName" />
+          </div>
+
+          <div class="mb-3 form-check form-switch">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="maintenance"
+              [(ngModel)]="settings.maintenanceMode"
+            />
+            <label class="form-check-label small fw-bold" for="maintenance"
+              >โหมดปิดปรับปรุง (Maintenance Mode)</label
+            >
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="row g-4">
-        <!-- General Settings -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2"><i
-                            class="fa-solid fa-gears me-2 text-primary"></i>การตั้งค่าทั่วไป </h5>
+    <!-- Carbon Rules -->
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm rounded-4 h-100">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 border-bottom pb-2">
+            <i class="fa-solid fa-leaf me-2 text-success"></i>กฎการประมวลผลคาร์บอน (Carbon Rules)
+          </h5>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">ปีฐานเริ่มต้น (Default Base Year)</label>
-                        <input type="number" class="form-control" [(ngModel)]="settings.defaultBaseYear">
-                        <div class="form-text">ปีที่ใช้เป็นมาตรฐานในการเปรียบเทียบการลดคาร์บอน</div>
-                    </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted"
+              >มาตรฐานอ้างอิง (Default Standard)</label
+            >
+            <select class="form-select" [(ngModel)]="settings.carbonStandard">
+              <option value="GWP_AR5">IPCC GWP AR5</option>
+              <option value="GWP_AR6">IPCC GWP AR6</option>
+              <option value="TGO">TGO (Thailand)</option>
+            </select>
+          </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">ชื่อระบบ (System Name)</label>
-                        <input type="text" class="form-control" [(ngModel)]="settings.systemName">
-                    </div>
-
-                    <div class="mb-3 form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="maintenance"
-                            [(ngModel)]="settings.maintenanceMode">
-                        <label class="form-check-label small fw-bold" for="maintenance">โหมดปิดปรับปรุง (Maintenance
-                            Mode)</label>
-                    </div>
-                </div>
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-muted">Carbon Threshold (Alert)</label>
+            <div class="input-group">
+              <input type="number" class="form-control" [(ngModel)]="settings.carbonThreshold" />
+              <span class="input-group-text">kgCO2e</span>
             </div>
+            <div class="form-text">แจ้งเตือนหากองค์กรใช้เกินเกณฑ์ในเดือนนั้น</div>
+          </div>
+
+          <button class="btn btn-outline-success btn-sm mt-2" routerLink="/admin/emission-factors">
+            <i class="fa-solid fa-arrow-right me-2"></i>จัดการค่าสัมประสิทธิ์ (Emission Factors)
+          </button>
         </div>
+      </div>
+    </div>
 
-        <!-- Carbon Rules -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm rounded-4 h-100">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2"><i
-                            class="fa-solid fa-leaf me-2 text-success"></i>กฎการประมวลผลคาร์บอน (Carbon Rules)</h5>
+    <!-- Stripe Integration Settings -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 border-bottom pb-2">
+            <i class="fa-brands fa-stripe me-2 text-primary text-2xl"></i>การเชื่อมต่อระบบชำระเงิน
+            (Stripe Integration)
+          </h5>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">มาตรฐานอ้างอิง (Default Standard)</label>
-                        <select class="form-select" [(ngModel)]="settings.carbonStandard">
-                            <option value="GWP_AR5">IPCC GWP AR5</option>
-                            <option value="GWP_AR6">IPCC GWP AR6</option>
-                            <option value="TGO">TGO (Thailand)</option>
-                        </select>
-                    </div>
+          <div class="alert alert-info border-0 rounded-3 small">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            ใช้สำหรับระบบตัดบัตรเครดิตอัตโนมัติ คุณสามารถดู API Keys ได้จากหน้า Dashboard ของ
+            <a
+              href="https://dashboard.stripe.com/apikeys"
+              target="_blank"
+              class="fw-bold text-decoration-none"
+              >Stripe</a
+            >
+          </div>
 
-                    <div class="mb-3">
-                        <label class="form-label small fw-bold text-muted">Carbon Threshold (Alert)</label>
-                        <div class="input-group">
-                            <input type="number" class="form-control" [(ngModel)]="settings.carbonThreshold">
-                            <span class="input-group-text">kgCO2e</span>
-                        </div>
-                        <div class="form-text">แจ้งเตือนหากองค์กรใช้เกินเกณฑ์ในเดือนนั้น</div>
-                    </div>
+          <div class="row g-4 mt-1">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">Stripe Public Key</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="settings['stripe.public_key']"
+                placeholder="pk_test_..."
+                autocomplete="off"
+                name="stripe_pk"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">Stripe Secret Key</label>
+              <input
+                type="password"
+                class="form-control"
+                [(ngModel)]="settings['stripe.secret_key']"
+                placeholder="sk_test_..."
+                autocomplete="new-password"
+                name="stripe_sk"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">Stripe Webhook Secret</label>
+              <input
+                type="password"
+                class="form-control"
+                [(ngModel)]="settings['stripe.webhook_secret']"
+                placeholder="whsec_..."
+                autocomplete="new-password"
+                name="stripe_wh"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">สกุลเงินเริ่มต้น (Currency)</label>
+              <select class="form-select" [(ngModel)]="settings['stripe.currency']">
+                <option value="thb">THB (Thai Baht)</option>
+                <option value="usd">USD (US Dollar)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-                    <button class="btn btn-outline-success btn-sm mt-2" routerLink="/admin/emission-factors">
-                        <i class="fa-solid fa-arrow-right me-2"></i>จัดการค่าสัมประสิทธิ์ (Emission Factors)
+    <!-- SMTP Integration Settings -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 border-bottom pb-2">
+            <i class="fa-solid fa-paper-plane me-2 text-primary"></i>ตั้งค่าระบบส่งอีเมล (SMTP
+            Settings)
+          </h5>
+
+          <div class="alert alert-info border-0 rounded-3 small">
+            <i class="fa-solid fa-circle-info me-2"></i>
+            ใช้สำหรับตั้งค่าการส่งอีเมลระบบ เช่น จดหมายต้อนรับ การยืนยันตัวตน และรีเซ็ตรหัสผ่าน
+            สามารถเปิดโหมดจำลอง (Mock) เพื่อส่งข้อมูลกลับไปยังอีเมลแจ้งเตือนกลางได้โดยไม่ต้องใช้
+            SMTP จริง
+          </div>
+
+          <div class="row g-4 mt-1">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted"
+                >โหมดการส่งจดหมาย (Mailer Mode)</label
+              >
+              <select class="form-select" [(ngModel)]="settings['smtp.mode']">
+                <option value="mock">Mock Mode (จำลองการส่ง)</option>
+                <option value="live">Live Mode (ส่งผ่าน SMTP จริง)</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted"
+                >อีเมลแจ้งเตือนกลางขององค์กร (Fallback/Central Email)</label
+              >
+              <input
+                type="email"
+                class="form-control"
+                [(ngModel)]="settings['smtp.fallback_email']"
+                placeholder="admin@greensync.com"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">SMTP Host</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="settings['smtp.host']"
+                placeholder="smtp.gmail.com"
+                [disabled]="settings['smtp.mode'] !== 'live'"
+              />
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small fw-bold text-muted">SMTP Port</label>
+              <input
+                type="number"
+                class="form-control"
+                [(ngModel)]="settings['smtp.port']"
+                placeholder="587"
+                [disabled]="settings['smtp.mode'] !== 'live'"
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-muted">SMTP User</label>
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="settings['smtp.user']"
+                placeholder="user@gmail.com"
+                [disabled]="settings['smtp.mode'] !== 'live'"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted">SMTP Password</label>
+              <input
+                type="password"
+                class="form-control"
+                [(ngModel)]="settings['smtp.pass']"
+                placeholder="••••••••"
+                autocomplete="new-password"
+                [disabled]="settings['smtp.mode'] !== 'live'"
+              />
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-muted"
+                >ชื่อผู้ส่งเริ่มต้น (Sender Signature)</label
+              >
+              <input
+                type="text"
+                class="form-control"
+                [(ngModel)]="settings['smtp.sender']"
+                placeholder="Green Office System <no-reply@greensync.com>"
+                [disabled]="settings['smtp.mode'] !== 'live'"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Email Templates -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4 border-bottom pb-2">
+            <i class="fa-solid fa-envelope me-2 text-info"></i>อีเมลเทมเพลต (Email Templates)
+          </h5>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="bg-light">
+                <tr>
+                  <th class="py-3 px-4">ชื่อเทมเพลต</th>
+                  <th class="py-3 px-4">หัวข้ออีเมล (Subject)</th>
+                  <th class="py-3 px-4 text-end">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="px-4 py-3 fw-bold">ระบบตอบรับการสมัครสมาชิก</td>
+                  <td class="px-4 py-3 text-muted">ยินดีต้อนรับสู่ GreenSync!</td>
+                  <td class="px-4 py-3 text-end">
+                    <button class="btn btn-sm btn-light border">
+                      <i class="fa-solid fa-pen"></i>
                     </button>
-                </div>
-            </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-4 py-3 fw-bold">อีเมลแจ้งเตือนการรีเซ็ตรหัสผ่าน</td>
+                  <td class="px-4 py-3 text-muted">คำขอกำหนดรหัสผ่านใหม่ของคุณ</td>
+                  <td class="px-4 py-3 text-end">
+                    <button class="btn btn-sm btn-light border">
+                      <i class="fa-solid fa-pen"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-
-        <!-- Stripe Integration Settings -->
-        <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2">
-                        <i class="fa-brands fa-stripe me-2 text-primary text-2xl"></i>การเชื่อมต่อระบบชำระเงิน (Stripe Integration)
-                    </h5>
-                    
-                    <div class="alert alert-info border-0 rounded-3 small">
-                        <i class="fa-solid fa-circle-info me-2"></i>
-                        ใช้สำหรับระบบตัดบัตรเครดิตอัตโนมัติ คุณสามารถดู API Keys ได้จากหน้า Dashboard ของ <a href="https://dashboard.stripe.com/apikeys" target="_blank" class="fw-bold text-decoration-none">Stripe</a>
-                    </div>
-
-                    <div class="row g-4 mt-1">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Stripe Public Key</label>
-                            <input type="text" class="form-control" [(ngModel)]="settings['stripe.public_key']" placeholder="pk_test_..." autocomplete="off" name="stripe_pk">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Stripe Secret Key</label>
-                            <input type="password" class="form-control" [(ngModel)]="settings['stripe.secret_key']" placeholder="sk_test_..." autocomplete="new-password" name="stripe_sk">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">Stripe Webhook Secret</label>
-                            <input type="password" class="form-control" [(ngModel)]="settings['stripe.webhook_secret']" placeholder="whsec_..." autocomplete="new-password" name="stripe_wh">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">สกุลเงินเริ่มต้น (Currency)</label>
-                            <select class="form-select" [(ngModel)]="settings['stripe.currency']">
-                                <option value="thb">THB (Thai Baht)</option>
-                                <option value="usd">USD (US Dollar)</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SMTP Integration Settings -->
-        <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2">
-                        <i class="fa-solid fa-paper-plane me-2 text-primary"></i>ตั้งค่าระบบส่งอีเมล (SMTP Settings)
-                    </h5>
-                    
-                    <div class="alert alert-info border-0 rounded-3 small">
-                        <i class="fa-solid fa-circle-info me-2"></i>
-                        ใช้สำหรับตั้งค่าการส่งอีเมลระบบ เช่น จดหมายต้อนรับ การยืนยันตัวตน และรีเซ็ตรหัสผ่าน สามารถเปิดโหมดจำลอง (Mock) เพื่อส่งข้อมูลกลับไปยังอีเมลแจ้งเตือนกลางได้โดยไม่ต้องใช้ SMTP จริง
-                    </div>
-
-                    <div class="row g-4 mt-1">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">โหมดการส่งจดหมาย (Mailer Mode)</label>
-                            <select class="form-select" [(ngModel)]="settings['smtp.mode']">
-                                <option value="mock">Mock Mode (จำลองการส่ง)</option>
-                                <option value="live">Live Mode (ส่งผ่าน SMTP จริง)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">อีเมลแจ้งเตือนกลางขององค์กร (Fallback/Central Email)</label>
-                            <input type="email" class="form-control" [(ngModel)]="settings['smtp.fallback_email']" placeholder="admin@greensync.com">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">SMTP Host</label>
-                            <input type="text" class="form-control" [(ngModel)]="settings['smtp.host']" placeholder="smtp.gmail.com" [disabled]="settings['smtp.mode'] !== 'live'">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small fw-bold text-muted">SMTP Port</label>
-                            <input type="number" class="form-control" [(ngModel)]="settings['smtp.port']" placeholder="587" [disabled]="settings['smtp.mode'] !== 'live'">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-bold text-muted">SMTP User</label>
-                            <input type="text" class="form-control" [(ngModel)]="settings['smtp.user']" placeholder="user@gmail.com" [disabled]="settings['smtp.mode'] !== 'live'">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">SMTP Password</label>
-                            <input type="password" class="form-control" [(ngModel)]="settings['smtp.pass']" placeholder="••••••••" autocomplete="new-password" [disabled]="settings['smtp.mode'] !== 'live'">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-bold text-muted">ชื่อผู้ส่งเริ่มต้น (Sender Signature)</label>
-                            <input type="text" class="form-control" [(ngModel)]="settings['smtp.sender']" placeholder="Green Office System <no-reply@greensync.com>" [disabled]="settings['smtp.mode'] !== 'live'">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Email Templates -->
-        <div class="col-12">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-4 border-bottom pb-2"><i
-                            class="fa-solid fa-envelope me-2 text-info"></i>อีเมลเทมเพลต (Email Templates)</h5>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="py-3 px-4">ชื่อเทมเพลต</th>
-                                    <th class="py-3 px-4">หัวข้ออีเมล (Subject)</th>
-                                    <th class="py-3 px-4 text-end">จัดการ</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="px-4 py-3 fw-bold">ระบบตอบรับการสมัครสมาชิก</td>
-                                    <td class="px-4 py-3 text-muted">ยินดีต้อนรับสู่ GreenSync!</td>
-                                    <td class="px-4 py-3 text-end">
-                                        <button class="btn btn-sm btn-light border"><i
-                                                class="fa-solid fa-pen"></i></button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3 fw-bold">อีเมลแจ้งเตือนการรีเซ็ตรหัสผ่าน</td>
-                                    <td class="px-4 py-3 text-muted">คำขอกำหนดรหัสผ่านใหม่ของคุณ</td>
-                                    <td class="px-4 py-3 text-end">
-                                        <button class="btn btn-sm btn-light border"><i
-                                                class="fa-solid fa-pen"></i></button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+  </div>
 
-    <div class="d-flex justify-content-end mt-4">
-        <button class="btn btn-primary rounded-pill px-5 shadow d-flex align-items-center" (click)="saveSettings()" [disabled]="isSaving">
-            <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
-            <i *ngIf="!isSaving" class="fa-solid fa-floppy-disk me-2"></i> บันทึกการตั้งค่าทั้งหมด
-        </button>
-    </div>
+  <div class="d-flex justify-content-end mt-4">
+    <button
+      class="btn btn-primary rounded-pill px-5 shadow d-flex align-items-center"
+      (click)="saveSettings()"
+      [disabled]="isSaving"
+    >
+      <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+      <i *ngIf="!isSaving" class="fa-solid fa-floppy-disk me-2"></i> บันทึกการตั้งค่าทั้งหมด
+    </button>
+  </div>
 </div>

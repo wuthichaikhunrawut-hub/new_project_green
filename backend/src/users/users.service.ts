@@ -9,6 +9,7 @@ import { UserRole as UserRoleLink } from './entities/user-role.entity';
 import { BankAccount } from './entities/bank-account.entity';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -163,7 +164,12 @@ export class UsersService {
     return count > 0;
   }
 
-  async findAll(roleName?: string, orgId?: number): Promise<User[]> {
+  async findAll(
+    roleName?: string,
+    orgId?: number,
+    page?: number,
+    limit?: number,
+  ): Promise<User[]> {
     const query = this.usersRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.roles', 'roles')
@@ -189,6 +195,10 @@ export class UsersService {
     if (orgId) {
       query.andWhere('user.org_id = :orgId', { orgId });
     }
+
+    const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 50;
+    const safePage = page ? Math.max(1, Number(page)) : 1;
+    query.skip((safePage - 1) * safeLimit).take(safeLimit);
 
     const users = await query.getMany();
 
@@ -441,6 +451,7 @@ export class UsersService {
 
     if (password) {
       userData.password_hash = await bcrypt.hash(password, 10);
+      userData.password_setup_required = false;
     }
 
     // Only update if there are valid columns remaining
@@ -501,36 +512,11 @@ export class UsersService {
         : null);
 
     if (mergedBankAccount) {
-      let account = await this.bankAccountRepository.findOne({
-        where: { user: { id } },
-      });
-      if (!account) {
-        const newAccount = this.bankAccountRepository.create({
-          bank_name: mergedBankAccount.bank_name || '',
-          account_no:
-            mergedBankAccount.account_no !== undefined
-              ? mergedBankAccount.account_no
-              : mergedBankAccount.bank_account_no || '',
-          account_name: user_profile?.first_name || 'Assessor Account',
-          user: { id },
-          is_primary: true,
-        });
-        account = Array.isArray(newAccount) ? newAccount[0] : newAccount;
-      } else {
-        if (mergedBankAccount.bank_name !== undefined) {
-          account.bank_name = mergedBankAccount.bank_name;
-        }
-        const accNo =
-          mergedBankAccount.account_no !== undefined
-            ? mergedBankAccount.account_no
-            : mergedBankAccount.bank_account_no;
-        if (accNo !== undefined) {
-          account.account_no = accNo;
-        }
-      }
-      if (account) {
-        await this.bankAccountRepository.save(account);
-      }
+      await this.upsertBankAccount(
+        id,
+        mergedBankAccount,
+        user_profile?.first_name || 'Assessor Account',
+      );
     }
 
     const updated = await this.findOne(id);
@@ -540,6 +526,94 @@ export class UsersService {
     }
     await this.auditLogsService.logAction(undefined, 'UPDATE_USER', logMsg);
     return updated;
+  }
+
+  async updateProfileOnly(id: number, profileDto: any): Promise<User | null> {
+    const { first_name, last_name, phone, profile_image, bio, bank_account } =
+      profileDto;
+
+    let profile = await this.userProfileRepository.findOne({
+      where: { user: { id } },
+    });
+    if (!profile) {
+      profile = new UserProfile();
+      (profile as any).user = { id };
+    }
+    if (first_name !== undefined) profile.first_name = first_name;
+    if (last_name !== undefined) profile.last_name = last_name;
+    if (phone !== undefined) profile.phone = phone;
+    if (profile_image !== undefined) profile.profile_image = profile_image;
+    await this.userProfileRepository.save(profile);
+
+    if (bio !== undefined) {
+      const assessorProf = await this.assessorProfileRepository.findOne({
+        where: { user: { id } },
+      });
+      if (assessorProf) {
+        assessorProf.education_background = bio;
+        await this.assessorProfileRepository.save(assessorProf);
+      }
+    }
+
+    if (bank_account) {
+      await this.upsertBankAccount(
+        id,
+        bank_account,
+        profile.first_name || 'User Account',
+      );
+    }
+
+    const updated = await this.findOne(id);
+    await this.auditLogsService.logAction(
+      id,
+      'UPDATE_PROFILE',
+      `User updated their personal profile: ${updated?.email || id}`,
+    );
+    return updated;
+  }
+
+  private async upsertBankAccount(
+    userId: number,
+    bankData: {
+      bank_name?: string;
+      account_no?: string;
+      bank_account_no?: string;
+      account_name?: string;
+    },
+    defaultAccountName: string,
+  ): Promise<BankAccount> {
+    const account = await this.bankAccountRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    const targetAccountNo =
+      bankData.account_no !== undefined
+        ? bankData.account_no
+        : bankData.bank_account_no || '';
+
+    let targetAccount: BankAccount;
+    if (!account) {
+      const newAccount = this.bankAccountRepository.create({
+        bank_name: bankData.bank_name || '',
+        account_no: targetAccountNo,
+        account_name: bankData.account_name || defaultAccountName,
+        user: { id: userId },
+        is_primary: true,
+      });
+      targetAccount = Array.isArray(newAccount) ? newAccount[0] : newAccount;
+    } else {
+      targetAccount = account;
+      if (bankData.bank_name !== undefined) {
+        targetAccount.bank_name = bankData.bank_name;
+      }
+      if (targetAccountNo !== undefined) {
+        targetAccount.account_no = targetAccountNo;
+      }
+      if (bankData.account_name !== undefined) {
+        targetAccount.account_name = bankData.account_name;
+      }
+    }
+    return this.bankAccountRepository.save(targetAccount);
   }
 
   async remove(id: number): Promise<void> {
@@ -573,6 +647,7 @@ export class UsersService {
       password_hash: hashedPassword,
       reset_password_token: null,
       reset_password_expires: null,
+      password_setup_required: false,
     });
   }
 
@@ -600,9 +675,15 @@ export class UsersService {
       const existingUser = await this.findByEmail(email);
       if (existingUser) continue;
 
+      // Imported accounts must never share a predictable credential. The
+      // generated secret is deliberately not returned or logged; the account
+      // owner must use the existing forgot-password flow to choose a password.
+      const bootstrapSecret = randomBytes(32).toString('base64url');
+
       await this.create({
         email,
-        password: 'Password123!', // Default password
+        password: bootstrapSecret,
+        password_setup_required: true,
         role: UserRole.EMPLOYEE,
         organization: { id: orgId },
         user_profile: {

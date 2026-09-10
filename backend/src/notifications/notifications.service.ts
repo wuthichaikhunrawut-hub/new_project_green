@@ -185,10 +185,20 @@ export class NotificationsService {
     return saved;
   }
 
-  async findAllForUser(userId: number): Promise<Notification[]> {
+  async findAllForUser(
+    userId: number,
+    page?: number,
+    limit?: number,
+  ): Promise<Notification[]> {
+    const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 50;
+    const safePage = page ? Math.max(1, Number(page)) : 1;
+    const skip = (safePage - 1) * safeLimit;
+
     return this.notificationsRepository.find({
       where: { recipient_id: userId },
       order: { created_at: 'DESC' },
+      skip,
+      take: safeLimit,
     });
   }
 
@@ -222,11 +232,19 @@ export class NotificationsService {
     );
   }
 
-  async findAllSystemWide(): Promise<Notification[]> {
+  async findAllSystemWide(
+    page?: number,
+    limit?: number,
+  ): Promise<Notification[]> {
+    const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 50;
+    const safePage = page ? Math.max(1, Number(page)) : 1;
+    const skip = (safePage - 1) * safeLimit;
+
     return this.notificationsRepository.find({
       relations: ['recipient', 'sender'],
       order: { created_at: 'DESC' },
-      take: 200,
+      skip,
+      take: safeLimit,
     });
   }
 

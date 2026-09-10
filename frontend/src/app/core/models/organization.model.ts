@@ -5,7 +5,7 @@ export enum OrgType {
   EDUCATION = 'EDUCATION',
   INDUSTRIAL = 'INDUSTRIAL',
   INDUSTRIAL_OFFICE = 'INDUSTRIAL_OFFICE',
-  LOCAL_ADMIN = 'LOCAL_ADMIN'
+  LOCAL_ADMIN = 'LOCAL_ADMIN',
 }
 
 export interface Organization {

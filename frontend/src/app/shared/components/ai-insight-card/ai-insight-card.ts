@@ -21,7 +21,7 @@ export interface AiInsightCardResult {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './ai-insight-card.html',
-  styleUrls: ['./ai-insight-card.css']
+  styleUrls: ['./ai-insight-card.css'],
 })
 export class AiInsightCardComponent {
   @Input({ required: true }) data: MonthlyGhgDatum[] = [];
@@ -42,11 +42,13 @@ export class AiInsightCardComponent {
     const latest = this.latest;
     if (!latest) return null;
 
-    const status: AiInsightCardResult['status'] = latest.totalKgCo2e <= latest.targetKgCo2e ? 'Achieved' : 'Not Achieved';
+    const status: AiInsightCardResult['status'] =
+      latest.totalKgCo2e <= latest.targetKgCo2e ? 'Achieved' : 'Not Achieved';
 
     const prev = this.previous;
     const deltaKgCo2e = prev ? latest.totalKgCo2e - prev.totalKgCo2e : undefined;
-    const deltaPercent = prev && prev.totalKgCo2e > 0 ? (deltaKgCo2e! / prev.totalKgCo2e) * 100 : undefined;
+    const deltaPercent =
+      prev && prev.totalKgCo2e > 0 ? (deltaKgCo2e! / prev.totalKgCo2e) * 100 : undefined;
 
     const overTargetKg = latest.totalKgCo2e - latest.targetKgCo2e;
 
@@ -54,23 +56,37 @@ export class AiInsightCardComponent {
     if (status === 'Not Achieved') {
       const increasing = typeof deltaKgCo2e === 'number' ? deltaKgCo2e > 0 : true;
       if (increasing) {
-        rootCauseAnalysis = 'การปล่อยก๊าซสูงขึ้นสัมพันธ์กับการใช้พลังงานเพิ่มขึ้น (เช่น อุปกรณ์ทำความเย็น/แสงสว่าง) หรือกิจกรรมในสำนักงานเพิ่มขึ้นในช่วงเดือนนี้';
+        rootCauseAnalysis =
+          'การปล่อยก๊าซสูงขึ้นสัมพันธ์กับการใช้พลังงานเพิ่มขึ้น (เช่น อุปกรณ์ทำความเย็น/แสงสว่าง) หรือกิจกรรมในสำนักงานเพิ่มขึ้นในช่วงเดือนนี้';
       } else {
-        rootCauseAnalysis = 'แม้แนวโน้มลดลงจากเดือนก่อน แต่ยังเกินเป้าหมาย อาจเกิดจากฐานการใช้พลังงาน/เชื้อเพลิงที่ยังสูง หรือการปรับตั้งค่าอาคารยังไม่เหมาะสม';
+        rootCauseAnalysis =
+          'แม้แนวโน้มลดลงจากเดือนก่อน แต่ยังเกินเป้าหมาย อาจเกิดจากฐานการใช้พลังงาน/เชื้อเพลิงที่ยังสูง หรือการปรับตั้งค่าอาคารยังไม่เหมาะสม';
       }
     }
 
     const smartRecommendations: string[] = [];
     if (status === 'Achieved') {
-      smartRecommendations.push('รักษามาตรการที่ทำให้ผ่านเป้าหมาย และตั้งเป้าลดลงต่อเนื่อง (Net Zero Roadmap)');
-      smartRecommendations.push('ทำการทบทวนปัจจัยการปล่อย (EF) และตรวจสอบความถูกต้องของหลักฐานทุกเดือน');
+      smartRecommendations.push(
+        'รักษามาตรการที่ทำให้ผ่านเป้าหมาย และตั้งเป้าลดลงต่อเนื่อง (Net Zero Roadmap)',
+      );
+      smartRecommendations.push(
+        'ทำการทบทวนปัจจัยการปล่อย (EF) และตรวจสอบความถูกต้องของหลักฐานทุกเดือน',
+      );
     } else {
-      smartRecommendations.push('ทำ Energy Walkthrough: ตรวจสอบ HVAC, เวลาเปิด-ปิด, setpoint และอุปกรณ์ที่กินไฟสูง');
-      smartRecommendations.push('ตั้งมาตรการควบคุมการใช้พลังงานรายสัปดาห์ พร้อมผู้รับผิดชอบและ KPI ตามหมวด 1.6.1');
-      smartRecommendations.push('จัดทำแผนลดการปล่อยที่มีผลลัพธ์วัดได้ (เช่น เปลี่ยนหลอด LED, ปรับปรุงฉนวน, ตั้งโหมดประหยัดพลังงาน)');
+      smartRecommendations.push(
+        'ทำ Energy Walkthrough: ตรวจสอบ HVAC, เวลาเปิด-ปิด, setpoint และอุปกรณ์ที่กินไฟสูง',
+      );
+      smartRecommendations.push(
+        'ตั้งมาตรการควบคุมการใช้พลังงานรายสัปดาห์ พร้อมผู้รับผิดชอบและ KPI ตามหมวด 1.6.1',
+      );
+      smartRecommendations.push(
+        'จัดทำแผนลดการปล่อยที่มีผลลัพธ์วัดได้ (เช่น เปลี่ยนหลอด LED, ปรับปรุงฉนวน, ตั้งโหมดประหยัดพลังงาน)',
+      );
     }
 
-    const important = status === 'Not Achieved' && (overTargetKg >= latest.targetKgCo2e * 0.1 || overTargetKg >= 50);
+    const important =
+      status === 'Not Achieved' &&
+      (overTargetKg >= latest.targetKgCo2e * 0.1 || overTargetKg >= 50);
 
     return {
       status,
@@ -78,7 +94,7 @@ export class AiInsightCardComponent {
       deltaPercent,
       rootCauseAnalysis,
       smartRecommendations,
-      important
+      important,
     };
   }
 

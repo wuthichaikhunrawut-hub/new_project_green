@@ -18,5 +18,15 @@ describe('AppController', () => {
     it('should return "Hello World!"', () => {
       expect(appController.getHello()).toBe('Hello World!');
     });
+
+    it('reports liveness without exposing configuration', () => {
+      expect(appController.getHealth()).toEqual(
+        expect.objectContaining({
+          status: 'ok',
+          service: 'green-sync-api',
+        }),
+      );
+      expect(appController.getHealth()).toHaveProperty('timestamp');
+    });
   });
 });

@@ -7,7 +7,9 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div class="flex flex-col gap-2">
-      <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">ระดับคะแนน (0-5)</label>
+      <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+        >ระดับคะแนน (0-5)</label
+      >
       <div class="flex gap-1.5">
         <button
           *ngFor="let s of [0, 1, 2, 3, 4, 5]"
@@ -28,9 +30,13 @@ import { CommonModule } from '@angular/common';
       </div>
     </div>
   `,
-  styles: [`
-    :host { display: block; }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `,
+  ],
 })
 export class ScoreSelectorComponent {
   @Input() score: number | null = null;

@@ -15,6 +15,7 @@ export interface SubscriptionPlan {
   plan_name: string;
   description: string;
   price_per_month: number;
+  stripe_price_id?: string | null;
   max_users: number;
   max_locations: number;
   is_active: boolean;

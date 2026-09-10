@@ -1,7 +1,10 @@
 <div class="container-fluid py-4 py-lg-5 px-4 px-xl-5 animate-in">
   <!-- Header & Back Button -->
   <div class="d-flex align-items-center justify-content-between mb-5 border-bottom pb-3">
-    <button (click)="goBack()" class="btn btn-link text-decoration-none text-dark p-0 d-flex align-items-center fw-bold transition-all hover-translate-x">
+    <button
+      (click)="goBack()"
+      class="btn btn-link text-decoration-none text-dark p-0 d-flex align-items-center fw-bold transition-all hover-translate-x"
+    >
       <div class="back-icon-circle me-3 shadow-sm border bg-white">
         <i class="fa-solid fa-arrow-left"></i>
       </div>
@@ -21,39 +24,81 @@
         <div class="card border-0 shadow-sm rounded-4 h-100 bg-white">
           <div class="card-body p-4 d-flex flex-column">
             <h5 class="fw-bold mb-4 text-dark border-bottom pb-3">สรุปรายการสั่งซื้อ</h5>
-            
+
             <div class="p-4 bg-light rounded-4 mb-4 border border-light shadow-sm">
               <!-- Badge Ribbon -->
-              <span *ngIf="selectedPlan?.badge" class="badge bg-primary text-white rounded-pill px-3 py-1 mb-3 shadow-sm d-inline-flex align-items-center text-xs">
-                <i class="fa-solid fa-star text-warning me-1" *ngIf="selectedPlan?.badge === 'popular'"></i>
-                <i class="fa-solid fa-fire text-warning me-1" *ngIf="selectedPlan?.badge === 'recommended'"></i>
-                <i class="fa-solid fa-building me-1" *ngIf="selectedPlan?.badge === 'enterprise'"></i>
-                {{ selectedPlan?.badge === 'recommended' ? 'แพ็กเกจแนะนำ' : selectedPlan?.badge === 'popular' ? 'แพ็กเกจยอดนิยม' : 'สำหรับองค์กร' }}
+              <span
+                *ngIf="selectedPlan?.badge"
+                class="badge bg-primary text-white rounded-pill px-3 py-1 mb-3 shadow-sm d-inline-flex align-items-center text-xs"
+              >
+                <i
+                  class="fa-solid fa-star text-warning me-1"
+                  *ngIf="selectedPlan?.badge === 'popular'"
+                ></i>
+                <i
+                  class="fa-solid fa-fire text-warning me-1"
+                  *ngIf="selectedPlan?.badge === 'recommended'"
+                ></i>
+                <i
+                  class="fa-solid fa-building me-1"
+                  *ngIf="selectedPlan?.badge === 'enterprise'"
+                ></i>
+                {{
+                  selectedPlan?.badge === 'recommended'
+                    ? 'แพ็กเกจแนะนำ'
+                    : selectedPlan?.badge === 'popular'
+                      ? 'แพ็กเกจยอดนิยม'
+                      : 'สำหรับองค์กร'
+                }}
               </span>
-              
+
               <h4 class="fw-bold m-0 text-dark">{{ selectedPlan?.plan_name || 'ไม่ระบุ' }}</h4>
               <div class="mt-3">
-                <span class="h1 fw-bold text-primary mb-0">฿{{ (billingCycle === 'monthly' ? (selectedPlan?.price_per_month ?? 0) : (selectedPlan?.price_per_month ?? 0) * 12 * 0.8) | number:'1.0-0' }}</span>
-                <span class="text-muted small fw-medium">/ {{ billingCycle === 'monthly' ? 'เดือน' : 'ปี' }}</span>
+                <span class="h1 fw-bold text-primary mb-0"
+                  >฿{{
+                    (billingCycle === 'monthly'
+                      ? (selectedPlan?.price_per_month ?? 0)
+                      : (selectedPlan?.price_per_month ?? 0) * 12 * 0.8
+                    ) | number: '1.0-0'
+                  }}</span
+                >
+                <span class="text-muted small fw-medium"
+                  >/ {{ billingCycle === 'monthly' ? 'เดือน' : 'ปี' }}</span
+                >
               </div>
             </div>
-            
+
             <div class="mb-3 text-dark fw-bold small">แพ็กเกจนี้ประกอบด้วย:</div>
             <ul class="list-unstyled mb-0 flex-grow-1">
-              <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngIf="selectedPlan?.max_users">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 w-[24px]">
+              <li
+                class="d-flex align-items-center mb-3 small fw-medium text-secondary"
+                *ngIf="selectedPlan?.max_users"
+              >
+                <div
+                  class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 w-[24px]"
+                >
                   <i class="fa-solid fa-check text-[0.65rem]"></i>
                 </div>
                 ผู้ใช้งานสูงสุด {{ selectedPlan?.max_users }} บัญชี
               </li>
-              <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngIf="selectedPlan?.max_locations">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 w-[24px]">
+              <li
+                class="d-flex align-items-center mb-3 small fw-medium text-secondary"
+                *ngIf="selectedPlan?.max_locations"
+              >
+                <div
+                  class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 w-[24px]"
+                >
                   <i class="fa-solid fa-check text-[0.65rem]"></i>
                 </div>
                 สาขาสูงสุด {{ selectedPlan?.max_locations }} สาขา
               </li>
-              <li class="d-flex align-items-center mb-3 small fw-medium text-secondary" *ngFor="let f of selectedPlan?.features">
-                <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[24px]">
+              <li
+                class="d-flex align-items-center mb-3 small fw-medium text-secondary"
+                *ngFor="let f of selectedPlan?.features"
+              >
+                <div
+                  class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center me-3 flex-shrink-0 w-[24px]"
+                >
                   <i class="fa-solid fa-check text-[0.65rem]"></i>
                 </div>
                 {{ f.feature_name }}
@@ -73,20 +118,39 @@
       <!-- Right Column: Payment Form -->
       <div class="col-lg-7 col-md-7 order-1 order-md-2">
         <!-- Main Payment Card -->
-        <div class="card border border-light shadow-sm rounded-4 overflow-hidden animate-slide-up h-100 bg-white">
+        <div
+          class="card border border-light shadow-sm rounded-4 overflow-hidden animate-slide-up h-100 bg-white"
+        >
           <!-- Card Header -->
           <div class="card-header bg-white border-bottom pt-4 px-4 px-lg-5 pb-3">
             <div class="d-flex align-items-center">
-              <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0;">
-                <i class="fa-solid fa-circle-check text-primary fs-4" *ngIf="selectedPlan && selectedPlan.price_per_month <= 0"></i>
-                <i class="fa-solid fa-credit-card text-primary fs-4" *ngIf="!selectedPlan || selectedPlan.price_per_month > 0"></i>
+              <div
+                class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
+                style="width: 48px; height: 48px; min-width: 48px; min-height: 48px; flex-shrink: 0"
+              >
+                <i
+                  class="fa-solid fa-circle-check text-primary fs-4"
+                  *ngIf="selectedPlan && selectedPlan.price_per_month <= 0"
+                ></i>
+                <i
+                  class="fa-solid fa-credit-card text-primary fs-4"
+                  *ngIf="!selectedPlan || selectedPlan.price_per_month > 0"
+                ></i>
               </div>
               <div>
                 <h5 class="fw-bold m-0 text-dark">
-                  {{ selectedPlan && selectedPlan.price_per_month <= 0 ? 'เปิดใช้งานแพ็กเกจทันที' : 'ข้อมูลบัตรเครดิต/เดบิต' }}
+                  {{
+                    selectedPlan && selectedPlan.price_per_month <= 0
+                      ? 'เปิดใช้งานแพ็กเกจทันที'
+                      : 'ข้อมูลบัตรเครดิต/เดบิต'
+                  }}
                 </h5>
                 <p class="text-muted small m-0">
-                  {{ selectedPlan && selectedPlan.price_per_month <= 0 ? 'ยืนยันเพื่อเปิดใช้งานแพ็กเกจฟรี' : 'ระบบรองรับบัตรทุกประเภท ปลอดภัย 100%' }}
+                  {{
+                    selectedPlan && selectedPlan.price_per_month <= 0
+                      ? 'ยืนยันเพื่อเปิดใช้งานแพ็กเกจฟรี'
+                      : 'ระบบรองรับบัตรทุกประเภท ปลอดภัย 100%'
+                  }}
                 </p>
               </div>
             </div>
@@ -94,121 +158,259 @@
 
           <div class="card-body p-4 p-lg-5 position-relative">
             <!-- Loading Overlay -->
-            <div *ngIf="isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)" class="text-center py-5">
+            <div
+              *ngIf="isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)"
+              class="text-center py-5"
+            >
               <div class="spinner-border text-primary mb-3" role="status"></div>
               <p class="text-muted small fw-bold">กำลังเชื่อมต่อระบบรักษาความปลอดภัย Stripe...</p>
             </div>
 
             <!-- Error Alert -->
-            <div *ngIf="errorMessage" class="alert alert-danger border-0 rounded-3 shadow-sm mb-4 d-flex align-items-center">
+            <div
+              *ngIf="errorMessage"
+              class="alert alert-danger border-0 rounded-3 shadow-sm mb-4 d-flex align-items-center"
+            >
               <i class="fa-solid fa-circle-exclamation fs-4 me-3"></i>
               <div class="flex-grow-1">
                 <div class="fw-bold">เกิดข้อผิดพลาด</div>
                 <div class="small">{{ errorMessage }}</div>
               </div>
-              <button (click)="initStripe()" class="btn btn-sm btn-outline-danger ms-3 rounded-pill px-3" *ngIf="!selectedPlan || selectedPlan.price_per_month > 0">
+              <button
+                (click)="initStripe()"
+                class="btn btn-sm btn-outline-danger ms-3 rounded-pill px-3"
+                *ngIf="!selectedPlan || selectedPlan.price_per_month > 0"
+              >
                 ลองอีกครั้ง
               </button>
             </div>
 
             <!-- Stripe Payment Wrapper -->
-            <div [style.opacity]="(isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)) ? 0.01 : 1" 
-                 [style.height]="(isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)) ? '1px' : 'auto'"
-                 [style.overflow]="(isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)) ? 'hidden' : 'visible'"
-                 class="stripe-payment-wrapper transition-all">
-              
+            <div
+              [style.opacity]="
+                isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0) ? 0.01 : 1
+              "
+              [style.height]="
+                isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)
+                  ? '1px'
+                  : 'auto'
+              "
+              [style.overflow]="
+                isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0)
+                  ? 'hidden'
+                  : 'visible'
+              "
+              class="stripe-payment-wrapper transition-all"
+            >
               <!-- Dynamic Badged Alerts -->
               <ng-container *ngIf="selectedPlan && selectedPlan.price_per_month > 0">
                 <!-- Popular Alert -->
-                <div *ngIf="selectedPlan.badge === 'popular'" class="alert alert-primary bg-primary bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0;">
+                <div
+                  *ngIf="selectedPlan.badge === 'popular'"
+                  class="alert alert-primary bg-primary bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center"
+                >
+                  <div
+                    class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      min-width: 40px;
+                      min-height: 40px;
+                      flex-shrink: 0;
+                    "
+                  >
                     <i class="fa-solid fa-star"></i>
                   </div>
                   <div>
-                    <div class="fw-bold text-primary" style="font-size: 0.95rem;">ตัวเลือกยอดฮิต! ตัดสินใจได้เยี่ยมมาก</div>
-                    <div class="small text-primary opacity-75">องค์กรส่วนใหญ่เลือกใช้แพ็กเกจนี้เพื่อปลดล็อกศักยภาพสูงสุดของทีมเวิร์ค</div>
+                    <div class="fw-bold text-primary" style="font-size: 0.95rem">
+                      ตัวเลือกยอดฮิต! ตัดสินใจได้เยี่ยมมาก
+                    </div>
+                    <div class="small text-primary opacity-75">
+                      องค์กรส่วนใหญ่เลือกใช้แพ็กเกจนี้เพื่อปลดล็อกศักยภาพสูงสุดของทีมเวิร์ค
+                    </div>
                   </div>
                 </div>
 
                 <!-- Recommended Alert -->
-                <div *ngIf="selectedPlan.badge === 'recommended'" class="alert alert-info bg-info bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0;">
+                <div
+                  *ngIf="selectedPlan.badge === 'recommended'"
+                  class="alert alert-info bg-info bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center"
+                >
+                  <div
+                    class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      min-width: 40px;
+                      min-height: 40px;
+                      flex-shrink: 0;
+                    "
+                  >
                     <i class="fa-solid fa-fire"></i>
                   </div>
                   <div>
-                    <div class="fw-bold text-info" style="font-size: 0.95rem;">แพ็กเกจสุดคุ้มค่า (คุ้มที่สุด)</div>
-                    <div class="small text-info opacity-75">ขอแสดงความยินดี คุณเลือกแพ็กเกจที่ผู้เชี่ยวชาญของเราแนะนำว่าคุ้มค่าเงินที่สุด</div>
+                    <div class="fw-bold text-info" style="font-size: 0.95rem">
+                      แพ็กเกจสุดคุ้มค่า (คุ้มที่สุด)
+                    </div>
+                    <div class="small text-info opacity-75">
+                      ขอแสดงความยินดี คุณเลือกแพ็กเกจที่ผู้เชี่ยวชาญของเราแนะนำว่าคุ้มค่าเงินที่สุด
+                    </div>
                   </div>
                 </div>
 
                 <!-- Enterprise Alert -->
-                <div *ngIf="selectedPlan.badge === 'enterprise'" class="alert alert-dark bg-dark bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0;">
+                <div
+                  *ngIf="selectedPlan.badge === 'enterprise'"
+                  class="alert alert-dark bg-dark bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center"
+                >
+                  <div
+                    class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      min-width: 40px;
+                      min-height: 40px;
+                      flex-shrink: 0;
+                    "
+                  >
                     <i class="fa-solid fa-building"></i>
                   </div>
                   <div>
-                    <div class="fw-bold text-dark" style="font-size: 0.95rem;">ยกระดับองค์กรสู่มาตรฐานสากล</div>
-                    <div class="small text-dark opacity-75">โซลูชันระดับ Enterprise พร้อมระบบรักษาความปลอดภัยและบริการระดับ VIP</div>
+                    <div class="fw-bold text-dark" style="font-size: 0.95rem">
+                      ยกระดับองค์กรสู่มาตรฐานสากล
+                    </div>
+                    <div class="small text-dark opacity-75">
+                      โซลูชันระดับ Enterprise พร้อมระบบรักษาความปลอดภัยและบริการระดับ VIP
+                    </div>
                   </div>
                 </div>
 
                 <!-- Default Paid Alert (If no badge) -->
-                <div *ngIf="!selectedPlan.badge" class="alert alert-info bg-info bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                  <div class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0;">
+                <div
+                  *ngIf="!selectedPlan.badge"
+                  class="alert alert-info bg-info bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center"
+                >
+                  <div
+                    class="bg-info text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                    style="
+                      width: 40px;
+                      height: 40px;
+                      min-width: 40px;
+                      min-height: 40px;
+                      flex-shrink: 0;
+                    "
+                  >
                     <i class="fa-solid fa-rocket"></i>
                   </div>
                   <div>
-                    <div class="fw-bold text-info" style="font-size: 0.95rem;">อัปเกรดเป็นแพ็กเกจพรีเมียม</div>
-                    <div class="small text-info opacity-75">ปลดล็อกฟีเจอร์ทั้งหมดแบบไร้ขีดจำกัด เพื่อประสิทธิภาพสูงสุดขององค์กรคุณ</div>
+                    <div class="fw-bold text-info" style="font-size: 0.95rem">
+                      อัปเกรดเป็นแพ็กเกจพรีเมียม
+                    </div>
+                    <div class="small text-info opacity-75">
+                      ปลดล็อกฟีเจอร์ทั้งหมดแบบไร้ขีดจำกัด เพื่อประสิทธิภาพสูงสุดขององค์กรคุณ
+                    </div>
                   </div>
                 </div>
               </ng-container>
 
               <!-- Free Plan Alert (<= 0 Baht) -->
-              <div *ngIf="selectedPlan && selectedPlan.price_per_month <= 0" class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center">
-                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px; min-height: 40px; flex-shrink: 0;">
+              <div
+                *ngIf="selectedPlan && selectedPlan.price_per_month <= 0"
+                class="alert alert-success bg-success bg-opacity-10 border-0 rounded-3 mb-4 d-flex align-items-center"
+              >
+                <div
+                  class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center me-3"
+                  style="
+                    width: 40px;
+                    height: 40px;
+                    min-width: 40px;
+                    min-height: 40px;
+                    flex-shrink: 0;
+                  "
+                >
                   <i class="fa-solid fa-gift"></i>
                 </div>
                 <div>
-                  <div class="fw-bold text-success" style="font-size: 0.95rem;">แพ็กเกจฟรี 100%!</div>
-                  <div class="small text-success opacity-75">คุณสามารถใช้งานฟีเจอร์ที่กำหนดได้ทันที โดยไม่ต้องผูกบัตรเครดิต</div>
+                  <div class="fw-bold text-success" style="font-size: 0.95rem">
+                    แพ็กเกจฟรี 100%!
+                  </div>
+                  <div class="small text-success opacity-75">
+                    คุณสามารถใช้งานฟีเจอร์ที่กำหนดได้ทันที โดยไม่ต้องผูกบัตรเครดิต
+                  </div>
                 </div>
               </div>
 
               <!-- Stripe Element Mount Point (Only for paid plans) -->
-              <div #paymentElement id="payment-element" class="p-3 border rounded-3 bg-light mb-4 shadow-sm min-h-[250px] h-auto" *ngIf="!selectedPlan || selectedPlan.price_per_month > 0">
+              <div
+                #paymentElement
+                id="payment-element"
+                class="p-3 border rounded-3 bg-light mb-4 shadow-sm min-h-[250px] h-auto"
+                *ngIf="!selectedPlan || selectedPlan.price_per_month > 0"
+              >
                 <!-- Stripe.js injects the Payment Element here -->
               </div>
 
               <!-- Friendly Free Notice (Only for free plans) -->
-              <div class="p-4 border border-dashed rounded-4 bg-light text-center mb-4" *ngIf="selectedPlan && selectedPlan.price_per_month <= 0">
+              <div
+                class="p-4 border border-dashed rounded-4 bg-light text-center mb-4"
+                *ngIf="selectedPlan && selectedPlan.price_per_month <= 0"
+              >
                 <i class="fa-solid fa-shield-heart text-primary fs-1 mb-3"></i>
                 <h6 class="fw-bold text-dark mb-2">ปลอดภัยและไม่มีค่าใช้จ่าย</h6>
-                <p class="text-muted small mb-0 px-3">Green Sync สนับสนุนแนวทางความยั่งยืน คุณสามารถเริ่มต้นทดลองใช้งานระบบบิลสแกน AI และตัวช่วยวิเคราะห์ได้ทันทีอย่างสมบูรณ์แบบโดยไม่ต้องระบุช่องทางชำระเงินใดๆ</p>
+                <p class="text-muted small mb-0 px-3">
+                  Green Sync สนับสนุนแนวทางความยั่งยืน คุณสามารถเริ่มต้นทดลองใช้งานระบบบิลสแกน AI
+                  และตัวช่วยวิเคราะห์ได้ทันทีอย่างสมบูรณ์แบบโดยไม่ต้องระบุช่องทางชำระเงินใดๆ
+                </p>
               </div>
 
-              <button 
-                [disabled]="isSaving || (isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0))" 
+              <button
+                [disabled]="
+                  isSaving ||
+                  (isStripeLoading && !(selectedPlan && selectedPlan.price_per_month <= 0))
+                "
                 (click)="handleSubmit()"
-                class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-3 text-white transition-all tracking-wide">
-                <i class="fa-solid fa-lock me-2" *ngIf="!isSaving && (!selectedPlan || selectedPlan.price_per_month > 0)"></i>
-                <i class="fa-solid fa-circle-play me-2" *ngIf="!isSaving && selectedPlan && selectedPlan.price_per_month <= 0"></i>
+                class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm mt-3 text-white transition-all tracking-wide"
+              >
+                <i
+                  class="fa-solid fa-lock me-2"
+                  *ngIf="!isSaving && (!selectedPlan || selectedPlan.price_per_month > 0)"
+                ></i>
+                <i
+                  class="fa-solid fa-circle-play me-2"
+                  *ngIf="!isSaving && selectedPlan && selectedPlan.price_per_month <= 0"
+                ></i>
                 <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
                 <span *ngIf="!isSaving">
-                  {{ selectedPlan && selectedPlan.price_per_month <= 0 ? 'เปิดใช้งานแพ็กเกจฟรี' : 'ยืนยันและชำระเงินอย่างปลอดภัย' }}
+                  {{
+                    selectedPlan && selectedPlan.price_per_month <= 0
+                      ? 'เปิดใช้งานแพ็กเกจฟรี'
+                      : 'ยืนยันและชำระเงินอย่างปลอดภัย'
+                  }}
                 </span>
               </button>
-            </div> <!-- End stripe-payment-wrapper -->
-          </div> <!-- End card-body -->
-        </div> <!-- End card -->
-        
-        <div class="text-center mt-4 animate-in">
-          <p class="text-muted small">พบปัญหาในการชำระเงิน? <a href="mailto:support@greensync.com" class="text-primary text-decoration-none fw-bold">ติดต่อศูนย์ช่วยเหลือ</a></p>
+            </div>
+            <!-- End stripe-payment-wrapper -->
+          </div>
+          <!-- End card-body -->
         </div>
-      </div> <!-- End col -->
-    </div> <!-- End row -->
-  </div> <!-- End Main Content Wrapper -->
-</div> <!-- End container -->
+        <!-- End card -->
+
+        <div class="text-center mt-4 animate-in">
+          <p class="text-muted small">
+            พบปัญหาในการชำระเงิน?
+            <a href="mailto:support@greensync.com" class="text-primary text-decoration-none fw-bold"
+              >ติดต่อศูนย์ช่วยเหลือ</a
+            >
+          </p>
+        </div>
+      </div>
+      <!-- End col -->
+    </div>
+    <!-- End row -->
+  </div>
+  <!-- End Main Content Wrapper -->
+</div>
+<!-- End container -->
 
 <app-confirm-dialog
   [open]="showDeleteConfirm"
@@ -217,5 +419,6 @@
   confirmLabel="ลบข้อมูล"
   variant="danger"
   (confirm)="confirmDelete()"
-  (cancel)="cancelDelete()">
+  (cancel)="cancelDelete()"
+>
 </app-confirm-dialog>

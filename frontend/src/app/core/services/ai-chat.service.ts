@@ -9,8 +9,8 @@ export class AiChatService {
   private apiUrl = `${environment.apiUrl}/gemini`;
 
   sendMessage(message: string): Observable<string> {
-    return this.http.post<{ reply: string }>(`${this.apiUrl}/chat`, { message }).pipe(
-      map(response => response.reply)
-    );
+    return this.http
+      .post<{ reply: string }>(`${this.apiUrl}/chat`, { message })
+      .pipe(map((response) => response.reply));
   }
 }

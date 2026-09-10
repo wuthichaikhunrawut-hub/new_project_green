@@ -4,7 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AssessmentDataService {
   private http = inject(HttpClient);
@@ -22,12 +22,12 @@ export class AssessmentDataService {
 
       return new HttpHeaders({
         'Content-Type': 'application/json',
-        
-        'x-org-id': orgId
+
+        'x-org-id': orgId,
       });
     }
     return new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
   }
 

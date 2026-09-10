@@ -37,7 +37,7 @@ export class SubscriptionsController {
   // --- User / Organization APIs (ต้องล็อกอิน) ---
   @Get('status')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EXECUTIVE')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EXECUTIVE')
   async getStatus(@Request() req: any) {
     return this.subscriptionsService.getUserSubscriptionStatusByUserId(
       req.user.sub,
@@ -46,7 +46,7 @@ export class SubscriptionsController {
 
   @Get('payments')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'USER', 'EXECUTIVE')
+  @Roles('SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EXECUTIVE')
   async getPayments(@Request() req: any) {
     const orgId = Number(req.user.orgId);
     return this.subscriptionsService.getOrganizationPayments(orgId);
@@ -54,7 +54,7 @@ export class SubscriptionsController {
 
   @Delete('my/cancel')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ORGANIZATION_ADMIN', 'EXECUTIVE')
+  @Roles('ORG_ADMIN', 'EXECUTIVE')
   async cancelMySubscription(@Request() req: any) {
     const orgId = Number(req.user.orgId);
     return this.subscriptionsService.cancelSubscription(orgId);
@@ -106,8 +106,11 @@ export class SubscriptionsController {
   @Get('invoices')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('SYSTEM_ADMIN')
-  findAllInvoices() {
-    return this.subscriptionsService.findAllInvoices();
+  findAllInvoices(
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.subscriptionsService.findAllInvoices(page, limit);
   }
 
   @Put('invoices/:id/status')
@@ -122,7 +125,7 @@ export class SubscriptionsController {
 
   @Get('usage')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ORGANIZATION_ADMIN', 'EXECUTIVE')
+  @Roles('ORG_ADMIN', 'EXECUTIVE')
   getUsageLogs(
     @Request() req: any,
     @Query('month') month?: string,
@@ -138,7 +141,7 @@ export class SubscriptionsController {
 
   @Get('my/quotas')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('ORGANIZATION_ADMIN', 'SYSTEM_ADMIN', 'EXECUTIVE')
+  @Roles('ORG_ADMIN', 'SYSTEM_ADMIN', 'EXECUTIVE')
   @Header(
     'Cache-Control',
     'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',

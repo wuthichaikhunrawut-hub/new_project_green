@@ -39,6 +39,15 @@ export class Organization {
   @Column({ type: 'double precision', nullable: true })
   target_reduction_percent: number;
 
+  @Column({ type: 'int', nullable: true })
+  target_year: number;
+
+  @Column({ type: 'double precision', nullable: true })
+  industry_benchmark_value: number;
+
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  carbon_standard: string;
+
   @Column({ type: 'varchar', length: 50, nullable: true })
   current_green_status: string;
 

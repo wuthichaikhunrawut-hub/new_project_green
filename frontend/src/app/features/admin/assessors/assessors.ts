@@ -2,14 +2,17 @@ import { ToastService } from '../../../core/services/toast.service';
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AssessorsAdminService, AssessorUser } from '../../../core/services/assessors-admin.service';
+import {
+  AssessorsAdminService,
+  AssessorUser,
+} from '../../../core/services/assessors-admin.service';
 
 @Component({
   selector: 'app-admin-assessors',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './assessors.html',
-  styleUrls: ['./assessors.css']
+  styleUrls: ['./assessors.css'],
 })
 export class AdminAssessorsComponent implements OnInit {
   private toast = inject(ToastService);
@@ -28,42 +31,45 @@ export class AdminAssessorsComponent implements OnInit {
   verifyActionTargetState: boolean = false;
   assessorToSuspend: AssessorUser | null = null;
 
-  ngOnInit() { this.loadAssessors(); }
+  ngOnInit() {
+    this.loadAssessors();
+  }
 
   loadAssessors() {
     this.isLoading = true;
     this.svc.getAssessors().subscribe({
-      next: (data) => { 
-        this.assessors = data; 
-        this.isLoading = false; 
+      next: (data) => {
+        this.assessors = data;
+        this.isLoading = false;
         this.applyFilters();
       },
-      error: () => { 
-        this.isLoading = false; 
-        this.cdr.markForCheck(); 
-      }
+      error: () => {
+        this.isLoading = false;
+        this.cdr.markForCheck();
+      },
     });
   }
 
   applyFilters() {
     let result = this.assessors;
-    
+
     if (this.filterStatus === 'APPROVED') {
-      result = result.filter(a => a.assessor_verified);
+      result = result.filter((a) => a.assessor_verified);
     } else if (this.filterStatus === 'PENDING') {
-      result = result.filter(a => !a.assessor_verified && a.is_active);
+      result = result.filter((a) => !a.assessor_verified && a.is_active);
     } else if (this.filterStatus === 'SUSPENDED') {
-      result = result.filter(a => !a.is_active);
+      result = result.filter((a) => !a.is_active);
     }
 
     if (this.searchText) {
       const lowerSearch = this.searchText.toLowerCase();
-      result = result.filter(a => 
-        (a.username && a.username.toLowerCase().includes(lowerSearch)) ||
-        (a.email && a.email.toLowerCase().includes(lowerSearch))
+      result = result.filter(
+        (a) =>
+          (a.username && a.username.toLowerCase().includes(lowerSearch)) ||
+          (a.email && a.email.toLowerCase().includes(lowerSearch)),
       );
     }
-    
+
     this.filteredData = result;
     this.cdr.markForCheck();
   }
@@ -83,7 +89,7 @@ export class AdminAssessorsComponent implements OnInit {
       },
       error: () => {
         this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถดำเนินการได้`);
-      }
+      },
     });
   }
 
@@ -94,17 +100,19 @@ export class AdminAssessorsComponent implements OnInit {
   confirmSuspend() {
     if (!this.assessorToSuspend) return;
     const action = this.assessorToSuspend.is_active ? 'ระงับ' : 'เปิดใช้งาน';
-    
-    this.svc.suspendAssessor(this.assessorToSuspend.id, !this.assessorToSuspend.is_active).subscribe({
-      next: () => {
-        this.toast.success(`${action}บัญชี ${this.assessorToSuspend!.username} เรียบร้อยแล้ว`);
-        this.assessorToSuspend = null;
-        this.loadAssessors();
-      },
-      error: () => {
-        this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถ${action}ได้`);
-      }
-    });
+
+    this.svc
+      .suspendAssessor(this.assessorToSuspend.id, !this.assessorToSuspend.is_active)
+      .subscribe({
+        next: () => {
+          this.toast.success(`${action}บัญชี ${this.assessorToSuspend!.username} เรียบร้อยแล้ว`);
+          this.assessorToSuspend = null;
+          this.loadAssessors();
+        },
+        error: () => {
+          this.toast.error(`เกิดข้อผิดพลาด ไม่สามารถ${action}ได้`);
+        },
+      });
   }
 
   // Modal logic

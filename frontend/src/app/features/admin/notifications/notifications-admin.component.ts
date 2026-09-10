@@ -15,7 +15,7 @@ type TargetType = 'ALL_SYSTEM' | 'ALL_ORG' | 'SPECIFIC_USER';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './notifications-admin.component.html',
-  styleUrls: ['./notifications-admin.component.css']
+  styleUrls: ['./notifications-admin.component.css'],
 })
 export class NotificationsAdminComponent implements OnInit {
   private notificationService = inject(NotificationService);
@@ -34,25 +34,25 @@ export class NotificationsAdminComponent implements OnInit {
   activeAdminTab = 'APPROVALS'; // 'APPROVALS' | 'SEND' | 'HISTORY'
 
   get announcementsHistory(): any[] {
-    return this.history.filter(item => !this.isRequestProposal(item));
+    return this.history.filter((item) => !this.isRequestProposal(item));
   }
 
   get proposalsHistory(): any[] {
-    return this.history.filter(item => this.isRequestProposal(item));
+    return this.history.filter((item) => this.isRequestProposal(item));
   }
 
   getPendingProposalsCount(): number {
-    return this.history.filter(item => 
-      this.isRequestProposal(item) && 
-      this.parseRequestProposal(item)?.status === 'PENDING'
+    return this.history.filter(
+      (item) =>
+        this.isRequestProposal(item) && this.parseRequestProposal(item)?.status === 'PENDING',
     ).length;
   }
-  
+
   selectedFactor: any = null;
   notificationToDelete: any | null = null;
   rejectingItem: any | null = null;
   rejectReason = '';
-  
+
   targetType: TargetType = 'ALL_SYSTEM';
   selectedOrgId: number | null = null;
   selectedUserId: number | null = null;
@@ -61,7 +61,7 @@ export class NotificationsAdminComponent implements OnInit {
     title: '',
     message: '',
     type: NotificationType.SYSTEM,
-    link: ''
+    link: '',
   };
 
   notificationTypes = [
@@ -69,7 +69,7 @@ export class NotificationsAdminComponent implements OnInit {
     { value: NotificationType.ASSESSMENT, label: 'การประเมิน' },
     { value: NotificationType.DEADLINE, label: 'แจ้งเตือนกำหนดส่ง' },
     { value: NotificationType.REQUEST, label: 'คำร้องอนุมัติวิชาการ' },
-    { value: NotificationType.URGENT, label: 'แจ้งเตือนสำคัญ' }
+    { value: NotificationType.URGENT, label: 'แจ้งเตือนสำคัญ' },
   ];
 
   isSending = false;
@@ -81,8 +81,8 @@ export class NotificationsAdminComponent implements OnInit {
   }
 
   loadInitialData() {
-    this.orgService.getAll().subscribe(orgs => this.organizations = orgs);
-    this.usersService.getUsers().subscribe(users => this.allUsers = users);
+    this.orgService.getAll().subscribe((orgs) => (this.organizations = orgs));
+    this.usersService.getUsers().subscribe((users) => (this.allUsers = users));
     this.loadHistory();
   }
 
@@ -94,7 +94,7 @@ export class NotificationsAdminComponent implements OnInit {
       next: (data: any[]) => {
         // Group by title, message, and approximate time
         const groups = new Map<string, any>();
-        data.forEach(item => {
+        data.forEach((item) => {
           const date = new Date(item.created_at).toISOString().substring(0, 16); // group by minute
           const key = `${item.title}_${item.message}_${date}`;
           if (!groups.has(key)) {
@@ -105,7 +105,9 @@ export class NotificationsAdminComponent implements OnInit {
             g.grouped_ids.push(item.id);
           }
         });
-        this.history = Array.from(groups.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        this.history = Array.from(groups.values()).sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
         this.isLoadingHistory = false;
         this.cdr.markForCheck();
       },
@@ -113,7 +115,7 @@ export class NotificationsAdminComponent implements OnInit {
         console.error('Failed to load notification history:', err);
         this.isLoadingHistory = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -121,7 +123,9 @@ export class NotificationsAdminComponent implements OnInit {
     this.selectedOrgId = orgId ? Number(orgId) : null;
     this.selectedUserId = null;
     if (this.selectedOrgId) {
-      this.filteredUsers = this.allUsers.filter(u => u.organization && u.organization.id == this.selectedOrgId);
+      this.filteredUsers = this.allUsers.filter(
+        (u) => u.organization && u.organization.id == this.selectedOrgId,
+      );
     } else {
       this.filteredUsers = [];
     }
@@ -130,7 +134,8 @@ export class NotificationsAdminComponent implements OnInit {
   getRecipientCount(): number {
     if (this.targetType === 'ALL_SYSTEM') return this.allUsers.length;
     if (this.targetType === 'ALL_ORG') {
-        return this.allUsers.filter(u => u.organization && u.organization.id == this.selectedOrgId).length;
+      return this.allUsers.filter((u) => u.organization && u.organization.id == this.selectedOrgId)
+        .length;
     }
     if (this.targetType === 'SPECIFIC_USER') return this.selectedUserId ? 1 : 0;
     return 0;
@@ -147,33 +152,37 @@ export class NotificationsAdminComponent implements OnInit {
     this.successMessage = '';
     this.errorMessage = '';
 
-    this.notificationService.sendBulkNotification({
+    this.notificationService
+      .sendBulkNotification({
         title: this.notification.title,
         message: this.notification.message,
         type: this.notification.type,
         recipient_ids: recipientIds,
-        link: this.notification.link || undefined
-    }).subscribe({
-      next: () => {
-        this.successMessage = `ส่งการแจ้งเตือนสำเร็จแล้ว (${recipientIds.length} ผู้รับ)`;
-        this.resetForm();
-        this.isSending = false;
-        this.loadHistory(true); // Refresh history silently
-        this.cdr.markForCheck();
-      },
-      error: (err) => {
-        this.isSending = false;
-        this.errorMessage = 'เกิดข้อผิดพลาดในการส่งการแจ้งเตือน';
-        console.error(err);
-        this.cdr.markForCheck();
-      }
-    });
+        link: this.notification.link || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.successMessage = `ส่งการแจ้งเตือนสำเร็จแล้ว (${recipientIds.length} ผู้รับ)`;
+          this.resetForm();
+          this.isSending = false;
+          this.loadHistory(true); // Refresh history silently
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.isSending = false;
+          this.errorMessage = 'เกิดข้อผิดพลาดในการส่งการแจ้งเตือน';
+          console.error(err);
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   private getRecipientIds(): number[] {
-    if (this.targetType === 'ALL_SYSTEM') return this.allUsers.map(u => u.id);
+    if (this.targetType === 'ALL_SYSTEM') return this.allUsers.map((u) => u.id);
     if (this.targetType === 'ALL_ORG') {
-      return this.allUsers.filter(u => u.organization && u.organization.id == this.selectedOrgId).map(u => u.id);
+      return this.allUsers
+        .filter((u) => u.organization && u.organization.id == this.selectedOrgId)
+        .map((u) => u.id);
     }
     if (this.targetType === 'SPECIFIC_USER' && this.selectedUserId) {
       return [Number(this.selectedUserId)];
@@ -187,12 +196,12 @@ export class NotificationsAdminComponent implements OnInit {
 
   confirmDeleteNotification() {
     if (!this.notificationToDelete) return;
-    
+
     // We could delete them one by one or if there's a bulk delete, but let's do loop for now
     const ids: number[] = this.notificationToDelete.grouped_ids;
     let completed = 0;
-    
-    ids.forEach(id => {
+
+    ids.forEach((id) => {
       this.notificationService.deleteNotification(id).subscribe({
         next: () => {
           completed++;
@@ -209,44 +218,55 @@ export class NotificationsAdminComponent implements OnInit {
             this.notificationToDelete = null;
             this.loadHistory(true); // Refresh silently
           }
-        }
+        },
       });
     });
   }
-  
+
   resetForm() {
     this.notification = {
       title: '',
       message: '',
       type: NotificationType.SYSTEM,
-      link: ''
+      link: '',
     };
     this.targetType = 'ALL_SYSTEM';
     this.selectedOrgId = null;
     this.selectedUserId = null;
   }
 
-
   // Preview Helpers
   getPreviewIcon(): string {
     switch (this.notification.type) {
-      case NotificationType.DEADLINE: return 'fa-clock';
-      case NotificationType.ASSESSMENT: return 'fa-file-circle-check';
-      case NotificationType.ACCOUNT: return 'fa-user-shield';
-      case NotificationType.REQUEST: return 'fa-file-invoice';
-      case NotificationType.URGENT: return 'fa-triangle-exclamation';
-      default: return 'fa-circle-info';
+      case NotificationType.DEADLINE:
+        return 'fa-clock';
+      case NotificationType.ASSESSMENT:
+        return 'fa-file-circle-check';
+      case NotificationType.ACCOUNT:
+        return 'fa-user-shield';
+      case NotificationType.REQUEST:
+        return 'fa-file-invoice';
+      case NotificationType.URGENT:
+        return 'fa-triangle-exclamation';
+      default:
+        return 'fa-circle-info';
     }
   }
 
   getPreviewIconClass(): string {
     switch (this.notification.type) {
-      case NotificationType.DEADLINE: return 'bg-warning bg-opacity-10 text-warning';
-      case NotificationType.ASSESSMENT: return 'bg-primary bg-opacity-10 text-primary';
-      case NotificationType.ACCOUNT: return 'bg-success bg-opacity-10 text-success';
-      case NotificationType.REQUEST: return 'bg-info bg-opacity-10 text-info';
-      case NotificationType.URGENT: return 'bg-danger bg-opacity-10 text-danger';
-      default: return 'bg-secondary bg-opacity-10 text-secondary';
+      case NotificationType.DEADLINE:
+        return 'bg-warning bg-opacity-10 text-warning';
+      case NotificationType.ASSESSMENT:
+        return 'bg-primary bg-opacity-10 text-primary';
+      case NotificationType.ACCOUNT:
+        return 'bg-success bg-opacity-10 text-success';
+      case NotificationType.REQUEST:
+        return 'bg-info bg-opacity-10 text-info';
+      case NotificationType.URGENT:
+        return 'bg-danger bg-opacity-10 text-danger';
+      default:
+        return 'bg-secondary bg-opacity-10 text-secondary';
     }
   }
 
@@ -255,18 +275,18 @@ export class NotificationsAdminComponent implements OnInit {
   }
 
   getCategoryLabel(): string {
-    const type = this.notificationTypes.find(t => t.value === this.notification.type);
+    const type = this.notificationTypes.find((t) => t.value === this.notification.type);
     return type ? type.label : 'ทั่วไป';
   }
 
   getRecipientLabel(): string {
     if (this.targetType === 'ALL_SYSTEM') return 'ผู้ใช้งานทุกคนในระบบ';
     if (this.targetType === 'ALL_ORG') {
-      const org = this.organizations.find(o => o.id == this.selectedOrgId);
+      const org = this.organizations.find((o) => o.id == this.selectedOrgId);
       return org ? `ทุกคนใน ${org.name}` : 'เลือกองค์กร';
     }
     if (this.targetType === 'SPECIFIC_USER') {
-      const user = this.allUsers.find(u => u.id == this.selectedUserId);
+      const user = this.allUsers.find((u) => u.id == this.selectedUserId);
       return user ? user.username : 'เลือกผู้ใช้งาน';
     }
     return 'ไม่ได้เลือกผู้รับ';
@@ -286,16 +306,18 @@ export class NotificationsAdminComponent implements OnInit {
 
   approveProposal(item: any) {
     this.toast.info('กำลังดำเนินการบันทึกข้อมูลและอนุมัติ...');
-    this.http.post(`${environment.apiUrl}/notifications/${item.id}/approve-academic`, {}).subscribe({
-      next: () => {
-        this.toast.success('อนุมัติเกณฑ์/สูตรคาร์บอนและบันทึกสู่ระบบสำเร็จเรียบร้อยแล้วครับ!');
-        this.loadHistory(true); // Refresh silently
-      },
-      error: (err) => {
-        console.error(err);
-        this.toast.error('เกิดข้อผิดพลาดในการทำรายการอนุมัติ');
-      }
-    });
+    this.http
+      .post(`${environment.apiUrl}/notifications/${item.id}/approve-academic`, {})
+      .subscribe({
+        next: () => {
+          this.toast.success('อนุมัติเกณฑ์/สูตรคาร์บอนและบันทึกสู่ระบบสำเร็จเรียบร้อยแล้วครับ!');
+          this.loadHistory(true); // Refresh silently
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.error('เกิดข้อผิดพลาดในการทำรายการอนุมัติ');
+        },
+      });
   }
 
   openRejectModal(item: any) {
@@ -309,18 +331,20 @@ export class NotificationsAdminComponent implements OnInit {
       return;
     }
 
-    this.http.post(`${environment.apiUrl}/notifications/${this.rejectingItem.id}/reject-academic`, {
-      reason: this.rejectReason
-    }).subscribe({
-      next: () => {
-        this.toast.success('ปฏิเสธคำร้องข้อเสนอ และตอบกลับผู้ยื่นขอสำเร็จแล้ว');
-        this.rejectingItem = null;
-        this.loadHistory(true); // Refresh silently
-      },
-      error: (err) => {
-        console.error(err);
-        this.toast.error('เกิดข้อผิดพลาดในการทำรายการปฏิเสธ');
-      }
-    });
+    this.http
+      .post(`${environment.apiUrl}/notifications/${this.rejectingItem.id}/reject-academic`, {
+        reason: this.rejectReason,
+      })
+      .subscribe({
+        next: () => {
+          this.toast.success('ปฏิเสธคำร้องข้อเสนอ และตอบกลับผู้ยื่นขอสำเร็จแล้ว');
+          this.rejectingItem = null;
+          this.loadHistory(true); // Refresh silently
+        },
+        error: (err) => {
+          console.error(err);
+          this.toast.error('เกิดข้อผิดพลาดในการทำรายการปฏิเสธ');
+        },
+      });
   }
 }

@@ -9,7 +9,7 @@ import { ToastService } from '../../shared/services/toast.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.css']
+  styleUrls: ['./notifications.component.css'],
 })
 export class NotificationsComponent implements OnInit {
   private notificationService = inject(NotificationService);
@@ -21,18 +21,18 @@ export class NotificationsComponent implements OnInit {
   notifications: Notification[] = [];
   isLoading = false;
 
-  get unreadCount() { 
-    return this.notifications.filter(n => !n.is_read).length; 
+  get unreadCount() {
+    return this.notifications.filter((n) => !n.is_read).length;
   }
 
   get filteredNotifications() {
     return this.activeTab === 'unread'
-      ? this.notifications.filter(n => !n.is_read)
+      ? this.notifications.filter((n) => !n.is_read)
       : this.notifications;
   }
 
-  ngOnInit() { 
-    this.loadNotifications(); 
+  ngOnInit() {
+    this.loadNotifications();
   }
 
   loadNotifications() {
@@ -47,7 +47,7 @@ export class NotificationsComponent implements OnInit {
         console.error('Failed to load notifications:', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 
@@ -69,7 +69,7 @@ export class NotificationsComponent implements OnInit {
   navigateSafely(link: string) {
     if (!link) return;
     let targetLink = link.trim();
-    
+
     // Handle external links
     if (targetLink.startsWith('http://') || targetLink.startsWith('https://')) {
       window.open(targetLink, '_blank');
@@ -80,9 +80,9 @@ export class NotificationsComponent implements OnInit {
     if (!targetLink.startsWith('/')) {
       targetLink = '/' + targetLink;
     }
-    
+
     // Navigate using Angular router, handle unknown routes
-    this.router.navigateByUrl(targetLink).catch(err => {
+    this.router.navigateByUrl(targetLink).catch((err) => {
       console.error('Navigation error:', err);
       this.toast.warning('ไม่พบหน้ารายละเอียดดังกล่าวในระบบ หรือลิงก์ไม่ถูกต้อง');
     });
@@ -90,26 +90,34 @@ export class NotificationsComponent implements OnInit {
 
   markAllRead() {
     this.notificationService.markAllAsRead().subscribe(() => {
-      this.notifications.forEach(n => n.is_read = true);
+      this.notifications.forEach((n) => (n.is_read = true));
       this.cdr.markForCheck();
     });
   }
 
   getTypeIcon(type: string): string {
     switch (type) {
-      case 'DEADLINE': return 'fa-clock';
-      case 'ASSESSMENT': return 'fa-file-circle-check';
-      case 'ACCOUNT': return 'fa-user-shield';
-      default: return 'fa-circle-info';
+      case 'DEADLINE':
+        return 'fa-clock';
+      case 'ASSESSMENT':
+        return 'fa-file-circle-check';
+      case 'ACCOUNT':
+        return 'fa-user-shield';
+      default:
+        return 'fa-circle-info';
     }
   }
 
   getTypeClass(type: string): string {
     switch (type) {
-      case 'DEADLINE': return 'text-warning';
-      case 'ASSESSMENT': return 'text-primary';
-      case 'ACCOUNT': return 'text-success';
-      default: return 'text-info';
+      case 'DEADLINE':
+        return 'text-warning';
+      case 'ASSESSMENT':
+        return 'text-primary';
+      case 'ACCOUNT':
+        return 'text-success';
+      default:
+        return 'text-info';
     }
   }
 }

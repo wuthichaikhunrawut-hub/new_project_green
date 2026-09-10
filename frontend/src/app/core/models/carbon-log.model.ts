@@ -3,7 +3,7 @@ export enum ActivityType {
   WATER = 'WATER',
   WASTE = 'WASTE',
   FUEL = 'FUEL',
-  GAS = 'GAS'
+  GAS = 'GAS',
 }
 
 export interface EmissionFactor {

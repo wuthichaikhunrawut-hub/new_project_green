@@ -10,7 +10,7 @@ import { UploadService } from '../../../core/services/upload.service';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './assessor-register.html',
-  styleUrls: ['./assessor-register.css']
+  styleUrls: ['./assessor-register.css'],
 })
 export class AssessorRegisterComponent {
   private authService = inject(AuthService);
@@ -29,7 +29,7 @@ export class AssessorRegisterComponent {
     confirmPassword: '',
     firstName: '',
     lastName: '',
-    phone: ''
+    phone: '',
   };
 
   profileData = {
@@ -40,14 +40,18 @@ export class AssessorRegisterComponent {
     qualification_file_url: '',
     bank_name: '',
     bank_account_no: '',
-    bank_account_name: ''
+    bank_account_name: '',
   };
 
   nextStep() {
     this.errorMessage = '';
-    
+
     if (this.step === 1) {
-      if (!this.userData.email || !this.userData.password || this.userData.password !== this.userData.confirmPassword) {
+      if (
+        !this.userData.email ||
+        !this.userData.password ||
+        this.userData.password !== this.userData.confirmPassword
+      ) {
         this.errorMessage = 'กรุณากรอกอีเมลและรหัสผ่านให้ถูกต้อง';
         return;
       }
@@ -73,7 +77,7 @@ export class AssessorRegisterComponent {
   async onFileSelected(event: any) {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-    
+
     const file = input.files[0];
 
     // Basic validation
@@ -84,7 +88,8 @@ export class AssessorRegisterComponent {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+    if (file.size > 5 * 1024 * 1024) {
+      // 5MB limit
       this.errorMessage = 'ไฟล์มีขนาดใหญ่เกินไป (จำกัด 5MB)';
       input.value = '';
       return;
@@ -116,10 +121,14 @@ export class AssessorRegisterComponent {
       error: (err) => {
         clearTimeout(timeoutId);
         console.error('❌ Upload failed', err);
-        this.errorMessage = 'ไม่สามารถอัปโหลดไฟล์ได้: ' + (err.error?.message || err.message || 'Network Error — กรุณาตรวจสอบว่า Backend ทำงานอยู่');
+        this.errorMessage =
+          'ไม่สามารถอัปโหลดไฟล์ได้: ' +
+          (err.error?.message ||
+            err.message ||
+            'Network Error — กรุณาตรวจสอบว่า Backend ทำงานอยู่');
         this.isUploading = false;
         input.value = ''; // Reset input so user can try again
-      }
+      },
     });
   }
 
@@ -133,19 +142,21 @@ export class AssessorRegisterComponent {
     this.errorMessage = '';
 
     try {
-      const response: any = await this.authService.registerAssessor({
-        userData: {
-          username: `${this.userData.firstName} ${this.userData.lastName}`,
-          email: this.userData.email,
-          password: this.userData.password
-        },
-        profileData: {
-          ...this.profileData,
-          firstName: this.userData.firstName,
-          lastName: this.userData.lastName,
-          phone: this.userData.phone
-        }
-      }).toPromise();
+      const response: any = await this.authService
+        .registerAssessor({
+          userData: {
+            username: `${this.userData.firstName} ${this.userData.lastName}`,
+            email: this.userData.email,
+            password: this.userData.password,
+          },
+          profileData: {
+            ...this.profileData,
+            firstName: this.userData.firstName,
+            lastName: this.userData.lastName,
+            phone: this.userData.phone,
+          },
+        })
+        .toPromise();
 
       if (response && response.access_token) {
         localStorage.setItem('access_token', response.access_token);

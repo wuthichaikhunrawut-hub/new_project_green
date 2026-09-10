@@ -7,7 +7,7 @@ import { ExecutiveService } from '../../../core/services/executive.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './audit-summary.html',
-  styleUrls: ['./audit-summary.css']
+  styleUrls: ['./audit-summary.css'],
 })
 export class ExecutiveAuditSummaryComponent implements OnInit {
   private executiveService = inject(ExecutiveService);
@@ -31,28 +31,25 @@ export class ExecutiveAuditSummaryComponent implements OnInit {
     this.executiveService.getDashboard().subscribe({
       next: (data) => {
         this.orgName = data.orgName;
-        
-        // Map branches and populate their Green Office category scores
-        this.auditData = (data.carbonByUnit || []).map((unit, index) => {
-          let baseScore = 88 - (index * 6);
-          if (baseScore < 60) baseScore = 65;
 
+        this.auditData = data.approvedAssessments.map((assessment) => {
+          const score = Number(assessment.totalScore || 0);
           return {
-            unitName: unit.unitName || 'หน่วยงานกลาง',
-            overallProgress: baseScore,
-            overallStatus: baseScore >= 80 ? 'ผ่านเกณฑ์ดีเยี่ยม (ทอง)' : baseScore >= 70 ? 'ผ่านเกณฑ์ดีมาก (เงิน)' : 'ผ่านเกณฑ์ดี (ทองแดง)',
-            statusClass: baseScore >= 80 ? 'success' : baseScore >= 70 ? 'warning' : 'danger',
-            categories: [
-              { name: 'หมวด 1: กำหนดนโยบาย', score: Math.min(100, Math.round(baseScore * 1.05)) },
-              { name: 'หมวด 2: การสื่อสาร & ฝึกอบรม', score: Math.min(100, Math.round(baseScore * 0.95)) },
-              { name: 'หมวด 3: การใช้พลังงาน & ทรัพยากร', score: Math.min(100, Math.round(baseScore * 0.88)) },
-              { name: 'หมวด 4: การจัดการของเสีย & ขยะ', score: Math.min(100, Math.round(baseScore * 1.02)) },
-              { name: 'หมวด 5: สภาพแวดล้อม & ความปลอดภัย', score: Math.min(100, Math.round(baseScore * 0.92)) },
-              { name: 'หมวด 6: จัดซื้อจัดจ้างที่เป็นมิตร', score: Math.min(100, Math.round(baseScore * 0.85)) }
-            ]
+            unitName: assessment.assessmentYear
+              ? `ผลประเมินปี ${assessment.assessmentYear}`
+              : `ผลประเมิน #${assessment.id}`,
+            overallProgress: score,
+            overallStatus:
+              score >= 80
+                ? 'ผ่านเกณฑ์ดีเยี่ยม (ทอง)'
+                : score >= 70
+                  ? 'ผ่านเกณฑ์ดีมาก (เงิน)'
+                  : 'ผ่านเกณฑ์ดี (ทองแดง)',
+            statusClass: score >= 80 ? 'success' : score >= 70 ? 'warning' : 'danger',
+            categories: [],
           };
         });
-        
+
         this.isLoading = false;
         this.cdr.markForCheck();
       },
@@ -60,7 +57,7 @@ export class ExecutiveAuditSummaryComponent implements OnInit {
         console.error('Failed to load audit summary', err);
         this.isLoading = false;
         this.cdr.markForCheck();
-      }
+      },
     });
   }
 }

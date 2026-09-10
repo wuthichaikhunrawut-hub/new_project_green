@@ -6,11 +6,14 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { OrganizationUnit } from '../../organizations/entities/organization-unit.entity';
 import { EmissionFactor } from './emission-factor.entity';
 
+@Index(['org_id', 'year', 'month'])
+@Index(['org_id', 'created_at'])
 @Entity('carbon_activity_logs')
 export class CarbonLog {
   @PrimaryGeneratedColumn('increment', { name: 'carbon_log_id' })

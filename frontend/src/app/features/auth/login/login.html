@@ -1,18 +1,17 @@
 <div class="login-page">
-
   <!-- ===== LEFT PANEL: Branding ===== -->
   <div class="login-left">
     <div class="left-bg-mesh"></div>
 
     <!-- TOP: Logo (absolute) -->
     <a routerLink="/" class="brand-logo">
-      <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="h-[45px]">
+      <img src="assets/image/Green_office_imge.png" alt="GreenSync" class="h-[45px]" />
     </a>
 
     <!-- BOTTOM: Text overlay on image -->
     <div class="left-bottom-overlay">
       <div class="badge-pill">AI-Powered ESG Platform</div>
-      <h1>บริหารคาร์บอน<br>สู่ <span class="text-em">Net Zero</span><br>อย่างชาญฉลาด</h1>
+      <h1>บริหารคาร์บอน<br />สู่ <span class="text-em">Net Zero</span><br />อย่างชาญฉลาด</h1>
       <p>แพลตฟอร์มจัดการ Carbon Footprint และมาตรฐาน ESG ครบวงจร สำหรับองค์กรไทยยุคใหม่</p>
       <div class="left-stats">
         <div class="stat-pill">
@@ -29,13 +28,11 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- ===== RIGHT PANEL: Form ===== -->
   <div class="login-right">
     <div class="form-card animate-in">
-
       <!-- Header -->
       <div class="form-header">
         <h2>เข้าสู่ระบบ</h2>
@@ -44,31 +41,46 @@
 
       <!-- Form -->
       <form (ngSubmit)="onLogin()" class="login-form">
-
         <div class="field-group">
           <label for="username">อีเมล</label>
           <div class="input-wrapper">
             <i class="fa-solid fa-envelope"></i>
-            <input type="email" id="username" placeholder="email@organization.com" [(ngModel)]="username"
-              name="username" required autocomplete="email">
+            <input
+              type="email"
+              id="username"
+              placeholder="email@organization.com"
+              [(ngModel)]="username"
+              name="username"
+              required
+              autocomplete="email"
+            />
           </div>
         </div>
 
         <div class="field-group">
           <label for="password">
             รหัสผ่าน
-            <a href="javascript:void(0)" (click)="forgotPassword()" class="forgot-link">ลืมรหัสผ่าน?</a>
+            <a href="javascript:void(0)" (click)="forgotPassword()" class="forgot-link"
+              >ลืมรหัสผ่าน?</a
+            >
           </label>
           <div class="input-wrapper">
             <i class="fa-solid fa-lock"></i>
-            <input type="password" id="password" placeholder="••••••••" [(ngModel)]="password" name="password" required
-              autocomplete="current-password">
+            <input
+              type="password"
+              id="password"
+              placeholder="••••••••"
+              [(ngModel)]="password"
+              name="password"
+              required
+              autocomplete="current-password"
+            />
           </div>
         </div>
 
         <div class="form-options">
           <label class="remember-me">
-            <input type="checkbox">
+            <input type="checkbox" />
             <span>จดจำฉันไว้</span>
           </label>
         </div>
@@ -82,30 +94,32 @@
           <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
           {{ isLoading ? 'กำลังตรวจสอบ...' : 'เข้าสู่ระบบ' }}
         </button>
-
       </form>
 
       <div class="form-footer">
         <p>ยังไม่มีบัญชีองค์กร? <a routerLink="/register">ลงทะเบียนที่นี่</a></p>
         <p class="copyright">© 2026 GreenSync Technology. All rights reserved.</p>
       </div>
-
     </div>
   </div>
 
   <!-- Forgot Password Premium Modal -->
   <div *ngIf="showForgotModal" class="forgot-modal-overlay" (click)="closeForgotModal()">
     <div class="forgot-modal-card animate-in" (click)="$event.stopPropagation()">
-      
       <!-- Success State -->
       <div *ngIf="forgotSuccess" class="forgot-success-state">
         <div class="success-icon-wrap">
           <i class="fa-solid fa-paper-plane"></i>
         </div>
         <h3>ส่งลิงก์เรียบร้อยแล้ว!</h3>
-        <p>หากอีเมล <strong>{{ forgotEmail }}</strong> มีอยู่ในระบบ ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ</p>
+        <p>
+          หากอีเมล <strong>{{ forgotEmail }}</strong> มีอยู่ในระบบ
+          ลิงก์รีเซ็ตรหัสผ่านจะถูกส่งไปยังอีเมลของคุณ
+        </p>
         <p class="forgot-hint">กรุณาตรวจสอบกล่องจดหมายและโฟลเดอร์สแปมของคุณ</p>
-        <button type="button" class="btn-forgot-close" (click)="closeForgotModal()">กลับหน้าเข้าสู่ระบบ</button>
+        <button type="button" class="btn-forgot-close" (click)="closeForgotModal()">
+          กลับหน้าเข้าสู่ระบบ
+        </button>
       </div>
 
       <!-- Form State -->
@@ -121,25 +135,35 @@
         <div class="forgot-modal-body">
           <div class="input-wrapper">
             <i class="fa-solid fa-envelope"></i>
-            <input type="email" [(ngModel)]="forgotEmail" placeholder="email@organization.com" (keyup.enter)="submitForgotPassword()">
+            <input
+              type="email"
+              [(ngModel)]="forgotEmail"
+              placeholder="email@organization.com"
+              (keyup.enter)="submitForgotPassword()"
+            />
           </div>
 
-          <div *ngIf="forgotError" class="error-alert" style="margin-top: 12px;">
+          <div *ngIf="forgotError" class="error-alert" style="margin-top: 12px">
             <i class="fa-solid fa-circle-exclamation"></i>
             {{ forgotError }}
           </div>
         </div>
 
         <div class="forgot-modal-footer">
-          <button type="button" class="btn-forgot-cancel" (click)="closeForgotModal()">ยกเลิก</button>
-          <button type="button" class="btn-forgot-submit" (click)="submitForgotPassword()" [disabled]="forgotLoading">
+          <button type="button" class="btn-forgot-cancel" (click)="closeForgotModal()">
+            ยกเลิก
+          </button>
+          <button
+            type="button"
+            class="btn-forgot-submit"
+            (click)="submitForgotPassword()"
+            [disabled]="forgotLoading"
+          >
             <span *ngIf="forgotLoading" class="spinner-border spinner-border-sm me-2"></span>
             {{ forgotLoading ? 'กำลังส่ง...' : 'ส่งลิงก์รีเซ็ต' }}
           </button>
         </div>
       </div>
-
     </div>
   </div>
-
 </div>

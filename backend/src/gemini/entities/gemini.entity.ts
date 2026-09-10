@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
-@Entity('chat_log')
+@Entity('chat_logs')
 export class ChatLog {
   @PrimaryGeneratedColumn('increment', { name: 'chat_log_id' })
   id: number;
@@ -24,6 +24,17 @@ export class ChatLog {
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   intent: string;
+
+  @Column({ type: 'int', nullable: true, name: 'session_id' })
+  session_id: number | null;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    name: 'session_title',
+  })
+  session_title: string | null;
 
   @Column({ type: 'varchar', length: 100, nullable: true })
   related_module: string;

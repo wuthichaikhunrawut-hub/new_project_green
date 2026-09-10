@@ -3,12 +3,8 @@ import { CommonModule } from '@angular/common';
 
 import { AssessorAdminRoutingModule } from './assessor-admin-routing-module';
 
-
 @NgModule({
   declarations: [],
-  imports: [
-    CommonModule,
-    AssessorAdminRoutingModule
-  ]
+  imports: [CommonModule, AssessorAdminRoutingModule],
 })
-export class AssessorAdminModule { }
+export class AssessorAdminModule {}

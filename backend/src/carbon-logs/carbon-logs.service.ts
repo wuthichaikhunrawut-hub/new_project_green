@@ -11,6 +11,7 @@ import { CreateCarbonLogDto } from './dto/create-carbon-log.dto';
 import { UpdateCarbonLogDto } from './dto/update-carbon-log.dto';
 import { EmissionFactor } from './entities/emission-factor.entity';
 import { UserProfile } from '../users/entities/user-profile.entity';
+import { calculateEmission } from './utils/emission-calculator.util';
 
 @Injectable()
 export class CarbonLogsService {
@@ -36,7 +37,10 @@ export class CarbonLogsService {
           { where: { id: createDto.emission_factor_id } },
         )) as any;
         if (factor && factor.factor_value != null) {
-          log.total_emission = createDto.usage_amount * factor.factor_value;
+          log.total_emission = calculateEmission(
+            createDto.usage_amount,
+            factor.factor_value,
+          );
         }
       }
 
@@ -57,12 +61,22 @@ export class CarbonLogsService {
     }
   }
 
-  async findAll(orgId: number): Promise<CarbonLog[]> {
+  async findAll(
+    orgId: number,
+    page?: number,
+    limit?: number,
+  ): Promise<CarbonLog[]> {
     try {
+      const safeLimit = limit ? Math.min(Math.max(1, Number(limit)), 200) : 50;
+      const safePage = page ? Math.max(1, Number(page)) : 1;
+      const skip = (safePage - 1) * safeLimit;
+
       return await this.logRepository.find({
         where: { org_id: orgId },
         relations: ['emission_factor'],
         order: { year: 'DESC', month: 'DESC', created_at: 'DESC' },
+        skip,
+        take: safeLimit,
       });
     } catch {
       throw new InternalServerErrorException('ไม่สามารถโหลดข้อมูลคาร์บอนได้');
@@ -95,7 +109,7 @@ export class CarbonLogsService {
           { where: { id: efId } },
         )) as any;
         if (factor && factor.factor_value != null) {
-          log.total_emission = usage * factor.factor_value;
+          log.total_emission = calculateEmission(usage, factor.factor_value);
         }
       }
 

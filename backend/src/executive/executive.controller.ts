@@ -29,7 +29,7 @@ interface JwtUser {
 
 @Controller('executive')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('EXECUTIVE', 'SYSTEM_ADMIN', 'ORGANIZATION_ADMIN', 'ORG_ADMIN')
+@Roles('EXECUTIVE', 'SYSTEM_ADMIN', 'ORG_ADMIN')
 export class ExecutiveController {
   constructor(private readonly executiveService: ExecutiveService) {}
 
@@ -280,23 +280,6 @@ export class ExecutiveController {
       body.targetReductionPercent,
       body.year,
     );
-  }
-
-  @Get('custom-goals')
-  getCustomGoals(@Request() req: { user: JwtUser }) {
-    const orgId = Number(req.user.orgId ?? 0);
-    if (!orgId) throw new BadRequestException('Organization ID missing');
-    return this.executiveService.getCustomGoals(orgId);
-  }
-
-  @Post('custom-goals')
-  saveCustomGoals(
-    @Request() req: { user: JwtUser },
-    @Body() body: { goals: any[] },
-  ) {
-    const orgId = Number(req.user.orgId ?? 0);
-    if (!orgId) throw new BadRequestException('Organization ID missing');
-    return this.executiveService.saveCustomGoals(orgId, body.goals);
   }
 
   @Get('leaderboard')

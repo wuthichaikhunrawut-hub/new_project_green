@@ -11,11 +11,17 @@ import { ToastService } from '../../../../core/services/toast.service';
   standalone: true,
   imports: [CommonModule, ScoreSelectorComponent, EvidenceUploadComponent],
   template: `
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md">
+    <div
+      class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all hover:shadow-md"
+    >
       <!-- Card Header -->
-      <div class="px-5 py-4 border-b border-slate-100 flex items-start justify-between bg-slate-50/50">
+      <div
+        class="px-5 py-4 border-b border-slate-100 flex items-start justify-between bg-slate-50/50"
+      >
         <div class="flex gap-4">
-          <div class="shrink-0 w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center shadow-sm">
+          <div
+            class="shrink-0 w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center shadow-sm"
+          >
             <span class="text-sm font-black text-white">{{ questionId }}</span>
           </div>
           <div>
@@ -24,8 +30,10 @@ import { ToastService } from '../../../../core/services/toast.service';
           </div>
         </div>
         <div class="flex flex-col items-end gap-1.5">
-          <span class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
-                [class]="statusClass">
+          <span
+            class="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider"
+            [class]="statusClass"
+          >
             {{ statusLabel }}
           </span>
           <div class="text-sm font-bold text-slate-400">
@@ -38,7 +46,9 @@ import { ToastService } from '../../../../core/services/toast.service';
       <div class="p-5 flex flex-col gap-6">
         <!-- Implementation Status -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">สถานะการดำเนินการ</label>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+            >สถานะการดำเนินการ</label
+          >
           <div class="flex flex-wrap gap-2">
             <button
               *ngFor="let state of implementationStates"
@@ -59,11 +69,16 @@ import { ToastService } from '../../../../core/services/toast.service';
         </div>
 
         <!-- Score Selector -->
-        <app-score-selector [score]="score" (scoreChange)="onScoreChange($event)"></app-score-selector>
+        <app-score-selector
+          [score]="score"
+          (scoreChange)="onScoreChange($event)"
+        ></app-score-selector>
 
         <!-- Description Textarea -->
         <div class="flex flex-col gap-2">
-          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">คำอธิบาย / วิธีดำเนินการ</label>
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider"
+            >คำอธิบาย / วิธีดำเนินการ</label
+          >
           <textarea
             (input)="onDetailsChange($event)"
             [value]="details || ''"
@@ -80,25 +95,39 @@ import { ToastService } from '../../../../core/services/toast.service';
             (filesSelected)="onFilesSelected($event)"
             (filesCleared)="onFilesCleared()"
           ></app-evidence-upload>
-          
+
           <!-- Glassmorphic loading spinner overlay -->
-          <div *ngIf="isUploading" class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center gap-3 px-4 rounded-xl border border-slate-100 animate-in fade-in duration-200">
-            <div class="w-5 h-5 rounded-full border-2 border-green-200 border-t-green-600 animate-spin shrink-0"></div>
+          <div
+            *ngIf="isUploading"
+            class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center gap-3 px-4 rounded-xl border border-slate-100 animate-in fade-in duration-200"
+          >
+            <div
+              class="w-5 h-5 rounded-full border-2 border-green-200 border-t-green-600 animate-spin shrink-0"
+            ></div>
             <span class="text-xs font-bold text-slate-600">กำลังประมวลผลไฟล์หลักฐาน...</span>
           </div>
         </div>
       </div>
 
       <!-- Footer Info -->
-      <div *ngIf="score === 5 && fileCount === 0" class="px-5 py-3 bg-amber-50 border-t border-amber-100 flex items-center gap-2">
+      <div
+        *ngIf="score === 5 && fileCount === 0"
+        class="px-5 py-3 bg-amber-50 border-t border-amber-100 flex items-center gap-2"
+      >
         <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
-        <span class="text-xs font-semibold text-amber-700">คำเตือน: ต้องแนบหลักฐานอย่างน้อย 1 ไฟล์ สำหรับระดับคะแนนเต็ม (5)</span>
+        <span class="text-xs font-semibold text-amber-700"
+          >คำเตือน: ต้องแนบหลักฐานอย่างน้อย 1 ไฟล์ สำหรับระดับคะแนนเต็ม (5)</span
+        >
       </div>
     </div>
   `,
-  styles: [`
-    :host { display: block; }
-  `]
+  styles: [
+    `
+      :host {
+        display: block;
+      }
+    `,
+  ],
 })
 export class AssessmentCardComponent {
   private uploadService = inject(UploadService);
@@ -119,9 +148,24 @@ export class AssessmentCardComponent {
   isUploading = false;
 
   implementationStates = [
-    { value: 'none', label: 'ยังไม่มีการดำเนินการ', icon: 'fa-solid fa-circle-xmark', color: 'slate' },
-    { value: 'partial', label: 'ดำเนินการบางส่วน', icon: 'fa-solid fa-circle-half-stroke', color: 'amber' },
-    { value: 'complete', label: 'ดำเนินการครบถ้วน', icon: 'fa-solid fa-circle-check', color: 'green' }
+    {
+      value: 'none',
+      label: 'ยังไม่มีการดำเนินการ',
+      icon: 'fa-solid fa-circle-xmark',
+      color: 'slate',
+    },
+    {
+      value: 'partial',
+      label: 'ดำเนินการบางส่วน',
+      icon: 'fa-solid fa-circle-half-stroke',
+      color: 'amber',
+    },
+    {
+      value: 'complete',
+      label: 'ดำเนินการครบถ้วน',
+      icon: 'fa-solid fa-circle-check',
+      color: 'green',
+    },
   ];
 
   get statusLabel(): string {
@@ -173,20 +217,22 @@ export class AssessmentCardComponent {
     }
 
     const file = files[index];
-    this.uploadService.uploadFile(file, 'evidence', { 
-      assessmentDetailId: this.detailId!,
-      userId 
-    }).subscribe({
-      next: () => {
-        this.fileCount++;
-        this.uploadSequential(files, index + 1, userId);
-      },
-      error: (err) => {
-        console.error('❌ Upload error in card:', err);
-        this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
-        this.isUploading = false;
-      }
-    });
+    this.uploadService
+      .uploadFile(file, 'evidence', {
+        assessmentDetailId: this.detailId!,
+        userId,
+      })
+      .subscribe({
+        next: () => {
+          this.fileCount++;
+          this.uploadSequential(files, index + 1, userId);
+        },
+        error: (err) => {
+          console.error('❌ Upload error in card:', err);
+          this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
+          this.isUploading = false;
+        },
+      });
   }
 
   onFilesCleared() {
@@ -196,9 +242,9 @@ export class AssessmentCardComponent {
       this.isUploading = true;
       this.uploadService.getFiles().subscribe({
         next: (allFiles) => {
-          const filesToDelete = allFiles.filter(f => 
-            f.assessment_detail_id === this.detailId || 
-            f.assessmentDetailId === this.detailId
+          const filesToDelete = allFiles.filter(
+            (f) =>
+              f.assessment_detail_id === this.detailId || f.assessmentDetailId === this.detailId,
           );
 
           if (filesToDelete.length === 0) {
@@ -215,7 +261,7 @@ export class AssessmentCardComponent {
           console.error('❌ Failed to fetch files for deletion', err);
           this.isUploading = false;
           this.toast.error('ไม่สามารถดึงข้อมูลไฟล์หลักฐานเพื่อลบได้');
-        }
+        },
       });
     }
   }
@@ -237,7 +283,7 @@ export class AssessmentCardComponent {
         error: (err) => {
           console.error('❌ Failed to delete file:', fileId, err);
           this.deleteSequential(files, index + 1); // skip error and continue
-        }
+        },
       });
     } else {
       this.deleteSequential(files, index + 1);
@@ -250,7 +296,7 @@ export class AssessmentCardComponent {
       score: this.score,
       details: this.details,
       fileCount: this.fileCount,
-      status: this.statusLabel
+      status: this.statusLabel,
     });
   }
 }

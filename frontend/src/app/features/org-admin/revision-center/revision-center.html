@@ -3,14 +3,17 @@
     <div class="page-header-left">
       <h1 class="page-title">ศูนย์กลางการแก้ไขข้อมูล</h1>
       <p class="page-subtitle">
-        จัดการรายการที่ผู้ตรวจประเมินส่งกลับให้แก้ไข (รอการแก้ไข) และสามารถแก้ไขข้อมูลคาร์บอนก่อนส่งกลับไปตรวจซ้ำ
+        จัดการรายการที่ผู้ตรวจประเมินส่งกลับให้แก้ไข (รอการแก้ไข)
+        และสามารถแก้ไขข้อมูลคาร์บอนก่อนส่งกลับไปตรวจซ้ำ
       </p>
     </div>
   </header>
 
   @if (isLoading) {
     <div class="flex justify-center py-16">
-      <div class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"></div>
+      <div
+        class="h-10 w-10 rounded-full border-2 border-emerald-500 border-t-transparent animate-spin"
+      ></div>
     </div>
   } @else {
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -29,10 +32,10 @@
                 class="w-full text-left px-5 py-4 hover:bg-slate-50 transition-colors"
                 [class.bg-emerald-50]="activeRevision?.id === item.id"
               >
-                <p class="font-medium text-slate-900">คำขอ #{{ item.id }} · ปี {{ item.assessment_year }}</p>
-                <p class="text-sm text-slate-600 mt-1">
-                  เหตุผลจากผู้ตรวจ: {{ item.notes || '-' }}
+                <p class="font-medium text-slate-900">
+                  คำขอ #{{ item.id }} · ปี {{ item.assessment_year }}
                 </p>
+                <p class="text-sm text-slate-600 mt-1">เหตุผลจากผู้ตรวจ: {{ item.notes || '-' }}</p>
               </button>
             }
           </div>
@@ -43,13 +46,19 @@
         <h2 class="font-semibold text-slate-900">ขั้นตอนการดำเนินการ</h2>
         @if (activeRevision) {
           <div class="mb-4">
-            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ข้อความจากผู้ตรวจประเมิน</h3>
-            <div class="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm border border-amber-100 whitespace-pre-line">
+            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              ข้อความจากผู้ตรวจประเมิน
+            </h3>
+            <div
+              class="bg-amber-50 text-amber-800 p-3 rounded-lg text-sm border border-amber-100 whitespace-pre-line"
+            >
               {{ activeRevision.notes || '-' }}
             </div>
           </div>
           <div>
-            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ระบุหมายเหตุใหม่ (สำหรับผู้รับสาร)</h3>
+            <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+              ระบุหมายเหตุใหม่ (สำหรับผู้รับสาร)
+            </h3>
             <textarea
               [(ngModel)]="actionNote"
               placeholder="พิมพ์ข้อความที่ต้องการแจ้งให้พนักงานหรือผู้ตรวจ..."
@@ -115,7 +124,7 @@
                     {{ log.usage_amount }}
                   }
                 </td>
-                <td class="px-4 py-3 text-slate-600">{{ log.total_emission | number:'1.1-2' }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ log.total_emission | number: '1.1-2' }}</td>
                 <td class="px-4 py-3">
                   @if (editingLogId === log.id) {
                     <div class="flex gap-2">
@@ -123,19 +132,25 @@
                         type="button"
                         (click)="saveCarbon(log)"
                         class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold"
-                      >บันทึก</button>
+                      >
+                        บันทึก
+                      </button>
                       <button
                         type="button"
                         (click)="cancelEditCarbon()"
                         class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold"
-                      >ยกเลิก</button>
+                      >
+                        ยกเลิก
+                      </button>
                     </div>
                   } @else {
                     <button
                       type="button"
                       (click)="startEditCarbon(log)"
                       class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold hover:bg-slate-50"
-                    >แก้ไข</button>
+                    >
+                      แก้ไข
+                    </button>
                   }
                 </td>
               </tr>

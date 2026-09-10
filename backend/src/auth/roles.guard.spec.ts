@@ -6,8 +6,6 @@ import { ExecutionContext } from '@nestjs/common';
 
 describe('RolesGuard', () => {
   let guard: RolesGuard;
-  let reflector: Reflector;
-  let settingsService: SettingsService;
 
   const mockReflector = {
     getAllAndOverride: jest.fn(),
@@ -28,8 +26,6 @@ describe('RolesGuard', () => {
     }).compile();
 
     guard = module.get<RolesGuard>(RolesGuard);
-    reflector = module.get<Reflector>(Reflector);
-    settingsService = module.get<SettingsService>(SettingsService);
   });
 
   afterEach(() => {

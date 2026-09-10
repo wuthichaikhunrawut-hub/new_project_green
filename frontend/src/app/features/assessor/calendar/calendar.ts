@@ -47,21 +47,21 @@ export class Calendar implements OnInit {
         this.events = [];
         this.generateCalendar();
         this.isLoading = false;
-      }
+      },
     });
   }
 
   generateCalendar() {
     const startOfMonth = new Date(this.currentYear, this.currentMonth, 1);
     const endOfMonth = new Date(this.currentYear, this.currentMonth + 1, 0);
-    
+
     // Day of the week of first day of month (0 = Sunday, 1 = Monday, etc.)
     // We want Mon = 0, Tue = 1, ..., Sun = 6 (since grid header is Mon to Sun)
-    let startDayOfWeek = startOfMonth.getDay(); 
+    let startDayOfWeek = startOfMonth.getDay();
     startDayOfWeek = startDayOfWeek === 0 ? 6 : startDayOfWeek - 1;
-    
+
     const days: CalendarDay[] = [];
-    
+
     // Previous month's overflow days
     const prevMonthEnd = new Date(this.currentYear, this.currentMonth, 0);
     const prevMonthDaysCount = prevMonthEnd.getDate();
@@ -71,10 +71,10 @@ export class Calendar implements OnInit {
         date: d,
         isCurrentMonth: false,
         isToday: this.isSameDay(d, new Date()),
-        events: this.getEventsForDate(d)
+        events: this.getEventsForDate(d),
       });
     }
-    
+
     // Current month's days
     const daysInMonth = endOfMonth.getDate();
     for (let i = 1; i <= daysInMonth; i++) {
@@ -83,10 +83,10 @@ export class Calendar implements OnInit {
         date: d,
         isCurrentMonth: true,
         isToday: this.isSameDay(d, new Date()),
-        events: this.getEventsForDate(d)
+        events: this.getEventsForDate(d),
       });
     }
-    
+
     // Next month's overflow days to fill grid of 35 or 42
     const totalSlots = days.length > 35 ? 42 : 35;
     const nextMonthDaysCount = totalSlots - days.length;
@@ -96,17 +96,17 @@ export class Calendar implements OnInit {
         date: d,
         isCurrentMonth: false,
         isToday: this.isSameDay(d, new Date()),
-        events: this.getEventsForDate(d)
+        events: this.getEventsForDate(d),
       });
     }
-    
+
     this.calendarDays = days;
     const dateObj = new Date(this.currentYear, this.currentMonth, 1);
     this.currentMonthName = dateObj.toLocaleString('th-TH', { month: 'long' });
   }
 
   getEventsForDate(d: Date): any[] {
-    return this.events.filter(e => {
+    return this.events.filter((e) => {
       if (!e.date) return false;
       const eventDate = new Date(e.date);
       return this.isSameDay(eventDate, d);
@@ -114,9 +114,11 @@ export class Calendar implements OnInit {
   }
 
   isSameDay(d1: Date, d2: Date): boolean {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
+    return (
+      d1.getFullYear() === d2.getFullYear() &&
+      d1.getMonth() === d2.getMonth() &&
+      d1.getDate() === d2.getDate()
+    );
   }
 
   prevMonth() {
@@ -150,10 +152,10 @@ export class Calendar implements OnInit {
         'text-slate-700': true,
         'hover:bg-slate-200': true,
         'border-l-4': true,
-        'border-slate-400': true
+        'border-slate-400': true,
       };
     }
-    
+
     switch (String(ev.status).toUpperCase()) {
       case 'PENDING':
       case 'SUBMITTED':
@@ -162,7 +164,7 @@ export class Calendar implements OnInit {
           'text-blue-700': true,
           'hover:bg-blue-100': true,
           'border-l-4': true,
-          'border-blue-500': true
+          'border-blue-500': true,
         };
       case 'IN_REVIEW':
         return {
@@ -170,7 +172,7 @@ export class Calendar implements OnInit {
           'text-amber-700': true,
           'hover:bg-amber-100': true,
           'border-l-4': true,
-          'border-amber-500': true
+          'border-amber-500': true,
         };
       case 'REVISION_REQUESTED':
         return {
@@ -178,7 +180,7 @@ export class Calendar implements OnInit {
           'text-rose-700': true,
           'hover:bg-rose-100': true,
           'border-l-4': true,
-          'border-rose-500': true
+          'border-rose-500': true,
         };
       case 'APPROVED':
         return {
@@ -186,7 +188,7 @@ export class Calendar implements OnInit {
           'text-emerald-700': true,
           'hover:bg-emerald-100': true,
           'border-l-4': true,
-          'border-emerald-500': true
+          'border-emerald-500': true,
         };
       default:
         return {
@@ -194,7 +196,7 @@ export class Calendar implements OnInit {
           'text-gray-700': true,
           'hover:bg-gray-100': true,
           'border-l-4': true,
-          'border-gray-500': true
+          'border-gray-500': true,
         };
     }
   }

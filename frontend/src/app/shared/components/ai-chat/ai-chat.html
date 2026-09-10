@@ -5,8 +5,12 @@
 </button>
 
 <!-- Chat Panel -->
-<div class="chat-panel" [class.open]="isOpen" [style.width.px]="chatWidth" [style.height.px]="chatHeight">
-  
+<div
+  class="chat-panel"
+  [class.open]="isOpen"
+  [style.width.px]="chatWidth"
+  [style.height.px]="chatHeight"
+>
   <!-- Resize Handles -->
   <div class="resize-handle resize-top" (mousedown)="onResizeStart($event, 'top')"></div>
   <div class="resize-handle resize-left" (mousedown)="onResizeStart($event, 'left')"></div>
@@ -19,7 +23,11 @@
         <i class="fa-solid fa-bars"></i>
       </button>
       <div class="chat-avatar bg-white p-[2px]">
-        <img src="/assets/images/greenbot.png" alt="GreenBot" class="w-100 h-100 rounded-circle object-fit-cover">
+        <img
+          src="/assets/images/greenbot.png"
+          alt="GreenBot"
+          class="w-100 h-100 rounded-circle object-fit-cover"
+        />
       </div>
       <div>
         <p class="chat-title">GreenBot</p>
@@ -35,7 +43,10 @@
   <div class="chat-history-drawer" [class.open]="showHistory">
     <div class="drawer-header">
       <span class="font-bold text-sm text-slate-800">ประวัติการสนทนา</span>
-      <button (click)="toggleHistory()" class="text-slate-400 hover:text-slate-600 transition-colors">
+      <button
+        (click)="toggleHistory()"
+        class="text-slate-400 hover:text-slate-600 transition-colors"
+      >
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
@@ -43,15 +54,21 @@
       <div *ngIf="sessions.length === 0" class="text-center text-slate-400 text-xs py-4">
         ไม่มีประวัติการสนทนา
       </div>
-      <div *ngFor="let s of sessions" 
-           class="history-item d-flex align-items-center justify-content-between" 
-           [class.active]="s.id === activeSessionId"
-           (click)="selectSession(s)">
+      <div
+        *ngFor="let s of sessions"
+        class="history-item d-flex align-items-center justify-content-between"
+        [class.active]="s.id === activeSessionId"
+        (click)="selectSession(s)"
+      >
         <div class="d-flex align-items-center text-truncate pr-2">
           <i class="fa-regular fa-message mr-2 flex-shrink-0"></i>
           <span class="text-truncate">{{ s.title }}</span>
         </div>
-        <button class="btn-delete-session-item ml-2" (click)="openDeleteSessionModal(s, $event)" title="ลบการสนทนานี้">
+        <button
+          class="btn-delete-session-item ml-2"
+          (click)="openDeleteSessionModal(s, $event)"
+          title="ลบการสนทนานี้"
+        >
           <i class="fa-regular fa-trash-can"></i>
         </button>
       </div>
@@ -86,14 +103,22 @@
       placeholder="ถามเกี่ยวกับ Green Office หรือ Carbon..."
       [disabled]="isLoading"
     ></textarea>
-    <button class="chat-send-btn" (click)="sendMessage()" [disabled]="isLoading || !inputMessage.trim()">
+    <button
+      class="chat-send-btn"
+      (click)="sendMessage()"
+      [disabled]="isLoading || !inputMessage.trim()"
+    >
       <i class="fa-solid fa-paper-plane"></i>
     </button>
   </div>
 </div>
 
 <!-- Custom Centered Modal Overlay -->
-<div class="custom-modal-backdrop" *ngIf="showDeleteConfirmModal || showDeleteAllConfirmModal" (click)="cancelDelete()">
+<div
+  class="custom-modal-backdrop"
+  *ngIf="showDeleteConfirmModal || showDeleteAllConfirmModal"
+  (click)="cancelDelete()"
+>
   <div class="custom-modal-content" (click)="$event.stopPropagation()">
     <div class="custom-modal-header text-center">
       <div class="modal-alert-icon mb-3">
@@ -102,12 +127,26 @@
       <h5 class="fw-black text-slate-800 mb-1 fs-5">ยืนยันการลบประวัติ</h5>
     </div>
     <div class="custom-modal-body text-center text-slate-500 text-xs my-3 leading-relaxed">
-      <span *ngIf="showDeleteConfirmModal">คุณต้องการลบการสนทนานี้ใช่หรือไม่?<br>การลบจะไม่สามารถกู้คืนข้อมูลได้</span>
-      <span *ngIf="showDeleteAllConfirmModal">คุณต้องการลบประวัติการสนทนาทั้งหมดใช่หรือไม่?<br>การลบจะไม่สามารถกู้คืนข้อมูลได้</span>
+      <span *ngIf="showDeleteConfirmModal"
+        >คุณต้องการลบการสนทนานี้ใช่หรือไม่?<br />การลบจะไม่สามารถกู้คืนข้อมูลได้</span
+      >
+      <span *ngIf="showDeleteAllConfirmModal"
+        >คุณต้องการลบประวัติการสนทนาทั้งหมดใช่หรือไม่?<br />การลบจะไม่สามารถกู้คืนข้อมูลได้</span
+      >
     </div>
     <div class="custom-modal-footer d-flex gap-2 justify-content-center mt-4">
-      <button class="btn btn-light rounded-pill px-4 py-2 text-xs fw-bold border" (click)="cancelDelete()">ยกเลิก</button>
-      <button class="btn btn-danger rounded-pill px-4 py-2 text-xs text-white fw-bold shadow-sm" (click)="confirmDelete()">ยืนยันการลบ</button>
+      <button
+        class="btn btn-light rounded-pill px-4 py-2 text-xs fw-bold border"
+        (click)="cancelDelete()"
+      >
+        ยกเลิก
+      </button>
+      <button
+        class="btn btn-danger rounded-pill px-4 py-2 text-xs text-white fw-bold shadow-sm"
+        (click)="confirmDelete()"
+      >
+        ยืนยันการลบ
+      </button>
     </div>
   </div>
 </div>

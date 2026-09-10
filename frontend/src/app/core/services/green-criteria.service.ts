@@ -14,7 +14,7 @@ export interface GreenCriteria {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class GreenCriteriaService {
   private http = inject(HttpClient);
@@ -22,7 +22,7 @@ export class GreenCriteriaService {
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     });
   }
 
@@ -35,7 +35,9 @@ export class GreenCriteriaService {
   }
 
   updateCriteria(id: number, data: Partial<GreenCriteria>): Observable<GreenCriteria> {
-    return this.http.put<GreenCriteria>(`${this.apiUrl}/${id}`, data, { headers: this.getHeaders() });
+    return this.http.put<GreenCriteria>(`${this.apiUrl}/${id}`, data, {
+      headers: this.getHeaders(),
+    });
   }
 
   deleteCriteria(id: number): Observable<void> {

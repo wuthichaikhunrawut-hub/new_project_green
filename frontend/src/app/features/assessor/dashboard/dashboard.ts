@@ -9,6 +9,30 @@ import {
 } from '../../../core/models/assessor.model';
 import { ToastService } from '../../../shared/services/toast.service';
 
+const STATUS_LABELS: Readonly<Record<string, string>> = {
+  PENDING: 'รอตรวจ',
+  SUBMITTED: 'ส่งแล้ว',
+  IN_REVIEW: 'กำลังตรวจ',
+  REVISION_REQUESTED: 'รอแก้ไข',
+  APPROVED: 'อนุมัติ',
+  REJECTED: 'ปฏิเสธ',
+};
+
+const STATUS_CLASSES: Readonly<Record<string, string>> = {
+  PENDING: 'badge-pending',
+  SUBMITTED: 'badge-submitted',
+  IN_REVIEW: 'badge-review',
+  REVISION_REQUESTED: 'badge-revision',
+  APPROVED: 'badge-approved',
+  REJECTED: 'badge-rejected',
+};
+
+const SCOPE_COLORS: Readonly<Record<number, string>> = {
+  1: '#0ea5e9',
+  2: '#059669',
+  3: '#8b5cf6',
+};
+
 @Component({
   selector: 'app-assessor-dashboard',
   standalone: true,
@@ -24,12 +48,63 @@ export class AssessorDashboardComponent implements OnInit {
 
   isLoading = true;
   stats: AssessorDashboardStats = {
-    pending: 0, inReview: 0, revisionRequested: 0,
-    completed: 0, nearDeadline: 0, avgScorePercent: 0,
+    pending: 0,
+    inReview: 0,
+    revisionRequested: 0,
+    completed: 0,
+    nearDeadline: 0,
+    avgScorePercent: 0,
   };
   assignments: AssessorAssignmentItem[] = [];
+  readonly statCards: ReadonlyArray<{
+    key: 'pending' | 'inReview' | 'revisionRequested' | 'nearDeadline';
+    tone: string;
+    icon: string;
+    label: string;
+    trendIcon: string;
+    trendText: string;
+    hideTrendWhenEmpty?: boolean;
+    deadline?: boolean;
+  }> = [
+    {
+      key: 'pending',
+      tone: 'stat-amber',
+      icon: 'fa-clock',
+      label: 'รอตรวจประเมิน',
+      trendIcon: 'fa-arrow-up',
+      trendText: 'ต้องดำเนินการ',
+      hideTrendWhenEmpty: true,
+    },
+    {
+      key: 'inReview',
+      tone: 'stat-blue',
+      icon: 'fa-magnifying-glass',
+      label: 'กำลังตรวจสอบ',
+      trendIcon: 'fa-circle-dot',
+      trendText: 'In Progress',
+    },
+    {
+      key: 'revisionRequested',
+      tone: 'stat-violet',
+      icon: 'fa-rotate-left',
+      label: 'ส่งกลับแก้ไข',
+      trendIcon: 'fa-pen',
+      trendText: 'รอองค์กรแก้ไข',
+    },
+    {
+      key: 'nearDeadline',
+      tone: 'stat-red',
+      icon: 'fa-triangle-exclamation',
+      label: 'ใกล้ครบกำหนด',
+      trendIcon: 'fa-fire',
+      trendText: 'ต้องรีบดำเนินการ!',
+      deadline: true,
+    },
+  ];
 
-  get currentUser() { return this.authService.getUser(); }
+  get currentUser() {
+    return this.authService.getUser();
+  }
   get greeting(): string {
     const h = new Date().getHours();
     if (h < 12) return 'อรุณสวัสดิ์';
@@ -38,17 +113,20 @@ export class AssessorDashboardComponent implements OnInit {
   }
 
   get nearDeadlineItems(): AssessorAssignmentItem[] {
-    return this.assignments.filter(a => this.getDaysWaiting(a) >= 10 &&
-      !['APPROVED', 'REJECTED'].includes(a.status));
+    return this.assignments.filter(
+      (a) => this.getDaysWaiting(a) >= 10 && !['APPROVED', 'REJECTED'].includes(a.status),
+    );
   }
 
   get activeItems(): AssessorAssignmentItem[] {
-    return this.assignments.filter(a =>
-      !['APPROVED', 'REJECTED'].includes(a.status) && this.getDaysWaiting(a) < 10
-    ).slice(0, 5);
+    return this.assignments
+      .filter((a) => !['APPROVED', 'REJECTED'].includes(a.status) && this.getDaysWaiting(a) < 10)
+      .slice(0, 5);
   }
 
-  ngOnInit(): void { this.loadDashboard(); }
+  ngOnInit(): void {
+    this.loadDashboard();
+  }
 
   loadDashboard(): void {
     this.isLoading = true;
@@ -68,20 +146,11 @@ export class AssessorDashboardComponent implements OnInit {
   }
 
   statusLabel(status: string): string {
-    const map: Record<string, string> = {
-      PENDING: 'รอตรวจ', SUBMITTED: 'ส่งแล้ว', IN_REVIEW: 'กำลังตรวจ',
-      REVISION_REQUESTED: 'รอแก้ไข', APPROVED: 'อนุมัติ', REJECTED: 'ปฏิเสธ',
-    };
-    return map[status] ?? status;
+    return STATUS_LABELS[status] ?? status;
   }
 
   statusClass(status: string): string {
-    const map: Record<string, string> = {
-      PENDING: 'badge-pending', SUBMITTED: 'badge-submitted',
-      IN_REVIEW: 'badge-review', REVISION_REQUESTED: 'badge-revision',
-      APPROVED: 'badge-approved', REJECTED: 'badge-rejected',
-    };
-    return map[status] ?? 'badge-pending';
+    return STATUS_CLASSES[status] ?? STATUS_CLASSES['PENDING'];
   }
 
   getDaysWaiting(item: AssessorAssignmentItem): number {
@@ -91,7 +160,7 @@ export class AssessorDashboardComponent implements OnInit {
   }
 
   getScopeColor(scope: number): string {
-    return ['', '#0ea5e9', '#059669', '#8b5cf6'][scope] ?? '#6b7280';
+    return SCOPE_COLORS[scope] ?? '#6b7280';
   }
 
   scopeBarWidth(value: number, total: number): string {

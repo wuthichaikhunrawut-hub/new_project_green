@@ -25,7 +25,7 @@ interface JwtUser {
 
 @Controller('org-admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ORGANIZATION_ADMIN', 'ORG_ADMIN', 'SYSTEM_ADMIN')
+@Roles('ORG_ADMIN', 'SYSTEM_ADMIN')
 export class OrgAdminController {
   constructor(private readonly orgAdminService: OrgAdminService) {}
 

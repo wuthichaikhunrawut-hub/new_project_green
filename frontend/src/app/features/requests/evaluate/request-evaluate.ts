@@ -1,5 +1,12 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  inject,
+  ChangeDetectorRef,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -37,7 +44,7 @@ interface CategoryGroup {
   standalone: true,
   imports: [CommonModule, FormsModule, ThaiDatePipe],
   templateUrl: './request-evaluate.html',
-  styleUrl: './request-evaluate.css'
+  styleUrl: './request-evaluate.css',
 })
 export class RequestEvaluateComponent implements OnInit, OnDestroy {
   private toast = inject(ToastService);
@@ -149,13 +156,14 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
       error: () => {
         this.toast.success('ไม่พบข้อมูลคำร้องนี้');
         this.goBack();
-      }
+      },
     });
   }
 
   loadCarbonSummary(orgId: number) {
     this.carbonLoading = true;
-    this.http.get<CarbonSummary>(`${environment.apiUrl}/assessor/organizations/${orgId}/carbon-summary`)
+    this.http
+      .get<CarbonSummary>(`${environment.apiUrl}/assessor/organizations/${orgId}/carbon-summary`)
       .subscribe({
         next: (data) => {
           this.carbonSummary = data;
@@ -165,7 +173,7 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
         error: () => {
           this.carbonSummary = null;
           this.carbonLoading = false;
-        }
+        },
       });
   }
 
@@ -181,13 +189,15 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
           categoryName: this.CATEGORY_NAMES[cat] ?? `หมวด ${cat}`,
           details: [],
           maxScore: 0,
-          assessorScore: 0
+          assessorScore: 0,
         });
       }
       map.get(cat)!.details.push(detail);
     });
 
-    this.categoryGroups = Array.from(map.values()).sort((a, b) => a.categoryNumber - b.categoryNumber);
+    this.categoryGroups = Array.from(map.values()).sort(
+      (a, b) => a.categoryNumber - b.categoryNumber,
+    );
     if (this.categoryGroups.length > 0) this.activeTab = 0;
   }
 
@@ -206,39 +216,62 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
   }
 
   calculateTotalAssessorScore(): number {
-    return this.request?.details?.reduce((s: number, d: any) => s + (Number(d.assessor_score) || 0), 0) ?? 0;
+    return (
+      this.request?.details?.reduce(
+        (s: number, d: any) => s + (Number(d.assessor_score) || 0),
+        0,
+      ) ?? 0
+    );
   }
 
   calculateTotalMaxScore(): number {
-    return this.request?.details?.reduce((s: number, d: any) => s + (Number(d.criteria?.max_score) || 5), 0) ?? 0;
+    return (
+      this.request?.details?.reduce(
+        (s: number, d: any) => s + (Number(d.criteria?.max_score) || 5),
+        0,
+      ) ?? 0
+    );
   }
 
   getCertificationLevel(): { level: string; percent: number; color: string; bg: string } {
     const total = this.calculateTotalAssessorScore();
     const max = this.calculateTotalMaxScore();
-    if (max === 0) return { level: 'ยังไม่มีข้อมูล', percent: 0, color: 'text-muted', bg: '#6b7280' };
+    if (max === 0)
+      return { level: 'ยังไม่มีข้อมูล', percent: 0, color: 'text-muted', bg: '#6b7280' };
     const percent = Math.round((total / max) * 100);
     /*
     if (percent >= 95) return { level: '🏆 แพลทินัม (Platinum)', percent, color: 'text-info', bg: '#a855f7' };
     */
-    if (percent >= 90) return { level: '🥇 ทอง (Gold)', percent, color: 'text-warning', bg: '#f59e0b' };
-    if (percent >= 80) return { level: '🥈 เงิน (Silver)', percent, color: 'text-secondary', bg: '#6b7280' };
-    if (percent >= 60) return { level: '🥉 ทองแดง (Bronze)', percent, color: 'text-danger', bg: '#b45309' };
+    if (percent >= 90)
+      return { level: '🥇 ทอง (Gold)', percent, color: 'text-warning', bg: '#f59e0b' };
+    if (percent >= 80)
+      return { level: '🥈 เงิน (Silver)', percent, color: 'text-secondary', bg: '#6b7280' };
+    if (percent >= 60)
+      return { level: '🥉 ทองแดง (Bronze)', percent, color: 'text-danger', bg: '#b45309' };
     return { level: '❌ ไม่ผ่านเกณฑ์', percent, color: 'text-dark', bg: '#ef4444' };
   }
 
   getStatusLabel(status: string): string {
     const map: Record<string, string> = {
-      PENDING: 'รอตรวจ', SUBMITTED: 'ส่งแล้ว', IN_REVIEW: 'กำลังตรวจ',
-      REVISION_REQUESTED: 'ขอแก้ไข', APPROVED: 'อนุมัติแล้ว', REJECTED: 'ปฏิเสธ', DRAFT: 'ร่าง'
+      PENDING: 'รอตรวจ',
+      SUBMITTED: 'ส่งแล้ว',
+      IN_REVIEW: 'กำลังตรวจ',
+      REVISION_REQUESTED: 'ขอแก้ไข',
+      APPROVED: 'อนุมัติแล้ว',
+      REJECTED: 'ปฏิเสธ',
+      DRAFT: 'ร่าง',
     };
     return map[status] ?? status;
   }
 
   getStatusClass(status: string): string {
     const map: Record<string, string> = {
-      PENDING: 'status-pending', SUBMITTED: 'status-submitted', IN_REVIEW: 'status-in-review',
-      REVISION_REQUESTED: 'status-revision', APPROVED: 'status-approved', REJECTED: 'status-rejected'
+      PENDING: 'status-pending',
+      SUBMITTED: 'status-submitted',
+      IN_REVIEW: 'status-in-review',
+      REVISION_REQUESTED: 'status-revision',
+      APPROVED: 'status-approved',
+      REJECTED: 'status-rejected',
     };
     return map[status] ?? 'status-pending';
   }
@@ -259,23 +292,41 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
   isPass(item: any): boolean {
     if (item.assessor_score === null || item.assessor_score === undefined) return false;
     const max = Number(item.criteria?.max_score) || 5;
-    return Number(item.assessor_score) >= (max / 2);
+    return Number(item.assessor_score) >= max / 2;
   }
 
   isFailing(item: any): boolean {
     if (item.assessor_score === null || item.assessor_score === undefined) return false;
     const max = Number(item.criteria?.max_score) || 5;
-    return Number(item.assessor_score) < (max / 2);
+    return Number(item.assessor_score) < max / 2;
   }
-  getScore(item: any): number { return Number(item.assessor_score) || 0; }
-  getComment(item: any): string { return item.auditor_comment ?? ''; }
-  setComment(item: any, val: string) { item.auditor_comment = val; }
-  setScore(item: any, event: Event) { item.assessor_score = Number((event.target as HTMLInputElement).value); }
-  getSelfScore(item: any): number { return Number(item.self_score) || 0; }
-  getApplicantComment(item: any): string { return item.applicant_comment ?? ''; }
-  getEvidenceFiles(item: any): any[] { return item.evidence_files ?? []; }
-  getFileName(f: any): string { return f.name ?? f.file_name ?? 'ไฟล์แนบ'; }
-  getFileUrl(f: any): string { return f.url ?? f.file_url ?? '#'; }
+  getScore(item: any): number {
+    return Number(item.assessor_score) || 0;
+  }
+  getComment(item: any): string {
+    return item.auditor_comment ?? '';
+  }
+  setComment(item: any, val: string) {
+    item.auditor_comment = val;
+  }
+  setScore(item: any, event: Event) {
+    item.assessor_score = Number((event.target as HTMLInputElement).value);
+  }
+  getSelfScore(item: any): number {
+    return Number(item.self_score) || 0;
+  }
+  getApplicantComment(item: any): string {
+    return item.applicant_comment ?? '';
+  }
+  getEvidenceFiles(item: any): any[] {
+    return item.evidence_files ?? [];
+  }
+  getFileName(f: any): string {
+    return f.name ?? f.file_name ?? 'ไฟล์แนบ';
+  }
+  getFileUrl(f: any): string {
+    return f.url ?? f.file_url ?? '#';
+  }
 
   openConfirm(action: 'APPROVED' | 'REVISION_REQUESTED' | 'REJECTED') {
     this.confirmAction = action;
@@ -324,16 +375,21 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
       details: (this.request.details ?? []).map((d: any) => ({
         assessment_detail_id: d.id,
         assessor_score: d.assessor_score ?? 0,
-        auditor_comment: d.auditor_comment
-      })) as any[]
+        auditor_comment: d.auditor_comment,
+      })) as any[],
     };
 
     this.requestsService.updateRequest(this.request.id, payload).subscribe({
       next: () => {
         this.isSaving = false;
         if (newStatus) {
-          this.toast.success(newStatus === 'APPROVED' ? '✅ อนุมัติคำขอเรียบร้อยแล้ว' :
-            newStatus === 'REVISION_REQUESTED' ? '🔄 ส่งกลับให้องค์กรแก้ไขแล้ว' : '❌ ปฏิเสธคำขอเรียบร้อยแล้ว');
+          this.toast.success(
+            newStatus === 'APPROVED'
+              ? '✅ อนุมัติคำขอเรียบร้อยแล้ว'
+              : newStatus === 'REVISION_REQUESTED'
+                ? '🔄 ส่งกลับให้องค์กรแก้ไขแล้ว'
+                : '❌ ปฏิเสธคำขอเรียบร้อยแล้ว',
+          );
           this.goBack();
         }
         this.cdr.markForCheck();
@@ -341,7 +397,7 @@ export class RequestEvaluateComponent implements OnInit, OnDestroy {
       error: () => {
         this.toast.error('เกิดข้อผิดพลาดในการบันทึก');
         this.isSaving = false;
-      }
+      },
     });
   }
 

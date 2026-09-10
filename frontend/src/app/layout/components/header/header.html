@@ -11,7 +11,10 @@
             <ng-container *ngIf="roleKey === 'ASSESSOR'">Assessor Portal</ng-container>
             <ng-container *ngIf="roleKey === 'ORG_ADMIN'">Organization Admin Portal</ng-container>
             <ng-container *ngIf="roleKey === 'EXECUTIVE'">Executive Portal</ng-container>
-            <ng-container *ngIf="!['SYSTEM_ADMIN', 'ASSESSOR', 'ORG_ADMIN', 'EXECUTIVE'].includes(roleKey)">Applicant Portal</ng-container>
+            <ng-container
+              *ngIf="!['SYSTEM_ADMIN', 'ASSESSOR', 'ORG_ADMIN', 'EXECUTIVE'].includes(roleKey)"
+              >Applicant Portal</ng-container
+            >
           </span>
         </li>
       </ol>
@@ -20,17 +23,23 @@
 
   <div class="top-actions d-flex align-items-center gap-3">
     <div class="quota-info d-none d-lg-block">
-      <span class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-medium text-muted"
-            title="โควต้าการใช้เครื่องมือ AI วิเคราะห์ข้อมูล (ใช้ไป 12 จาก 50 ครั้ง) รีเซ็ตทุกเดือน">
+      <span
+        class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-medium text-muted"
+        title="โควต้าการใช้เครื่องมือ AI วิเคราะห์ข้อมูล (ใช้ไป 12 จาก 50 ครั้ง) รีเซ็ตทุกเดือน"
+      >
         <i class="fa-solid fa-bolt text-amber-500 me-1"></i> AI Usage: 12/50
       </span>
     </div>
-    <button *ngIf="roleKey !== 'SYSTEM_ADMIN'"
+    <button
+      *ngIf="roleKey !== 'SYSTEM_ADMIN'"
       class="btn-icon position-relative border-0 bg-transparent text-secondary p-2 rounded-circle hover-bg-light transition-all"
-      [routerLink]="['/notifications']">
+      [routerLink]="['/notifications']"
+    >
       <i class="fa-solid fa-bell fs-5"></i>
-      <span *ngIf="unreadNotifications > 0" 
-        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-[0.65rem]">
+      <span
+        *ngIf="unreadNotifications > 0"
+        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-[0.65rem]"
+      >
         {{ unreadNotifications > 99 ? '99+' : unreadNotifications }}
       </span>
     </button>

@@ -61,6 +61,10 @@ export class OrganizationsService {
     });
   }
 
+  async findUnit(unitId: number): Promise<OrganizationUnit | null> {
+    return this.orgUnitRepository.findOne({ where: { id: unitId } });
+  }
+
   async updateUnit(
     unitId: number,
     updateData: Partial<OrganizationUnit>,

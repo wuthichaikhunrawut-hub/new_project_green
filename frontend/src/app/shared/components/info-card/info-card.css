@@ -14,7 +14,9 @@
 }
 
 .solid-card:hover {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
   transform: translateY(-2px);
 }
 
@@ -33,15 +35,26 @@
   left: -100%;
   width: 50%;
   height: 100%;
-  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
   transform: skewX(-25deg);
   animation: shine 6s infinite;
 }
 
 @keyframes shine {
-  0% { left: -100%; }
-  20% { left: 200%; }
-  100% { left: 200%; }
+  0% {
+    left: -100%;
+  }
+  20% {
+    left: 200%;
+  }
+  100% {
+    left: 200%;
+  }
 }
 
 .card-title {
@@ -69,23 +82,53 @@
 }
 
 /* Tailwind pseudo color classes for dynamic assignment */
-.bg-teal-500 { background-color: #16A34A; }
-.bg-amber-500 { background-color: #f59e0b; }
-.bg-sky-500 { background-color: #0ea5e9; }
-.bg-rose-500 { background-color: #f43f5e; }
-.bg-slate-500 { background-color: #64748b; }
+.bg-teal-500 {
+  background-color: #16a34a;
+}
+.bg-amber-500 {
+  background-color: #f59e0b;
+}
+.bg-sky-500 {
+  background-color: #0ea5e9;
+}
+.bg-rose-500 {
+  background-color: #f43f5e;
+}
+.bg-slate-500 {
+  background-color: #64748b;
+}
 
-.bg-primary bg-opacity-10 { background-color: #ecfdf5; }
-.bg-amber-subtle { background-color: #fffbeb; }
-.bg-sky-subtle { background-color: #f0f9ff; }
-.bg-rose-subtle { background-color: #fff1f2; }
-.bg-slate-subtle { background-color: #f8fafc; }
+.bg-primary bg-opacity-10 {
+  background-color: #ecfdf5;
+}
+.bg-amber-subtle {
+  background-color: #fffbeb;
+}
+.bg-sky-subtle {
+  background-color: #f0f9ff;
+}
+.bg-rose-subtle {
+  background-color: #fff1f2;
+}
+.bg-slate-subtle {
+  background-color: #f8fafc;
+}
 
-.text-primary { color: #16A34A; }
-.text-amber { color: #f59e0b; }
-.text-sky { color: #0ea5e9; }
-.text-rose { color: #f43f5e; }
-.text-slate { color: #64748b; }
+.text-primary {
+  color: #16a34a;
+}
+.text-amber {
+  color: #f59e0b;
+}
+.text-sky {
+  color: #0ea5e9;
+}
+.text-rose {
+  color: #f43f5e;
+}
+.text-slate {
+  color: #64748b;
+}
 
 .trend-badge {
   font-size: 0.625rem;

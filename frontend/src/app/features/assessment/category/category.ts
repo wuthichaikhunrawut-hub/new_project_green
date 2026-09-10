@@ -43,7 +43,7 @@ interface UploadedFile {
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './category.html',
-  styleUrls: ['./category.css']
+  styleUrls: ['./category.css'],
 })
 export class CategoryPageComponent implements OnInit {
   private toast = inject(ToastService);
@@ -67,9 +67,9 @@ export class CategoryPageComponent implements OnInit {
     'การจัดการของเสีย',
     'สภาพแวดล้อมและความปลอดภัย',
     'การจัดซื้อจัดจ้างที่เป็นมิตรกับสิ่งแวดล้อม',
-    'การดำเนินงานเพื่อความต่อเนื่อง'
+    'การดำเนินงานเพื่อความต่อเนื่อง',
   ];
-  
+
   private categoryDescriptions = [
     '',
     'ประเมินการตั้งเป้าหมายและนโยบายด้านสิ่งแวดล้อมขององค์กร',
@@ -78,27 +78,29 @@ export class CategoryPageComponent implements OnInit {
     'การคัดแยกขยะและการลดปริมาณขยะ',
     'การจัดการพื้นที่ทำงานให้ปลอดภัยและน่าอยู่',
     'การเลือกซื้อสินค้าที่มีฉลากรับรองสิ่งแวดล้อม',
-    'การดำเนินงานเพื่อความยั่งยืนและความต่อเนื่องขององค์กร'
+    'การดำเนินงานเพื่อความยั่งยืนและความต่อเนื่องขององค์กร',
   ];
 
   ngOnInit() {
     // Load all required data first
     forkJoin({
       criteria: this.criteriaService.getCriteriaList(),
-      requests: this.requestsService.getRequests()
+      requests: this.requestsService.getRequests(),
     }).subscribe({
       next: (res) => {
         this.allCriteria = res.criteria;
-        
+
         // Find an active assessment or use the first one
         if (res.requests && res.requests.length > 0) {
           this.activeAssessment = res.requests[0];
           // If details are missing, fetch by ID to ensure full relation
           if (!this.activeAssessment.details && this.activeAssessment.id) {
-            this.requestsService.getRequestById(String(this.activeAssessment.id)).subscribe(fullReq => {
-              this.activeAssessment = fullReq;
-              this.subscribeToRoute();
-            });
+            this.requestsService
+              .getRequestById(String(this.activeAssessment.id))
+              .subscribe((fullReq) => {
+                this.activeAssessment = fullReq;
+                this.subscribeToRoute();
+              });
             return;
           }
         }
@@ -107,12 +109,12 @@ export class CategoryPageComponent implements OnInit {
       error: (err) => {
         console.error('Failed to load assessment data', err);
         this.subscribeToRoute(); // fallback to render empty or partial
-      }
+      },
     });
   }
 
   private subscribeToRoute() {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const idParam = params.get('id');
       this.categoryId = idParam ? parseInt(idParam, 10) : 1;
       this.buildCategoryData(this.categoryId);
@@ -121,15 +123,17 @@ export class CategoryPageComponent implements OnInit {
 
   buildCategoryData(id: number) {
     // Filter criteria for this specific category
-    const categoryCriteria = this.allCriteria.filter(c => c.category_number === id);
-    
+    const categoryCriteria = this.allCriteria.filter((c) => c.category_number === id);
+
     // Calculate total max score for this category
     const totalScore = categoryCriteria.reduce((sum, c) => sum + (c.max_score || 0), 0);
 
-    const questions: Question[] = categoryCriteria.map(criteria => {
+    const questions: Question[] = categoryCriteria.map((criteria) => {
       // Find matching assessment detail
-      const detail = this.activeAssessment?.details?.find((d: AssessmentDetail) => d.criteria?.id === criteria.id);
-      
+      const detail = this.activeAssessment?.details?.find(
+        (d: AssessmentDetail) => d.criteria?.id === criteria.id,
+      );
+
       let status: 'pending' | 'uploaded' | 'rejected' | 'approved' = 'pending';
       const files: UploadedFile[] = [];
 
@@ -157,12 +161,14 @@ export class CategoryPageComponent implements OnInit {
         files: files,
         selfScore: detail?.self_score || 0,
         applicantComment: detail?.applicant_comment || '',
-        maxScore: criteria.max_score || 0
+        maxScore: criteria.max_score || 0,
       };
     });
 
     // Calculate progress (approved/uploaded = done)
-    const completed = questions.filter(q => q.status === 'approved' || q.status === 'uploaded').length;
+    const completed = questions.filter(
+      (q) => q.status === 'approved' || q.status === 'uploaded',
+    ).length;
     const progress = questions.length > 0 ? Math.round((completed / questions.length) * 100) : 0;
 
     this.categoryData = {
@@ -171,7 +177,7 @@ export class CategoryPageComponent implements OnInit {
       description: this.categoryDescriptions[id] || '',
       totalScore: totalScore > 0 ? totalScore : 15,
       progress: progress,
-      questions: questions
+      questions: questions,
     };
   }
 
@@ -184,7 +190,7 @@ export class CategoryPageComponent implements OnInit {
   private authService = inject(AuthService);
   private currentQuestionId: string | null = null;
   isUploading = false;
-  
+
   // New: Store files selected but not yet uploaded
   pendingFiles: { [questionId: string]: File[] } = {};
 
@@ -217,16 +223,16 @@ export class CategoryPageComponent implements OnInit {
 
     this.isUploading = true;
     const userId = this.authService.getUser()?.id;
-    const question = this.categoryData?.questions.find(q => q.id === questionId);
-    
+    const question = this.categoryData?.questions.find((q) => q.id === questionId);
+
     if (!question) return;
 
     // Upload each file (could use forkJoin for parallel but let's keep it simple for now)
-    const uploadObservables = files.map(file => 
-      this.uploadService.uploadFile(file, 'assessment', { 
+    const uploadObservables = files.map((file) =>
+      this.uploadService.uploadFile(file, 'assessment', {
         assessmentDetailId: question.detailId,
-        userId 
-      })
+        userId,
+      }),
     );
 
     // Using recursion or forkJoin would be better, but let's do sequential for clarity
@@ -243,38 +249,40 @@ export class CategoryPageComponent implements OnInit {
     }
 
     const file = files[index];
-    const question = this.categoryData?.questions.find(q => q.id === questionId);
+    const question = this.categoryData?.questions.find((q) => q.id === questionId);
     const userId = this.authService.getUser()?.id;
 
-    this.uploadService.uploadFile(file, 'assessment', { 
-      assessmentDetailId: question?.detailId,
-      userId 
-    }).subscribe({
-      next: (res) => {
-        if (question) {
-          question.files.push({ 
-            id: res.id,
-            name: res.file_name, 
-            size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
-            url: res.file_url
-          });
-          question.status = 'uploaded';
-        }
-        this.processUploads(questionId, files, index + 1);
-      },
-      error: (err) => {
-        console.error('Upload error:', err);
-        this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
-        this.isUploading = false;
-      }
-    });
+    this.uploadService
+      .uploadFile(file, 'assessment', {
+        assessmentDetailId: question?.detailId,
+        userId,
+      })
+      .subscribe({
+        next: (res) => {
+          if (question) {
+            question.files.push({
+              id: res.id,
+              name: res.file_name,
+              size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+              url: res.file_url,
+            });
+            question.status = 'uploaded';
+          }
+          this.processUploads(questionId, files, index + 1);
+        },
+        error: (err) => {
+          console.error('Upload error:', err);
+          this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
+          this.isUploading = false;
+        },
+      });
   }
 
   deleteFile(questionId: string, fileIndex: number) {
-    const question = this.categoryData?.questions.find(q => q.id === questionId);
+    const question = this.categoryData?.questions.find((q) => q.id === questionId);
     if (question && question.files[fileIndex]) {
       const fileToDelete = question.files[fileIndex];
-      
+
       if (fileToDelete.id && confirm('คุณแน่ใจหรือไม่ว่าต้องการลบไฟล์นี้ถาวร?')) {
         this.isUploading = true;
         this.uploadService.deleteFile(fileToDelete.id).subscribe({
@@ -291,7 +299,7 @@ export class CategoryPageComponent implements OnInit {
             console.error('Delete error:', err);
             this.isUploading = false;
             this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
-          }
+          },
         });
       }
     }
@@ -299,8 +307,12 @@ export class CategoryPageComponent implements OnInit {
 
   private recalculateProgress() {
     if (this.categoryData) {
-      const completed = this.categoryData.questions.filter(q => q.status === 'approved' || q.status === 'uploaded').length;
-      this.categoryData.progress = Math.round((completed / this.categoryData.questions.length) * 100);
+      const completed = this.categoryData.questions.filter(
+        (q) => q.status === 'approved' || q.status === 'uploaded',
+      ).length;
+      this.categoryData.progress = Math.round(
+        (completed / this.categoryData.questions.length) * 100,
+      );
     }
   }
 
@@ -311,7 +323,7 @@ export class CategoryPageComponent implements OnInit {
   }
 
   goNext() {
-    const maxCategory = this.allCriteria.some(c => c.category_number === 7) ? 7 : 6;
+    const maxCategory = this.allCriteria.some((c) => c.category_number === 7) ? 7 : 6;
     if (this.categoryId < maxCategory) {
       this.router.navigate(['/assessment/category', this.categoryId + 1]);
     } else {
@@ -329,20 +341,24 @@ export class CategoryPageComponent implements OnInit {
 
   saveDetail(q: Question) {
     if (!this.activeAssessment || !q.detailId) return;
-    
-    this.requestsService.updateRequest(this.activeAssessment.id.toString(), {
-      details: [{
-        assessment_detail_id: q.detailId,
-        self_score: q.selfScore,
-        applicant_comment: q.applicantComment
-      }]
-    } as any).subscribe({
-      next: () => {
-        this.toast.success('บันทึกข้อมูลประเมินตนเองสำเร็จ');
-      },
-      error: () => {
-        this.toast.error('บันทึกข้อมูลไม่สำเร็จ');
-      }
-    });
+
+    this.requestsService
+      .updateRequest(this.activeAssessment.id.toString(), {
+        details: [
+          {
+            assessment_detail_id: q.detailId,
+            self_score: q.selfScore,
+            applicant_comment: q.applicantComment,
+          },
+        ],
+      } as any)
+      .subscribe({
+        next: () => {
+          this.toast.success('บันทึกข้อมูลประเมินตนเองสำเร็จ');
+        },
+        error: () => {
+          this.toast.error('บันทึกข้อมูลไม่สำเร็จ');
+        },
+      });
   }
 }
