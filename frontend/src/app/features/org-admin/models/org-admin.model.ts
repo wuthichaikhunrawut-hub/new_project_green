@@ -1,5 +1,5 @@
-import { Assessment } from './assessment.model';
-import { CarbonLog } from './carbon-log.model';
+import { Assessment } from '../../../core/models/assessment.model';
+import { CarbonLog } from '../../../core/models/carbon-log.model';
 
 export interface RevisionCenterResponse {
   revisions: Assessment[];
