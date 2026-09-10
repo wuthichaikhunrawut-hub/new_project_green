@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AdminAnalyticsService, AdminStats } from '../../../core/services/admin-analytics.service';
+import { AdminAnalyticsService, AdminStats } from '../services/admin-analytics.service';
 import { InsightsService } from '../../../core/services/insights.service';
 
 @Component({

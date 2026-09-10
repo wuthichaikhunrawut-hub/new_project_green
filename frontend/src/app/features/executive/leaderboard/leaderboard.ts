@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ExecutiveService } from '../../../core/services/executive.service';
+import { ExecutiveService } from '../services/executive.service';
 import { forkJoin } from 'rxjs';
 
 @Component({

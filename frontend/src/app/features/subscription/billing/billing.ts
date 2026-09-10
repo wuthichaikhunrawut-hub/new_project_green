@@ -3,7 +3,7 @@ import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core'
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
-import { BillingService, PaymentMethod } from '../../../core/services/billing.service';
+import { BillingService, PaymentMethod } from '../services/billing.service';
 import { SettingsService } from '../../../core/services/settings.service';
 import { UserSubscriptionsService } from '../../../core/services/user-subscriptions.service';
 import { SubscriptionPlan } from '../../../core/services/subscriptions-admin.service';

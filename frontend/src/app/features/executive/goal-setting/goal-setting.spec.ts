@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
 import { GoalSetting } from './goal-setting';
-import { ExecutiveService } from '../../../core/services/executive.service';
+import { ExecutiveService } from '../services/executive.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 describe('GoalSetting', () => {

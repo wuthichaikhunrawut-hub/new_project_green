@@ -3,7 +3,7 @@ import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angu
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { AssessmentCardComponent } from '../../../shared/components/assessment/assessment-card/assessment-card';
 import { timeout } from 'rxjs';
-import { AssessmentDataService } from '../../../core/services/assessment-data.service';
+import { AssessmentDataService } from '../services/assessment-data.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { clampNumber, escapeHtml } from '../../../shared/security/html-escape';

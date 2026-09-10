@@ -7,9 +7,9 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ExecutiveService } from '../../../core/services/executive.service';
+import { ExecutiveService } from '../services/executive.service';
 import { InsightsService } from '../../../core/services/insights.service';
-import { ExecutiveDashboardResponse } from '../../../core/models/executive.model';
+import { ExecutiveDashboardResponse } from '../models/executive.model';
 
 @Component({
   selector: 'app-executive-dashboard',

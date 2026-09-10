@@ -1,68 +1,4 @@
 services:
-  postgres:
-    image: postgres:16
-    container_name: green_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: greenoffice
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: green_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
-      PGADMIN_DEFAULT_PASSWORD: admin123
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-    depends_on:
-      - postgres
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      target: development
-    container_name: green_backend
-    restart: always
-    env_file:
-      - ./backend/.env
-    environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USERNAME: postgres
-      DB_PASSWORD: 1234
-      DB_NAME: greenoffice
-      SUPABASE_URL: ${SUPABASE_URL:?SUPABASE_URL is required}
-      SUPABASE_KEY: ${SUPABASE_KEY:?SUPABASE_KEY is required}
-      SUPABASE_BUCKET: ${SUPABASE_BUCKET:-greensync-storage}
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    command: npm run start:dev
-    healthcheck:
-      test: ["CMD", "node", "-e", "const req = require('http').request('http://localhost:3001/', { method: 'GET', timeout: 2000 }, (res) => { process.exit(res.statusCode === 200 ? 0 : 1); }); req.on('error', () => process.exit(1)); req.end();"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    depends_on:
-      postgres:
-        condition: service_healthy
-
   frontend:
     image: green-office-frontend-dev
     build:
@@ -91,9 +27,3 @@ services:
       timeout: 10s
       retries: 3
     command: npm start -- --host 0.0.0.0 --poll 250 --watch --live-reload
-    depends_on:
-      - backend
-
-volumes:
-  postgres_data:
-  pgadmin_data:

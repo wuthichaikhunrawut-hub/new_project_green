@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { OrgAdminService } from '../../../core/services/org-admin.service';
+import { OrgAdminService } from '../services/org-admin.service';
 import { CarbonService } from '../../../core/services/carbon.service';
 import { Assessment } from '../../../core/models/assessment.model';
 import { CarbonLog } from '../../../core/models/carbon-log.model';

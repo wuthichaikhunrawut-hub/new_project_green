@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { AuditLogsService, AuditLog } from '../../../core/services/audit-logs.service';
+import { AuditLogsService, AuditLog } from '../services/audit-logs.service';
 
 @Component({
   selector: 'app-admin-audit-logs',

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ExecutiveService } from '../../../core/services/executive.service';
+import { ExecutiveService } from '../services/executive.service';
 import { ToastService } from '../../../core/services/toast.service';
 
 interface GoalItem {

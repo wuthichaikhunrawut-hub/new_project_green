@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, ChangeDetectorRef, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ExecutiveService } from '../../../core/services/executive.service';
+import { ExecutiveService } from '../services/executive.service';
 
 @Component({
   selector: 'app-executive-audit-summary',
