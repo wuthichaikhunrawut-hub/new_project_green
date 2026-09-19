@@ -15,8 +15,8 @@ import { ExecutiveDashboardResponse } from '../models/executive.model';
   selector: 'app-executive-dashboard',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css'],
+  templateUrl: './executive-dashboard.html',
+  styleUrls: ['./executive-dashboard.css'],
 })
 export class ExecutiveDashboardComponent implements OnInit, AfterViewInit {
   private executiveService = inject(ExecutiveService);

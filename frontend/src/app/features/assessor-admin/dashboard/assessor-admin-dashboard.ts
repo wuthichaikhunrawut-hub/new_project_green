@@ -10,13 +10,13 @@ import { ToastService } from '../../../core/services/toast.service';
 import { Assessment } from '../../../core/models/assessment.model';
 
 @Component({
-  selector: 'app-dashboard',
+  selector: 'app-assessor-admin-dashboard',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css',
+  templateUrl: './assessor-admin-dashboard.html',
+  styleUrl: './assessor-admin-dashboard.css',
 })
-export class Dashboard implements OnInit {
+export class AssessorAdminDashboardComponent implements OnInit {
   private adminService = inject(AssessorsAdminService);
   private requestsService = inject(RequestsService);
   private toast = inject(ToastService);

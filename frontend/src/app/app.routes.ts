@@ -58,7 +58,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () =>
-          import('./features/dashboard/dashboard').then((m) => m.DashboardComponent),
+          import('./features/dashboard/main-dashboard').then((m) => m.DashboardComponent),
         title: 'Green Sync - ภาพรวมระบบ',
         canActivate: [RoleGuard],
         data: { roles: ['USER', 'EXECUTIVE', 'EMPLOYEE', 'SYSTEM_ADMIN', 'ORG_ADMIN'] },
@@ -166,7 +166,9 @@ export const routes: Routes = [
       {
         path: 'assessor-admin/dashboard',
         loadComponent: () =>
-          import('./features/assessor-admin/dashboard/dashboard').then((m) => m.Dashboard),
+          import('./features/assessor-admin/dashboard/assessor-admin-dashboard').then(
+            (m) => m.AssessorAdminDashboardComponent,
+          ),
         title: 'Assessor Admin Dashboard - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ASSESSOR_ADMIN'] },
@@ -175,7 +177,7 @@ export const routes: Routes = [
       {
         path: 'assessor/dashboard',
         loadComponent: () =>
-          import('./features/assessor/dashboard/dashboard').then(
+          import('./features/assessor/dashboard/assessor-dashboard').then(
             (m) => m.AssessorDashboardComponent,
           ),
         title: 'แดชบอร์ดผู้ตรวจประเมิน - Green Sync',
@@ -321,7 +323,7 @@ export const routes: Routes = [
       {
         path: 'executive/dashboard',
         loadComponent: () =>
-          import('./features/executive/dashboard/dashboard').then(
+          import('./features/executive/dashboard/executive-dashboard').then(
             (m) => m.ExecutiveDashboardComponent,
           ),
         title: 'Executive Dashboard - Green Sync',
@@ -361,7 +363,7 @@ export const routes: Routes = [
       {
         path: 'org/profile',
         loadComponent: () =>
-          import('./features/org/profile/profile').then((m) => m.OrgProfileComponent),
+          import('./features/org/profile/org-profile').then((m) => m.OrgProfileComponent),
         title: 'ข้อมูลหน่วยงาน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] },
@@ -370,7 +372,9 @@ export const routes: Routes = [
       {
         path: 'assessor/profile',
         loadComponent: () =>
-          import('./features/assessor/profile/profile').then((m) => m.AssessorProfileComponent),
+          import('./features/assessor/profile/assessor-profile').then(
+            (m) => m.AssessorProfileComponent,
+          ),
         title: 'โปรไฟล์ผู้ตรวจประเมิน - Green Sync',
         canActivate: [RoleGuard],
         data: { roles: ['ASSESSOR', 'SYSTEM_ADMIN'] },

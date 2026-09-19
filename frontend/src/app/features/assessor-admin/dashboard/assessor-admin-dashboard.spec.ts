@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 
-import { Dashboard } from './dashboard';
+import { AssessorAdminDashboardComponent } from './assessor-admin-dashboard';
 import { AssessorsAdminService } from '../../../core/services/assessors-admin.service';
 import { RequestsService } from '../../../core/services/requests.service';
 import { ToastService } from '../../../core/services/toast.service';
 
-describe('Dashboard', () => {
-  let component: Dashboard;
-  let fixture: ComponentFixture<Dashboard>;
+describe('AssessorAdminDashboardComponent', () => {
+  let component: AssessorAdminDashboardComponent;
+  let fixture: ComponentFixture<AssessorAdminDashboardComponent>;
   const dashboardStats = {
     totalAssessors: 0,
     assigned: 0,
@@ -39,7 +39,7 @@ describe('Dashboard', () => {
     requestsService.getRequests.mockClear();
 
     await TestBed.configureTestingModule({
-      imports: [Dashboard],
+      imports: [AssessorAdminDashboardComponent],
       providers: [
         { provide: AssessorsAdminService, useValue: adminService },
         { provide: RequestsService, useValue: requestsService },
@@ -47,7 +47,7 @@ describe('Dashboard', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(Dashboard);
+    fixture = TestBed.createComponent(AssessorAdminDashboardComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

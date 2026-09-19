@@ -23,8 +23,8 @@ import { environment } from '../../../environments/environment';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './dashboard.html',
-  styleUrls: ['./dashboard.css'],
+  templateUrl: './main-dashboard.html',
+  styleUrls: ['./main-dashboard.css'],
 })
 export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private greenService = inject(GreenOfficeService);

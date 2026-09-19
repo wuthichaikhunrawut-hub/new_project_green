@@ -37,8 +37,8 @@ const SCOPE_COLORS: Readonly<Record<number, string>> = {
   selector: 'app-assessor-dashboard',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './dashboard.html',
-  styleUrl: './dashboard.css',
+  templateUrl: './assessor-dashboard.html',
+  styleUrl: './assessor-dashboard.css',
 })
 export class AssessorDashboardComponent implements OnInit {
   private readonly assessorService = inject(AssessorService);

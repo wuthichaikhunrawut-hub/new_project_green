@@ -10,8 +10,8 @@ import { environment } from '../../../../environments/environment';
   selector: 'app-assessor-profile',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './profile.html',
-  styleUrls: ['./profile.css'],
+  templateUrl: './assessor-profile.html',
+  styleUrls: ['./assessor-profile.css'],
 })
 export class AssessorProfileComponent implements OnInit {
   private http = inject(HttpClient);

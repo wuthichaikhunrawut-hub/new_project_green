@@ -14,8 +14,8 @@ import { forkJoin } from 'rxjs';
   selector: 'app-org-profile',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './profile.html',
-  styleUrl: './profile.css',
+  templateUrl: './org-profile.html',
+  styleUrl: './org-profile.css',
 })
 export class OrgProfileComponent implements OnInit {
   private toast = inject(ToastService);
