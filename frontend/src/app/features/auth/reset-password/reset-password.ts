@@ -8,8 +8,8 @@ import { AuthService } from '../../../core/services/auth.service';
   selector: 'app-reset-password',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  templateUrl: './reset-password.component.html',
-  styleUrl: './reset-password.component.css',
+  templateUrl: './reset-password.html',
+  styleUrl: './reset-password.css',
 })
 export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);

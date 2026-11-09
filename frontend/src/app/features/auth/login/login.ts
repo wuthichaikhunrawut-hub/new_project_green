@@ -91,7 +91,7 @@ export class LoginComponent {
               const isExecutive = roleUpper === 'EXECUTIVE';
               const isAdmin = roleUpper === 'ADMIN' || roleUpper === 'SYSTEM_ADMIN';
 
-              const isAssessor = roleUpper === 'ASSESSOR' || roleUpper === 'ASSESSOR_ADMIN';
+              const isAssessor = roleUpper === 'ASSESSOR';
 
               if (isAssessor) {
                 this.router.navigate(['/assessor/dashboard']);

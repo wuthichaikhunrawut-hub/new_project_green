@@ -34,7 +34,7 @@ export class RequestsComponent implements OnInit, OnDestroy {
     const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
     if (role === 'SYSTEM_ADMIN' || role === 'ADMIN') return 'SYSTEM_ADMIN';
     if (role === 'ORGANIZATION_ADMIN' || role === 'ORG_ADMIN') return 'ORG_ADMIN';
-    if (role === 'ASSESSOR' || role === 'ASSESSOR_ADMIN') return 'ASSESSOR';
+    if (role === 'ASSESSOR') return 'ASSESSOR';
     return role;
   }
 
@@ -48,7 +48,7 @@ export class RequestsComponent implements OnInit, OnDestroy {
 
   get isAssigner(): boolean {
     const role = (this.user?.role || '').toUpperCase().trim().split(' ').join('_');
-    return ['SYSTEM_ADMIN', 'ADMIN', 'ASSESSOR_ADMIN'].includes(role);
+    return ['SYSTEM_ADMIN', 'ADMIN'].includes(role);
   }
 
   get isAllowedToSubmit(): boolean {

@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UploadService } from '../../../core/services/upload.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { GreenOfficeService } from '../../../core/services/green-office.service';
-import { GeminiService } from '../../../services/gemini';
+import { GeminiService } from '../../../core/services/gemini.service';
 
 import { ConfirmDialogComponent } from '../../../shared/components/ui/confirm-dialog';
 

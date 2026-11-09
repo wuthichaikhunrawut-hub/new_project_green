@@ -96,7 +96,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (r === 'SYSTEM_ADMIN' || r === 'ADMIN') return 'SYSTEM_ADMIN';
     if (r === 'ORGANIZATION_ADMIN' || r === 'ORG_ADMIN') return 'ORG_ADMIN';
     if (r === 'ASSESSOR') return 'ASSESSOR';
-    if (r === 'ASSESSOR_ADMIN') return 'ASSESSOR_ADMIN';
     if (r === 'EXECUTIVE') return 'EXECUTIVE';
     if (r === 'EMPLOYEE') return 'EMPLOYEE';
     if (r === 'USER') return 'USER';
@@ -131,10 +130,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return this.isSystemAdmin || this.isOrgAdmin;
   }
   get isAssessor(): boolean {
-    return this.roleKey === 'ASSESSOR' || this.roleKey === 'ASSESSOR_ADMIN';
-  }
-  get isAssessorAdmin(): boolean {
-    return this.roleKey === 'ASSESSOR_ADMIN';
+    return this.roleKey === 'ASSESSOR';
   }
   get isExecutive(): boolean {
     return this.roleKey === 'EXECUTIVE';

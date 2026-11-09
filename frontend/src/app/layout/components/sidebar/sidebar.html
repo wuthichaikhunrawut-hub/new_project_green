@@ -67,6 +67,15 @@
         <span>มอบหมายงานตรวจ</span>
       </a>
       <a
+        routerLink="/assessor-admin/dashboard"
+        routerLinkActive="active"
+        class="nav-item"
+        (click)="onNavItemClick()"
+      >
+        <i class="fa-solid fa-chart-simple"></i>
+        <span>ภาพรวมผู้ตรวจประเมิน</span>
+      </a>
+      <a
         routerLink="/admin/notifications"
         routerLinkActive="active"
         class="nav-item"
@@ -479,16 +488,6 @@
       </a>
 
       <div class="nav-label">งานตรวจประเมิน</div>
-      <a
-        routerLink="/requests"
-        routerLinkActive="active"
-        *ngIf="isAssessorAdmin"
-        class="nav-item"
-        (click)="onNavItemClick()"
-      >
-        <i class="fa-solid fa-user-gear"></i>
-        <span>มอบหมายงานตรวจ</span>
-      </a>
       <a
         routerLink="/assessor/assignments"
         routerLinkActive="active"

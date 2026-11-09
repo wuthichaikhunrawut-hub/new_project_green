@@ -8,8 +8,8 @@ import { ToastService } from '../../shared/services/toast.service';
   selector: 'app-notifications',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './notifications.component.html',
-  styleUrls: ['./notifications.component.css'],
+  templateUrl: './notifications.html',
+  styleUrls: ['./notifications.css'],
 })
 export class NotificationsComponent implements OnInit {
   private notificationService = inject(NotificationService);
