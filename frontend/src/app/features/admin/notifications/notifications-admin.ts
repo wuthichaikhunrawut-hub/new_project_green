@@ -14,8 +14,8 @@ type TargetType = 'ALL_SYSTEM' | 'ALL_ORG' | 'SPECIFIC_USER';
   selector: 'app-notifications-admin',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './notifications-admin.component.html',
-  styleUrls: ['./notifications-admin.component.css'],
+  templateUrl: './notifications-admin.html',
+  styleUrls: ['./notifications-admin.css'],
 })
 export class NotificationsAdminComponent implements OnInit {
   private notificationService = inject(NotificationService);

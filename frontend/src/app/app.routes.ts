@@ -22,7 +22,7 @@ export const routes: Routes = [
   {
     path: 'auth/reset-password',
     loadComponent: () =>
-      import('./features/auth/reset-password/reset-password.component').then(
+      import('./features/auth/reset-password/reset-password').then(
         (m) => m.ResetPasswordComponent,
       ),
     title: 'ตั้งรหัสผ่านใหม่ - Green Sync',
@@ -154,7 +154,7 @@ export const routes: Routes = [
       {
         path: 'admin/notifications',
         loadComponent: () =>
-          import('./features/admin/notifications/notifications-admin.component').then(
+          import('./features/admin/notifications/notifications-admin').then(
             (m) => m.NotificationsAdminComponent,
           ),
         title: 'ส่งการแจ้งเตือน - Green Sync',
@@ -171,7 +171,7 @@ export const routes: Routes = [
           ),
         title: 'Assessor Admin Dashboard - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ASSESSOR_ADMIN'] },
+        data: { roles: ['SYSTEM_ADMIN'] },
       },
       // GROUP: ASSESSOR PAGES
       {
@@ -255,14 +255,14 @@ export const routes: Routes = [
           import('./features/assessor/calendar/calendar').then((m) => m.Calendar),
         title: 'ตารางงานผู้ตรวจประเมิน - Green Sync',
         canActivate: [RoleGuard],
-        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR', 'ASSESSOR_ADMIN'] },
+        data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'ASSESSOR'] },
       },
 
       // GROUP 3: CARBON FOOTPRINT
       {
         path: 'carbon/logs',
         loadComponent: () =>
-          import('./features/logs/carbon-logs').then((m) => m.CarbonLogsComponent),
+          import('./features/carbon-logs/carbon-logs').then((m) => m.CarbonLogsComponent),
         title: 'บันทึกก๊าซเรือนกระจก',
         canActivate: [RoleGuard],
         data: { roles: ['SYSTEM_ADMIN', 'ORG_ADMIN', 'USER', 'EMPLOYEE', 'EXECUTIVE'] },
@@ -424,7 +424,7 @@ export const routes: Routes = [
       {
         path: 'notifications',
         loadComponent: () =>
-          import('./features/notifications/notifications.component').then(
+          import('./features/notifications/notifications').then(
             (m) => m.NotificationsComponent,
           ),
         title: 'การแจ้งเตือน - Green Sync',

@@ -2,7 +2,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { Component, inject, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { GeminiService, BillScanResult } from '../../services/gemini';
+import { GeminiService, BillScanResult } from '../../core/services/gemini.service';
 import { CarbonService, CarbonLog } from '../../core/services/carbon.service';
 import {
   EmissionFactorsService,

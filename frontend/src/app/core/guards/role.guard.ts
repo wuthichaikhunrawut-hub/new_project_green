@@ -42,7 +42,10 @@ export class RoleGuard implements CanActivate {
       if (val === 'ORGADMIN' || val === 'ORGANIZATIONADMIN') {
         return 'ORGANIZATIONADMIN';
       }
-      if (val === 'SYSTEMADMIN' || val === 'ADMIN') {
+      // Assessor Admin was merged into System Admin (system now has 4 roles: System Admin,
+      // Organization Admin, Assessor, Executive) — any leftover/stale role string still
+      // resolves to full system-admin access rather than locking the account out.
+      if (val === 'SYSTEMADMIN' || val === 'ADMIN' || val === 'ASSESSORADMIN') {
         return 'SYSTEMADMIN';
       }
       return val;
@@ -52,13 +55,6 @@ export class RoleGuard implements CanActivate {
     const allowed = allowedRoles.map((r) => normalizeRole(r));
 
     if (allowed.includes(userRole)) {
-      return true;
-    }
-
-    if (
-      userRole === 'ASSESSORADMIN' &&
-      (allowed.includes('ASSESSOR') || allowed.includes('SYSTEMADMIN'))
-    ) {
       return true;
     }
 
@@ -79,7 +75,6 @@ export class RoleGuard implements CanActivate {
         this.router.navigate(['/dashboard']);
         break;
       case 'ASSESSOR':
-      case 'ASSESSOR_ADMIN':
         this.router.navigate(['/assessor/dashboard']);
         break;
       case 'EXECUTIVE':
