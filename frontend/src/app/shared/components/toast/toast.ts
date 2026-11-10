@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastService, Toast } from '../../../core/services/toast.service';
 import { trigger, state, style, animate, transition } from '@angular/animations';
@@ -42,12 +42,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class ToastComponent implements OnInit {
   toasts: Toast[] = [];
   private readonly destroyRef = inject(DestroyRef);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   constructor(public toastService: ToastService) {}
 
   ngOnInit() {
     this.toastService.toasts$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((toasts) => {
       this.toasts = toasts;
+      this.cdr.markForCheck();
     });
   }
 

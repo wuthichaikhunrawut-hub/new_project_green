@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -17,6 +17,7 @@ export class RegisterComponent {
 
   private router = inject(Router);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   // ข้อมูลสำหรับ Table organizations
   orgData = {
@@ -81,10 +82,12 @@ export class RegisterComponent {
         this.isLoading = false;
         this.toast.success('ลงทะเบียนสำเร็จ! เข้าสู่ระบบอัตโนมัติ');
         this.router.navigate(['/dashboard']);
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.isLoading = false;
         this.toast.error(err.error?.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
+        this.cdr.markForCheck();
       },
     });
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AssessorService } from '../../../core/services/assessor.service';
@@ -20,6 +20,7 @@ interface CalendarDay {
 export class Calendar implements OnInit {
   private assessorService = inject(AssessorService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   currentDate = new Date();
   currentMonth = this.currentDate.getMonth();
@@ -41,12 +42,14 @@ export class Calendar implements OnInit {
         this.events = data || [];
         this.generateCalendar();
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Failed to load calendar events', err);
         this.events = [];
         this.generateCalendar();
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }

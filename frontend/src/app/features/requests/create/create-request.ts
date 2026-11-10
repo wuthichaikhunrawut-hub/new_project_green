@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -19,6 +19,7 @@ export class CreateRequestComponent implements OnInit {
   private authService = inject(AuthService);
   private requestsService = inject(RequestsService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   isSubmitting = false;
   currentYear = new Date().getFullYear();
@@ -57,11 +58,13 @@ export class CreateRequestComponent implements OnInit {
         this.toast.success('ส่งคำขอรับรองเรียบร้อยแล้ว!');
         this.isSubmitting = false;
         this.router.navigate(['/requests']);
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         console.error('Failed to submit request', err);
         this.toast.error('เกิดข้อผิดพลาดในการส่งคำขอ');
         this.isSubmitting = false;
+        this.cdr.markForCheck();
       },
     });
   }

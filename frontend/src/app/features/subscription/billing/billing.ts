@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Location } from '@angular/common';
@@ -25,6 +25,7 @@ export class BillingComponent implements OnInit {
   private userSubService = inject(UserSubscriptionsService);
   private router = inject(Router);
   private location = inject(Location);
+  private cdr = inject(ChangeDetectorRef);
 
   @ViewChild('paymentElement') paymentElementRef!: ElementRef;
 
@@ -63,10 +64,12 @@ export class BillingComponent implements OnInit {
             this.billingCycle = 'monthly'; // Defaulting to monthly if not specified
           }
           this.setupPaymentFlow();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Auto-fetch plan error:', err);
           this.setupPaymentFlow();
+          this.cdr.markForCheck();
         },
       });
     }
@@ -90,12 +93,14 @@ export class BillingComponent implements OnInit {
         const publicKey = settings['stripe.public_key'];
         if (!publicKey) {
           this.isStripeLoading = false;
+          this.cdr.markForCheck();
           return;
         }
 
         this.stripe = await loadStripe(publicKey);
         if (!this.stripe) {
           this.isStripeLoading = false;
+          this.cdr.markForCheck();
           return;
         }
 
@@ -104,6 +109,7 @@ export class BillingComponent implements OnInit {
             if (!res.clientSecret) {
               this.errorMessage = 'ระบบไม่ได้รับรหัสความปลอดภัยจากเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง';
               this.isStripeLoading = false;
+              this.cdr.markForCheck();
               return;
             }
 
@@ -147,6 +153,7 @@ export class BillingComponent implements OnInit {
 
             this.paymentElement.on('ready', () => {
               this.isStripeLoading = false;
+              this.cdr.markForCheck();
               // Force a resize event to ensure Stripe recalculates height
               setTimeout(() => {
                 window.dispatchEvent(new Event('resize'));
@@ -157,6 +164,7 @@ export class BillingComponent implements OnInit {
               this.isStripeLoading = false;
               this.errorMessage =
                 'ไม่สามารถโหลดฟอร์มชำระเงินได้ เนื่องจากปัญหาการเชื่อมต่อ กรุณารีเฟรชหน้าจอหรือตรวจสอบอินเทอร์เน็ตของคุณ';
+              this.cdr.markForCheck();
             });
 
             (
@@ -168,16 +176,19 @@ export class BillingComponent implements OnInit {
               }
             ).on('change', (event) => {
               this.errorMessage = event.error?.message ?? '';
+              this.cdr.markForCheck();
             });
           },
           error: (err) => {
             this.isStripeLoading = false;
             this.errorMessage = 'ไม่สามารถเชื่อมต่อกับระบบชำระเงินได้ในขณะนี้';
+            this.cdr.markForCheck();
           },
         });
       },
       error: (err) => {
         this.isStripeLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -188,9 +199,11 @@ export class BillingComponent implements OnInit {
       next: (methods) => {
         this.paymentMethods = methods;
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -205,11 +218,13 @@ export class BillingComponent implements OnInit {
           this.isSaving = false;
           this.toast.success('เปิดใช้งานแพ็กเกจฟรีเรียบร้อยแล้ว!');
           this.router.navigate(['/subscription']);
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.isSaving = false;
           this.errorMessage = err.error?.message || 'เกิดข้อผิดพลาดในการเปิดใช้งานแพ็กเกจฟรี';
           this.toast.error(this.errorMessage);
+          this.cdr.markForCheck();
         },
       });
       return;
@@ -231,6 +246,7 @@ export class BillingComponent implements OnInit {
     if (error) {
       this.errorMessage = error.message || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล';
       this.isSaving = false;
+      this.cdr.markForCheck();
     } else {
       const paymentMethodId =
         typeof setupIntent?.payment_method === 'string'
@@ -239,6 +255,7 @@ export class BillingComponent implements OnInit {
       if (!this.selectedPlan || !paymentMethodId) {
         this.errorMessage = 'ไม่พบข้อมูลแพ็กเกจหรือช่องทางชำระเงิน กรุณาลองใหม่';
         this.isSaving = false;
+        this.cdr.markForCheck();
         return;
       }
 
@@ -256,17 +273,20 @@ export class BillingComponent implements OnInit {
             if (confirmation.error) {
               this.errorMessage = confirmation.error.message || 'ไม่สามารถยืนยันการชำระเงินได้';
               this.isSaving = false;
+              this.cdr.markForCheck();
               return;
             }
           }
           this.isSaving = false;
           this.toast.success('สมัครแพ็กเกจและบันทึกการชำระเงินเรียบร้อยแล้ว');
           this.router.navigate(['/subscription']);
+          this.cdr.markForCheck();
         },
         error: (subscribeError) => {
           this.errorMessage = subscribeError.error?.message || 'ไม่สามารถสมัครแพ็กเกจได้';
           this.isSaving = false;
           this.toast.error(this.errorMessage);
+          this.cdr.markForCheck();
         },
       });
     }
@@ -282,6 +302,7 @@ export class BillingComponent implements OnInit {
       this.billingService.deletePaymentMethod(this.methodToDelete).subscribe(() => {
         this.loadPaymentMethods();
         this.cancelDelete();
+        this.cdr.markForCheck();
       });
     }
   }

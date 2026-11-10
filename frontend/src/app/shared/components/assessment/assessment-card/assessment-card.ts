@@ -1,4 +1,11 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  inject,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ScoreSelectorComponent } from '../score-selector/score-selector';
 import { EvidenceUploadComponent } from '../evidence-upload/evidence-upload';
@@ -133,6 +140,7 @@ export class AssessmentCardComponent {
   private uploadService = inject(UploadService);
   private authService = inject(AuthService);
   private toast = inject(ToastService);
+  private cdr = inject(ChangeDetectorRef);
 
   @Input() questionId: string = '';
   @Input() detailId: number | null = null;
@@ -213,6 +221,7 @@ export class AssessmentCardComponent {
       this.isUploading = false;
       this.toast.success('อัปโหลดไฟล์หลักฐานสำเร็จเรียบร้อยครับ! 🎉');
       this.emitChange();
+      this.cdr.markForCheck();
       return;
     }
 
@@ -226,11 +235,13 @@ export class AssessmentCardComponent {
         next: () => {
           this.fileCount++;
           this.uploadSequential(files, index + 1, userId);
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('❌ Upload error in card:', err);
           this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
           this.isUploading = false;
+          this.cdr.markForCheck();
         },
       });
   }
@@ -252,6 +263,7 @@ export class AssessmentCardComponent {
             this.isUploading = false;
             this.emitChange();
             this.toast.success('ลบหลักฐานเรียบร้อยครับ');
+            this.cdr.markForCheck();
             return;
           }
 
@@ -261,6 +273,7 @@ export class AssessmentCardComponent {
           console.error('❌ Failed to fetch files for deletion', err);
           this.isUploading = false;
           this.toast.error('ไม่สามารถดึงข้อมูลไฟล์หลักฐานเพื่อลบได้');
+          this.cdr.markForCheck();
         },
       });
     }
@@ -272,6 +285,7 @@ export class AssessmentCardComponent {
       this.isUploading = false;
       this.emitChange();
       this.toast.success('ลบไฟล์หลักฐานทั้งหมดเรียบร้อยแล้วครับ! 🗑️');
+      this.cdr.markForCheck();
       return;
     }
 

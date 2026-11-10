@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
@@ -24,6 +24,7 @@ import { Subscription } from 'rxjs';
 })
 export class MainLayoutComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   // ดึงข้อมูล User จาก Database Table 'users' (ผ่าน Service)
   user: any = null;
@@ -36,6 +37,7 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.subscription.add(
       this.authService.currentUser$.subscribe((user) => {
         this.user = user;
+        this.cdr.markForCheck();
       }),
     );
   }

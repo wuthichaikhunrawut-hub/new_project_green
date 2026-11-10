@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -15,6 +15,7 @@ export class ResetPasswordComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
+  private cdr = inject(ChangeDetectorRef);
 
   token = '';
   newPassword = '';
@@ -57,10 +58,12 @@ export class ResetPasswordComponent implements OnInit {
       next: () => {
         this.isLoading = false;
         this.isSuccess = true;
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.isLoading = false;
         this.errorMessage = err.error?.message || 'เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง';
+        this.cdr.markForCheck();
       },
     });
   }

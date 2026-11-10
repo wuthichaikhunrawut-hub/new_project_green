@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UserSubscriptionsService } from '../../core/services/user-subscriptions.service';
@@ -13,6 +13,7 @@ import { UserSubscriptionsService } from '../../core/services/user-subscriptions
 export class HomeComponent implements OnInit, OnDestroy {
   private userSubService = inject(UserSubscriptionsService);
   private platformId = inject(PLATFORM_ID);
+  private cdr = inject(ChangeDetectorRef);
 
   heroSlides = [
     {
@@ -70,11 +71,13 @@ export class HomeComponent implements OnInit, OnDestroy {
             };
           });
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.plansLoading = false;
         this.plansLoadError = true;
         console.error('Failed to load plans from database:', err);
+        this.cdr.markForCheck();
       },
     });
   }
@@ -86,6 +89,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   startSlideShow() {
     this.slideInterval = setInterval(() => {
       this.nextSlide();
+      this.cdr.markForCheck();
     }, 5000); // Rotate every 5 seconds
   }
 

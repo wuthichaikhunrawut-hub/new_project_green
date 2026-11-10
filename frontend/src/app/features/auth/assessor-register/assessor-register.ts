@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -16,6 +16,7 @@ export class AssessorRegisterComponent {
   private authService = inject(AuthService);
   private uploadService = inject(UploadService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   step = 1;
   isLoading = false;
@@ -107,6 +108,7 @@ export class AssessorRegisterComponent {
         this.isUploading = false;
         this.errorMessage = 'อัปโหลดหมดเวลา กรุณาลองใหม่อีกครั้ง';
         input.value = '';
+        this.cdr.markForCheck();
       }
     }, 30000);
 
@@ -117,6 +119,7 @@ export class AssessorRegisterComponent {
         this.isUploading = false;
         this.successMessage = 'อัปโหลดไฟล์หลักฐานเรียบร้อยแล้ว';
         console.log('✅ Upload success:', this.profileData.qualification_file_url);
+        this.cdr.markForCheck();
       },
       error: (err) => {
         clearTimeout(timeoutId);
@@ -128,6 +131,7 @@ export class AssessorRegisterComponent {
             'Network Error — กรุณาตรวจสอบว่า Backend ทำงานอยู่');
         this.isUploading = false;
         input.value = ''; // Reset input so user can try again
+        this.cdr.markForCheck();
       },
     });
   }
@@ -167,6 +171,7 @@ export class AssessorRegisterComponent {
       this.errorMessage = error.error?.message || 'เกิดข้อผิดพลาดในการลงทะเบียน';
     } finally {
       this.isLoading = false;
+      this.cdr.markForCheck();
     }
   }
 }

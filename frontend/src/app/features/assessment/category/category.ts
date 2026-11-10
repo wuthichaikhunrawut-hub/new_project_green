@@ -1,5 +1,5 @@
 import { ToastService } from '../../../core/services/toast.service';
-import { Component, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, inject, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -52,6 +52,7 @@ export class CategoryPageComponent implements OnInit {
   private router = inject(Router);
   private criteriaService = inject(GreenCriteriaService);
   private requestsService = inject(RequestsService);
+  private cdr = inject(ChangeDetectorRef);
 
   categoryId: number = 1;
   categoryData: CategoryData | null = null;
@@ -118,6 +119,7 @@ export class CategoryPageComponent implements OnInit {
       const idParam = params.get('id');
       this.categoryId = idParam ? parseInt(idParam, 10) : 1;
       this.buildCategoryData(this.categoryId);
+      this.cdr.markForCheck();
     });
   }
 
@@ -269,11 +271,13 @@ export class CategoryPageComponent implements OnInit {
             question.status = 'uploaded';
           }
           this.processUploads(questionId, files, index + 1);
+          this.cdr.markForCheck();
         },
         error: (err) => {
           console.error('Upload error:', err);
           this.toast.error(`เกิดข้อผิดพลาดในการอัปโหลดไฟล์: ${file.name}`);
           this.isUploading = false;
+          this.cdr.markForCheck();
         },
       });
   }
@@ -294,11 +298,13 @@ export class CategoryPageComponent implements OnInit {
             this.isUploading = false;
             this.recalculateProgress();
             this.toast.success('ลบไฟล์เรียบร้อยแล้วครับ!');
+            this.cdr.markForCheck();
           },
           error: (err) => {
             console.error('Delete error:', err);
             this.isUploading = false;
             this.toast.error('เกิดข้อผิดพลาดในการลบไฟล์');
+            this.cdr.markForCheck();
           },
         });
       }

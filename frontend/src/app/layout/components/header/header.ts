@@ -1,4 +1,12 @@
-import { Component, inject, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import {
+  Component,
+  inject,
+  Output,
+  EventEmitter,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
@@ -16,6 +24,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   router = inject(Router);
   notificationService = inject(NotificationService);
+  private cdr = inject(ChangeDetectorRef);
 
   @Output() toggleSidebarEvent = new EventEmitter<void>();
 
@@ -51,12 +60,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
         if (user) {
           this.fetchUnreadCount();
         }
+        this.cdr.markForCheck();
       }),
     );
 
     this.subscription.add(
       this.notificationService.unreadCount$.subscribe((count) => {
         this.unreadNotifications = count;
+        this.cdr.markForCheck();
       }),
     );
   }
